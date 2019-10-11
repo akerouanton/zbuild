@@ -1,0 +1,235 @@
+package llbutils
+
+import (
+	"context"
+	"fmt"
+	"os"
+	"path"
+	"strings"
+
+	"github.com/moby/buildkit/client/llb"
+	"github.com/moby/buildkit/client/llb/imagemetaresolver"
+	"github.com/moby/buildkit/frontend/gateway/client"
+	digest "github.com/opencontainers/go-digest"
+	"golang.org/x/xerrors"
+)
+
+const (
+	// APT is the const used to install apt packages with InstallSystemPackages.
+	APT = "apt"
+)
+
+var (
+	// UnsupportedPackageManager is thrown when the package manager used by the
+	// base image distro isn't supported by webdf.
+	UnsupportedPackageManager = xerrors.New("unspported package manager")
+)
+
+// SolveState takes any state and solve it. It returns the solve result, a
+// unique ref and an error if any happens.
+func SolveState(
+	ctx context.Context,
+	c client.Client,
+	src llb.State,
+) (*client.Result, client.Reference, error) {
+	def, err := src.Marshal()
+	if err != nil {
+		return nil, nil, xerrors.Errorf("failed to marshal LLB state: %v", err)
+	}
+
+	res, err := c.Solve(ctx, client.SolveRequest{
+		Definition: def.ToPB(),
+	})
+	if err != nil {
+		return nil, nil, xerrors.Errorf("failed to execute solve request: %v", err)
+	}
+
+	ref, err := res.SingleRef()
+	if err != nil {
+		return nil, nil, xerrors.Errorf("failed to get a single ref for source: %v", err)
+	}
+
+	return res, ref, nil
+}
+
+// ReadFile reads the content of the file at given filepath. It returns the
+// file content, a bool indicating if the file was present and an error
+// (excluding ErrNotExists).
+func ReadFile(ctx context.Context, ref client.Reference, filepath string) ([]byte, bool, error) {
+	content, err := ref.ReadFile(ctx, client.ReadRequest{
+		Filename: filepath,
+	})
+	if err != nil && strings.Contains(err.Error(), "no such file or directory") {
+		return []byte{}, false, nil
+	} else if err != nil {
+		os.Exit(1)
+		return []byte{}, false, err
+	}
+
+	return content, true, nil
+}
+
+func ImageSource(imageRef string, withMeta bool) llb.State {
+	opts := []llb.ImageOption{}
+
+	if withMeta {
+		opts = append(opts, llb.WithMetaResolver(imagemetaresolver.Default()))
+	}
+
+	return llb.Image(imageRef, opts...)
+}
+
+func Copy(src llb.State, srcPath string, dest llb.State, destPath string, chown string) llb.State {
+	copyOpts := []llb.CopyOption{
+		&llb.CopyInfo{
+			FollowSymlinks:      true,
+			CopyDirContentsOnly: true,
+			CreateDestPath:      true,
+			AllowWildcard:       true,
+		},
+	}
+	if chown != "" {
+		copyOpts = append(copyOpts, llb.WithUser(chown))
+	}
+
+	return dest.File(
+		llb.Copy(src, srcPath, destPath, copyOpts...),
+		llb.WithCustomName(fmt.Sprintf("Copy %s", srcPath)))
+}
+
+// @TODO: take a list of commands and execute them with errexit/pipefail
+func Shellf(format string, v ...interface{}) llb.RunOption {
+	return llb.Shlexf("/bin/sh -c '"+format+"'", v...)
+}
+
+func Mkdir(state llb.State, owner string, dirs ...string) llb.State {
+	for _, dir := range dirs {
+		action := llb.Mkdir(dir, 0750,
+			llb.WithParents(true),
+			llb.WithUser(owner))
+		state = state.File(action)
+	}
+
+	return state
+}
+
+// InstallSystemPackages installs the given packages with the given package
+// manager. Packages map have to be a set of package names associated to their
+// respective version.
+func InstallSystemPackages(
+	state llb.State,
+	pkgMgr string,
+	packages map[string]string,
+	locks map[string]string,
+) (llb.State, error) {
+	var cmds []string
+	var pkgNames []string
+
+	switch pkgMgr {
+	case APT:
+		packageSpecs := []string{}
+		// @TODO: analyze package constraints and ensure they match locked versions
+		for pkgName := range packages {
+			if pkgVersion, ok := packages[pkgName]; ok {
+				packageSpecs = append(packageSpecs, pkgName+"="+pkgVersion)
+				pkgNames = append(pkgNames, pkgName)
+			}
+		}
+
+		cmds = []string{
+			"apt-get update",
+			fmt.Sprintf("apt-get install -y --no-install-recommends %s", strings.Join(packageSpecs, " ")),
+			"rm -rf /var/lib/apt/lists/*",
+		}
+	default:
+		return llb.State{}, UnsupportedPackageManager
+	}
+
+	// @TODO: sort packages by name to increase cache reusability?
+	stepName := fmt.Sprintf("Install system packages (%s)", strings.Join(pkgNames, ", "))
+	state = state.Run(
+		Shellf(strings.Join(cmds, " && ")),
+		llb.WithCustomName(stepName),
+	).Root()
+	return state, nil
+}
+
+// ExternalFile represents a file that should be loaded through HTTP during
+// service builds.
+type ExternalFile struct {
+	URL         string
+	Compressed  bool
+	Pattern     string
+	Destination string
+	Checksum    string
+	Mode        os.FileMode
+	Owner       string
+}
+
+// CopyExternalFiles downloads the given list of ExternalFiles, each in their
+// own DAG tree root (thus they're going to be executed in parallel),
+// decompress and unpack them if required and finally copy them to the given
+// state.
+func CopyExternalFiles(state llb.State, externalFiles []ExternalFile) llb.State {
+	for _, externalFile := range externalFiles {
+		httpOpts := []llb.HTTPOption{
+			llb.Filename("/out"),
+			llb.WithCustomName("Download " + externalFile.URL),
+		}
+
+		if externalFile.Checksum != "" {
+			httpOpts = append(httpOpts, llb.Checksum(digest.Digest(externalFile.Checksum)))
+		}
+
+		externalSource := llb.HTTP(externalFile.URL, httpOpts...)
+		src := externalSource
+		srcPath := "/out"
+		adj := ""
+
+		if externalFile.Compressed {
+			decompressOpts := []llb.CopyOption{&llb.CopyInfo{
+				AttemptUnpack: true,
+			}}
+			src = llb.Scratch().File(
+				llb.Copy(src, "/out", "/decompressed", decompressOpts...),
+				llb.WithCustomName("Decompress "+externalFile.URL))
+
+			srcPath = "/decompressed"
+			adj = "decompressed "
+		}
+
+		if externalFile.Pattern != "" {
+			unpackOpts := []llb.CopyOption{&llb.CopyInfo{
+				AttemptUnpack: true,
+				AllowWildcard: true,
+			}}
+			unpackSrcPath := path.Join(srcPath, externalFile.Pattern)
+			unpackAction := llb.Copy(src, unpackSrcPath, "/unpacked", unpackOpts...)
+
+			src = llb.Scratch().File(unpackAction, llb.WithCustomName("Unpack "+externalFile.URL))
+			srcPath = "/unpacked"
+			adj = "unpacked "
+		}
+
+		copyInfo := &llb.CopyInfo{
+			FollowSymlinks:      true,
+			CopyDirContentsOnly: true,
+			CreateDestPath:      true,
+			AllowWildcard:       true,
+		}
+		if externalFile.Mode != 0 {
+			copyInfo.Mode = &externalFile.Mode
+		}
+
+		copyOpts := []llb.CopyOption{copyInfo}
+		if externalFile.Owner != "" {
+			copyOpts = append(copyOpts, llb.WithUser(externalFile.Owner))
+		}
+
+		state = state.File(
+			llb.Copy(src, srcPath, externalFile.Destination, copyOpts...),
+			llb.WithCustomName(fmt.Sprintf("Copy %s%s to %s", adj, externalFile.URL, externalFile.Destination)))
+	}
+
+	return state
+}

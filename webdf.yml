@@ -1,0 +1,23 @@
+# syntax=akerouanton/pocllb
+
+services:
+  - name: api
+    type: php
+    version: 7.0.29
+    extensions:
+      intl: "*"
+      pdo_mysql: "*"
+      soap: "*"
+    healthcheck: true
+    integrations:
+      - blackfire
+    source_dirs:
+      - './app'
+      - './src'
+    extra_scripts:
+      - './bin/console'
+      - './web/app.php'
+    stateful_dirs:
+      - './web/uploads'
+    ini_file: 'docker/app/php.prod.ini'
+    fpm_config_file: 'docker/app/fpm.conf'
