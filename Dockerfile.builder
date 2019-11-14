@@ -1,5 +1,9 @@
-FROM scratch
+FROM debian:buster-slim
 
-COPY ./webdf-builder /bin/webdf-builder
+RUN apt-get update && \
+    apt-get install -y ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
 
-CMD ["/bin/webdf-builder"]
+COPY ./webdf-builder /bin/webdf
+
+ENTRYPOINT ["/bin/webdf"]

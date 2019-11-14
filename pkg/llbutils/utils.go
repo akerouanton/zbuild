@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"sort"
 	"strings"
 
 	"github.com/moby/buildkit/client/llb"
@@ -59,10 +60,9 @@ func ReadFile(ctx context.Context, ref client.Reference, filepath string) ([]byt
 	content, err := ref.ReadFile(ctx, client.ReadRequest{
 		Filename: filepath,
 	})
-	if err != nil && strings.Contains(err.Error(), "no such file or directory") {
+	if err != nil && strings.Contains(err.Error(), "file does not exist") {
 		return []byte{}, false, nil
 	} else if err != nil {
-		os.Exit(1)
 		return []byte{}, false, err
 	}
 
@@ -97,9 +97,8 @@ func Copy(src llb.State, srcPath string, dest llb.State, destPath string, chown 
 		llb.WithCustomName(fmt.Sprintf("Copy %s", srcPath)))
 }
 
-// @TODO: take a list of commands and execute them with errexit/pipefail
 func Shellf(format string, v ...interface{}) llb.RunOption {
-	return llb.Shlexf("/bin/sh -c '"+format+"'", v...)
+	return llb.Shlexf("/bin/sh -o errexit -o pipefail -c '"+format+"'", v...)
 }
 
 func Mkdir(state llb.State, owner string, dirs ...string) llb.State {
@@ -116,10 +115,10 @@ func Mkdir(state llb.State, owner string, dirs ...string) llb.State {
 // InstallSystemPackages installs the given packages with the given package
 // manager. Packages map have to be a set of package names associated to their
 // respective version.
+// @TODO: Add support for apk pkgMgr
 func InstallSystemPackages(
 	state llb.State,
 	pkgMgr string,
-	packages map[string]string,
 	locks map[string]string,
 ) (llb.State, error) {
 	var cmds []string
@@ -128,12 +127,9 @@ func InstallSystemPackages(
 	switch pkgMgr {
 	case APT:
 		packageSpecs := []string{}
-		// @TODO: analyze package constraints and ensure they match locked versions
-		for pkgName := range packages {
-			if pkgVersion, ok := packages[pkgName]; ok {
-				packageSpecs = append(packageSpecs, pkgName+"="+pkgVersion)
-				pkgNames = append(pkgNames, pkgName)
-			}
+		for pkgName, pkgVersion := range locks {
+			packageSpecs = append(packageSpecs, pkgName+"="+pkgVersion)
+			pkgNames = append(pkgNames, pkgName)
 		}
 
 		cmds = []string{
@@ -145,7 +141,7 @@ func InstallSystemPackages(
 		return llb.State{}, UnsupportedPackageManager
 	}
 
-	// @TODO: sort packages by name to increase cache reusability?
+	sort.Strings(pkgNames)
 	stepName := fmt.Sprintf("Install system packages (%s)", strings.Join(pkgNames, ", "))
 	state = state.Run(
 		Shellf(strings.Join(cmds, " && ")),
@@ -154,8 +150,7 @@ func InstallSystemPackages(
 	return state, nil
 }
 
-// ExternalFile represents a file that should be loaded through HTTP during
-// service builds.
+// ExternalFile represents a file that should be loaded through HTTP at build-time.
 type ExternalFile struct {
 	URL         string
 	Compressed  bool

@@ -1,4 +1,0 @@
-services:
-  - name: service-name
-    type: some-type
-    bar: baz

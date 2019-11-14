@@ -1,23 +1,45 @@
-# syntax=akerouanton/pocllb
+# syntax=akerouanton/webdf-builder:test9
+type: php
+fpm: true
+version: 7.0.29
 
-services:
-  - name: api
-    type: php
-    version: 7.0.29
+extensions:
+  intl: "*"
+  pdo_mysql: "*"
+  soap: "*"
+
+# These parameters are automatically set by webdf using the "symfony" integration, so there're not needed in this case.
+# source_dirs:
+#   - './app'
+#   - './src'
+# extra_scripts:
+#   - './bin/console'
+#   - './web/app.php'
+
+stateful_dirs:
+  - './web/uploads'
+
+config_files:
+  fpm.conf: 'docker/app/fpm.conf'
+
+integrations:
+  - symfony
+
+stages:
+  dev:
+    config_files:
+      php.ini: 'docker/app/php.dev.ini'
+
+  prod:
+    config_files:
+      php.ini: 'docker/app/php.prod.ini'
     extensions:
-      intl: "*"
-      pdo_mysql: "*"
-      soap: "*"
+      apcu: "*"
+      opcache: "*"
     healthcheck: true
     integrations:
       - blackfire
-    source_dirs:
-      - './app'
-      - './src'
-    extra_scripts:
-      - './bin/console'
-      - './web/app.php'
-    stateful_dirs:
-      - './web/uploads'
-    ini_file: 'docker/app/php.prod.ini'
-    fpm_config_file: 'docker/app/fpm.conf'
+
+  worker:
+    derive_from: prod
+    healthcheck: false

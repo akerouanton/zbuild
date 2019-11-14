@@ -1,8 +1,27 @@
+export GO111MODULE=on
+
+GO_BUILD_STATIC := go build -ldflags '-extldflags "-fno-PIC -static"' -buildmode pie -tags 'osusergo netgo static_build'
+
+# Either use `gotest` if available (same as `go test` but with colors), or use
+# `go test`.
+GOTEST := go test
+ifneq ($(shell which gotest),)
+	GOTEST := gotest
+endif
+
 .PHONY: build
-build: .validate-image-tag
-	go build -o webdf ./cmd/webdf
-	go build -o webdf-builder ./cmd/webdf-builder
-	docker build -t akerouanton/webdf-builder:$(IMAGE_TAG) -f Dockerfile.builder .
+build:
+	$(GO_BUILD_STATIC) -o bin/webdf ./cmd/webdf
+	$(GO_BUILD_STATIC) -o bin/webdf-builder ./cmd/webdf-builder
+
+.PHONY: test
+test:
+	$(GOTEST) -v -cover -coverprofile cover.out ./...
+	go tool cover -o cover.html -html=cover.out
+
+.PHONY: build-image
+build-image: .validate-image-tag build
+	docker build -t akerouanton/webdf-builder:$(IMAGE_TAG) -f Dockerfile.builder bin/
 
 .PHONY: push
 push: .validate-image-tag
@@ -11,6 +30,12 @@ push: .validate-image-tag
 .PHONY: install
 install:
 	cp webdf ~/go/bin
+
+
+####################
+## Preconditions
+####################
+
 
 .PHONY: .validate-image-tag
 .validate-image-tag:
