@@ -1,0 +1,324 @@
+[
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:7382207c90799f3b5f259ab733f37313122e3a6c3f8465834c14da97d82491ec",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "File": {
+          "actions": [
+            {
+              "input": 0,
+              "secondaryInput": -1,
+              "output": 0,
+              "Action": {
+                "Mkdir": {
+                  "path": "/usr/src/app",
+                  "mode": 488,
+                  "makeParents": true,
+                  "owner": {
+                    "user": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    },
+                    "group": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    }
+                  },
+                  "timestamp": -1
+                }
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:3d1375acccfa7e74ef59bfaef1874b1f6527d3b4b89bbd93a350c89f2e97e104",
+    "OpMetadata": {
+      "caps": {
+        "file.base": true
+      }
+    }
+  },
+  {
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:c1aaee8a38ba6dec64d5b8c919c7cf6bddc04f0bd18763678342d33a25c06844",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "File": {
+          "actions": [
+            {
+              "input": 0,
+              "secondaryInput": -1,
+              "output": 0,
+              "Action": {
+                "Mkdir": {
+                  "path": "/app",
+                  "mode": 488,
+                  "makeParents": true,
+                  "owner": {
+                    "user": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    },
+                    "group": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    }
+                  },
+                  "timestamp": -1
+                }
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:7382207c90799f3b5f259ab733f37313122e3a6c3f8465834c14da97d82491ec",
+    "OpMetadata": {
+      "caps": {
+        "file.base": true
+      }
+    }
+  },
+  {
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:3d1375acccfa7e74ef59bfaef1874b1f6527d3b4b89bbd93a350c89f2e97e104",
+          "index": 0
+        }
+      ],
+      "Op": null
+    },
+    "Digest": "sha256:931565e82725bbd6d1122d90e6829cf4f7353a6204c6acb0164abe45e7bcc034",
+    "OpMetadata": {
+      "caps": {
+        "constraints": true,
+        "platform": true
+      }
+    }
+  },
+  {
+    "Op": {
+      "Op": {
+        "Source": {
+          "identifier": "docker-image://docker.io/library/php:7.2"
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:c1aaee8a38ba6dec64d5b8c919c7cf6bddc04f0bd18763678342d33a25c06844",
+    "OpMetadata": {
+      "caps": {
+        "source.image": true
+      }
+    }
+  }
+]

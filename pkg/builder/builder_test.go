@@ -16,6 +16,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/moby/buildkit/client/llb"
 	"github.com/moby/buildkit/frontend/gateway/client"
+	specs "github.com/opencontainers/image-spec/specs-go/v1"
 )
 
 type testCase struct {
@@ -27,7 +28,8 @@ type testCase struct {
 
 func TestBuilder(t *testing.T) {
 	testcases := map[string]func(*gomock.Controller) testCase{
-		"successfully build service image":                successfullyBuildServiceImageTC,
+		"successfully build default stage and file":       successfullyBuildDefaultStageAndFileTC,
+		"successfully build custom stage and file":        successfullyBuildCustomStageAndFileTC,
 		"fail to resolve build context":                   failToResolveBuildContextTC,
 		"fail to read webdf.yml file":                     failToReadYmlTC,
 		"fail to read webdf.lock file":                    failToReadLockTC,
@@ -46,17 +48,25 @@ func TestBuilder(t *testing.T) {
 			defer mockCtrl.Finish()
 
 			tc := tcinit(mockCtrl)
-			b := builder.Builder{tc.registry}
+			b := builder.Builder{
+				Registry: tc.registry,
+			}
 
 			outRes, outErr := b.Build(context.TODO(), tc.client)
 
-			if tc.expectedErr != nil && !strings.HasPrefix(outErr.Error(), tc.expectedErr.Error()) {
-				t.Fatalf("Expected error: %+v\nGot: %+v\n", tc.expectedErr.Error(), outErr.Error())
+			if tc.expectedErr != nil {
+				if !strings.HasPrefix(outErr.Error(), tc.expectedErr.Error()) {
+					t.Fatalf("Expected error: %+v\nGot: %+v\n", tc.expectedErr.Error(), outErr.Error())
+				}
+				return
 			}
+
 			if tc.expectedErr == nil && outErr != nil {
 				t.Fatalf("Error not expected but got one: %+v\n", outErr)
 			}
 			if diff := deep.Equal(tc.expectedRes, outRes); diff != nil {
+				t.Logf("expected metadata: %s", tc.expectedRes.Metadata)
+				t.Logf("actual metadata: %s", outRes.Metadata)
 				t.Fatal(diff)
 			}
 		})
@@ -78,7 +88,7 @@ extensions:
   intl: "*"`)
 )
 
-func successfullyBuildServiceImageTC(mockCtrl *gomock.Controller) testCase {
+func successfullyBuildDefaultStageAndFileTC(mockCtrl *gomock.Controller) testCase {
 	registry := registry.NewTypeRegistry()
 	registry.Register("php", mockTypeHandler{})
 
@@ -108,6 +118,8 @@ func successfullyBuildServiceImageTC(mockCtrl *gomock.Controller) testCase {
 	}
 	c.EXPECT().Solve(gomock.Any(), gomock.Any()).Return(resImg, nil)
 
+	imgConfig := `{"author":"webdf","architecture":"","os":"","rootfs":{"type":"","diff_ids":null},"config":{}}`
+
 	return testCase{
 		client:   c,
 		registry: registry,
@@ -115,7 +127,56 @@ func successfullyBuildServiceImageTC(mockCtrl *gomock.Controller) testCase {
 			Refs: map[string]client.Reference{"linux/amd64": refImage},
 			Ref:  refImage,
 			Metadata: map[string][]byte{
-				"containerimage.config": []byte("null"),
+				"containerimage.config": []byte(imgConfig),
+			},
+		},
+	}
+}
+
+func successfullyBuildCustomStageAndFileTC(mockCtrl *gomock.Controller) testCase {
+	registry := registry.NewTypeRegistry()
+	registry.Register("php", mockTypeHandler{})
+
+	c := llbtest.NewMockClient(mockCtrl)
+	c.EXPECT().BuildOpts().AnyTimes().Return(client.BuildOpts{
+		SessionID: "sessid",
+		// @TODO: use a mock to ensure these parameters are passed to specialized builders
+		Opts: map[string]string{
+			"dockerfilekey": "api.webdf.yml",
+			"target":        "prod",
+		},
+	})
+
+	refBuildCtx := llbtest.NewMockReference(mockCtrl)
+	resBuildCtx := &client.Result{
+		Refs: map[string]client.Reference{"linux/amd64": refBuildCtx},
+		Ref:  refBuildCtx,
+	}
+	c.EXPECT().Solve(gomock.Any(), gomock.Any()).Return(resBuildCtx, nil)
+
+	readYmlReq := client.ReadRequest{Filename: "api.webdf.yml"}
+	refBuildCtx.EXPECT().ReadFile(gomock.Any(), gomock.Eq(readYmlReq)).Return(webdfYml, nil)
+
+	readLockReq := client.ReadRequest{Filename: "api.webdf.lock"}
+	refBuildCtx.EXPECT().ReadFile(gomock.Any(), gomock.Eq(readLockReq)).Return(webdfLock, nil)
+
+	refImage := llbtest.NewMockReference(mockCtrl)
+	resImg := &client.Result{
+		Refs: map[string]client.Reference{"linux/amd64": refImage},
+		Ref:  refImage,
+	}
+	c.EXPECT().Solve(gomock.Any(), gomock.Any()).Return(resImg, nil)
+
+	imgConfig := `{"author":"webdf","architecture":"","os":"","rootfs":{"type":"","diff_ids":null},"config":{}}`
+
+	return testCase{
+		client:   c,
+		registry: registry,
+		expectedRes: &client.Result{
+			Refs: map[string]client.Reference{"linux/amd64": refImage},
+			Ref:  refImage,
+			Metadata: map[string][]byte{
+				"containerimage.config": []byte(imgConfig),
 			},
 		},
 	}
@@ -289,10 +350,24 @@ type mockTypeHandler struct {
 
 func (h mockTypeHandler) Build(ctx context.Context, c client.Client, opts builddef.BuildOpts) (llb.State, *image.Image, error) {
 	state := llb.State{}
-	if h.failing {
-		return state, nil, errors.New("some build error")
+	img := image.Image{
+		Image: specs.Image{
+			Author: "webdf",
+		},
 	}
-	return state, nil, nil
+
+	if h.failing {
+		return state, &img, errors.New("some build error")
+	}
+	return state, &img, nil
+}
+
+func (h mockTypeHandler) DebugLLB(buildOpts builddef.BuildOpts) (llb.State, error) {
+	state := llb.State{}
+	if h.failing {
+		return state, errors.New("some build error")
+	}
+	return state, nil
 }
 
 func (h mockTypeHandler) UpdateLocks(*builddef.BuildDef, []string, pkgsolver.PackageSolver) (builddef.Locks, error) {

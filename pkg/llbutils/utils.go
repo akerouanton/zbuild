@@ -144,7 +144,7 @@ func InstallSystemPackages(
 	sort.Strings(pkgNames)
 	stepName := fmt.Sprintf("Install system packages (%s)", strings.Join(pkgNames, ", "))
 	state = state.Run(
-		Shellf(strings.Join(cmds, " && ")),
+		Shellf(strings.Join(cmds, "; ")),
 		llb.WithCustomName(stepName),
 	).Root()
 	return state, nil

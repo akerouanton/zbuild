@@ -1,0 +1,235 @@
+[
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:c1aaee8a38ba6dec64d5b8c919c7cf6bddc04f0bd18763678342d33a25c06844",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "File": {
+          "actions": [
+            {
+              "input": -1,
+              "secondaryInput": 0,
+              "output": 0,
+              "Action": {
+                "Copy": {
+                  "src": "/etc/passwd",
+                  "dest": "/etc/passwd2",
+                  "owner": {
+                    "user": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    },
+                    "group": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    }
+                  },
+                  "mode": -1,
+                  "followSymlink": true,
+                  "dirCopyContents": true,
+                  "createDestPath": true,
+                  "allowWildcard": true,
+                  "timestamp": -1
+                }
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:29ed5b3c6092a918d7e41fa9ff1372df1c52529981dd8510a59294c0abfd903b",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Copy /etc/passwd"
+      },
+      "caps": {
+        "file.base": true
+      }
+    }
+  },
+  {
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:29ed5b3c6092a918d7e41fa9ff1372df1c52529981dd8510a59294c0abfd903b",
+          "index": 0
+        }
+      ],
+      "Op": null
+    },
+    "Digest": "sha256:4a0d9d58222245b9d66a77f00e90a25413e42b9a1708d004c84a5f7fa04e6c4e",
+    "OpMetadata": {
+      "caps": {
+        "constraints": true,
+        "meta.description": true,
+        "platform": true
+      }
+    }
+  },
+  {
+    "Op": {
+      "Op": {
+        "Source": {
+          "identifier": "docker-image://docker.io/library/php:7.2"
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:c1aaee8a38ba6dec64d5b8c919c7cf6bddc04f0bd18763678342d33a25c06844",
+    "OpMetadata": {
+      "caps": {
+        "source.image": true
+      }
+    }
+  }
+]

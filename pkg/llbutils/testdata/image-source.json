@@ -1,0 +1,130 @@
+[
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:c1aaee8a38ba6dec64d5b8c919c7cf6bddc04f0bd18763678342d33a25c06844",
+          "index": 0
+        }
+      ],
+      "Op": null
+    },
+    "Digest": "sha256:7e8f6e75237b3163225e9e9435fc224fc3dae04a91d971e63fd03f962656c25c",
+    "OpMetadata": {
+      "caps": {
+        "constraints": true,
+        "platform": true
+      }
+    }
+  },
+  {
+    "Op": {
+      "Op": {
+        "Source": {
+          "identifier": "docker-image://docker.io/library/php:7.2"
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:c1aaee8a38ba6dec64d5b8c919c7cf6bddc04f0bd18763678342d33a25c06844",
+    "OpMetadata": {
+      "caps": {
+        "source.image": true
+      }
+    }
+  }
+]

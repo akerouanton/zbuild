@@ -16,6 +16,7 @@ import (
 
 type loadFromContextTC struct {
 	client      *llbtest.MockClient
+	buildOpts   builddef.BuildOpts
 	expectedDef *builddef.BuildDef
 	expectedErr error
 }
@@ -28,9 +29,6 @@ func itLoadsConfigAndLockFilesFromContextTC(
 	basedir := "testdata/config-files"
 
 	c := llbtest.NewMockClient(mockCtrl)
-	c.EXPECT().BuildOpts().Return(client.BuildOpts{
-		SessionID: "sessid",
-	})
 
 	contextRef := llbtest.NewMockReference(mockCtrl)
 	solvedContext := &client.Result{
@@ -53,10 +51,12 @@ func itLoadsConfigAndLockFilesFromContextTC(
 
 	return loadFromContextTC{
 		client: c,
+		buildOpts: builddef.BuildOpts{
+			File:     "webdf.yml",
+			LockFile: "webdf.lock",
+		},
 		expectedDef: &builddef.BuildDef{
-			ConfigFilename: "webdf.yml",
-			LockFilename:   "webdf.lock",
-			Type:           "some-type",
+			Type: "some-type",
 			RawConfig: map[string]interface{}{
 				"foo": "bar",
 			},
@@ -76,9 +76,6 @@ func itLoadsConfigFileWithoutLockFromContextTC(
 	basedir := "testdata/without-lock"
 
 	c := llbtest.NewMockClient(mockCtrl)
-	c.EXPECT().BuildOpts().Return(client.BuildOpts{
-		SessionID: "sessid",
-	})
 
 	contextRef := llbtest.NewMockReference(mockCtrl)
 	solvedContext := &client.Result{
@@ -99,10 +96,12 @@ func itLoadsConfigFileWithoutLockFromContextTC(
 
 	return loadFromContextTC{
 		client: c,
+		buildOpts: builddef.BuildOpts{
+			File:     "webdf.yml",
+			LockFile: "webdf.lock",
+		},
 		expectedDef: &builddef.BuildDef{
-			ConfigFilename: "webdf.yml",
-			LockFilename:   "webdf.lock",
-			Type:           "some-type",
+			Type: "some-type",
 			RawConfig: map[string]interface{}{
 				"bar": "baz",
 			},
@@ -118,9 +117,6 @@ func itFailsToLoadConfigFilesWhenTheresNoYmlFileFromContextTC(
 	ctx := context.TODO()
 
 	c := llbtest.NewMockClient(mockCtrl)
-	c.EXPECT().BuildOpts().Return(client.BuildOpts{
-		SessionID: "sessid",
-	})
 
 	contextRef := llbtest.NewMockReference(mockCtrl)
 	solvedContext := &client.Result{
@@ -134,7 +130,11 @@ func itFailsToLoadConfigFilesWhenTheresNoYmlFileFromContextTC(
 	}).Return([]byte{}, errors.New("file does not exist"))
 
 	return loadFromContextTC{
-		client:      c,
+		client: c,
+		buildOpts: builddef.BuildOpts{
+			File:     "webdf.yml",
+			LockFile: "webdf.lock",
+		},
 		expectedErr: builddef.ConfigYMLNotFound,
 	}
 }
@@ -146,10 +146,6 @@ func itFailsToLoadConfigFilesWhenContextCannotBeResolvedTC(
 	ctx := context.TODO()
 
 	c := llbtest.NewMockClient(mockCtrl)
-	c.EXPECT().BuildOpts().Return(client.BuildOpts{
-		SessionID: "sessid",
-	})
-
 	c.EXPECT().Solve(ctx, gomock.Any()).Return(nil, errors.New("some error"))
 
 	return loadFromContextTC{
@@ -178,7 +174,7 @@ func TestLoadConfigFromBuildContext(t *testing.T) {
 			tc := tcinit(t, mockCtrl)
 			ctx := context.TODO()
 
-			config, err := builddef.LoadFromContext(ctx, tc.client)
+			config, err := builddef.LoadFromContext(ctx, tc.client, tc.buildOpts)
 			if tc.expectedErr == nil && err != nil {
 				t.Fatalf("No error expected but got one: %v\n", err)
 			}
@@ -195,15 +191,16 @@ func TestLoadConfigFromBuildContext(t *testing.T) {
 func TestLoadFromFS(t *testing.T) {
 	testcases := map[string]struct {
 		basedir     string
+		file        string
+		lockFile    string
 		expectedDef *builddef.BuildDef
 		expectedErr error
 	}{
 		"it loads config and lock files": {
-			basedir: "testdata/config-files",
+			file:     "testdata/config-files/webdf.yml",
+			lockFile: "testdata/config-files/webdf.lock",
 			expectedDef: &builddef.BuildDef{
-				ConfigFilename: "webdf.yml",
-				LockFilename:   "webdf.lock",
-				Type:           "some-type",
+				Type: "some-type",
 				RawConfig: map[string]interface{}{
 					"foo": "bar",
 				},
@@ -214,18 +211,18 @@ func TestLoadFromFS(t *testing.T) {
 			},
 		},
 		"it loads config file without lock": {
-			basedir: "testdata/without-lock",
+			file:     "testdata/without-lock/webdf.yml",
+			lockFile: "testdata/without-lock/webdf.lock",
 			expectedDef: &builddef.BuildDef{
-				ConfigFilename: "webdf.yml",
-				LockFilename:   "webdf.lock",
-				Type:           "some-type",
+				Type: "some-type",
 				RawConfig: map[string]interface{}{
 					"bar": "baz",
 				},
 			},
 		},
 		"it fails to load config files when there's no yml file": {
-			basedir:     "testdata/does-not-exist",
+			file:        "testdata/does-not-exist/webdf.yml",
+			lockFile:    "testdata/does-not-exist/webdf.lock",
 			expectedErr: errors.New("webdf.yml not found in build context"),
 		},
 	}
@@ -236,7 +233,7 @@ func TestLoadFromFS(t *testing.T) {
 		t.Run(tcname, func(t *testing.T) {
 			t.Parallel()
 
-			out, err := builddef.LoadFromFS(tc.basedir)
+			out, err := builddef.LoadFromFS(tc.file, tc.lockFile)
 			if tc.expectedErr != nil && err.Error() != tc.expectedErr.Error() {
 				t.Errorf("Expected error: %v\nGot: %v\n", tc.expectedErr, err)
 			}

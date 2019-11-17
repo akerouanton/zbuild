@@ -79,18 +79,26 @@ func successfullyFindBuilderTC() registryTC {
 	reg.Register("some-type", mockTypeHandler{&expectedImage})
 
 	return registryTC{
-		name:          "it finds the requested service builder",
-		registry:      reg,
-		builddef:      builddef.NewBuildDef("my-service", "some-type", map[string]interface{}{}),
+		name:     "it finds the requested service builder",
+		registry: reg,
+		builddef: builddef.BuildDef{
+			Type:      "some-type",
+			RawConfig: map[string]interface{}{},
+			RawLocks:  map[string]interface{}{},
+		},
 		expectedImage: &expectedImage,
 	}
 }
 
 func failToFindBuilderTC() registryTC {
 	return registryTC{
-		name:        "it fails to find the appropriate builder for the given service type",
-		registry:    registry.NewTypeRegistry(),
-		builddef:    builddef.NewBuildDef("my-service", "some-type", map[string]interface{}{}),
+		name:     "it fails to find the appropriate builder for the given service type",
+		registry: registry.NewTypeRegistry(),
+		builddef: builddef.BuildDef{
+			Type:      "some-type",
+			RawConfig: map[string]interface{}{},
+			RawLocks:  map[string]interface{}{},
+		},
 		expectedErr: registry.ErrUnknownDefType,
 	}
 }
@@ -102,6 +110,11 @@ type mockTypeHandler struct {
 func (h mockTypeHandler) Build(ctx context.Context, c client.Client, opts builddef.BuildOpts) (llb.State, *image.Image, error) {
 	state := llb.State{}
 	return state, h.builtImage, nil
+}
+
+func (h mockTypeHandler) DebugLLB(buildOpts builddef.BuildOpts) (llb.State, error) {
+	state := llb.State{}
+	return state, nil
 }
 
 func (h mockTypeHandler) UpdateLocks(genericDef *builddef.BuildDef, stages []string, pkgSolver pkgsolver.PackageSolver) (builddef.Locks, error) {

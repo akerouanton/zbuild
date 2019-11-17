@@ -2,8 +2,12 @@ package llbutils_test
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"flag"
+	"io/ioutil"
 	"os"
+	"sort"
 	"testing"
 
 	"github.com/NiR-/webdf/pkg/llbtest"
@@ -12,120 +16,342 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/moby/buildkit/client/llb"
 	"github.com/moby/buildkit/frontend/gateway/client"
+	"github.com/moby/buildkit/solver/pb"
+	digest "github.com/opencontainers/go-digest"
 )
 
-func TestSolveState_succeeds_to_solve_a_source_and_get_a_single_ref_from_it(t *testing.T) {
-	t.Parallel()
+type solveStateTC struct {
+	client      client.Client
+	state       llb.State
+	expectedRes *client.Result
+	expectedRef client.Reference
+	expectedErr error
+}
 
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-
+func initSuccessfullySolveStateTC(mockCtrl *gomock.Controller) solveStateTC {
 	ref := llbtest.NewMockReference(mockCtrl)
 	res := &client.Result{
 		Refs: map[string]client.Reference{"linux/amd64": ref},
 		Ref:  ref,
 	}
 
-	ctx := context.TODO()
 	c := llbtest.NewMockClient(mockCtrl)
-	c.EXPECT().Solve(ctx, gomock.Any()).Return(res, nil)
+	c.EXPECT().Solve(gomock.Any(), gomock.Any()).Return(res, nil)
 
-	outRes, outRef, err := llbutils.SolveState(ctx, c, llb.State{})
-	if err != nil {
-		t.Errorf("Expected no error but got one: %v\n", err)
-		t.FailNow()
-	}
-	if diff := deep.Equal(ref, outRef); diff != nil {
-		t.Fatal(diff)
-	}
-	if diff := deep.Equal(res, outRes); diff != nil {
-		t.Fatal(diff)
+	return solveStateTC{
+		client:      c,
+		state:       llb.State{},
+		expectedRes: res,
+		expectedRef: ref,
 	}
 }
 
-func TestSolveState_returns_an_error_when_solve_request_fail(t *testing.T) {
-	t.Parallel()
-
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-
-	ctx := context.TODO()
+func initReturnsAnErrorWhenSolveFailsTC(mockCtrl *gomock.Controller) solveStateTC {
 	c := llbtest.NewMockClient(mockCtrl)
-	c.EXPECT().Solve(ctx, gomock.Any()).Return(nil, errors.New("some error"))
+	c.EXPECT().Solve(gomock.Any(), gomock.Any()).Return(nil, errors.New("some error"))
 
-	_, _, err := llbutils.SolveState(ctx, c, llb.State{})
-	if err == nil {
-		t.Error("Error expected but none returned")
+	return solveStateTC{
+		client:      c,
+		state:       llb.State{},
+		expectedErr: errors.New("failed to execute solve request: some error"),
 	}
 }
 
-func TestSolveState_returns_an_error_when_result_as_no_singe_ref(t *testing.T) {
-	t.Parallel()
-
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-
+func initReturnsAnErrorWhenResultAsNoSingleRefTC(mockCtrl *gomock.Controller) solveStateTC {
 	ref := llbtest.NewMockReference(mockCtrl)
 	res := &client.Result{
 		Refs: map[string]client.Reference{"linux/amd64": ref},
 	}
 
-	ctx := context.TODO()
 	c := llbtest.NewMockClient(mockCtrl)
-	c.EXPECT().Solve(ctx, gomock.Any()).Return(res, nil)
+	c.EXPECT().Solve(gomock.Any(), gomock.Any()).Return(res, nil)
 
-	_, _, err := llbutils.SolveState(ctx, c, llb.State{})
-	if err == nil {
-		t.Error("Error expected but none returned")
+	return solveStateTC{
+		client:      c,
+		state:       llb.State{},
+		expectedErr: errors.New("failed to get a single ref for source: invalid map result"),
 	}
 }
 
-func TestReadFile_successfully_returns_file_content(t *testing.T) {
-	t.Parallel()
+func TestSolveState(t *testing.T) {
+	testcases := map[string]func(*gomock.Controller) solveStateTC{
+		"successfully solve state":                      initSuccessfullySolveStateTC,
+		"returns an error when solve fails":             initReturnsAnErrorWhenSolveFailsTC,
+		"returns an error when result as no single ref": initReturnsAnErrorWhenResultAsNoSingleRefTC,
+	}
 
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
+	for tcname := range testcases {
+		tcinit := testcases[tcname]
 
-	ctx := context.TODO()
+		t.Run(tcname, func(t *testing.T) {
+			t.Parallel()
+
+			mockCtrl := gomock.NewController(t)
+			defer mockCtrl.Finish()
+
+			tc := tcinit(mockCtrl)
+
+			ctx := context.TODO()
+			outRes, outRef, outErr := llbutils.SolveState(ctx, tc.client, tc.state)
+
+			if tc.expectedErr != nil {
+				if outErr == nil {
+					t.Fatalf("Expected: %+v\nGot: <nil>", tc.expectedErr.Error())
+				}
+				if tc.expectedErr.Error() != outErr.Error() {
+					t.Fatalf("Expected: %+v\nGot: %+v", tc.expectedErr.Error(), outErr.Error())
+				}
+				return
+			}
+			if diff := deep.Equal(tc.expectedRef, outRef); diff != nil {
+				t.Fatal(diff)
+			}
+			if diff := deep.Equal(tc.expectedRes, outRes); diff != nil {
+				t.Fatal(diff)
+			}
+		})
+	}
+}
+
+type readFileTC struct {
+	filepath    string
+	ref         client.Reference
+	found       bool
+	expected    []byte
+	expectedErr error
+}
+
+func initSuccessfullyReadFileContentTC(mockCtrl *gomock.Controller) readFileTC {
 	filepath := "some/file.yml"
 	expected := []byte("some file content")
 
 	ref := llbtest.NewMockReference(mockCtrl)
-	ref.EXPECT().ReadFile(ctx, client.ReadRequest{
+	ref.EXPECT().ReadFile(gomock.Any(), client.ReadRequest{
 		Filename: filepath,
 	}).Return(expected, nil)
 
-	out, ok, err := llbutils.ReadFile(ctx, ref, filepath)
-	if err != nil {
-		t.Errorf("No error expected but got one: %v\n", err)
-		t.FailNow()
-	}
-	if !ok {
-		t.Errorf("File %q not found but should be.", filepath)
-	}
-	if diff := deep.Equal([]byte("some file content"), out); diff != nil {
-		t.Error(diff)
+	return readFileTC{
+		filepath: filepath,
+		ref:      ref,
+		found:    true,
+		expected: expected,
 	}
 }
 
-func TestReadFile_returns_no_error_when_file_is_not_found(t *testing.T) {
-	t.Parallel()
-
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-
-	ctx := context.TODO()
+func initReturnsNoErrorsWhenFileNotFoundTC(mockCtrl *gomock.Controller) readFileTC {
 	filepath := "some/file.yml"
 
 	ref := llbtest.NewMockReference(mockCtrl)
-	ref.EXPECT().ReadFile(ctx, gomock.Any()).Return([]byte{}, os.ErrNotExist)
+	ref.EXPECT().ReadFile(gomock.Any(), gomock.Any()).Return([]byte{}, os.ErrNotExist)
 
-	_, ok, err := llbutils.ReadFile(ctx, ref, filepath)
+	return readFileTC{
+		filepath: filepath,
+		ref:      ref,
+		found:    false,
+	}
+}
+
+func TestReadFile(t *testing.T) {
+	testcases := map[string]func(*gomock.Controller) readFileTC{
+		"successfully read file content":        initSuccessfullyReadFileContentTC,
+		"returns no errors when file not found": initReturnsNoErrorsWhenFileNotFoundTC,
+	}
+
+	for tcname := range testcases {
+		tcinit := testcases[tcname]
+
+		t.Run(tcname, func(t *testing.T) {
+			t.Parallel()
+
+			mockCtrl := gomock.NewController(t)
+			defer mockCtrl.Finish()
+
+			tc := tcinit(mockCtrl)
+
+			ctx := context.TODO()
+			out, ok, err := llbutils.ReadFile(ctx, tc.ref, tc.filepath)
+
+			if tc.expectedErr != nil {
+				if err == nil {
+					t.Fatalf("Expected: %+v\nGot: <nil>", tc.expectedErr.Error())
+				}
+				if tc.expectedErr.Error() != err.Error() {
+					t.Fatalf("Expected: %+v\nGot: %+v", tc.expectedErr.Error(), err.Error())
+				}
+				return
+			}
+			if tc.found != ok {
+				t.Fatalf("Expected found: %t\nGot: %t", tc.found, ok)
+			}
+			if string(tc.expected) != string(out) {
+				t.Fatalf("Expected content: %s\nGot: %s", string(tc.expected), string(out))
+			}
+		})
+	}
+}
+
+var flagTestdata = flag.Bool("testdata", false, "Use this flag to (re)generate testdata (dumps of LLB states)")
+
+func TestStateHelpers(t *testing.T) {
+	testcases := map[string]struct {
+		testdata string
+		init     func(*testing.T) llb.State
+	}{
+		"ImageSource": {
+			testdata: "testdata/image-source.json",
+			init: func(_ *testing.T) llb.State {
+				return llbutils.ImageSource("php:7.2", true)
+			},
+		},
+		"Mkdir": {
+			testdata: "testdata/mkdir.json",
+			init: func(_ *testing.T) llb.State {
+				state := llbutils.ImageSource("php:7.2", false)
+				return llbutils.Mkdir(state, "1000:1000", "/app", "/usr/src/app")
+			},
+		},
+		"Copy": {
+			testdata: "testdata/copy.json",
+			init: func(_ *testing.T) llb.State {
+				src := llbutils.ImageSource("php:7.2", false)
+				dest := llb.Scratch()
+				return llbutils.Copy(src, "/etc/passwd", dest, "/etc/passwd2", "1000:1000")
+			},
+		},
+		"InstallSystemPackages": {
+			testdata: "testdata/install-system-packages.json",
+			init: func(t *testing.T) llb.State {
+				dest := llbutils.ImageSource("php:7.2", false)
+				locks := map[string]string{
+					"curl":            "curl-version",
+					"ca-certficiates": "ca-certificates-version",
+					"zlib1g-dev":      "zlib1g-dev-version",
+				}
+				state, err := llbutils.InstallSystemPackages(dest, llbutils.APT, locks)
+				if err != nil {
+					t.Fatal(err)
+				}
+				return state
+			},
+		},
+		"CopyExternalFiles": {
+			testdata: "testdata/copy-external-files.json",
+			init: func(_ *testing.T) llb.State {
+				dest := llb.Scratch()
+				externalFiles := []llbutils.ExternalFile{
+					{
+						URL:         "https://blackfire.io/api/v1/releases/probe/php/linux/amd64/72",
+						Compressed:  true,
+						Pattern:     "blackfire-*.so",
+						Destination: "/some/path",
+						Mode:        0644,
+					},
+					llbutils.ExternalFile{
+						URL:         "https://github.com/NiR-/fcgi-client/releases/download/v0.1.0/fcgi-client.phar",
+						Destination: "/usr/local/bin/fcgi-client",
+						Mode:        0750,
+						Owner:       "1000:1000",
+					},
+					llbutils.ExternalFile{
+						URL:         "https://github.com/NiR-/fcgi-client/releases/download/v0.2.0/fcgi-client.phar",
+						Checksum:    "some-checksum",
+						Destination: "/usr/local/bin/fcgi-client-0.2",
+						Mode:        0750,
+						Owner:       "1000:1000",
+					},
+				}
+				return llbutils.CopyExternalFiles(dest, externalFiles)
+			},
+		},
+	}
+
+	for tcname := range testcases {
+		tc := testcases[tcname]
+
+		t.Run(tcname, func(t *testing.T) {
+			t.Parallel()
+
+			state := tc.init(t)
+			jsonState := stateToJSON(t, state)
+
+			if *flagTestdata {
+				writeTestdata(t, tc.testdata, jsonState)
+				return
+			}
+
+			testdata := loadTestdata(t, tc.testdata)
+			if testdata != jsonState {
+				t.Fatalf("Expected: %+v\nGot: %+v", testdata, jsonState)
+			}
+		})
+	}
+}
+
+func writeTestdata(t *testing.T, filepath string, content string) {
+	err := ioutil.WriteFile(filepath, []byte(content), 0644)
 	if err != nil {
-		t.Errorf("No error expected but got one: %v\n", err)
-		t.FailNow()
+		t.Fatalf("Could not write %q: %v", filepath, err)
 	}
-	if ok {
-		t.Errorf("File %q should not exist.", filepath)
+}
+
+func loadTestdata(t *testing.T, filepath string) string {
+	out, err := ioutil.ReadFile(filepath)
+	if err != nil {
+		t.Fatalf("Could not load %q: %v", filepath, err)
 	}
+	return string(out)
+}
+
+type llbOp struct {
+	Op         pb.Op
+	Digest     digest.Digest
+	OpMetadata pb.OpMetadata
+}
+
+func stateToJSON(t *testing.T, state llb.State) string {
+	def, err := state.Marshal(llb.LinuxAmd64)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	ops := make([]llbOp, len(def.Def))
+
+	for _, dt := range def.Def {
+		var op pb.Op
+		if err := (&op).Unmarshal(dt); err != nil {
+			t.Fatalf("Failed to parse op: %v", err)
+		}
+
+		dgst := digest.FromBytes(dt)
+		ent := llbOp{Op: op, Digest: dgst, OpMetadata: def.Metadata[dgst]}
+
+		ops = append(ops, ent)
+	}
+
+	ops = sortOps(ops)
+	out, err := json.MarshalIndent(ops, "", "  ")
+	if err != nil {
+		t.Fatalf("Could not encode Op into JSON: %v", err)
+	}
+
+	return string(out)
+}
+
+func sortOps(ops []llbOp) []llbOp {
+	keys := make([]string, len(ops))
+	digests := make(map[string]llbOp, len(ops))
+	for _, op := range ops {
+		digest := string(op.Digest)
+		keys = append(keys, digest)
+		digests[digest] = op
+	}
+
+	sort.Strings(keys)
+
+	sorted := make([]llbOp, len(ops))
+	for _, key := range keys {
+		sorted = append(sorted, digests[key])
+	}
+
+	return sorted
 }

@@ -1,0 +1,224 @@
+[
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "Op": null
+    },
+    "Digest": "",
+    "OpMetadata": {
+      "caps": null
+    }
+  },
+  {
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:90608c713dc693195e873ab236ae7ae1cedf6915459d92d82b78846102bc284c",
+          "index": 0
+        }
+      ],
+      "Op": null
+    },
+    "Digest": "sha256:2cf5743be31b76bb3460d56fc1fd76fbd46adc7914f531cbcbcb803328ca4871",
+    "OpMetadata": {
+      "caps": {
+        "constraints": true,
+        "meta.description": true,
+        "platform": true
+      }
+    }
+  },
+  {
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:c1aaee8a38ba6dec64d5b8c919c7cf6bddc04f0bd18763678342d33a25c06844",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "Exec": {
+          "meta": {
+            "args": [
+              "/bin/sh",
+              "-o",
+              "errexit",
+              "-o",
+              "pipefail",
+              "-c",
+              "apt-get update; apt-get install -y --no-install-recommends curl=curl-version ca-certficiates=ca-certificates-version zlib1g-dev=zlib1g-dev-version; rm -rf /var/lib/apt/lists/*"
+            ],
+            "cwd": "/"
+          },
+          "mounts": [
+            {
+              "input": 0,
+              "dest": "/",
+              "output": 0
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:90608c713dc693195e873ab236ae7ae1cedf6915459d92d82b78846102bc284c",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Install system packages (ca-certficiates, curl, zlib1g-dev)"
+      },
+      "caps": {
+        "exec.meta.base": true,
+        "exec.mount.bind": true
+      }
+    }
+  },
+  {
+    "Op": {
+      "Op": {
+        "Source": {
+          "identifier": "docker-image://docker.io/library/php:7.2"
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:c1aaee8a38ba6dec64d5b8c919c7cf6bddc04f0bd18763678342d33a25c06844",
+    "OpMetadata": {
+      "caps": {
+        "source.image": true
+      }
+    }
+  }
+]
