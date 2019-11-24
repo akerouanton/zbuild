@@ -84,7 +84,7 @@ func successfullyFindBuilderTC() registryTC {
 		builddef: builddef.BuildDef{
 			Type:      "some-type",
 			RawConfig: map[string]interface{}{},
-			RawLocks:  map[string]interface{}{},
+			RawLocks:  []byte{},
 		},
 		expectedImage: &expectedImage,
 	}
@@ -97,7 +97,7 @@ func failToFindBuilderTC() registryTC {
 		builddef: builddef.BuildDef{
 			Type:      "some-type",
 			RawConfig: map[string]interface{}{},
-			RawLocks:  map[string]interface{}{},
+			RawLocks:  []byte{},
 		},
 		expectedErr: registry.ErrUnknownDefType,
 	}
@@ -117,7 +117,7 @@ func (h mockTypeHandler) DebugLLB(buildOpts builddef.BuildOpts) (llb.State, erro
 	return state, nil
 }
 
-func (h mockTypeHandler) UpdateLocks(genericDef *builddef.BuildDef, stages []string, pkgSolver pkgsolver.PackageSolver) (builddef.Locks, error) {
+func (h mockTypeHandler) UpdateLocks(genericDef *builddef.BuildDef, pkgSolver pkgsolver.PackageSolver) (builddef.Locks, error) {
 	return mockLocks{}, nil
 }
 

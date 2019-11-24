@@ -1,0 +1,8 @@
+type: php
+
+stages:
+  dev:
+    derive_from: prod
+  
+  prod:
+    derive_from: dev

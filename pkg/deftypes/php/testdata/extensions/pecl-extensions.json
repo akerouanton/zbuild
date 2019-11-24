@@ -1,0 +1,62 @@
+[
+  {
+    "Op": {
+      "Op": {
+        "Exec": {
+          "meta": {
+            "args": [
+              "/bin/sh",
+              "-o",
+              "errexit",
+              "-o",
+              "pipefail",
+              "-c",
+              "pecl install -o -f redis \u0026\u0026 docker-php-ext-enable redis \u0026\u0026 rm -rf /tmp/pear"
+            ],
+            "cwd": "/"
+          },
+          "mounts": [
+            {
+              "input": -1,
+              "dest": "/",
+              "output": 0
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:78f19250bbd6af3ba65559933f37f4b89cf0d72fac1dec2c281c6eb2f7f36611",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Install PHP extensions (redis)"
+      },
+      "caps": {
+        "exec.meta.base": true
+      }
+    }
+  },
+  {
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:78f19250bbd6af3ba65559933f37f4b89cf0d72fac1dec2c281c6eb2f7f36611",
+          "index": 0
+        }
+      ],
+      "Op": null
+    },
+    "Digest": "sha256:ff65ce857a11b26f9ba07461cb17d7ab30efe96e9840de8b940617961df05edf",
+    "OpMetadata": {
+      "caps": {
+        "constraints": true,
+        "meta.description": true,
+        "platform": true
+      }
+    }
+  }
+]

@@ -124,12 +124,16 @@ func InstallSystemPackages(
 	var cmds []string
 	var pkgNames []string
 
+	for pkgName := range locks {
+		pkgNames = append(pkgNames, pkgName)
+	}
+	sort.Strings(pkgNames)
+
 	switch pkgMgr {
 	case APT:
 		packageSpecs := []string{}
-		for pkgName, pkgVersion := range locks {
-			packageSpecs = append(packageSpecs, pkgName+"="+pkgVersion)
-			pkgNames = append(pkgNames, pkgName)
+		for _, pkgName := range pkgNames {
+			packageSpecs = append(packageSpecs, pkgName+"="+locks[pkgName])
 		}
 
 		cmds = []string{
@@ -141,7 +145,6 @@ func InstallSystemPackages(
 		return llb.State{}, UnsupportedPackageManager
 	}
 
-	sort.Strings(pkgNames)
 	stepName := fmt.Sprintf("Install system packages (%s)", strings.Join(pkgNames, ", "))
 	state = state.Run(
 		Shellf(strings.Join(cmds, "; ")),

@@ -2,22 +2,21 @@
 type: php
 fpm: true
 version: 7.0.29
+infer: false
 
 extensions:
   intl: "*"
   pdo_mysql: "*"
   soap: "*"
 
-# These parameters are automatically set by webdf using the "symfony" integration, so there're not needed in this case.
-# source_dirs:
-#   - './app'
-#   - './src'
-# extra_scripts:
-#   - './bin/console'
-#   - './web/app.php'
+source_dirs:
+  - 'generated/'
+
+extra_scripts:
+  - 'gencode.php'
 
 stateful_dirs:
-  - './web/uploads'
+  - 'public/uploads'
 
 config_files:
   fpm.conf: 'docker/app/fpm.conf'
@@ -25,10 +24,15 @@ config_files:
 integrations:
   - symfony
 
+post_install:
+  - echo some command
+
 stages:
   dev:
+    dev: true
     config_files:
       php.ini: 'docker/app/php.dev.ini'
+    healthcheck: false
 
   prod:
     config_files:
@@ -42,4 +46,17 @@ stages:
 
   worker:
     derive_from: prod
+    config_files:
+      fpm.conf: ''
+    composer_dump:
+      apcu: true
+    source_dirs:
+      - 'worker/'
+    extra_scripts:
+      - 'bin/worker'
+    stateful_dirs:
+      - 'data/imports'
+    post_install:
+      - echo some other command
     healthcheck: false
+    fpm: false

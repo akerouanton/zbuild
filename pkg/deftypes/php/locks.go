@@ -1,9 +1,10 @@
 package php
 
 import (
+	"context"
+
 	"github.com/NiR-/webdf/pkg/builddef"
 	"github.com/NiR-/webdf/pkg/pkgsolver"
-	"github.com/mitchellh/mapstructure"
 	"golang.org/x/xerrors"
 	"gopkg.in/yaml.v2"
 )
@@ -11,14 +12,8 @@ import (
 // DefinitionLocks defines version locks for system packages and PHP extensions used
 // by each stage.
 type DefinitionLocks struct {
-	Stages map[string]StageLocks `yaml:"stages"`
-}
-
-// StageLocks represents the version locks for a single stage.
-type StageLocks struct {
 	builddef.BaseLocks `yaml:",inline"`
-
-	Extensions map[string]string `yaml:"extensions"`
+	Stages             map[string]StageLocks `yaml:"stages"`
 }
 
 func (l DefinitionLocks) RawLocks() ([]byte, error) {
@@ -29,88 +24,90 @@ func (l DefinitionLocks) RawLocks() ([]byte, error) {
 	return lockdata, nil
 }
 
+// StageLocks represents the version locks for a single stage.
+type StageLocks struct {
+	builddef.BaseStageLocks `yaml:",inline"`
+
+	Extensions map[string]string `yaml:"extensions"`
+}
+
 func (h PHPHandler) UpdateLocks(
 	genericDef *builddef.BuildDef,
-	stages []string,
 	pkgSolver pkgsolver.PackageSolver,
 ) (builddef.Locks, error) {
-	def := defaultDefinition()
-	if err := mapstructure.Decode(genericDef.RawConfig, &def); err != nil {
-		return nil, xerrors.Errorf("could not decode manifest: %v", err)
+	def, err := NewSpecializedDefinition(genericDef)
+	if err != nil {
+		return nil, err
 	}
 
-	if err := mapstructure.Decode(genericDef.RawLocks, &def.Locks); err != nil {
-		return nil, xerrors.Errorf("could not decode lock manifest: %v", err)
-	}
-
-	if len(stages) == 0 {
-		stages = []string{"base"}
-		for name := range def.Stages {
-			stages = append(stages, name)
+	// @TODO: support template in base image param instead
+	// @TODO: resolve sha256 of the base image and lock it
+	baseImageRef := def.BaseImage
+	if baseImageRef == "" {
+		baseImageRef = defaultBaseImage + ":" + def.Version
+		if *def.BaseStage.FPM {
+			// @TODO: Add a distro param?
+			baseImageRef += "-fpm-buster"
 		}
 	}
+	def.Locks.BaseImage = baseImageRef
 
-	for _, name := range stages {
-		stage, err := def.ResolveStageDefinition(name)
-		if err != nil {
-			return nil, xerrors.Errorf("could not resolve stage %q: %+v", name, err)
-		}
+	ctx := context.TODO()
+	osrelease, err := builddef.ResolveImageOS(ctx, h.fetcher, baseImageRef)
+	if err != nil {
+		return nil, xerrors.Errorf("could not resolve base image os-release: %v", err)
+	}
+	def.Locks.OS = osrelease
 
-		addIntegrations(&stage)
-
-		if def.Infer {
-			if err := loadPlatformReqsFromFS(&stage); err != nil {
-				err := xerrors.Errorf("could not load platform-reqs from composer.lock: %v", err)
-				return nil, err
-			}
-
-			inferExtensions(&stage)
-			inferSystemPackages(&stage)
-		}
-
-		if _, ok := def.Locks.Stages[name]; !ok {
-			def.Locks.Stages[name] = StageLocks{}
-		}
-
-		locks := def.Locks.Stages[name]
-		if err := updateStageLocks(stage, &locks, pkgSolver); err != nil {
-			return nil, err
-		}
-
-		def.Locks.Stages[name] = locks
+	solverCfg, err := pkgsolver.GuessSolverConfig(osrelease, "amd64")
+	if err != nil {
+		return nil, xerrors.Errorf("could not update stage locks: %v", err)
+	}
+	err = pkgSolver.Configure(solverCfg)
+	if err != nil {
+		return nil, xerrors.Errorf("could not update stage locks: %v", err)
 	}
 
-	return def.Locks, nil
+	stagesLocks, err := updateStagesLocks(def, pkgSolver)
+	def.Locks.Stages = stagesLocks
+	return def.Locks, err
 }
 
-func updateStageLocks(
-	stage StageDefinition,
-	locks *StageLocks,
+func updateStagesLocks(
+	def Definition,
 	pkgSolver pkgsolver.PackageSolver,
-) error {
-	// @TODO: guess dpkg suite/archive to use from the base service image
-	err := pkgSolver.WithDpkgSuites([][]string{
-		{"http://deb.debian.org/debian", "jessie"},
-		{"http://deb.debian.org/debian", "jessie-updates"},
-		{"http://security.debian.org", "jessie/updates"},
-	})
-	if err != nil {
-		return xerrors.Errorf("could not update stage locks: %+v", err)
+) (map[string]StageLocks, error) {
+	locks := map[string]StageLocks{}
+
+	platformReqsLoader := func(stage *StageDefinition) error {
+		// @TODO: basedir should be the parent dir of the webdf.yml file
+		return LoadPlatformReqsFromFS(stage, "")
 	}
 
-	locks.SystemPackages, err = pkgSolver.ResolveVersions(stage.SystemPackages, "amd64")
-	if err != nil {
-		return xerrors.Errorf("could not resolve systems package versions: %v", err)
+	for name := range def.Stages {
+		stage, err := def.ResolveStageDefinition(name, platformReqsLoader)
+		if err != nil {
+			return nil, xerrors.Errorf("could not resolve stage %q: %v", name, err)
+		}
+
+		stageLocks := StageLocks{}
+		stageLocks.SystemPackages, err = pkgSolver.ResolveVersions(stage.SystemPackages)
+		if err != nil {
+			return nil, xerrors.Errorf("could not resolve systems package versions: %v", err)
+		}
+
+		stageLocks.Extensions, err = findExtensionVersions(stage.Extensions)
+		if err != nil {
+			return nil, xerrors.Errorf("could not resolve php extension versions: %v", err)
+		}
+
+		locks[name] = stageLocks
 	}
 
-	locks.Extensions, err = findExtensionVersions(stage.Extensions)
-	if err != nil {
-		return xerrors.Errorf("could not resolve php extension versions: %v", err)
-	}
-
-	return nil
+	return locks, nil
 }
 
+// @TODO: improve
 func findExtensionVersions(extensions map[string]string) (map[string]string, error) {
 	return extensions, nil
 }

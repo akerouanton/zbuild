@@ -56,13 +56,13 @@ func TestBuilder(t *testing.T) {
 
 			if tc.expectedErr != nil {
 				if !strings.HasPrefix(outErr.Error(), tc.expectedErr.Error()) {
-					t.Fatalf("Expected error: %+v\nGot: %+v\n", tc.expectedErr.Error(), outErr.Error())
+					t.Fatalf("Expected error: %v\nGot: %v\n", tc.expectedErr.Error(), outErr.Error())
 				}
 				return
 			}
 
 			if tc.expectedErr == nil && outErr != nil {
-				t.Fatalf("Error not expected but got one: %+v\n", outErr)
+				t.Fatalf("Error not expected but got one: %v\n", outErr)
 			}
 			if diff := deep.Equal(tc.expectedRes, outRes); diff != nil {
 				t.Logf("expected metadata: %s", tc.expectedRes.Metadata)
@@ -370,7 +370,7 @@ func (h mockTypeHandler) DebugLLB(buildOpts builddef.BuildOpts) (llb.State, erro
 	return state, nil
 }
 
-func (h mockTypeHandler) UpdateLocks(*builddef.BuildDef, []string, pkgsolver.PackageSolver) (builddef.Locks, error) {
+func (h mockTypeHandler) UpdateLocks(*builddef.BuildDef, pkgsolver.PackageSolver) (builddef.Locks, error) {
 	return mockLocks{}, nil
 }
 

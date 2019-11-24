@@ -124,7 +124,7 @@ func (b Builder) UpdateLockFile(file string) error {
 		return err
 	}
 
-	locks, err := typeHandler.UpdateLocks(def, []string{}, b.PkgSolver)
+	locks, err := typeHandler.UpdateLocks(def, b.PkgSolver)
 	if err != nil {
 		return err
 	}

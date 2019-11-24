@@ -1,10 +1,11 @@
 package main
 
 import (
-	"log"
-
 	"github.com/NiR-/webdf/pkg/deftypes/php"
+	"github.com/NiR-/webdf/pkg/filefetch"
 	"github.com/NiR-/webdf/pkg/registry"
+	"github.com/docker/docker/client"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -23,13 +24,23 @@ func main() {
 	webdfCmd.AddCommand(newDebugLLBCmd())
 
 	if err := webdfCmd.Execute(); err != nil {
-		log.Fatal(err)
+		logrus.Fatal(err)
 	}
 }
 
 func buildTypeRegistry() *registry.TypeRegistry {
+	docker, err := client.NewClientWithOpts(client.FromEnv)
+	if err != nil {
+		logrus.Fatal(err)
+	}
+
+	fetcher := filefetch.DockerFetcher{
+		Client: docker,
+		Labels: map[string]string{},
+	}
+
 	reg := registry.NewTypeRegistry()
-	php.RegisterDefType(reg)
+	php.RegisterDefType(reg, fetcher)
 
 	return reg
 }

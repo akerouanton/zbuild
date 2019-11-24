@@ -52,9 +52,9 @@ func initPackageSolver() (pkgsolver.PackageSolver, error) {
 		basepath = path.Join(home, ".local/share")
 	}
 
-	path := path.Join(basepath, "webdf")
+	path := path.Join(basepath, "webdf/dpkg")
 	dpkgRepo := dpkg.NewRepository(path)
-	pkgSolver = pkgsolver.NewPackageSolver(dpkgRepo)
+	pkgSolver = pkgsolver.NewDpkgSolver(dpkgRepo)
 
 	return pkgSolver, nil
 }

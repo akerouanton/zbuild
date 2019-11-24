@@ -7,12 +7,16 @@ import (
 
 // BuildOpts represents the parameters passed to specialized builders.
 // (see github.com/NiR-/webdf/pkg/deftypes/)
+// @TODO: add support for contextkey
 type BuildOpts struct {
 	Def       *BuildDef
 	SessionID string
-	File      string
-	LockFile  string
-	Stage     string
+	// LocalUniqueID is useful mostly for test purpose, in order to use
+	// a predefine value and have stable op digests.
+	LocalUniqueID string
+	File          string
+	LockFile      string
+	Stage         string
 }
 
 func NewBuildOpts(file, stage, sessionID string) BuildOpts {

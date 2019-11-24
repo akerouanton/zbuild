@@ -1,0 +1,31 @@
+type: php
+fpm: true
+version: 7.0.29
+infer: false
+
+extensions:
+  intl: "*"
+  pdo_mysql: "*"
+  soap: "*"
+
+source_dirs:
+  - './src'
+
+extra_scripts:
+  - './public/index.php'
+
+stateful_dirs:
+  - './public/uploads'
+
+config_files:
+  fpm.conf: 'docker/app/fpm.conf'
+  php.ini: 'docker/app/php.ini'
+
+integrations:
+  - blackfire
+
+healthcheck: true
+
+post_install:
+  - some more commands
+  - another one

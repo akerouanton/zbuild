@@ -1,0 +1,15 @@
+# syntax=akerouanton/webdf-builder:test9
+type: php
+fpm: true
+version: 7.2
+
+# These parameters are automatically set by webdf using the "symfony" integration, so there're not needed in this case.
+# source_dirs:
+#   - './app'
+#   - './src'
+# extra_scripts:
+#   - './bin/console'
+#   - './web/app.php'
+
+integrations:
+  - symfony

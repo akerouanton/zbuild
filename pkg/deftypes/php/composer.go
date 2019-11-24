@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"io/ioutil"
+	"path"
 	"strings"
 
 	"github.com/NiR-/webdf/pkg/builddef"
@@ -14,9 +15,9 @@ import (
 	"golang.org/x/xerrors"
 )
 
-// loadPlatformReqsFromContext loads composer.lock from build conext and adds
+// LoadPlatformReqsFromContext loads composer.lock from build conext and adds
 // any extensions declared there but not in webdf.yaml.
-func loadPlatformReqsFromContext(
+func LoadPlatformReqsFromContext(
 	ctx context.Context,
 	c client.Client,
 	stage *StageDefinition,
@@ -54,8 +55,11 @@ func loadPlatformReqsFromContext(
 	return nil
 }
 
-func loadPlatformReqsFromFS(stage *StageDefinition) error {
-	lockdata, err := ioutil.ReadFile("composer.lock")
+// LoadPlatformReqsFromFS load composer.lock from the filesystem and add
+// any extensions declared there but not in webdf.yaml.
+func LoadPlatformReqsFromFS(stage *StageDefinition, basedir string) error {
+	fullpath := path.Join(basedir, "composer.lock")
+	lockdata, err := ioutil.ReadFile(fullpath)
 	if err != nil {
 		logrus.Debugf("Could not load composer.lock: %+v", err)
 		return nil
@@ -86,7 +90,7 @@ func parsePlatformReqs(lockdata []byte) (map[string]string, error) {
 		return map[string]string{}, nil
 	}
 
-	exts := make(map[string]string, 0)
+	exts := make(map[string]string)
 	for req, constraint := range platformReqs.(map[string]interface{}) {
 		if !strings.HasPrefix(req, "ext-") {
 			continue

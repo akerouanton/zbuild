@@ -5,10 +5,11 @@ import (
 )
 
 // BuildDef represents a service as declared in webdf config file.
+// @TODO: rename into GenericKind
 type BuildDef struct {
 	Type      string                 `yaml:"type"`
 	RawConfig map[string]interface{} `yaml:",inline"`
-	RawLocks  map[string]interface{} `yaml:"-"`
+	RawLocks  []byte                 `yaml:"-"`
 }
 
 // BaseConfig exposes fields shared by all/most specific config structs.
@@ -17,9 +18,15 @@ type BaseConfig struct {
 	SystemPackages map[string]string `mapstructure:"system_packages"`
 }
 
-// BaseLocks exposes fields shared by all/most service locks.
 type BaseLocks struct {
-	SystemPackages map[string]string `mapstructure:"system_packages"`
+	BaseImage string `yaml:"base_image"`
+	// @TODO: is this really useful during builds? should be removed?
+	OS OSRelease `yaml:"os"`
+}
+
+// BaseStageLocks exposes fields shared by all/most service locks.
+type BaseStageLocks struct {
+	SystemPackages map[string]string `yaml:"system_packages"`
 }
 
 // Locks define a common interface implemented by all specialized Locks structs.

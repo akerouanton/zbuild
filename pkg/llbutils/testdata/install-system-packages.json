@@ -1,160 +1,6 @@
 [
   {
     "Op": {
-      "Op": null
-    },
-    "Digest": "",
-    "OpMetadata": {
-      "caps": null
-    }
-  },
-  {
-    "Op": {
-      "Op": null
-    },
-    "Digest": "",
-    "OpMetadata": {
-      "caps": null
-    }
-  },
-  {
-    "Op": {
-      "Op": null
-    },
-    "Digest": "",
-    "OpMetadata": {
-      "caps": null
-    }
-  },
-  {
-    "Op": {
-      "Op": null
-    },
-    "Digest": "",
-    "OpMetadata": {
-      "caps": null
-    }
-  },
-  {
-    "Op": {
-      "Op": null
-    },
-    "Digest": "",
-    "OpMetadata": {
-      "caps": null
-    }
-  },
-  {
-    "Op": {
-      "Op": null
-    },
-    "Digest": "",
-    "OpMetadata": {
-      "caps": null
-    }
-  },
-  {
-    "Op": {
-      "Op": null
-    },
-    "Digest": "",
-    "OpMetadata": {
-      "caps": null
-    }
-  },
-  {
-    "Op": {
-      "Op": null
-    },
-    "Digest": "",
-    "OpMetadata": {
-      "caps": null
-    }
-  },
-  {
-    "Op": {
-      "Op": null
-    },
-    "Digest": "",
-    "OpMetadata": {
-      "caps": null
-    }
-  },
-  {
-    "Op": {
-      "Op": null
-    },
-    "Digest": "",
-    "OpMetadata": {
-      "caps": null
-    }
-  },
-  {
-    "Op": {
-      "Op": null
-    },
-    "Digest": "",
-    "OpMetadata": {
-      "caps": null
-    }
-  },
-  {
-    "Op": {
-      "Op": null
-    },
-    "Digest": "",
-    "OpMetadata": {
-      "caps": null
-    }
-  },
-  {
-    "Op": {
-      "Op": null
-    },
-    "Digest": "",
-    "OpMetadata": {
-      "caps": null
-    }
-  },
-  {
-    "Op": {
-      "Op": null
-    },
-    "Digest": "",
-    "OpMetadata": {
-      "caps": null
-    }
-  },
-  {
-    "Op": {
-      "Op": null
-    },
-    "Digest": "",
-    "OpMetadata": {
-      "caps": null
-    }
-  },
-  {
-    "Op": {
-      "inputs": [
-        {
-          "digest": "sha256:90608c713dc693195e873ab236ae7ae1cedf6915459d92d82b78846102bc284c",
-          "index": 0
-        }
-      ],
-      "Op": null
-    },
-    "Digest": "sha256:2cf5743be31b76bb3460d56fc1fd76fbd46adc7914f531cbcbcb803328ca4871",
-    "OpMetadata": {
-      "caps": {
-        "constraints": true,
-        "meta.description": true,
-        "platform": true
-      }
-    }
-  },
-  {
-    "Op": {
       "inputs": [
         {
           "digest": "sha256:c1aaee8a38ba6dec64d5b8c919c7cf6bddc04f0bd18763678342d33a25c06844",
@@ -171,7 +17,7 @@
               "-o",
               "pipefail",
               "-c",
-              "apt-get update; apt-get install -y --no-install-recommends curl=curl-version ca-certficiates=ca-certificates-version zlib1g-dev=zlib1g-dev-version; rm -rf /var/lib/apt/lists/*"
+              "apt-get update; apt-get install -y --no-install-recommends ca-certficiates=ca-certificates-version curl=curl-version zlib1g-dev=zlib1g-dev-version; rm -rf /var/lib/apt/lists/*"
             ],
             "cwd": "/"
           },
@@ -190,7 +36,7 @@
       },
       "constraints": {}
     },
-    "Digest": "sha256:90608c713dc693195e873ab236ae7ae1cedf6915459d92d82b78846102bc284c",
+    "Digest": "sha256:66fdb8f9218647b140e1b2de5b3b9df7a6e473da9e351307f53e7af2f2e1d29a",
     "OpMetadata": {
       "description": {
         "llb.customname": "Install system packages (ca-certficiates, curl, zlib1g-dev)"
@@ -198,6 +44,25 @@
       "caps": {
         "exec.meta.base": true,
         "exec.mount.bind": true
+      }
+    }
+  },
+  {
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:66fdb8f9218647b140e1b2de5b3b9df7a6e473da9e351307f53e7af2f2e1d29a",
+          "index": 0
+        }
+      ],
+      "Op": null
+    },
+    "Digest": "sha256:946d13ae23487314bcc8e3e106e658208eeab32696a48c0c288942ca6e3fcf12",
+    "OpMetadata": {
+      "caps": {
+        "constraints": true,
+        "meta.description": true,
+        "platform": true
       }
     }
   },

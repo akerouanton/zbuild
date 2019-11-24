@@ -1,0 +1,12 @@
+type: php
+# Default extensions aren't automatically removed when inference is disabled
+infer: true
+
+extensions:
+  filter: "*"
+  json: "*"
+  reflection: "*"
+  session: "*"
+  sodium: "*"
+  spl: "*"
+  standard: "*"

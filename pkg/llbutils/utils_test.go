@@ -2,12 +2,10 @@ package llbutils_test
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"flag"
 	"io/ioutil"
 	"os"
-	"sort"
 	"testing"
 
 	"github.com/NiR-/webdf/pkg/llbtest"
@@ -16,8 +14,6 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/moby/buildkit/client/llb"
 	"github.com/moby/buildkit/frontend/gateway/client"
-	"github.com/moby/buildkit/solver/pb"
-	digest "github.com/opencontainers/go-digest"
 )
 
 type solveStateTC struct {
@@ -74,6 +70,10 @@ func initReturnsAnErrorWhenResultAsNoSingleRefTC(mockCtrl *gomock.Controller) so
 }
 
 func TestSolveState(t *testing.T) {
+	if *flagTestdata {
+		return
+	}
+
 	testcases := map[string]func(*gomock.Controller) solveStateTC{
 		"successfully solve state":                      initSuccessfullySolveStateTC,
 		"returns an error when solve fails":             initReturnsAnErrorWhenSolveFailsTC,
@@ -96,10 +96,10 @@ func TestSolveState(t *testing.T) {
 
 			if tc.expectedErr != nil {
 				if outErr == nil {
-					t.Fatalf("Expected: %+v\nGot: <nil>", tc.expectedErr.Error())
+					t.Fatalf("Expected: %v\nGot: <nil>", tc.expectedErr.Error())
 				}
 				if tc.expectedErr.Error() != outErr.Error() {
-					t.Fatalf("Expected: %+v\nGot: %+v", tc.expectedErr.Error(), outErr.Error())
+					t.Fatalf("Expected: %v\nGot: %v", tc.expectedErr.Error(), outErr.Error())
 				}
 				return
 			}
@@ -152,6 +152,10 @@ func initReturnsNoErrorsWhenFileNotFoundTC(mockCtrl *gomock.Controller) readFile
 }
 
 func TestReadFile(t *testing.T) {
+	if *flagTestdata {
+		return
+	}
+
 	testcases := map[string]func(*gomock.Controller) readFileTC{
 		"successfully read file content":        initSuccessfullyReadFileContentTC,
 		"returns no errors when file not found": initReturnsNoErrorsWhenFileNotFoundTC,
@@ -173,10 +177,10 @@ func TestReadFile(t *testing.T) {
 
 			if tc.expectedErr != nil {
 				if err == nil {
-					t.Fatalf("Expected: %+v\nGot: <nil>", tc.expectedErr.Error())
+					t.Fatalf("Expected: %v\nGot: <nil>", tc.expectedErr.Error())
 				}
 				if tc.expectedErr.Error() != err.Error() {
-					t.Fatalf("Expected: %+v\nGot: %+v", tc.expectedErr.Error(), err.Error())
+					t.Fatalf("Expected: %v\nGot: %v", tc.expectedErr.Error(), err.Error())
 				}
 				return
 			}
@@ -272,7 +276,7 @@ func TestStateHelpers(t *testing.T) {
 			t.Parallel()
 
 			state := tc.init(t)
-			jsonState := stateToJSON(t, state)
+			jsonState := llbtest.StateToJSON(t, state)
 
 			if *flagTestdata {
 				writeTestdata(t, tc.testdata, jsonState)
@@ -280,8 +284,8 @@ func TestStateHelpers(t *testing.T) {
 			}
 
 			testdata := loadTestdata(t, tc.testdata)
-			if testdata != jsonState {
-				t.Fatalf("Expected: %+v\nGot: %+v", testdata, jsonState)
+			if diff := deep.Equal(testdata, jsonState); diff != nil {
+				t.Fatal(diff)
 			}
 		})
 	}
@@ -300,58 +304,4 @@ func loadTestdata(t *testing.T, filepath string) string {
 		t.Fatalf("Could not load %q: %v", filepath, err)
 	}
 	return string(out)
-}
-
-type llbOp struct {
-	Op         pb.Op
-	Digest     digest.Digest
-	OpMetadata pb.OpMetadata
-}
-
-func stateToJSON(t *testing.T, state llb.State) string {
-	def, err := state.Marshal(llb.LinuxAmd64)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	ops := make([]llbOp, len(def.Def))
-
-	for _, dt := range def.Def {
-		var op pb.Op
-		if err := (&op).Unmarshal(dt); err != nil {
-			t.Fatalf("Failed to parse op: %v", err)
-		}
-
-		dgst := digest.FromBytes(dt)
-		ent := llbOp{Op: op, Digest: dgst, OpMetadata: def.Metadata[dgst]}
-
-		ops = append(ops, ent)
-	}
-
-	ops = sortOps(ops)
-	out, err := json.MarshalIndent(ops, "", "  ")
-	if err != nil {
-		t.Fatalf("Could not encode Op into JSON: %v", err)
-	}
-
-	return string(out)
-}
-
-func sortOps(ops []llbOp) []llbOp {
-	keys := make([]string, len(ops))
-	digests := make(map[string]llbOp, len(ops))
-	for _, op := range ops {
-		digest := string(op.Digest)
-		keys = append(keys, digest)
-		digests[digest] = op
-	}
-
-	sort.Strings(keys)
-
-	sorted := make([]llbOp, len(ops))
-	for _, key := range keys {
-		sorted = append(sorted, digests[key])
-	}
-
-	return sorted
 }

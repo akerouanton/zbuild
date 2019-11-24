@@ -25,7 +25,8 @@ gen-mocks:
 
 .PHONY: gen-testdata
 gen-testdata:
-	@$(GOTEST) ./pkg/llbutils -testdata
+	@$(GOTEST) -v ./pkg/llbutils -testdata
+	@$(GOTEST) -v ./pkg/deftypes/php -testdata
 	@echo "WARNING: Be sure to review regenerated testdata files before committing them."
 
 .PHONY: build-image

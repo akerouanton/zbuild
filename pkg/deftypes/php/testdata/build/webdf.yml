@@ -1,0 +1,22 @@
+type: php
+fpm: true
+version: 7.3
+
+extensions:
+  intl: "*"
+  pdo_mysql: "*"
+  soap: "*"
+
+config_files:
+  fpm.conf: "docker/app/fpm.conf"
+  php.ini: "docker/app/php.ini"
+
+integrations:
+  - blackfire
+  - symfony
+
+stages:
+  dev:
+    dev: true
+  prod:
+    healthcheck: true

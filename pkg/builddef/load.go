@@ -58,12 +58,7 @@ func LoadFromContext(
 		return &def, nil
 	}
 
-	var lockCfg map[string]interface{}
-	if err = yaml.Unmarshal(lockContent, &lockCfg); err != nil {
-		return nil, xerrors.Errorf("could not decode %s: %v", buildOpts.LockFile, err)
-	}
-
-	def.RawLocks = lockCfg
+	def.RawLocks = lockContent
 
 	return &def, nil
 }
@@ -74,6 +69,7 @@ func LoadFromContext(
 func LoadFromFS(file, lockFile string) (*BuildDef, error) {
 	ymlContent, err := ioutil.ReadFile(file)
 	if os.IsNotExist(err) {
+		// @TODO: include file path in error message
 		return nil, ConfigYMLNotFound
 	} else if err != nil {
 		return nil, xerrors.Errorf("could not load %s from filesystem: %v", file, err)
@@ -90,13 +86,7 @@ func LoadFromFS(file, lockFile string) (*BuildDef, error) {
 	} else if err != nil {
 		return nil, xerrors.Errorf("could not load %s from filesystem: %v", lockFile, err)
 	}
-
-	var lockCfg map[string]interface{}
-	if err = yaml.Unmarshal(lockContent, &lockCfg); err != nil {
-		return nil, xerrors.Errorf("could not decode %s: %v", lockFile, err)
-	}
-
-	def.RawLocks = lockCfg
+	def.RawLocks = lockContent
 
 	return &def, nil
 }

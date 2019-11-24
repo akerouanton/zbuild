@@ -1,35 +1,47 @@
 package php
 
+import (
+	"fmt"
+	"sort"
+	"strings"
+
+	"github.com/NiR-/webdf/pkg/llbutils"
+	"github.com/moby/buildkit/client/llb"
+)
+
 var coreExts = map[string]bool{
-	"bcmath":    true,
-	"bz2":       true,
-	"calendar":  true,
-	"ctype":     true,
-	"curl":      true,
-	"dba":       true,
-	"dom":       true,
-	"enchant":   true,
-	"exif":      true,
-	"fileinfo":  true,
-	"filter":    true,
-	"ftp":       true,
-	"gd":        true,
-	"gettext":   true,
-	"gmp":       true,
-	"hash":      true,
-	"iconv":     true,
-	"imap":      true,
-	"interbase": true,
-	"intl":      true,
-	"json":      true,
-	"ldap":      true,
-	"mbstring":  true,
-	// @TODO: removed from php:7.2+
-	"mcrypt":       true,
+	"bcmath":       true,
+	"bz2":          true,
+	"calendar":     true,
+	"ctype":        true,
+	"curl":         true,
+	"dba":          true,
+	"dom":          true,
+	"enchant":      true,
+	"exif":         true,
+	"ffi":          true,
+	"fileinfo":     true,
+	"filter":       true,
+	"ftp":          true,
+	"gd":           true,
+	"gd.freetype":  true,
+	"gd.jpeg":      true,
+	"gd.webp":      true,
+	"gettext":      true,
+	"gmp":          true,
+	"hash":         true,
+	"iconv":        true,
+	"imap":         true,
+	"interbase":    true, // @TODO: removed from php7.4+?
+	"intl":         true,
+	"json":         true,
+	"ldap":         true,
+	"mbstring":     true,
+	"mcrypt":       true, // @TODO: removed from php:7.2+
 	"mysqli":       true,
 	"oci8":         true,
 	"odbc":         true,
-	"opcache":      true,
+	"opcache":      true, // @TODO: enabled by default since php7.3+
 	"pcntl":        true,
 	"pdo":          true,
 	"pdo_dblib":    true,
@@ -44,13 +56,14 @@ var coreExts = map[string]bool{
 	"posix":        true,
 	"pspell":       true,
 	"readline":     true,
-	"recode":       true,
+	"recode":       true, // @TODO: removed from php7.4+?
 	"reflection":   true,
 	"session":      true,
 	"shmop":        true,
 	"simplexml":    true,
 	"snmp":         true,
 	"soap":         true,
+	"sodium":       true,
 	"sockets":      true,
 	"spl":          true,
 	"standard":     true,
@@ -59,13 +72,58 @@ var coreExts = map[string]bool{
 	"sysvshm":      true,
 	"tidy":         true,
 	"tokenizer":    true,
-	"wddx":         true,
+	"wddx":         true, // @TODO: removed from php7.4?
 	"xml":          true,
 	"xmlreader":    true,
 	"xmlrpc":       true,
 	"xmlwriter":    true,
 	"xsl":          true,
 	"zip":          true,
+}
+
+var extensionsDeps = map[string]map[string]string{
+	"bz2":          {"libbz2-dev": "*"},
+	"curl":         {"libcurl4-openssl-dev": "*"},
+	"dom":          {"libxml2-dev": "*"},
+	"enchant":      {"libenchant-dev": "*"},
+	"ffi":          {"libffi-dev": "*"},
+	"ftp":          {"libssl-dev": "*"},
+	"gd":           {"libpng-dev": "*"},
+	"gd.freetype":  {"libfreetype6-dev": "*"},
+	"gd.jpeg":      {"libjpeg-dev": "*"},
+	"gd.webp":      {"libwebp-dev": "*"},
+	"gmp":          {"libgmp-dev": "*"},
+	"imap":         {"libc-client-dev": "*", "libkrb5-dev": "*"},
+	"interbase":    {}, // @TODO: could not find needed dependencies
+	"intl":         {"libicu-dev": "*"},
+	"ldap":         {"libldap2-dev": "*"},
+	"mcrypt":       {"libmcrypt-dev": "*"},
+	"oci8":         {}, // @TODO
+	"odbc":         {}, // @TODO
+	"pdo_dblib":    {}, // @TODO
+	"pdo_firebird": {}, // @TODO
+	"pdo_oci":      {}, // @TODO
+	"pdo_odbc":     {}, // @TODO
+	"pdo_pgsql":    {"libpq-dev": "*"},
+	"pdo_sqlite":   {"libsqlite3-dev": "*"},
+	"pgsql":        {"libpq-dev": "*"},
+	"phar":         {"libssl-dev": "*"},
+	"pspell":       {"libpspell-dev": "*"},
+	"readline":     {"libedit-dev": "*"},
+	"recode":       {"librecode-dev": "*"},
+	"simplexml":    {"libxml2-dev": "*"},
+	"snmp":         {"libsnmp-dev": "*"},
+	"soap":         {"libxml2-dev": "*"},
+	"sodium":       {"libsodium-dev": "*"},
+	"sockets":      {"libssl-dev": "*", "openssl": "*"},
+	"tidy":         {"libtidy-dev": "*"},
+	"wddx":         {"libxml2-dev": "*"},
+	"xml":          {"libxml2-dev": "*"},
+	"xmlreader":    {}, // @TODO: this extension seems broken (bad include statement)
+	"xmlrpc":       {"libxml2-dev": "*"},
+	"xmlwriter":    {"libxml2-dev": "*"},
+	"xsl":          {"libxslt1-dev": "*"},
+	"zip":          {"zlib1g-dev": "*"},
 }
 
 func filterExtensions(extensions map[string]string, filterFunc func(string) bool) map[string]string {
@@ -97,20 +155,130 @@ func getExtensionNames(extensions map[string]string) []string {
 		names = append(names, extName)
 	}
 
+	sort.Strings(names)
 	return names
 }
 
-func getExtensionSpecs(extensions map[string]string) []string {
+func getCoreExtensionSpecs(extensions map[string]string) []string {
 	specs := []string{}
 
-	for extName, extVersion := range extensions {
-		spec := extName
-		if extVersion != "" {
-			spec = extName + "-" + extVersion
+	for extName := range extensions {
+		if extName == "gd.freetype" || extName == "gd.jpeg" || extName == "gd.webp" {
+			continue
+		}
+		specs = append(specs, extName)
+	}
+
+	sort.Strings(specs)
+	return specs
+}
+
+func getPeclExtensionSpecs(extensions map[string]string) []string {
+	keys := make([]string, 0, len(extensions))
+
+	for name := range extensions {
+		keys = append(keys, name)
+	}
+
+	sort.Strings(keys)
+
+	specs := []string{}
+	for _, key := range keys {
+		extVersion := extensions[key]
+		spec := key
+		if extVersion != "" && extVersion != "*" {
+			spec = key + "-" + extVersion
 		}
 
 		specs = append(specs, spec)
 	}
 
 	return specs
+}
+
+// @TODO: Use docker-php-source extract/delete
+func InstallExtensions(state llb.State, extensions map[string]string) llb.State {
+	coreExtensions := filterExtensions(extensions, isCoreExtension)
+	peclExtensions := filterExtensions(extensions, isNotCoreExtension)
+
+	cmds := []string{}
+	if len(coreExtensions) > 0 {
+		coreExtensionNames := getExtensionNames(coreExtensions)
+		coreExtensionSpecs := getCoreExtensionSpecs(coreExtensions)
+		cmds = append(cmds, configureExtensionBuilds(coreExtensionNames)...)
+		cmds = append(cmds,
+			"docker-php-ext-install -j\"$(nproc)\" "+strings.Join(coreExtensionSpecs, " "))
+	}
+	// @TODO: install pecl if needed (for PHP 7.4+)
+	if len(peclExtensions) > 0 {
+		pecl := "pecl install -o -f"
+		peclExtensionNames := getExtensionNames(peclExtensions)
+		peclExtensionSpecs := getPeclExtensionSpecs(peclExtensions)
+		cmds = append(cmds,
+			pecl+" "+strings.Join(peclExtensionSpecs, " "),
+			"docker-php-ext-enable "+strings.Join(peclExtensionNames, " "),
+			"rm -rf /tmp/pear")
+	}
+
+	if len(cmds) == 0 {
+		return state
+	}
+
+	extensionNames := getExtensionNames(extensions)
+	exec := state.Run(
+		llbutils.Shellf(strings.Join(cmds, " && ")),
+		llb.WithCustomNamef("Install PHP extensions (%s)", strings.Join(extensionNames, ", ")))
+
+	return exec.Root()
+}
+
+var extConfigureParams = map[string][]string{
+	"gd.freetype": {"--with-freetype-dir"},
+	"gd.jpeg":     {"--with-jpeg-dir"},
+	"gd.webp":     {"--with-webp-dir"},
+	"imap":        {"--with-imap-ssl", "--with-kerberos"},
+}
+
+func configureExtensionBuilds(exts []string) []string {
+	configArgs := map[string]string{}
+	for _, ext := range exts {
+		params, ok := extConfigureParams[ext]
+		if !ok {
+			continue
+		}
+
+		extName := normalizeExtName(ext)
+		if _, ok := configArgs[extName]; !ok {
+			configArgs[extName] = ""
+		}
+
+		configArgs[extName] = configArgs[extName] + " " + strings.Join(params, " ")
+	}
+
+	cmds := []string{}
+	withGD := false
+	for _, ext := range exts {
+		extName := normalizeExtName(ext)
+		// Skip this extension if it's GD (or one if its alias) and it's
+		// already been added.
+		if extName == "gd" && withGD {
+			continue
+		}
+		if extName == "gd" {
+			withGD = true
+		}
+
+		args := strings.Trim(configArgs[extName], " ")
+		cmd := fmt.Sprintf("docker-php-ext-configure %s %s", extName, args)
+		cmds = append(cmds, cmd)
+	}
+
+	return cmds
+}
+
+func normalizeExtName(extName string) string {
+	if extName == "gd.freetype" || extName == "gd.jpeg" || extName == "gd.webp" {
+		return "gd"
+	}
+	return extName
 }

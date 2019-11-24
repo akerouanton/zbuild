@@ -1,0 +1,11 @@
+type: php
+fpm: true
+version: 7.3
+
+extensions:
+  intl: "*"
+  pdo_mysql: "*"
+  soap: "*"
+
+integrations:
+  - blackfire

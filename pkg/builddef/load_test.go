@@ -60,10 +60,9 @@ func itLoadsConfigAndLockFilesFromContextTC(
 			RawConfig: map[string]interface{}{
 				"foo": "bar",
 			},
-			RawLocks: map[string]interface{}{
-				"foo": "bar",
-				"baz": "plop",
-			},
+			RawLocks: []byte(`foo: bar
+baz: plop
+`),
 		},
 	}
 }
@@ -174,14 +173,14 @@ func TestLoadConfigFromBuildContext(t *testing.T) {
 			tc := tcinit(t, mockCtrl)
 			ctx := context.TODO()
 
-			config, err := builddef.LoadFromContext(ctx, tc.client, tc.buildOpts)
+			buildDef, err := builddef.LoadFromContext(ctx, tc.client, tc.buildOpts)
 			if tc.expectedErr == nil && err != nil {
 				t.Fatalf("No error expected but got one: %v\n", err)
 			}
 			if tc.expectedErr != nil && err.Error() != tc.expectedErr.Error() {
 				t.Fatalf("Expected error: %v\nGot: %v\n", tc.expectedErr, err)
 			}
-			if diff := deep.Equal(tc.expectedDef, config); diff != nil {
+			if diff := deep.Equal(tc.expectedDef, buildDef); diff != nil {
 				t.Error(diff)
 			}
 		})
@@ -204,10 +203,9 @@ func TestLoadFromFS(t *testing.T) {
 				RawConfig: map[string]interface{}{
 					"foo": "bar",
 				},
-				RawLocks: map[string]interface{}{
-					"foo": "bar",
-					"baz": "plop",
-				},
+				RawLocks: []byte(`foo: bar
+baz: plop
+`),
 			},
 		},
 		"it loads config file without lock": {

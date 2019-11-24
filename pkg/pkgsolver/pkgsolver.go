@@ -1,54 +1,64 @@
 package pkgsolver
 
 import (
-	"github.com/snyh/go-dpkg-parser"
+	"github.com/NiR-/webdf/pkg/builddef"
 	"golang.org/x/xerrors"
 )
 
-type PackageSolver struct {
-	dpkgRepo *dpkg.Repository
+// PackageSolver is used by specialzed deftypes to lock system packages.
+type PackageSolver interface {
+	// Configure sets the package "suites" that should be used for subsequent
+	// calls to ResolveVersions(). See GuessSolverConfig()
+	Configure(config SolverConfig) error
+	// ResolveVersions takes a map of packages to resolve, associated with their
+	// version constraint. It returns a map of packages associated with their
+	// resolved version. If one of the package cannot be resolved or if the
+	// given arch is not supported, it returns an error.
+	ResolveVersions(pkgs map[string]string) (map[string]string, error)
+	// Type returns the SolverType matching the current instance of
+	// PackageSolver.
+	Type() SolverType
 }
 
-func NewPackageSolver(dpkgRepo *dpkg.Repository) PackageSolver {
-	return PackageSolver{dpkgRepo}
+type SolverType string
+
+const (
+	Dpkg SolverType = "dpkg"
+	// Apk  SolverType = "apk"
+)
+
+type SolverConfig struct {
+	Arch string
+	// See https://wiki.debian.org/SourcesList
+	DpkgSuites [][]string
 }
 
-// WithDpkgSuites takes a list of string pairs: the first string is the
-// repository URL and second string is the distribution name.
-// See https://wiki.debian.org/SourcesList
-func (s PackageSolver) WithDpkgSuites(suites [][]string) error {
-	for _, suite := range suites {
-		if err := s.dpkgRepo.AddSuite(suite[0], suite[1], ""); err != nil {
-			return xerrors.Errorf("could not add suite %s: %v", suite[1], err)
+func GuessSolverConfig(osrelease builddef.OSRelease, arch string) (SolverConfig, error) {
+	solverType := Dpkg
+	if osrelease.Name == "alpine" {
+		return SolverConfig{}, xerrors.New("alpine is not supported yet")
+	}
+
+	dpkgSuites := [][]string{}
+	// apkSuites := [][]string{}
+
+	switch solverType {
+	case Dpkg:
+		// @TODO: load these suites from the base image instead of guessing them based on version codename
+		// because of that, webdf only supports debian for now
+		dpkgSuites = [][]string{
+			{"http://deb.debian.org/debian", osrelease.VersionName},
+			{"http://deb.debian.org/debian", osrelease.VersionName + "-updates"},
+			{"http://security.debian.org", osrelease.VersionName + "/updates"},
 		}
-	}
-	return nil
-}
-
-// ResolveVersions takes a map of packages to resolve associated with their
-// version constraint and the architecture to resolve package for. It returns
-// a map of packages associated with their resolved version. If one of the
-// package cannot be resolved or if the given arch is not supported, it returns
-// an error.
-func (s PackageSolver) ResolveVersions(
-	pkgs map[string]string,
-	arch string,
-) (map[string]string, error) {
-	versions := make(map[string]string, len(pkgs))
-
-	ar, err := s.dpkgRepo.Archive(arch)
-	if err != nil {
-		return versions, err
+	default:
+		return SolverConfig{}, xerrors.Errorf("%q package solver is not supported", solverType)
 	}
 
-	for pkg := range pkgs {
-		bp, err := ar.FindBinary(pkg)
-		if err != nil {
-			return versions, err
-		}
-
-		versions[pkg] = bp.Version
+	config := SolverConfig{
+		Arch:       arch,
+		DpkgSuites: dpkgSuites,
+		// apkSuites: apkSuites,
 	}
-
-	return versions, nil
+	return config, nil
 }

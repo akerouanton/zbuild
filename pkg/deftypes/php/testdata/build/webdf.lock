@@ -1,0 +1,38 @@
+base_image: docker.io/library/php:7.3-fpm-buster
+os:
+  name: debian
+  versionname: buster
+  versionid: 10
+stages:
+  dev:
+    system_packages:
+      git: 1:2.20.1-2
+      libicu-dev: 63.1-6
+      libpcre3-dev: 2:8.39-12
+      libssl-dev: 1.1.1d-0+deb10u2
+      libxml2-dev: 2.9.4+dfsg1-7+b3
+      openssl: 1.1.1d-0+deb10u2
+      unzip: 6.0-23+deb10u1
+      zlib1g-dev: 1:1.2.11.dfsg-1
+    extensions:
+      intl: '*'
+      pdo_mysql: '*'
+      soap: '*'
+      sockets: '*'
+      zip: '*'
+  prod:
+    system_packages:
+      git: 1:2.20.1-2
+      libicu-dev: 63.1-6
+      libpcre3-dev: 2:8.39-12
+      libssl-dev: 1.1.1d-0+deb10u2
+      libxml2-dev: 2.9.4+dfsg1-7+b3
+      openssl: 1.1.1d-0+deb10u2
+      unzip: 6.0-23+deb10u1
+      zlib1g-dev: 1:1.2.11.dfsg-1
+    extensions:
+      intl: '*'
+      pdo_mysql: '*'
+      soap: '*'
+      sockets: '*'
+      zip: '*'

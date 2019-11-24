@@ -1,0 +1,17 @@
+stages:
+  base:
+    system_packages:
+      git: 1:2.1.4-2.1+deb8u7
+      libicu-dev: 52.1-8+deb8u7
+    extensions:
+      intl: '*'
+      pdo_mysql: '*'
+      soap: '*'
+  dev:
+    system_packages:
+      git: 1:2.1.4-2.1+deb8u7
+      libicu-dev: 52.1-8+deb8u7
+    extensions:
+      intl: '*'
+      pdo_mysql: '*'
+      soap: '*'

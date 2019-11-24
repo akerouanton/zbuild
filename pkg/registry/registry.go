@@ -13,12 +13,16 @@ import (
 
 // TypeHandler represents a series of methods used to build and update locks for a given type of builddef.
 type TypeHandler interface {
+	// Build is the method called by the builder package when buildkit daemon
+	// whenever a new build with webdf syntax provider starts. It returns a LLB
+	// DAG representing the build steps and the metadata of the final image, or
+	// an error if something goes wrong during the build.
 	Build(ctx context.Context, c client.Client, buildOpts builddef.BuildOpts) (llb.State, *image.Image, error)
 	// DebugLLB returns a LLB DAG like a call to BUild method does, but unlike
 	// this other method, DebugLLB is never called during a buildkit session,
 	// so there's no buildkit client available.
 	DebugLLB(buildOpts builddef.BuildOpts) (llb.State, error)
-	UpdateLocks(genericDef *builddef.BuildDef, stages []string, pkgSolver pkgsolver.PackageSolver) (builddef.Locks, error)
+	UpdateLocks(genericDef *builddef.BuildDef, pkgSolver pkgsolver.PackageSolver) (builddef.Locks, error)
 }
 
 // TypeRegistry associates service types with their respective service type handler.

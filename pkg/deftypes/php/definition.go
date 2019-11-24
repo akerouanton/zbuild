@@ -1,27 +1,22 @@
 package php
 
 import (
+	"fmt"
+	"path"
+
 	"github.com/NiR-/webdf/pkg/builddef"
 	"github.com/NiR-/webdf/pkg/llbutils"
-	"github.com/NiR-/webdf/pkg/registry"
+	version "github.com/hashicorp/go-version"
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/xerrors"
+	"gopkg.in/yaml.v2"
 )
-
-// RegisterDefType adds a LLB DAG builder to the given TypeRegistry for php
-// definition type.
-func RegisterDefType(registry *registry.TypeRegistry) {
-	registry.Register("php", PHPHandler{})
-}
-
-type PHPHandler struct{}
 
 // defaultDefinition returns a Definition with all its fields initialized with
 // default values.
 func defaultDefinition() Definition {
 	fpm := true
-	// @TODO: ensure this is a valid default version
-	version := "latest"
+	version := "7.2"
 	healthcheck := false
 	infer := true
 	dev := true
@@ -44,8 +39,9 @@ func defaultDefinition() Definition {
 			Healthcheck:  &healthcheck,
 			PostInstall:  []string{},
 		},
-		Version: version,
-		Infer:   infer,
+		BaseImage: "",
+		Version:   version,
+		Infer:     infer,
 		Stages: map[string]DerivedStage{
 			"dev": {
 				DeriveFrom: "base",
@@ -55,16 +51,25 @@ func defaultDefinition() Definition {
 	}
 }
 
-func decodeGenericDef(genericDef *builddef.BuildDef) (Definition, error) {
+func NewSpecializedDefinition(genericDef *builddef.BuildDef) (Definition, error) {
 	def := defaultDefinition()
 
-	// @TODO: be sure to fail if there's extra props
-	if err := mapstructure.Decode(genericDef.RawConfig, &def); err != nil {
+	decoderConf := mapstructure.DecoderConfig{
+		ErrorUnused:      true,
+		WeaklyTypedInput: true,
+		Result:           &def,
+	}
+	decoder, err := mapstructure.NewDecoder(&decoderConf)
+	if err != nil {
+		return def, err
+	}
+
+	if err := decoder.Decode(genericDef.RawConfig); err != nil {
 		err := xerrors.Errorf("could not decode build manifest: %v", err)
 		return def, err
 	}
 
-	if err := mapstructure.Decode(genericDef.RawLocks, &def.Locks); err != nil {
+	if err := yaml.Unmarshal(genericDef.RawLocks, &def.Locks); err != nil {
 		err := xerrors.Errorf("could not decode lock manifest: %v", err)
 		return def, err
 	}
@@ -78,11 +83,10 @@ func decodeGenericDef(genericDef *builddef.BuildDef) (Definition, error) {
 type Definition struct {
 	BaseStage Stage `mapstructure:",squash"`
 
-	// @TODO: Add base parameter
-	// BaseImage string `mapstructure:"base"`
-	Version string                  `mapstructure:"version"`
-	Infer   bool                    `mapstructure:"infer"`
-	Stages  map[string]DerivedStage `mapstructure:"stages"`
+	BaseImage string                  `mapstructure:"base"`
+	Version   string                  `mapstructure:"version"`
+	Infer     bool                    `mapstructure:"infer"`
+	Stages    map[string]DerivedStage `mapstructure:"stages"`
 
 	Locks DefinitionLocks `mapstructure:"-"`
 }
@@ -127,25 +131,45 @@ type ComposerDumpFlags struct {
 	ClassmapAuthoritative bool `mapstructure:"classmap_authoritative"`
 }
 
+func (fl ComposerDumpFlags) Flags() (string, error) {
+	if fl.APCU && fl.ClassmapAuthoritative {
+		return "", xerrors.New("you can't use both --apcu and --classmap-authoritative flags. See https://getcomposer.org/doc/articles/autoloader-optimization.md")
+	}
+
+	flags := "--no-dev --optimize"
+	if fl.APCU {
+		flags += " --apcu"
+	}
+	if fl.ClassmapAuthoritative {
+		flags += " --classmap-authoritative"
+	}
+	return flags, nil
+}
+
 // StageDefinition represents the config of stage once it got merged with all
 // its ancestors.
 type StageDefinition struct {
 	Stage
-	Name    string
-	Version string
-	Infer   bool
-	Dev     *bool
+	Name          string
+	BaseImage     string
+	Version       string
+	MajMinVersion string
+	Infer         bool
+	Dev           *bool
 }
 
-func (def *Definition) ResolveStageDefinition(name string) (StageDefinition, error) {
+func (def *Definition) ResolveStageDefinition(
+	name string,
+	platformReqsLoader func(*StageDefinition) error,
+) (StageDefinition, error) {
 	var stageDef StageDefinition
 
-	stages := make([]DerivedStage, len(def.Stages)+1)
-	stageNames := make([]string, len(def.Stages)+1)
+	stages := make([]DerivedStage, 0, len(def.Stages)+1)
+	resolvedStages := make([]string, 0, len(def.Stages)+1)
 	nextStage := name
 
 	for nextStage != "" && nextStage != "base" {
-		for _, stageName := range stageNames {
+		for _, stageName := range resolvedStages {
 			if nextStage == stageName {
 				return stageDef, xerrors.Errorf(
 					"there's a cyclic dependency between %q and itself",
@@ -160,29 +184,59 @@ func (def *Definition) ResolveStageDefinition(name string) (StageDefinition, err
 		}
 
 		stages = append(stages, stage)
-		stageNames = append(stageNames, nextStage)
+		resolvedStages = append(resolvedStages, nextStage)
 		nextStage = stage.DeriveFrom
 	}
 
 	stageDef = mergeStages(def, stages...)
 	stageDef.Name = name
 
+	majMinVersion, err := extractMajMinVersion(stageDef.Version)
+	if err != nil {
+		return stageDef, err
+	}
+	stageDef.MajMinVersion = majMinVersion
+
+	addIntegrations(&stageDef)
+
+	if def.Infer {
+		if err := platformReqsLoader(&stageDef); err != nil {
+			return stageDef, xerrors.Errorf("could not load platform-reqs from composer.lock: %v", err)
+		}
+
+		inferExtensions(&stageDef)
+		inferSystemPackages(&stageDef)
+	}
+
 	return stageDef, nil
+}
+
+func extractMajMinVersion(versionString string) (string, error) {
+	ver, err := version.NewVersion(versionString)
+	if err != nil {
+		return "", err
+	}
+
+	segments := ver.Segments()
+	return fmt.Sprintf("%d.%d", segments[0], segments[1]), nil
 }
 
 func mergeStages(base *Definition, stages ...DerivedStage) StageDefinition {
 	dev := false
 	stageDef := StageDefinition{
-		Version: base.Version,
-		Infer:   base.Infer,
-		Stage:   base.BaseStage,
-		Dev:     &dev,
+		BaseImage: base.BaseImage,
+		Version:   base.Version,
+		Infer:     base.Infer,
+		Stage:     base.BaseStage,
+		Dev:       &dev,
 	}
 
 	stages = reverseStages(stages)
 	for _, stage := range stages {
+		// @TODO: merge base configs
 		if stage.FPM != nil {
 			stageDef.FPM = stage.FPM
+			// @TODO: empty fpm config file param
 		}
 		if len(stage.Extensions) > 0 {
 			for name, conf := range stage.Extensions {
@@ -218,6 +272,8 @@ func mergeStages(base *Definition, stages ...DerivedStage) StageDefinition {
 		}
 		if stage.Dev != nil {
 			stageDef.Dev = stage.Dev
+			// @TODO: disable healthcheck for dev stages
+			// @TODO: automatically add apcu and opcache to prod stages
 		}
 	}
 
@@ -238,19 +294,32 @@ func reverseStages(stages []DerivedStage) []DerivedStage {
 	return reversed
 }
 
+// @TODO: detect these paths instead
+var phpExtDirs = map[string]string{
+	"7.0": "/usr/local/lib/php/extensions/no-debug-non-zts-20151012/",
+	"7.1": "/usr/local/lib/php/extensions/no-debug-non-zts-20160303/",
+	"7.2": "/usr/local/lib/php/extensions/no-debug-non-zts-20170718/",
+	"7.3": "/usr/local/lib/php/extensions/no-debug-non-zts-20180731/",
+	"7.4": "/usr/local/lib/php/extensions/no-debug-non-zts-20190902/",
+}
+
 func addIntegrations(def *StageDefinition) {
 	for _, integration := range def.Integrations {
 		switch integration {
 		case "blackfire":
-			// @OTODO: Add blackfire checksum
+			if *def.Dev {
+				continue
+			}
+
+			dest := path.Join(phpExtDirs[def.MajMinVersion], "blackfire.so")
 			def.ExternalFiles = append(def.ExternalFiles, llbutils.ExternalFile{
-				URL:        "https://blackfire.io/api/v1/releases/probe/php/linux/amd64/72",
-				Compressed: true,
-				Pattern:    "blackfire-*.so",
-				// @TODO: get the destination path dynamically
-				Destination: "/usr/local/lib/php/extensions/no-debug-non-zts-20170718/blackfire.so",
+				URL:         "https://blackfire.io/api/v1/releases/probe/php/linux/amd64/72",
+				Compressed:  true,
+				Pattern:     "blackfire-*.so",
+				Destination: dest,
 				Mode:        0644,
 			})
+		// @TODO: check symfony version
 		case "symfony":
 			postInstall := []string{
 				"php -d display_errors=on bin/console cache:warmup --env=prod",
@@ -285,7 +354,7 @@ func inferExtensions(def *StageDefinition) {
 	}
 
 	// Remove extensions installed by default
-	toRemove := []string{"filter", "json", "reflection", "session", "spl", "standard"}
+	toRemove := []string{"filter", "json", "reflection", "session", "sodium", "spl", "standard"}
 	for _, name := range toRemove {
 		if _, ok := def.Extensions[name]; ok {
 			delete(def.Extensions, name)
@@ -299,147 +368,13 @@ func inferSystemPackages(def *StageDefinition) {
 	}
 
 	for ext := range def.Extensions {
-		switch ext {
-		case "bcmath":
-			// No system dependencies
-		case "bz2":
-			systemPackages["libbz2-dev"] = "*"
-		case "calendar":
-			// No system dependencies
-		case "ctype":
-			// No system dependencies
-		case "curl":
-			systemPackages["libcurl4-openssl-dev"] = "*"
-		case "dba":
-			// No system dependencies
-		case "dom":
-			systemPackages["libxml2-dev"] = "*"
-		case "enchant":
-			systemPackages["libenchant-dev"] = "*"
-		case "exif":
-			// No system dependencies
-		case "fileinfo":
-			// No system dependencies
-		case "filter":
-			// This extension is installed by default.
-		case "ftp":
-			systemPackages["libssl-dev"] = "*"
-		case "gd":
-			systemPackages["libpng-dev"] = "*"
-		case "gd.freetype":
-			// @TODO: Need to set PHP_FREETYPE_DIR=/usr during docker-php-ext-install
-			systemPackages["libfreetype6-dev"] = "*"
-		case "gd.jpeg":
-			// @TODO: Need to set PHP_JPEG_DIR=/usr during docker-php-ext-install
-			systemPackages["libjpeg-dev"] = "*"
-		case "gd.webp":
-			// @TODO: Need to set PHP_WEBP_DIR=/usr during docker-php-ext-install
-			systemPackages["libwebp-dev"] = "*"
-		case "gettext":
-			// No system dependencies
-		case "gmp":
-			systemPackages["libgmp-dev"] = "*"
-		case "hash":
-			// No system dependencies
-		case "iconv":
-			// No system dependencies
-		case "imap":
-			// @TODO: needs docker-php-ext-configure --with-imap-ssl --with-kerberos
-			systemPackages["libc-client-dev"] = "*"
-			systemPackages["libkrb5-dev"] = "*"
-		case "interbase":
-			// @TODO
-		case "intl":
-			systemPackages["libicu-dev"] = "*"
-		case "json":
-			// This extension is installed by default.
-		case "ldap":
-			systemPackages["libldap2-dev"] = "*"
-		case "mbstring":
-			// No system dependencies
-		case "mcrypt":
-			systemPackages["libmcrypt-dev"] = "*"
-		case "mysqli":
-			// No system dependencies
-		case "oci8":
-			// @TODO
-		case "odbc":
-			// @TODO
-		case "opcache":
-			// No system dependencies
-		case "pcntl":
-			// No system dependencies
-		case "pdo":
-			// No system dependencies
-		case "pdo_dblib":
-			// @TODO
-		case "pdo_firebird":
-			// @TODO
-		case "pdo_mysql":
-			// No system dependencies
-		case "pdo_oci":
-			// @TODO
-		case "pdo_odbc":
-			// @TODO
-		case "pdo_pgsql":
-			systemPackages["libpq-dev"] = "*"
-		case "pdo_sqlite":
-			systemPackages["libsqlite3-dev"] = "*"
-		case "pgsql":
-			systemPackages["libpq-dev"] = "*"
-		case "phar":
-			systemPackages["libssl-dev"] = "*"
-		case "posix":
-			// No system dependencies
-		case "pspell":
-			systemPackages["libpspell-dev"] = "*"
-		case "readline":
-			systemPackages["libedit-dev"] = "*"
-		case "recode":
-			systemPackages["librecode-dev"] = "*"
-		case "reflection":
-			// This extension is installed by default.
-		case "session":
-			// This extension is installed by default.
-		case "shmop":
-			// No system dependencies
-		case "simplexml":
-			systemPackages["libxml2-dev"] = "*"
-		case "snmp":
-			systemPackages["libsnmp-dev"] = "*"
-		case "soap":
-			systemPackages["libxml2-dev"] = "*"
-		case "sockets":
-			systemPackages["libssl-dev"] = "*"
-			systemPackages["openssl"] = "*"
-		case "spl":
-			// This extension is installed by default.
-		case "standard":
-			// This extension is installed by default.
-		case "sysvmsg":
-			// No system dependencies
-		case "sysvsem":
-			// No system dependencies
-		case "sysvshm":
-			// No system dependencies
-		case "tidy":
-			systemPackages["libtidy-dev"] = "*"
-		case "tokenizer":
-			// No system dependencies
-		case "wddx":
-			systemPackages["libxml2-dev"] = "*"
-		case "xml":
-			systemPackages["libxml2-dev"] = "*"
-		case "xmlreader":
-			// @TODO: this extension seems broken (bad include statement)
-		case "xmlrpc":
-			systemPackages["libxml2-dev"] = "*"
-		case "xmlwriter":
-			systemPackages["libxml2-dev"] = "*"
-		case "xsl":
-			systemPackages["libxslt1-dev"] = "*"
-		case "zip":
-			systemPackages["zlib1g-dev"] = "*"
+		deps, ok := extensionsDeps[ext]
+		if !ok {
+			continue
+		}
+
+		for name, ver := range deps {
+			systemPackages[name] = ver
 		}
 	}
 
