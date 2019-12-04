@@ -5,7 +5,9 @@ import (
 	"testing"
 
 	"github.com/NiR-/webdf/pkg/builddef"
+	"github.com/NiR-/webdf/pkg/mocks"
 	"github.com/go-test/deep"
+	"github.com/golang/mock/gomock"
 )
 
 func TestResolveImageOS(t *testing.T) {
@@ -40,8 +42,15 @@ BUG_REPORT_URL="https://bugs.debian.org/"`),
 		t.Run(tcname, func(t *testing.T) {
 			t.Parallel()
 
+			mockCtrl := gomock.NewController(t)
+			defer mockCtrl.Finish()
+
 			ctx := context.TODO()
-			fetcher := mockFileFetcher{output: tc.file}
+			fetcher := mocks.NewMockFileFetcher(mockCtrl)
+			fetcher.EXPECT().FetchFile(
+				ctx, tc.imageRef, "/etc/os-release",
+			).Return(tc.file, nil)
+
 			res, err := builddef.ResolveImageOS(ctx, fetcher, tc.imageRef)
 			if err != nil {
 				t.Fatalf("Unexpected error: %v", err)
@@ -51,14 +60,4 @@ BUG_REPORT_URL="https://bugs.debian.org/"`),
 			}
 		})
 	}
-}
-
-// @TODO: use gomock instead
-type mockFileFetcher struct {
-	err    error
-	output []byte
-}
-
-func (f mockFileFetcher) FetchFile(ctx context.Context, image, path string) ([]byte, error) {
-	return f.output, f.err
 }

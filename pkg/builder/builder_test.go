@@ -10,18 +10,19 @@ import (
 	"github.com/NiR-/webdf/pkg/builder"
 	"github.com/NiR-/webdf/pkg/image"
 	"github.com/NiR-/webdf/pkg/llbtest"
-	"github.com/NiR-/webdf/pkg/pkgsolver"
+	"github.com/NiR-/webdf/pkg/mocks"
 	"github.com/NiR-/webdf/pkg/registry"
 	"github.com/go-test/deep"
 	"github.com/golang/mock/gomock"
 	"github.com/moby/buildkit/client/llb"
 	"github.com/moby/buildkit/frontend/gateway/client"
 	specs "github.com/opencontainers/image-spec/specs-go/v1"
+	"golang.org/x/xerrors"
 )
 
 type testCase struct {
 	client      client.Client
-	registry    *registry.TypeRegistry
+	registry    *registry.KindRegistry
 	expectedErr error
 	expectedRes *client.Result
 }
@@ -33,9 +34,9 @@ func TestBuilder(t *testing.T) {
 		"fail to resolve build context":                   failToResolveBuildContextTC,
 		"fail to read webdf.yml file":                     failToReadYmlTC,
 		"fail to read webdf.lock file":                    failToReadLockTC,
-		"fail to find a suitable type handler":            failToFindASutableTypeHandlerTC,
-		"fail when type handler fails":                    failWhenTypeHandlerFailsTC,
-		"fail when type builder returns unsolvable state": failWhenTypeHandlerReturnsUnsolvableState,
+		"fail to find a suitable kind handler":            failToFindASutableKindHandlerTC,
+		"fail when kind handler fails":                    failWhenKindHandlerFailsTC,
+		"fail when kind builder returns unsolvable state": failWhenKindHandlerReturnsUnsolvableState,
 	}
 
 	for tcname := range testcases {
@@ -75,7 +76,7 @@ func TestBuilder(t *testing.T) {
 
 var (
 	webdfYml = []byte(`
-type: php
+kind: php
 version: 7.0.29
 
 extensions:
@@ -89,9 +90,6 @@ extensions:
 )
 
 func successfullyBuildDefaultStageAndFileTC(mockCtrl *gomock.Controller) testCase {
-	registry := registry.NewTypeRegistry()
-	registry.Register("php", mockTypeHandler{})
-
 	c := llbtest.NewMockClient(mockCtrl)
 	c.EXPECT().BuildOpts().AnyTimes().Return(client.BuildOpts{
 		SessionID: "sessid",
@@ -118,8 +116,28 @@ func successfullyBuildDefaultStageAndFileTC(mockCtrl *gomock.Controller) testCas
 	}
 	c.EXPECT().Solve(gomock.Any(), gomock.Any()).Return(resImg, nil)
 
-	imgConfig := `{"author":"webdf","architecture":"","os":"","rootfs":{"type":"","diff_ids":null},"config":{}}`
+	ctx := context.TODO()
+	buildOpts := builddef.BuildOpts{
+		File:      "webdf.yml",
+		LockFile:  "webdf.lock",
+		Stage:     "dev",
+		SessionID: "sessid",
+	}
+	state := llb.State{}
+	img := image.Image{
+		Image: specs.Image{
+			Author: "webdf",
+		},
+	}
+	handler := mocks.NewMockKindHandler(mockCtrl)
+	handler.EXPECT().Build(
+		ctx, c, MatchBuildOpts(buildOpts),
+	).Return(state, &img, nil)
 
+	registry := registry.NewKindRegistry()
+	registry.Register("php", handler)
+
+	imgConfig := `{"author":"webdf","architecture":"","os":"","rootfs":{"type":"","diff_ids":null},"config":{}}`
 	return testCase{
 		client:   c,
 		registry: registry,
@@ -134,13 +152,9 @@ func successfullyBuildDefaultStageAndFileTC(mockCtrl *gomock.Controller) testCas
 }
 
 func successfullyBuildCustomStageAndFileTC(mockCtrl *gomock.Controller) testCase {
-	registry := registry.NewTypeRegistry()
-	registry.Register("php", mockTypeHandler{})
-
 	c := llbtest.NewMockClient(mockCtrl)
 	c.EXPECT().BuildOpts().AnyTimes().Return(client.BuildOpts{
 		SessionID: "sessid",
-		// @TODO: use a mock to ensure these parameters are passed to specialized builders
 		Opts: map[string]string{
 			"dockerfilekey": "api.webdf.yml",
 			"target":        "prod",
@@ -167,8 +181,28 @@ func successfullyBuildCustomStageAndFileTC(mockCtrl *gomock.Controller) testCase
 	}
 	c.EXPECT().Solve(gomock.Any(), gomock.Any()).Return(resImg, nil)
 
-	imgConfig := `{"author":"webdf","architecture":"","os":"","rootfs":{"type":"","diff_ids":null},"config":{}}`
+	ctx := context.TODO()
+	buildOpts := builddef.BuildOpts{
+		File:      "api.webdf.yml",
+		LockFile:  "api.webdf.lock",
+		Stage:     "prod",
+		SessionID: "sessid",
+	}
+	state := llb.State{}
+	img := image.Image{
+		Image: specs.Image{
+			Author: "webdf",
+		},
+	}
+	handler := mocks.NewMockKindHandler(mockCtrl)
+	handler.EXPECT().Build(
+		ctx, c, MatchBuildOpts(buildOpts),
+	).Return(state, &img, nil)
 
+	registry := registry.NewKindRegistry()
+	registry.Register("php", handler)
+
+	imgConfig := `{"author":"webdf","architecture":"","os":"","rootfs":{"type":"","diff_ids":null},"config":{}}`
 	return testCase{
 		client:   c,
 		registry: registry,
@@ -194,7 +228,7 @@ func failToResolveBuildContextTC(mockCtrl *gomock.Controller) testCase {
 
 	return testCase{
 		client:      c,
-		registry:    registry.NewTypeRegistry(),
+		registry:    registry.NewKindRegistry(),
 		expectedErr: errors.New("failed to resolve build context: failed to execute solve request: some error"),
 	}
 }
@@ -219,7 +253,7 @@ func failToReadYmlTC(mockCtrl *gomock.Controller) testCase {
 
 	return testCase{
 		client:      c,
-		registry:    registry.NewTypeRegistry(),
+		registry:    registry.NewKindRegistry(),
 		expectedErr: errors.New("could not load webdf.yml from build context: some error"),
 	}
 }
@@ -247,15 +281,12 @@ func failToReadLockTC(mockCtrl *gomock.Controller) testCase {
 
 	return testCase{
 		client:      c,
-		registry:    registry.NewTypeRegistry(),
+		registry:    registry.NewKindRegistry(),
 		expectedErr: errors.New("could not load webdf.lock from build context: some error"),
 	}
 }
 
-func failToFindASutableTypeHandlerTC(mockCtrl *gomock.Controller) testCase {
-	registry := registry.NewTypeRegistry()
-	registry.Register("notphp", mockTypeHandler{})
-
+func failToFindASutableKindHandlerTC(mockCtrl *gomock.Controller) testCase {
 	c := llbtest.NewMockClient(mockCtrl)
 	c.EXPECT().BuildOpts().AnyTimes().Return(client.BuildOpts{
 		SessionID: "sessid",
@@ -274,18 +305,19 @@ func failToFindASutableTypeHandlerTC(mockCtrl *gomock.Controller) testCase {
 
 	readLockReq := client.ReadRequest{Filename: "webdf.lock"}
 	refBuildCtx.EXPECT().ReadFile(gomock.Any(), gomock.Eq(readLockReq)).Return(webdfLock, nil)
+
+	handler := mocks.NewMockKindHandler(mockCtrl)
+	registry := registry.NewKindRegistry()
+	registry.Register("notphp", handler)
 
 	return testCase{
 		client:      c,
 		registry:    registry,
-		expectedErr: errors.New("unknown service type"),
+		expectedErr: errors.New("unknown kind"),
 	}
 }
 
-func failWhenTypeHandlerFailsTC(mockCtrl *gomock.Controller) testCase {
-	registry := registry.NewTypeRegistry()
-	registry.Register("php", mockTypeHandler{failing: true})
-
+func failWhenKindHandlerFailsTC(mockCtrl *gomock.Controller) testCase {
 	c := llbtest.NewMockClient(mockCtrl)
 	c.EXPECT().BuildOpts().AnyTimes().Return(client.BuildOpts{
 		SessionID: "sessid",
@@ -304,6 +336,15 @@ func failWhenTypeHandlerFailsTC(mockCtrl *gomock.Controller) testCase {
 
 	readLockReq := client.ReadRequest{Filename: "webdf.lock"}
 	refBuildCtx.EXPECT().ReadFile(gomock.Any(), gomock.Eq(readLockReq)).Return(webdfLock, nil)
+
+	state := llb.State{}
+	img := image.Image{}
+	err := xerrors.New("some build error")
+	handler := mocks.NewMockKindHandler(mockCtrl)
+	handler.EXPECT().Build(gomock.Any(), c, gomock.Any()).Return(state, &img, err)
+
+	registry := registry.NewKindRegistry()
+	registry.Register("php", handler)
 
 	return testCase{
 		client:      c,
@@ -312,10 +353,7 @@ func failWhenTypeHandlerFailsTC(mockCtrl *gomock.Controller) testCase {
 	}
 }
 
-func failWhenTypeHandlerReturnsUnsolvableState(mockCtrl *gomock.Controller) testCase {
-	registry := registry.NewTypeRegistry()
-	registry.Register("php", mockTypeHandler{})
-
+func failWhenKindHandlerReturnsUnsolvableState(mockCtrl *gomock.Controller) testCase {
 	c := llbtest.NewMockClient(mockCtrl)
 	c.EXPECT().BuildOpts().AnyTimes().Return(client.BuildOpts{
 		SessionID: "sessid",
@@ -337,6 +375,18 @@ func failWhenTypeHandlerReturnsUnsolvableState(mockCtrl *gomock.Controller) test
 
 	c.EXPECT().Solve(gomock.Any(), gomock.Any()).Return(nil, errors.New("some solver error"))
 
+	state := llb.State{}
+	img := image.Image{
+		Image: specs.Image{
+			Author: "webdf",
+		},
+	}
+	handler := mocks.NewMockKindHandler(mockCtrl)
+	handler.EXPECT().Build(gomock.Any(), c, gomock.Any()).Return(state, &img, nil)
+
+	registry := registry.NewKindRegistry()
+	registry.Register("php", handler)
+
 	return testCase{
 		client:      c,
 		registry:    registry,
@@ -344,38 +394,25 @@ func failWhenTypeHandlerReturnsUnsolvableState(mockCtrl *gomock.Controller) test
 	}
 }
 
-type mockTypeHandler struct {
-	failing bool
+func MatchBuildOpts(expected builddef.BuildOpts) buildOptsMatcher {
+	return buildOptsMatcher{expected}
 }
 
-func (h mockTypeHandler) Build(ctx context.Context, c client.Client, opts builddef.BuildOpts) (llb.State, *image.Image, error) {
-	state := llb.State{}
-	img := image.Image{
-		Image: specs.Image{
-			Author: "webdf",
-		},
+type buildOptsMatcher struct {
+	opts builddef.BuildOpts
+}
+
+func (m buildOptsMatcher) Matches(x interface{}) bool {
+	opts, ok := x.(builddef.BuildOpts)
+	if !ok {
+		return false
 	}
-
-	if h.failing {
-		return state, &img, errors.New("some build error")
-	}
-	return state, &img, nil
+	return opts.SessionID == m.opts.SessionID &&
+		opts.File == m.opts.File &&
+		opts.LockFile == m.opts.LockFile &&
+		opts.Stage == m.opts.Stage
 }
 
-func (h mockTypeHandler) DebugLLB(buildOpts builddef.BuildOpts) (llb.State, error) {
-	state := llb.State{}
-	if h.failing {
-		return state, errors.New("some build error")
-	}
-	return state, nil
-}
-
-func (h mockTypeHandler) UpdateLocks(*builddef.BuildDef, pkgsolver.PackageSolver) (builddef.Locks, error) {
-	return mockLocks{}, nil
-}
-
-type mockLocks struct{}
-
-func (l mockLocks) RawLocks() ([]byte, error) {
-	return []byte{}, nil
+func (m buildOptsMatcher) String() string {
+	return "opts.SessionID && opts.File && opts.LockFile && opts.Stage"
 }

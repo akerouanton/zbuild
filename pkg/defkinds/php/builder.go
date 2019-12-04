@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/NiR-/notpecl/backends"
 	"github.com/NiR-/webdf/pkg/builddef"
 	"github.com/NiR-/webdf/pkg/filefetch"
 	"github.com/NiR-/webdf/pkg/image"
@@ -24,18 +25,22 @@ const (
 	webdfLabel = "io.webdf"
 )
 
-// RegisterDefType adds a LLB DAG builder to the given TypeRegistry for php
-// definition type.
-func RegisterDefType(registry *registry.TypeRegistry, fetcher filefetch.FileFetcher) {
+// RegisterKind adds a LLB DAG builder to the given KindRegistry for php
+// definition kind.
+func RegisterKind(registry *registry.KindRegistry, fetcher filefetch.FileFetcher) {
 	registry.Register("php", NewPHPHandler(fetcher))
 }
 
 type PHPHandler struct {
 	fetcher filefetch.FileFetcher
+	NotPecl backends.NotPeclBackend
 }
 
 func NewPHPHandler(fetcher filefetch.FileFetcher) PHPHandler {
-	return PHPHandler{fetcher}
+	return PHPHandler{
+		fetcher: fetcher,
+		NotPecl: backends.NewNotPeclBackend(),
+	}
 }
 
 func (h PHPHandler) Build(
@@ -46,6 +51,8 @@ func (h PHPHandler) Build(
 	opts := toLLBOpts{
 		buildOpts: buildOpts,
 		platformReqsLoader: func(stage *StageDefinition) error {
+			// @TODO: LoadPlatformReqsFromContext and LoadPlatformReqsFromFS by
+			// a single func and use filefetch package to
 			return LoadPlatformReqsFromContext(ctx, c, stage, buildOpts)
 		},
 	}
@@ -80,7 +87,7 @@ func Config2LLB(
 	var state llb.State
 	var img *image.Image
 
-	def, err := NewSpecializedDefinition(opts.buildOpts.Def)
+	def, err := NewKind(opts.buildOpts.Def)
 	if err != nil {
 		return state, img, err
 	}

@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/NiR-/webdf/pkg/builddef"
-	"github.com/NiR-/webdf/pkg/deftypes/php"
+	"github.com/NiR-/webdf/pkg/defkinds/php"
 	"github.com/NiR-/webdf/pkg/mocks"
 	"github.com/NiR-/webdf/pkg/pkgsolver"
 	"github.com/golang/mock/gomock"

@@ -1,5 +1,5 @@
 # syntax=akerouanton/webdf-builder:test9
-type: php
+kind: php
 fpm: true
 version: 7.2
 

@@ -1,4 +1,4 @@
-type: php
+kind: php
 fpm: true
 version: 7.3
 

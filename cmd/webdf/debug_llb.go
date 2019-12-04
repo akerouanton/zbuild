@@ -37,7 +37,7 @@ func newDebugLLBCmd() *cobra.Command {
 }
 
 func HandleDebugLLBCmd(cmd *cobra.Command, args []string) {
-	reg := buildTypeRegistry()
+	reg := buildKindRegistry()
 	b := builder.Builder{Registry: reg}
 
 	state, err := b.Debug(debugFlags.file, debugFlags.stage)

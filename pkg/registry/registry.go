@@ -11,8 +11,8 @@ import (
 	"golang.org/x/xerrors"
 )
 
-// TypeHandler represents a series of methods used to build and update locks for a given type of builddef.
-type TypeHandler interface {
+// KindHandler represents a series of methods used to build and update locks for a given kind of builddef.
+type KindHandler interface {
 	// Build is the method called by the builder package when buildkit daemon
 	// whenever a new build with webdf syntax provider starts. It returns a LLB
 	// DAG representing the build steps and the metadata of the final image, or
@@ -25,36 +25,36 @@ type TypeHandler interface {
 	UpdateLocks(genericDef *builddef.BuildDef, pkgSolver pkgsolver.PackageSolver) (builddef.Locks, error)
 }
 
-// TypeRegistry associates service types with their respective service type handler.
-type TypeRegistry struct {
-	types map[string]TypeHandler
+// KindRegistry associates kinds with their respective handler.
+type KindRegistry struct {
+	kinds map[string]KindHandler
 }
 
-// NewTypeRegistry creates an empty TypeRegistry.
-func NewTypeRegistry() *TypeRegistry {
-	return &TypeRegistry{
-		types: map[string]TypeHandler{},
+// NewKindRegistry creates an empty KindRegistry.
+func NewKindRegistry() *KindRegistry {
+	return &KindRegistry{
+		kinds: map[string]KindHandler{},
 	}
 }
 
-// Register adds a type handler to the registry.
-func (reg *TypeRegistry) Register(name string, handler TypeHandler) {
-	reg.types[name] = handler
+// Register adds a kind handler to the registry.
+func (reg *KindRegistry) Register(name string, handler KindHandler) {
+	reg.kinds[name] = handler
 }
 
-// FindTypeHandler checks if there's a known service type handler for the given
-// service type. It returns the builder if one is found and
-// ErrUnknownDefType otherwise.
-func (reg *TypeRegistry) FindTypeHandler(defType string) (TypeHandler, error) {
-	builder, ok := reg.types[defType]
+// FindHandler checks if there's a known handler for the given
+// kind. It returns the builder if one is found and
+// ErrUnknownDefKind otherwise.
+func (reg *KindRegistry) FindHandler(defKind string) (KindHandler, error) {
+	builder, ok := reg.kinds[defKind]
 	if !ok {
-		// @TODO: put the type in the error message for better UX
-		return nil, ErrUnknownDefType
+		// @TODO: put the kind in the error message for better UX
+		return nil, ErrUnknownDefKind
 	}
 
 	return builder, nil
 }
 
-// ErrUnknownDefType is returned when the decoded service has an unknown
-// type.
-var ErrUnknownDefType = xerrors.New("unknown service type")
+// ErrUnknownDefKind is returned when the decoded service has an unknown
+// kind.
+var ErrUnknownDefKind = xerrors.New("unknown kind")

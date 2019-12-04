@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/NiR-/webdf/pkg/builder"
-	"github.com/NiR-/webdf/pkg/deftypes/php"
+	"github.com/NiR-/webdf/pkg/defkinds/php"
 	"github.com/NiR-/webdf/pkg/filefetch"
 	"github.com/NiR-/webdf/pkg/registry"
 	"github.com/docker/docker/client"
@@ -23,8 +23,8 @@ func main() {
 		Labels: map[string]string{},
 	}
 
-	reg := registry.NewTypeRegistry()
-	php.RegisterDefType(reg, fetcher)
+	reg := registry.NewKindRegistry()
+	php.RegisterKind(reg, fetcher)
 
 	b := builder.Builder{Registry: reg}
 	err = grpcclient.RunFromEnvironment(appcontext.Context(), b.Build)

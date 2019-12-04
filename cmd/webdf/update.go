@@ -28,7 +28,7 @@ func newUpdateCmd() *cobra.Command {
 }
 
 func HandleUpdateCmd(cmd *cobra.Command, args []string) {
-	reg := buildTypeRegistry()
+	reg := buildKindRegistry()
 	pkgSolver, err := initPackageSolver()
 	if err != nil {
 		logrus.Fatal(err)

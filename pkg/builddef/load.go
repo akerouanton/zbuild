@@ -14,7 +14,7 @@ import (
 
 // ConfigYMLNotFound is an error returned when there's no webdf.yml file
 // found in the local build context. This file is looked for when one of
-// the Buildkit syntax provider (e.g. service types like php, node, etc...)
+// the Buildkit syntax provider (e.g. service kinds like php, node, etc...)
 // got invoked.
 var ConfigYMLNotFound = xerrors.New("webdf.yml not found in build context")
 

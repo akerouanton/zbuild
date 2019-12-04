@@ -24,7 +24,7 @@ const (
 )
 
 type Builder struct {
-	Registry  *registry.TypeRegistry
+	Registry  *registry.KindRegistry
 	PkgSolver pkgsolver.PackageSolver
 }
 
@@ -57,13 +57,13 @@ func (b Builder) Build(ctx context.Context, c client.Client) (*client.Result, er
 		return nil, err
 	}
 
-	typeHandler, err := b.Registry.FindTypeHandler(def.Type)
+	handler, err := b.Registry.FindHandler(def.Kind)
 	if err != nil {
 		return nil, err
 	}
 
 	buildOpts.Def = def
-	state, img, err := typeHandler.Build(ctx, c, buildOpts)
+	state, img, err := handler.Build(ctx, c, buildOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -97,13 +97,13 @@ func (b Builder) Debug(file, stage string) (llb.State, error) {
 		return state, err
 	}
 
-	typeHandler, err := b.Registry.FindTypeHandler(def.Type)
+	handler, err := b.Registry.FindHandler(def.Kind)
 	if err != nil {
 		return state, err
 	}
 
 	opts.Def = def
-	state, err = typeHandler.DebugLLB(opts)
+	state, err = handler.DebugLLB(opts)
 	if err != nil {
 		return state, err
 	}
@@ -119,12 +119,12 @@ func (b Builder) UpdateLockFile(file string) error {
 		return err
 	}
 
-	typeHandler, err := b.Registry.FindTypeHandler(def.Type)
+	handler, err := b.Registry.FindHandler(def.Kind)
 	if err != nil {
 		return err
 	}
 
-	locks, err := typeHandler.UpdateLocks(def, b.PkgSolver)
+	locks, err := handler.UpdateLocks(def, b.PkgSolver)
 	if err != nil {
 		return err
 	}

@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/NiR-/webdf/pkg/builddef"
-	"github.com/NiR-/webdf/pkg/deftypes/php"
+	"github.com/NiR-/webdf/pkg/defkinds/php"
 	"github.com/NiR-/webdf/pkg/llbutils"
 	"github.com/go-test/deep"
 	"golang.org/x/xerrors"
@@ -210,7 +210,7 @@ func initFailToParseUnknownPropertiesTC() newDefinitionTC {
 	}
 }
 
-func TestNewSpecializedDefinition(t *testing.T) {
+func TestNewKind(t *testing.T) {
 	if *flagTestdata {
 		return
 	}
@@ -233,7 +233,7 @@ func TestNewSpecializedDefinition(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			def, err := php.NewSpecializedDefinition(generic)
+			def, err := php.NewKind(generic)
 			if tc.expectedErr != nil {
 				if err == nil {
 					t.Fatalf("Expected: %v\nGot: <nil>", tc.expectedErr.Error())
@@ -529,7 +529,7 @@ func TestResolveStageDefinition(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			def, err := php.NewSpecializedDefinition(generic)
+			def, err := php.NewKind(generic)
 			if err != nil {
 				t.Fatal(err)
 			}

@@ -27,7 +27,7 @@ zbuild files with php types have following structure:
 
 ```yaml
 # syntax=akerouanton/webdf-builder:test9
-type: php
+kind: php
 
 version: <string>
 infer: <bool>
@@ -177,7 +177,7 @@ Some of [`<stage>` properties][#stage-properties] are local paths. All these pat
 
 ```yml
 # syntax=akerouanton/webdf-builder:test3
-type: php
+kind: php
 fpm: true
 version: 7.0.29
 

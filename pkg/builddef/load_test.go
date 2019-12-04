@@ -56,7 +56,7 @@ func itLoadsConfigAndLockFilesFromContextTC(
 			LockFile: "webdf.lock",
 		},
 		expectedDef: &builddef.BuildDef{
-			Type: "some-type",
+			Kind: "some-kind",
 			RawConfig: map[string]interface{}{
 				"foo": "bar",
 			},
@@ -100,7 +100,7 @@ func itLoadsConfigFileWithoutLockFromContextTC(
 			LockFile: "webdf.lock",
 		},
 		expectedDef: &builddef.BuildDef{
-			Type: "some-type",
+			Kind: "some-kind",
 			RawConfig: map[string]interface{}{
 				"bar": "baz",
 			},
@@ -199,7 +199,7 @@ func TestLoadFromFS(t *testing.T) {
 			file:     "testdata/config-files/webdf.yml",
 			lockFile: "testdata/config-files/webdf.lock",
 			expectedDef: &builddef.BuildDef{
-				Type: "some-type",
+				Kind: "some-kind",
 				RawConfig: map[string]interface{}{
 					"foo": "bar",
 				},
@@ -212,7 +212,7 @@ baz: plop
 			file:     "testdata/without-lock/webdf.yml",
 			lockFile: "testdata/without-lock/webdf.lock",
 			expectedDef: &builddef.BuildDef{
-				Type: "some-type",
+				Kind: "some-kind",
 				RawConfig: map[string]interface{}{
 					"bar": "baz",
 				},

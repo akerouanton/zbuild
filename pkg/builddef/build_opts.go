@@ -6,7 +6,7 @@ import (
 )
 
 // BuildOpts represents the parameters passed to specialized builders.
-// (see github.com/NiR-/webdf/pkg/deftypes/)
+// (see github.com/NiR-/webdf/pkg/defkinds/)
 // @TODO: add support for contextkey
 type BuildOpts struct {
 	Def       *BuildDef

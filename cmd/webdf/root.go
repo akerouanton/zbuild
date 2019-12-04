@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/NiR-/webdf/pkg/deftypes/php"
+	"github.com/NiR-/webdf/pkg/defkinds/php"
 	"github.com/NiR-/webdf/pkg/filefetch"
 	"github.com/NiR-/webdf/pkg/registry"
 	"github.com/docker/docker/client"
@@ -28,7 +28,7 @@ func main() {
 	}
 }
 
-func buildTypeRegistry() *registry.TypeRegistry {
+func buildKindRegistry() *registry.KindRegistry {
 	docker, err := client.NewClientWithOpts(client.FromEnv)
 	if err != nil {
 		logrus.Fatal(err)
@@ -39,8 +39,8 @@ func buildTypeRegistry() *registry.TypeRegistry {
 		Labels: map[string]string{},
 	}
 
-	reg := registry.NewTypeRegistry()
-	php.RegisterDefType(reg, fetcher)
+	reg := registry.NewKindRegistry()
+	php.RegisterKind(reg, fetcher)
 
 	return reg
 }

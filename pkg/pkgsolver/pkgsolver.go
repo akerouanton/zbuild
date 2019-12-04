@@ -5,7 +5,7 @@ import (
 	"golang.org/x/xerrors"
 )
 
-// PackageSolver is used by specialzed deftypes to lock system packages.
+// PackageSolver is used by specialzed defkinds to lock system packages.
 type PackageSolver interface {
 	// Configure sets the package "suites" that should be used for subsequent
 	// calls to ResolveVersions(). See GuessSolverConfig()

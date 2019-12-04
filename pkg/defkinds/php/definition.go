@@ -51,7 +51,7 @@ func defaultDefinition() Definition {
 	}
 }
 
-func NewSpecializedDefinition(genericDef *builddef.BuildDef) (Definition, error) {
+func NewKind(genericDef *builddef.BuildDef) (Definition, error) {
 	def := defaultDefinition()
 
 	decoderConf := mapstructure.DecoderConfig{

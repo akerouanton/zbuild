@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"github.com/NiR-/webdf/pkg/deftypes/php"
+	"github.com/NiR-/webdf/pkg/defkinds/php"
 	"github.com/NiR-/webdf/pkg/llbtest"
 	"github.com/go-test/deep"
 	"github.com/moby/buildkit/client/llb"

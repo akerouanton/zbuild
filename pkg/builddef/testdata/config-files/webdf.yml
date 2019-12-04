@@ -1,2 +1,2 @@
-type: some-type
+kind: some-kind
 foo: bar

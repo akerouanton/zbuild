@@ -35,7 +35,7 @@ func (h PHPHandler) UpdateLocks(
 	genericDef *builddef.BuildDef,
 	pkgSolver pkgsolver.PackageSolver,
 ) (builddef.Locks, error) {
-	def, err := NewSpecializedDefinition(genericDef)
+	def, err := NewKind(genericDef)
 	if err != nil {
 		return nil, err
 	}

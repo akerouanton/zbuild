@@ -20,7 +20,7 @@ requires the daemon to be running in experimental mode.
 #### 1. Write zbuild files
 
 Instead of writing Dockerfiles, you have to write zbuild files in YAML format.
-As zbuild implements builder backends for multiple types of images, you have to
+As zbuild implements builder backends for multiple kinds of images, you have to
 refer to their specific parameters.
 
 * [php](docs/php-parameters.md)
@@ -31,7 +31,7 @@ as following example. This is used by Buildkit to know which syntax provider to 
 
 ```yaml
 # syntax=akerouanton/webdf-builder:test9
-type: php
+kind: php
 fpm: true
 version: 7.0.29
 

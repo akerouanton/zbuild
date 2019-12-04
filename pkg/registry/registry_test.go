@@ -18,7 +18,7 @@ import (
 
 type registryTC struct {
 	name          string
-	registry      *registry.TypeRegistry
+	registry      *registry.KindRegistry
 	builddef      builddef.BuildDef
 	expectedImage *image.Image
 	expectedErr   error
@@ -36,7 +36,7 @@ func TestRegistry(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			typeHandler, err := tc.registry.FindTypeHandler(tc.builddef.Type)
+			handler, err := tc.registry.FindHandler(tc.builddef.Kind)
 			if tc.expectedErr != nil {
 				if tc.expectedErr.Error() != err.Error() {
 					t.Fatalf("Expected err: %v\nGot: %v\n", tc.expectedErr, err)
@@ -57,7 +57,7 @@ func TestRegistry(t *testing.T) {
 				Stage:     "base",
 			}
 
-			_, img, err := typeHandler.Build(context.TODO(), c, buildOpts)
+			_, img, err := handler.Build(context.TODO(), c, buildOpts)
 			if err != nil {
 				t.Fatalf("Unexpected error: %v\n", err)
 			}
@@ -75,14 +75,14 @@ func successfullyFindBuilderTC() registryTC {
 		},
 	}
 
-	reg := registry.NewTypeRegistry()
-	reg.Register("some-type", mockTypeHandler{&expectedImage})
+	reg := registry.NewKindRegistry()
+	reg.Register("some-kind", mockKindHandler{&expectedImage})
 
 	return registryTC{
 		name:     "it finds the requested service builder",
 		registry: reg,
 		builddef: builddef.BuildDef{
-			Type:      "some-type",
+			Kind:      "some-kind",
 			RawConfig: map[string]interface{}{},
 			RawLocks:  []byte{},
 		},
@@ -92,32 +92,32 @@ func successfullyFindBuilderTC() registryTC {
 
 func failToFindBuilderTC() registryTC {
 	return registryTC{
-		name:     "it fails to find the appropriate builder for the given service type",
-		registry: registry.NewTypeRegistry(),
+		name:     "it fails to find the appropriate builder for the given kind",
+		registry: registry.NewKindRegistry(),
 		builddef: builddef.BuildDef{
-			Type:      "some-type",
+			Kind:      "some-kind",
 			RawConfig: map[string]interface{}{},
 			RawLocks:  []byte{},
 		},
-		expectedErr: registry.ErrUnknownDefType,
+		expectedErr: registry.ErrUnknownDefKind,
 	}
 }
 
-type mockTypeHandler struct {
+type mockKindHandler struct {
 	builtImage *image.Image
 }
 
-func (h mockTypeHandler) Build(ctx context.Context, c client.Client, opts builddef.BuildOpts) (llb.State, *image.Image, error) {
+func (h mockKindHandler) Build(ctx context.Context, c client.Client, opts builddef.BuildOpts) (llb.State, *image.Image, error) {
 	state := llb.State{}
 	return state, h.builtImage, nil
 }
 
-func (h mockTypeHandler) DebugLLB(buildOpts builddef.BuildOpts) (llb.State, error) {
+func (h mockKindHandler) DebugLLB(buildOpts builddef.BuildOpts) (llb.State, error) {
 	state := llb.State{}
 	return state, nil
 }
 
-func (h mockTypeHandler) UpdateLocks(genericDef *builddef.BuildDef, pkgSolver pkgsolver.PackageSolver) (builddef.Locks, error) {
+func (h mockKindHandler) UpdateLocks(genericDef *builddef.BuildDef, pkgSolver pkgsolver.PackageSolver) (builddef.Locks, error) {
 	return mockLocks{}, nil
 }
 

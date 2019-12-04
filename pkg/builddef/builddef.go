@@ -5,9 +5,8 @@ import (
 )
 
 // BuildDef represents a service as declared in webdf config file.
-// @TODO: rename into GenericKind
 type BuildDef struct {
-	Type      string                 `yaml:"type"`
+	Kind      string                 `yaml:"kind"`
 	RawConfig map[string]interface{} `yaml:",inline"`
 	RawLocks  []byte                 `yaml:"-"`
 }
