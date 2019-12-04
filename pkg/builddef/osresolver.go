@@ -2,7 +2,6 @@ package builddef
 
 import (
 	"context"
-	"strconv"
 	"strings"
 
 	"github.com/NiR-/zbuild/pkg/filefetch"
@@ -13,7 +12,7 @@ import (
 type OSRelease struct {
 	Name        string
 	VersionName string
-	VersionID   int
+	VersionID   string
 }
 
 func ParseOSRelease(file []byte) (OSRelease, error) {
@@ -29,11 +28,7 @@ func ParseOSRelease(file []byte) (OSRelease, error) {
 		case "VERSION_CODENAME":
 			res.VersionName = parts[1]
 		case "VERSION_ID":
-			val, err := strconv.Atoi(strings.Trim(parts[1], `"`))
-			if err != nil {
-				return res, err
-			}
-			res.VersionID = val
+			res.VersionID = strings.Trim(parts[1], "\"")
 		}
 	}
 

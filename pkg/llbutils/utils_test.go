@@ -100,10 +100,10 @@ func TestSolveState(t *testing.T) {
 				}
 				return
 			}
-			if diff := deep.Equal(tc.expectedRef, outRef); diff != nil {
+			if diff := deep.Equal(outRef, tc.expectedRef); diff != nil {
 				t.Fatal(diff)
 			}
-			if diff := deep.Equal(tc.expectedRes, outRes); diff != nil {
+			if diff := deep.Equal(outRes, tc.expectedRes); diff != nil {
 				t.Fatal(diff)
 			}
 		})
@@ -278,7 +278,7 @@ func TestStateHelpers(t *testing.T) {
 			}
 
 			testdata := loadTestdata(t, tc.testdata)
-			if diff := deep.Equal(testdata, jsonState); diff != nil {
+			if diff := deep.Equal(jsonState, testdata); diff != nil {
 				t.Fatal(diff)
 			}
 		})

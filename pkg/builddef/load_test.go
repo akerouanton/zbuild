@@ -183,7 +183,7 @@ func TestLoadConfigFromBuildContext(t *testing.T) {
 			if err != nil {
 				t.Fatalf("Unexpected error: %v", err)
 			}
-			if diff := deep.Equal(tc.expectedDef, buildDef); diff != nil {
+			if diff := deep.Equal(buildDef, tc.expectedDef); diff != nil {
 				t.Error(diff)
 			}
 		})
@@ -244,7 +244,7 @@ baz: plop
 			if err != nil {
 				t.Fatalf("Unexpected error: %v", err)
 			}
-			if diff := deep.Equal(tc.expectedDef, out); diff != nil {
+			if diff := deep.Equal(out, tc.expectedDef); diff != nil {
 				t.Error(diff)
 			}
 		})

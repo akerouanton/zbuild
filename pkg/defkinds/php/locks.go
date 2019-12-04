@@ -42,7 +42,6 @@ func (h PHPHandler) UpdateLocks(
 		return nil, err
 	}
 
-	// @TODO: support template in base image param instead
 	// @TODO: resolve sha256 of the base image and lock it
 	baseImageRef := def.BaseImage
 	if baseImageRef == "" {
@@ -57,9 +56,11 @@ func (h PHPHandler) UpdateLocks(
 	ctx := context.TODO()
 	osrelease, err := builddef.ResolveImageOS(ctx, h.fetcher, baseImageRef)
 	if err != nil {
-		return nil, xerrors.Errorf("could not resolve base image os-release: %w", err)
+		return nil, xerrors.Errorf("could not resolve OS details from base image: %w", err)
 	}
-	def.Locks.OS = osrelease
+	if osrelease.Name != "debian" {
+		return nil, xerrors.Errorf("unsupported OS %q: only debian-based base images are supported", osrelease.Name)
+	}
 
 	solverCfg, err := pkgsolver.GuessSolverConfig(osrelease, "amd64")
 	if err != nil {

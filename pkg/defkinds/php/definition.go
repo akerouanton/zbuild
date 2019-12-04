@@ -197,6 +197,20 @@ func (def *Definition) ResolveStageDefinition(
 	}
 	stageDef.MajMinVersion = majMinVersion
 
+	if def.Infer {
+		if *stageDef.FPM == false {
+			stageDef.ConfigFiles.FPMConfigFile = nil
+		}
+		if *stageDef.Dev == true || *stageDef.FPM == false {
+			disabled := false
+			stageDef.Healthcheck = &disabled
+		}
+		if *stageDef.Dev == false {
+			stageDef.Extensions["apcu"] = "*"
+			stageDef.Extensions["opcache"] = "*"
+		}
+	}
+
 	addIntegrations(&stageDef)
 
 	if def.Infer {
@@ -236,7 +250,6 @@ func mergeStages(base *Definition, stages ...DerivedStage) StageDefinition {
 		// @TODO: merge base configs
 		if stage.FPM != nil {
 			stageDef.FPM = stage.FPM
-			// @TODO: empty fpm config file param
 		}
 		if len(stage.Extensions) > 0 {
 			for name, conf := range stage.Extensions {
@@ -272,8 +285,6 @@ func mergeStages(base *Definition, stages ...DerivedStage) StageDefinition {
 		}
 		if stage.Dev != nil {
 			stageDef.Dev = stage.Dev
-			// @TODO: disable healthcheck for dev stages
-			// @TODO: automatically add apcu and opcache to prod stages
 		}
 	}
 

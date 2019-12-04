@@ -19,8 +19,6 @@ type BaseConfig struct {
 
 type BaseLocks struct {
 	BaseImage string `yaml:"base_image"`
-	// @TODO: is this really useful during builds? should be removed?
-	OS OSRelease `yaml:"os"`
 }
 
 // BaseStageLocks exposes fields shared by all/most service locks.

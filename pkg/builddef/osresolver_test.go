@@ -31,7 +31,7 @@ BUG_REPORT_URL="https://bugs.debian.org/"`),
 			expected: builddef.OSRelease{
 				Name:        "debian",
 				VersionName: "stretch",
-				VersionID:   9,
+				VersionID:   "9",
 			},
 		},
 	}
@@ -55,7 +55,7 @@ BUG_REPORT_URL="https://bugs.debian.org/"`),
 			if err != nil {
 				t.Fatalf("Unexpected error: %v", err)
 			}
-			if diff := deep.Equal(tc.expected, res); diff != nil {
+			if diff := deep.Equal(res, tc.expected); diff != nil {
 				t.Fatal(diff)
 			}
 		})

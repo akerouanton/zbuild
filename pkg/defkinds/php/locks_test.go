@@ -11,6 +11,7 @@ import (
 	"github.com/NiR-/zbuild/pkg/mocks"
 	"github.com/NiR-/zbuild/pkg/pkgsolver"
 	"github.com/golang/mock/gomock"
+	"golang.org/x/xerrors"
 	"gopkg.in/yaml.v2"
 )
 
@@ -86,9 +87,36 @@ func initSuccessfullyUpdateLocksTC(t *testing.T, mockCtrl *gomock.Controller) up
 	}
 }
 
+var rawAlpineOSRelease = []byte(`NAME="Alpine Linux"
+ID=alpine
+VERSION_ID=3.10.3
+PRETTY_NAME="Alpine Linux v3.10"
+HOME_URL="https://alpinelinux.org/"
+BUG_REPORT_URL="https://bugs.alpinelinux.org/"
+`)
+
+func failToUpdateLocksForAlpineBaseImageTC(t *testing.T, mockCtrl *gomock.Controller) updateLocksTC {
+	ctx := context.TODO()
+
+	fetcher := mocks.NewMockFileFetcher(mockCtrl)
+	fetcher.EXPECT().FetchFile(
+		ctx,
+		"docker.io/library/php:7.3-fpm-buster",
+		"/etc/os-release",
+	).Return(rawAlpineOSRelease, nil)
+
+	return updateLocksTC{
+		deffile:     "testdata/locks/without-stages.yml",
+		handler:     php.NewPHPHandler(fetcher),
+		pkgSolver:   mocks.NewMockPackageSolver(mockCtrl),
+		expectedErr: xerrors.New("unsupported OS \"alpine\": only debian-based base images are supported"),
+	}
+}
+
 func TestUpdateLocks(t *testing.T) {
 	testcases := map[string]func(*testing.T, *gomock.Controller) updateLocksTC{
-		"successfully update locks": initSuccessfullyUpdateLocksTC,
+		"successfully update locks":                        initSuccessfullyUpdateLocksTC,
+		"fail to update locks for alpine based base image": failToUpdateLocksForAlpineBaseImageTC,
 	}
 
 	for tcname := range testcases {

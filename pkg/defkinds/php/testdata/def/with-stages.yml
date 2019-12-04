@@ -2,7 +2,6 @@
 kind: php
 fpm: true
 version: 7.0.29
-infer: false
 
 extensions:
   intl: "*"
@@ -32,22 +31,16 @@ stages:
     dev: true
     config_files:
       php.ini: 'docker/app/php.dev.ini'
-    healthcheck: false
 
   prod:
     config_files:
       php.ini: 'docker/app/php.prod.ini'
-    extensions:
-      apcu: "*"
-      opcache: "*"
     healthcheck: true
     integrations:
       - blackfire
 
   worker:
     derive_from: prod
-    config_files:
-      fpm.conf: ''
     composer_dump:
       apcu: true
     source_dirs:
@@ -58,5 +51,4 @@ stages:
       - 'data/imports'
     post_install:
       - echo some other command
-    healthcheck: false
     fpm: false

@@ -104,22 +104,18 @@ func initSuccessfullyParseRawDefinitionWithoutStagesTC() newDefinitionTC {
 }
 
 func initSuccessfullyParseRawDefinitionWithStagesTC() newDefinitionTC {
-	file := "testdata/def/with-stages.yml"
-	lockFile := "testdata/def/with-stages.lock"
-
-	isFPM := true
 	iniDevFile := "docker/app/php.dev.ini"
 	iniProdFile := "docker/app/php.prod.ini"
 	fpmConfigFile := "docker/app/fpm.conf"
-	healthcheckEnable := true
-	healthcheckDisable := false
+	healthcheckEnabled := true
+	healthcheckDisabled := false
 	isDev := true
-	emptyFPMConfigFile := ""
+	isFPM := true
 	isNotFPM := false
 
 	return newDefinitionTC{
-		file:     file,
-		lockFile: lockFile,
+		file:     "testdata/def/with-stages.yml",
+		lockFile: "",
 		expected: php.Definition{
 			BaseStage: php.Stage{
 				BaseConfig: builddef.BaseConfig{
@@ -145,11 +141,11 @@ func initSuccessfullyParseRawDefinitionWithStagesTC() newDefinitionTC {
 				},
 				Integrations: []string{"symfony"},
 				StatefulDirs: []string{"public/uploads"},
-				Healthcheck:  &healthcheckDisable,
+				Healthcheck:  &healthcheckDisabled,
 				PostInstall:  []string{"echo some command"},
 			},
 			Version: "7.0.29",
-			Infer:   false,
+			Infer:   true,
 			Stages: map[string]php.DerivedStage{
 				"dev": {
 					DeriveFrom: "",
@@ -158,7 +154,6 @@ func initSuccessfullyParseRawDefinitionWithStagesTC() newDefinitionTC {
 						ConfigFiles: php.PHPConfigFiles{
 							IniFile: &iniDevFile,
 						},
-						Healthcheck: &healthcheckDisable,
 					},
 				},
 				"prod": {
@@ -167,20 +162,14 @@ func initSuccessfullyParseRawDefinitionWithStagesTC() newDefinitionTC {
 						ConfigFiles: php.PHPConfigFiles{
 							IniFile: &iniProdFile,
 						},
-						Extensions: map[string]string{
-							"apcu":    "*",
-							"opcache": "*",
-						},
-						Healthcheck:  &healthcheckEnable,
+						Healthcheck:  &healthcheckEnabled,
 						Integrations: []string{"blackfire"},
 					},
 				},
 				"worker": {
 					DeriveFrom: "prod",
 					Stage: php.Stage{
-						ConfigFiles: php.PHPConfigFiles{
-							FPMConfigFile: &emptyFPMConfigFile,
-						},
+						ConfigFiles: php.PHPConfigFiles{},
 						ComposerDumpFlags: &php.ComposerDumpFlags{
 							APCU:                  true,
 							ClassmapAuthoritative: false,
@@ -189,7 +178,6 @@ func initSuccessfullyParseRawDefinitionWithStagesTC() newDefinitionTC {
 						ExtraScripts: []string{"bin/worker"},
 						StatefulDirs: []string{"data/imports"},
 						PostInstall:  []string{"echo some other command"},
-						Healthcheck:  &healthcheckDisable,
 						FPM:          &isNotFPM,
 					},
 				},
@@ -244,7 +232,7 @@ func TestNewKind(t *testing.T) {
 				t.Fatalf("Unexpected error: %v", err)
 			}
 
-			if diff := deep.Equal(tc.expected, def); diff != nil {
+			if diff := deep.Equal(def, tc.expected); diff != nil {
 				t.Fatal(diff)
 			}
 		})
@@ -265,7 +253,7 @@ func initSuccessfullyResolveDefaultDevStageTC() resolveStageTC {
 
 	isFPM := true
 	isDev := true
-	healthcheckEnable := true
+	healthcheckEnabled := true
 	phpIni := "docker/app/php.ini"
 	fpmConfigFile := "docker/app/fpm.conf"
 
@@ -306,7 +294,7 @@ func initSuccessfullyResolveDefaultDevStageTC() resolveStageTC {
 					ClassmapAuthoritative: true,
 				},
 				Integrations: []string{"blackfire"},
-				Healthcheck:  &healthcheckEnable,
+				Healthcheck:  &healthcheckEnabled,
 				PostInstall:  []string{"some more commands", "another one"},
 			},
 			Version:       "7.0.29",
@@ -318,19 +306,14 @@ func initSuccessfullyResolveDefaultDevStageTC() resolveStageTC {
 }
 
 func initSuccessfullyResolveWorkerStageTC() resolveStageTC {
-	file := "testdata/def/with-stages.yml"
-	lockFile := "testdata/def/with-stages.lock"
-
 	isNotFPM := false
 	isNotDev := false
-	healthcheckDisable := false
+	healthcheckDisabled := false
 	phpIni := "docker/app/php.prod.ini"
-	fpmConfigFile := ""
 
-	// @TODO: test all the merge
 	return resolveStageTC{
-		file:     file,
-		lockFile: lockFile,
+		file:     "testdata/def/with-stages.yml",
+		lockFile: "",
 		stage:    "worker",
 		expected: php.StageDefinition{
 			Name: "worker",
@@ -345,19 +328,29 @@ func initSuccessfullyResolveWorkerStageTC() resolveStageTC {
 							Mode:        0644,
 						},
 					},
-					SystemPackages: map[string]string{},
+					SystemPackages: map[string]string{
+						"zlib1g-dev":   "*",
+						"libicu-dev":   "*",
+						"libxml2-dev":  "*",
+						"unzip":        "*",
+						"git":          "*",
+						"libpcre3-dev": "*",
+						"libssl-dev":   "*",
+						"openssl":      "*",
+					},
 				},
 				FPM: &isNotFPM,
 				Extensions: map[string]string{
 					"intl":      "*",
 					"pdo_mysql": "*",
 					"soap":      "*",
+					"sockets":   "*",
 					"apcu":      "*",
 					"opcache":   "*",
+					"zip":       "*",
 				},
 				ConfigFiles: php.PHPConfigFiles{
-					IniFile:       &phpIni,
-					FPMConfigFile: &fpmConfigFile,
+					IniFile: &phpIni,
 				},
 				ComposerDumpFlags: &php.ComposerDumpFlags{
 					APCU:                  true,
@@ -375,7 +368,7 @@ func initSuccessfullyResolveWorkerStageTC() resolveStageTC {
 					"public/uploads",
 					"data/imports",
 				},
-				Healthcheck: &healthcheckDisable,
+				Healthcheck: &healthcheckDisabled,
 				PostInstall: []string{
 					"php -d display_errors=on bin/console cache:warmup --env=prod",
 					"echo some command",
@@ -384,7 +377,7 @@ func initSuccessfullyResolveWorkerStageTC() resolveStageTC {
 			},
 			Version:       "7.0.29",
 			MajMinVersion: "7.0",
-			Infer:         false,
+			Infer:         true,
 			Dev:           &isNotDev,
 		},
 	}
@@ -547,7 +540,7 @@ func TestResolveStageDefinition(t *testing.T) {
 			if err != nil {
 				t.Fatalf("Unexpected error: %v", err)
 			}
-			if diff := deep.Equal(tc.expected, stageDef); diff != nil {
+			if diff := deep.Equal(stageDef, tc.expected); diff != nil {
 				t.Fatal(diff)
 			}
 		})

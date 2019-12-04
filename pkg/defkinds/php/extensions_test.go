@@ -63,7 +63,7 @@ func TestInstallExtensions(t *testing.T) {
 			}
 
 			testdata := loadTestdata(t, tc.testdata)
-			if diff := deep.Equal(testdata, jsonState); diff != nil {
+			if diff := deep.Equal(jsonState, testdata); diff != nil {
 				t.Fatal(diff)
 			}
 		})

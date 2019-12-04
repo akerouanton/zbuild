@@ -63,7 +63,7 @@ func TestBuilder(t *testing.T) {
 			if outErr != nil {
 				t.Fatalf("Unexpected error: %v", outErr)
 			}
-			if diff := deep.Equal(tc.expectedRes, outRes); diff != nil {
+			if diff := deep.Equal(outRes, tc.expectedRes); diff != nil {
 				t.Logf("expected metadata: %s", tc.expectedRes.Metadata)
 				t.Logf("actual metadata: %s", outRes.Metadata)
 				t.Fatal(diff)
