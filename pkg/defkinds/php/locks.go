@@ -2,7 +2,9 @@ package php
 
 import (
 	"context"
+	"strings"
 
+	"github.com/NiR-/notpecl/extindex"
 	"github.com/NiR-/webdf/pkg/builddef"
 	"github.com/NiR-/webdf/pkg/pkgsolver"
 	"golang.org/x/xerrors"
@@ -68,12 +70,12 @@ func (h PHPHandler) UpdateLocks(
 		return nil, xerrors.Errorf("could not update stage locks: %v", err)
 	}
 
-	stagesLocks, err := updateStagesLocks(def, pkgSolver)
+	stagesLocks, err := h.updateStagesLocks(def, pkgSolver)
 	def.Locks.Stages = stagesLocks
 	return def.Locks, err
 }
 
-func updateStagesLocks(
+func (h PHPHandler) updateStagesLocks(
 	def Definition,
 	pkgSolver pkgsolver.PackageSolver,
 ) (map[string]StageLocks, error) {
@@ -96,7 +98,7 @@ func updateStagesLocks(
 			return nil, xerrors.Errorf("could not resolve systems package versions: %v", err)
 		}
 
-		stageLocks.Extensions, err = findExtensionVersions(stage.Extensions)
+		stageLocks.Extensions, err = h.lockExtensions(stage.Extensions)
 		if err != nil {
 			return nil, xerrors.Errorf("could not resolve php extension versions: %v", err)
 		}
@@ -107,7 +109,29 @@ func updateStagesLocks(
 	return locks, nil
 }
 
-// @TODO: improve
-func findExtensionVersions(extensions map[string]string) (map[string]string, error) {
-	return extensions, nil
+func (h PHPHandler) lockExtensions(extensions map[string]string) (map[string]string, error) {
+	resolved := map[string]string{}
+	ctx := context.Background()
+
+	for extName, constraint := range extensions {
+		if isCoreExtension(extName) {
+			resolved[extName] = constraint
+			continue
+		}
+
+		segments := strings.SplitN(constraint, "@", 2)
+		stability := extindex.Stable
+		if len(segments) == 2 {
+			stability = extindex.StabilityFromString(segments[1])
+		}
+
+		extVer, err := h.NotPecl.ResolveConstraint(ctx, extName, segments[0], stability)
+		if err != nil {
+			return resolved, err
+		}
+
+		resolved[extName] = extVer
+	}
+
+	return resolved, nil
 }

@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"testing"
 
+	"github.com/NiR-/notpecl/extindex"
 	"github.com/NiR-/webdf/pkg/builddef"
 	"github.com/NiR-/webdf/pkg/defkinds/php"
 	"github.com/NiR-/webdf/pkg/mocks"
@@ -65,9 +66,21 @@ func initSuccessfullyUpdateLocksTC(t *testing.T, mockCtrl *gomock.Controller) up
 		"zlib1g-dev":   "zlib1g-dev-version",
 	}, nil)
 
+	h := php.NewPHPHandler(fetcher)
+	h.NotPecl = h.NotPecl.WithExtensionIndex(extindex.ExtIndex{
+		"redis": extindex.ExtVersions{
+			"5.1.1": extindex.Beta,
+			"5.1.0": extindex.Stable,
+		},
+		"yaml": extindex.ExtVersions{
+			"1.0.0": extindex.Stable,
+			"1.1.0": extindex.Beta,
+		},
+	})
+
 	return updateLocksTC{
 		deffile:   "testdata/locks/without-stages.yml",
-		handler:   php.NewPHPHandler(fetcher),
+		handler:   h,
 		pkgSolver: pkgSolver,
 		expected:  "testdata/locks/without-stages.lock",
 	}
