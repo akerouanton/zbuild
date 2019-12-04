@@ -1,7 +1,7 @@
 package pkgsolver
 
 import (
-	"github.com/NiR-/webdf/pkg/builddef"
+	"github.com/NiR-/zbuild/pkg/builddef"
 	"golang.org/x/xerrors"
 )
 
@@ -45,7 +45,7 @@ func GuessSolverConfig(osrelease builddef.OSRelease, arch string) (SolverConfig,
 	switch solverType {
 	case Dpkg:
 		// @TODO: load these suites from the base image instead of guessing them based on version codename
-		// because of that, webdf only supports debian for now
+		// because of that, zbuild only supports debian for now
 		dpkgSuites = [][]string{
 			{"http://deb.debian.org/debian", osrelease.VersionName},
 			{"http://deb.debian.org/debian", osrelease.VersionName + "-updates"},

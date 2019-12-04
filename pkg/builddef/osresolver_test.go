@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/NiR-/webdf/pkg/builddef"
-	"github.com/NiR-/webdf/pkg/mocks"
+	"github.com/NiR-/zbuild/pkg/builddef"
+	"github.com/NiR-/zbuild/pkg/mocks"
 	"github.com/go-test/deep"
 	"github.com/golang/mock/gomock"
 )

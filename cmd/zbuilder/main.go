@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/NiR-/webdf/pkg/builder"
-	"github.com/NiR-/webdf/pkg/defkinds/php"
-	"github.com/NiR-/webdf/pkg/filefetch"
-	"github.com/NiR-/webdf/pkg/registry"
+	"github.com/NiR-/zbuild/pkg/builder"
+	"github.com/NiR-/zbuild/pkg/defkinds/php"
+	"github.com/NiR-/zbuild/pkg/filefetch"
+	"github.com/NiR-/zbuild/pkg/registry"
 	"github.com/docker/docker/client"
 	"github.com/moby/buildkit/frontend/gateway/grpcclient"
 	"github.com/moby/buildkit/util/appcontext"

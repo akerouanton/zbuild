@@ -8,11 +8,11 @@ import (
 	"time"
 
 	"github.com/NiR-/notpecl/backends"
-	"github.com/NiR-/webdf/pkg/builddef"
-	"github.com/NiR-/webdf/pkg/filefetch"
-	"github.com/NiR-/webdf/pkg/image"
-	"github.com/NiR-/webdf/pkg/llbutils"
-	"github.com/NiR-/webdf/pkg/registry"
+	"github.com/NiR-/zbuild/pkg/builddef"
+	"github.com/NiR-/zbuild/pkg/filefetch"
+	"github.com/NiR-/zbuild/pkg/image"
+	"github.com/NiR-/zbuild/pkg/llbutils"
+	"github.com/NiR-/zbuild/pkg/registry"
 	"github.com/moby/buildkit/client/llb"
 	"github.com/moby/buildkit/frontend/gateway/client"
 	"golang.org/x/xerrors"
@@ -22,7 +22,7 @@ const (
 	defaultBaseImage        = "docker.io/library/php"
 	defaultComposerImageTag = "docker.io/library/composer:1.9.0"
 
-	webdfLabel = "io.webdf"
+	zbuildLabel = "io.zbuild"
 )
 
 // RegisterKind adds a LLB DAG builder to the given KindRegistry for php
@@ -113,7 +113,7 @@ func Config2LLB(
 	}
 
 	img = image.CloneMeta(baseImg)
-	img.Config.Labels[webdfLabel] = "true"
+	img.Config.Labels[zbuildLabel] = "true"
 
 	composer := llbutils.ImageSource(defaultComposerImageTag, false)
 	state = llbutils.Copy(composer, "/usr/bin/composer", state, "/usr/bin/composer", "")

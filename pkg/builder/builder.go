@@ -6,10 +6,10 @@ import (
 	"errors"
 	"io/ioutil"
 
-	"github.com/NiR-/webdf/pkg/builddef"
-	"github.com/NiR-/webdf/pkg/llbutils"
-	"github.com/NiR-/webdf/pkg/pkgsolver"
-	"github.com/NiR-/webdf/pkg/registry"
+	"github.com/NiR-/zbuild/pkg/builddef"
+	"github.com/NiR-/zbuild/pkg/llbutils"
+	"github.com/NiR-/zbuild/pkg/pkgsolver"
+	"github.com/NiR-/zbuild/pkg/registry"
 	"github.com/moby/buildkit/client/llb"
 	"github.com/moby/buildkit/exporter/containerimage/exptypes"
 	"github.com/moby/buildkit/frontend/gateway/client"
@@ -37,7 +37,7 @@ func buildOptsFromBuildkitOpts(c client.Client) builddef.BuildOpts {
 	sessionID := c.BuildOpts().SessionID
 	opts := c.BuildOpts().Opts
 
-	file := "webdf.yml"
+	file := "zbuild.yml"
 	if v, ok := opts[keyNameDockerfile]; ok {
 		file = v
 	}

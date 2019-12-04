@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/NiR-/webdf/pkg/builddef"
-	"github.com/NiR-/webdf/pkg/llbtest"
+	"github.com/NiR-/zbuild/pkg/builddef"
+	"github.com/NiR-/zbuild/pkg/llbtest"
 	"github.com/go-test/deep"
 	"github.com/golang/mock/gomock"
 	"github.com/moby/buildkit/frontend/gateway/client"
@@ -37,23 +37,23 @@ func itLoadsConfigAndLockFilesFromContextTC(
 	}
 	c.EXPECT().Solve(ctx, gomock.Any()).Return(solvedContext, nil)
 
-	ymlPath := filepath.Join(basedir, "webdf.yml")
+	ymlPath := filepath.Join(basedir, "zbuild.yml")
 	ymlContent := readTestdata(t, ymlPath)
 	contextRef.EXPECT().ReadFile(ctx, client.ReadRequest{
-		Filename: "webdf.yml",
+		Filename: "zbuild.yml",
 	}).Return(ymlContent, nil)
 
-	lockPath := filepath.Join(basedir, "webdf.lock")
+	lockPath := filepath.Join(basedir, "zbuild.lock")
 	lockContent := readTestdata(t, lockPath)
 	contextRef.EXPECT().ReadFile(ctx, client.ReadRequest{
-		Filename: "webdf.lock",
+		Filename: "zbuild.lock",
 	}).Return(lockContent, nil)
 
 	return loadFromContextTC{
 		client: c,
 		buildOpts: builddef.BuildOpts{
-			File:     "webdf.yml",
-			LockFile: "webdf.lock",
+			File:     "zbuild.yml",
+			LockFile: "zbuild.lock",
 		},
 		expectedDef: &builddef.BuildDef{
 			Kind: "some-kind",
@@ -83,21 +83,21 @@ func itLoadsConfigFileWithoutLockFromContextTC(
 	}
 	c.EXPECT().Solve(ctx, gomock.Any()).Return(solvedContext, nil)
 
-	ymlPath := filepath.Join(basedir, "webdf.yml")
+	ymlPath := filepath.Join(basedir, "zbuild.yml")
 	ymlContent := readTestdata(t, ymlPath)
 	contextRef.EXPECT().ReadFile(ctx, client.ReadRequest{
-		Filename: "webdf.yml",
+		Filename: "zbuild.yml",
 	}).Return(ymlContent, nil)
 
 	contextRef.EXPECT().ReadFile(ctx, client.ReadRequest{
-		Filename: "webdf.lock",
+		Filename: "zbuild.lock",
 	}).Return([]byte{}, errors.New("file does not exist"))
 
 	return loadFromContextTC{
 		client: c,
 		buildOpts: builddef.BuildOpts{
-			File:     "webdf.yml",
-			LockFile: "webdf.lock",
+			File:     "zbuild.yml",
+			LockFile: "zbuild.lock",
 		},
 		expectedDef: &builddef.BuildDef{
 			Kind: "some-kind",
@@ -125,14 +125,14 @@ func itFailsToLoadConfigFilesWhenTheresNoYmlFileFromContextTC(
 	c.EXPECT().Solve(ctx, gomock.Any()).Return(solvedContext, nil)
 
 	contextRef.EXPECT().ReadFile(ctx, client.ReadRequest{
-		Filename: "webdf.yml",
+		Filename: "zbuild.yml",
 	}).Return([]byte{}, errors.New("file does not exist"))
 
 	return loadFromContextTC{
 		client: c,
 		buildOpts: builddef.BuildOpts{
-			File:     "webdf.yml",
-			LockFile: "webdf.lock",
+			File:     "zbuild.yml",
+			LockFile: "zbuild.lock",
 		},
 		expectedErr: builddef.ConfigYMLNotFound,
 	}
@@ -196,8 +196,8 @@ func TestLoadFromFS(t *testing.T) {
 		expectedErr error
 	}{
 		"it loads config and lock files": {
-			file:     "testdata/config-files/webdf.yml",
-			lockFile: "testdata/config-files/webdf.lock",
+			file:     "testdata/config-files/zbuild.yml",
+			lockFile: "testdata/config-files/zbuild.lock",
 			expectedDef: &builddef.BuildDef{
 				Kind: "some-kind",
 				RawConfig: map[string]interface{}{
@@ -209,8 +209,8 @@ baz: plop
 			},
 		},
 		"it loads config file without lock": {
-			file:     "testdata/without-lock/webdf.yml",
-			lockFile: "testdata/without-lock/webdf.lock",
+			file:     "testdata/without-lock/zbuild.yml",
+			lockFile: "testdata/without-lock/zbuild.lock",
 			expectedDef: &builddef.BuildDef{
 				Kind: "some-kind",
 				RawConfig: map[string]interface{}{
@@ -219,9 +219,9 @@ baz: plop
 			},
 		},
 		"it fails to load config files when there's no yml file": {
-			file:        "testdata/does-not-exist/webdf.yml",
-			lockFile:    "testdata/does-not-exist/webdf.lock",
-			expectedErr: errors.New("webdf.yml not found in build context"),
+			file:        "testdata/does-not-exist/zbuild.yml",
+			lockFile:    "testdata/does-not-exist/zbuild.lock",
+			expectedErr: errors.New("zbuild.yml not found in build context"),
 		},
 	}
 

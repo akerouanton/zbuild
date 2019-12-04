@@ -1,4 +1,4 @@
-module github.com/NiR-/webdf
+module github.com/NiR-/zbuild
 
 go 1.12
 

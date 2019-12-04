@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/NiR-/webdf/pkg/builder"
+	"github.com/NiR-/zbuild/pkg/builder"
 	"github.com/moby/buildkit/client/llb"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -19,7 +19,7 @@ const debugDescription = `Output LLB DAG in binary format.
 This command alone is not really useful. To have a readable output, you have to
 pipe its output to ` + "`buildctl debug dump-llb`" + `:
 
-	webdf debug-llb | buildctl debug dump-llb | jq -C . | less -R
+	zbuild debug-llb | buildctl debug dump-llb | jq -C . | less -R
 `
 
 func newDebugLLBCmd() *cobra.Command {
@@ -30,7 +30,7 @@ func newDebugLLBCmd() *cobra.Command {
 		Long:   debugDescription,
 		Run:    HandleDebugLLBCmd,
 	}
-	cmd.Flags().StringVarP(&debugFlags.file, "file", "f", "webdf.yml", "Path to the webdf.yml file to debug")
+	cmd.Flags().StringVarP(&debugFlags.file, "file", "f", "zbuild.yml", "Path to the zbuild.yml file to debug")
 	cmd.Flags().StringVar(&debugFlags.stage, "target", "dev", "Name of the stage to debug")
 
 	return cmd

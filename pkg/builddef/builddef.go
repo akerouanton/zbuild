@@ -1,10 +1,10 @@
 package builddef
 
 import (
-	"github.com/NiR-/webdf/pkg/llbutils"
+	"github.com/NiR-/zbuild/pkg/llbutils"
 )
 
-// BuildDef represents a service as declared in webdf config file.
+// BuildDef represents a service as declared in zbuild config file.
 type BuildDef struct {
 	Kind      string                 `yaml:"kind"`
 	RawConfig map[string]interface{} `yaml:",inline"`

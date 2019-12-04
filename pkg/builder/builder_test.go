@@ -6,12 +6,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/NiR-/webdf/pkg/builddef"
-	"github.com/NiR-/webdf/pkg/builder"
-	"github.com/NiR-/webdf/pkg/image"
-	"github.com/NiR-/webdf/pkg/llbtest"
-	"github.com/NiR-/webdf/pkg/mocks"
-	"github.com/NiR-/webdf/pkg/registry"
+	"github.com/NiR-/zbuild/pkg/builddef"
+	"github.com/NiR-/zbuild/pkg/builder"
+	"github.com/NiR-/zbuild/pkg/image"
+	"github.com/NiR-/zbuild/pkg/llbtest"
+	"github.com/NiR-/zbuild/pkg/mocks"
+	"github.com/NiR-/zbuild/pkg/registry"
 	"github.com/go-test/deep"
 	"github.com/golang/mock/gomock"
 	"github.com/moby/buildkit/client/llb"
@@ -32,8 +32,8 @@ func TestBuilder(t *testing.T) {
 		"successfully build default stage and file":       successfullyBuildDefaultStageAndFileTC,
 		"successfully build custom stage and file":        successfullyBuildCustomStageAndFileTC,
 		"fail to resolve build context":                   failToResolveBuildContextTC,
-		"fail to read webdf.yml file":                     failToReadYmlTC,
-		"fail to read webdf.lock file":                    failToReadLockTC,
+		"fail to read zbuild.yml file":                     failToReadYmlTC,
+		"fail to read zbuild.lock file":                    failToReadLockTC,
 		"fail to find a suitable kind handler":            failToFindASutableKindHandlerTC,
 		"fail when kind handler fails":                    failWhenKindHandlerFailsTC,
 		"fail when kind builder returns unsolvable state": failWhenKindHandlerReturnsUnsolvableState,
@@ -75,14 +75,14 @@ func TestBuilder(t *testing.T) {
 }
 
 var (
-	webdfYml = []byte(`
+	zbuildYml = []byte(`
 kind: php
 version: 7.0.29
 
 extensions:
   intl: "*"`)
 
-	webdfLock = []byte(`
+	zbuildLock = []byte(`
 system_packages:
   libicu-dev: "52.1-8+deb8u7"
 extensions:
@@ -103,11 +103,11 @@ func successfullyBuildDefaultStageAndFileTC(mockCtrl *gomock.Controller) testCas
 	}
 	c.EXPECT().Solve(gomock.Any(), gomock.Any()).Return(resBuildCtx, nil)
 
-	readYmlReq := client.ReadRequest{Filename: "webdf.yml"}
-	refBuildCtx.EXPECT().ReadFile(gomock.Any(), gomock.Eq(readYmlReq)).Return(webdfYml, nil)
+	readYmlReq := client.ReadRequest{Filename: "zbuild.yml"}
+	refBuildCtx.EXPECT().ReadFile(gomock.Any(), gomock.Eq(readYmlReq)).Return(zbuildYml, nil)
 
-	readLockReq := client.ReadRequest{Filename: "webdf.lock"}
-	refBuildCtx.EXPECT().ReadFile(gomock.Any(), gomock.Eq(readLockReq)).Return(webdfLock, nil)
+	readLockReq := client.ReadRequest{Filename: "zbuild.lock"}
+	refBuildCtx.EXPECT().ReadFile(gomock.Any(), gomock.Eq(readLockReq)).Return(zbuildLock, nil)
 
 	refImage := llbtest.NewMockReference(mockCtrl)
 	resImg := &client.Result{
@@ -118,15 +118,15 @@ func successfullyBuildDefaultStageAndFileTC(mockCtrl *gomock.Controller) testCas
 
 	ctx := context.TODO()
 	buildOpts := builddef.BuildOpts{
-		File:      "webdf.yml",
-		LockFile:  "webdf.lock",
+		File:      "zbuild.yml",
+		LockFile:  "zbuild.lock",
 		Stage:     "dev",
 		SessionID: "sessid",
 	}
 	state := llb.State{}
 	img := image.Image{
 		Image: specs.Image{
-			Author: "webdf",
+			Author: "zbuild",
 		},
 	}
 	handler := mocks.NewMockKindHandler(mockCtrl)
@@ -137,7 +137,7 @@ func successfullyBuildDefaultStageAndFileTC(mockCtrl *gomock.Controller) testCas
 	registry := registry.NewKindRegistry()
 	registry.Register("php", handler)
 
-	imgConfig := `{"author":"webdf","architecture":"","os":"","rootfs":{"type":"","diff_ids":null},"config":{}}`
+	imgConfig := `{"author":"zbuild","architecture":"","os":"","rootfs":{"type":"","diff_ids":null},"config":{}}`
 	return testCase{
 		client:   c,
 		registry: registry,
@@ -156,7 +156,7 @@ func successfullyBuildCustomStageAndFileTC(mockCtrl *gomock.Controller) testCase
 	c.EXPECT().BuildOpts().AnyTimes().Return(client.BuildOpts{
 		SessionID: "sessid",
 		Opts: map[string]string{
-			"dockerfilekey": "api.webdf.yml",
+			"dockerfilekey": "api.zbuild.yml",
 			"target":        "prod",
 		},
 	})
@@ -168,11 +168,11 @@ func successfullyBuildCustomStageAndFileTC(mockCtrl *gomock.Controller) testCase
 	}
 	c.EXPECT().Solve(gomock.Any(), gomock.Any()).Return(resBuildCtx, nil)
 
-	readYmlReq := client.ReadRequest{Filename: "api.webdf.yml"}
-	refBuildCtx.EXPECT().ReadFile(gomock.Any(), gomock.Eq(readYmlReq)).Return(webdfYml, nil)
+	readYmlReq := client.ReadRequest{Filename: "api.zbuild.yml"}
+	refBuildCtx.EXPECT().ReadFile(gomock.Any(), gomock.Eq(readYmlReq)).Return(zbuildYml, nil)
 
-	readLockReq := client.ReadRequest{Filename: "api.webdf.lock"}
-	refBuildCtx.EXPECT().ReadFile(gomock.Any(), gomock.Eq(readLockReq)).Return(webdfLock, nil)
+	readLockReq := client.ReadRequest{Filename: "api.zbuild.lock"}
+	refBuildCtx.EXPECT().ReadFile(gomock.Any(), gomock.Eq(readLockReq)).Return(zbuildLock, nil)
 
 	refImage := llbtest.NewMockReference(mockCtrl)
 	resImg := &client.Result{
@@ -183,15 +183,15 @@ func successfullyBuildCustomStageAndFileTC(mockCtrl *gomock.Controller) testCase
 
 	ctx := context.TODO()
 	buildOpts := builddef.BuildOpts{
-		File:      "api.webdf.yml",
-		LockFile:  "api.webdf.lock",
+		File:      "api.zbuild.yml",
+		LockFile:  "api.zbuild.lock",
 		Stage:     "prod",
 		SessionID: "sessid",
 	}
 	state := llb.State{}
 	img := image.Image{
 		Image: specs.Image{
-			Author: "webdf",
+			Author: "zbuild",
 		},
 	}
 	handler := mocks.NewMockKindHandler(mockCtrl)
@@ -202,7 +202,7 @@ func successfullyBuildCustomStageAndFileTC(mockCtrl *gomock.Controller) testCase
 	registry := registry.NewKindRegistry()
 	registry.Register("php", handler)
 
-	imgConfig := `{"author":"webdf","architecture":"","os":"","rootfs":{"type":"","diff_ids":null},"config":{}}`
+	imgConfig := `{"author":"zbuild","architecture":"","os":"","rootfs":{"type":"","diff_ids":null},"config":{}}`
 	return testCase{
 		client:   c,
 		registry: registry,
@@ -247,14 +247,14 @@ func failToReadYmlTC(mockCtrl *gomock.Controller) testCase {
 	}
 	c.EXPECT().Solve(gomock.Any(), gomock.Any()).Return(resBuildCtx, nil)
 
-	readYmlReq := client.ReadRequest{Filename: "webdf.yml"}
+	readYmlReq := client.ReadRequest{Filename: "zbuild.yml"}
 	err := errors.New("some error")
 	refBuildCtx.EXPECT().ReadFile(gomock.Any(), gomock.Eq(readYmlReq)).Return([]byte{}, err)
 
 	return testCase{
 		client:      c,
 		registry:    registry.NewKindRegistry(),
-		expectedErr: errors.New("could not load webdf.yml from build context: some error"),
+		expectedErr: errors.New("could not load zbuild.yml from build context: some error"),
 	}
 }
 
@@ -272,17 +272,17 @@ func failToReadLockTC(mockCtrl *gomock.Controller) testCase {
 	}
 	c.EXPECT().Solve(gomock.Any(), gomock.Any()).Return(resBuildCtx, nil)
 
-	readYmlReq := client.ReadRequest{Filename: "webdf.yml"}
-	refBuildCtx.EXPECT().ReadFile(gomock.Any(), gomock.Eq(readYmlReq)).Return(webdfYml, nil)
+	readYmlReq := client.ReadRequest{Filename: "zbuild.yml"}
+	refBuildCtx.EXPECT().ReadFile(gomock.Any(), gomock.Eq(readYmlReq)).Return(zbuildYml, nil)
 
-	readLockReq := client.ReadRequest{Filename: "webdf.lock"}
+	readLockReq := client.ReadRequest{Filename: "zbuild.lock"}
 	err := errors.New("some error")
 	refBuildCtx.EXPECT().ReadFile(gomock.Any(), gomock.Eq(readLockReq)).Return([]byte{}, err)
 
 	return testCase{
 		client:      c,
 		registry:    registry.NewKindRegistry(),
-		expectedErr: errors.New("could not load webdf.lock from build context: some error"),
+		expectedErr: errors.New("could not load zbuild.lock from build context: some error"),
 	}
 }
 
@@ -300,11 +300,11 @@ func failToFindASutableKindHandlerTC(mockCtrl *gomock.Controller) testCase {
 	}
 	c.EXPECT().Solve(gomock.Any(), gomock.Any()).Return(resBuildCtx, nil)
 
-	readYmlReq := client.ReadRequest{Filename: "webdf.yml"}
-	refBuildCtx.EXPECT().ReadFile(gomock.Any(), gomock.Eq(readYmlReq)).Return(webdfYml, nil)
+	readYmlReq := client.ReadRequest{Filename: "zbuild.yml"}
+	refBuildCtx.EXPECT().ReadFile(gomock.Any(), gomock.Eq(readYmlReq)).Return(zbuildYml, nil)
 
-	readLockReq := client.ReadRequest{Filename: "webdf.lock"}
-	refBuildCtx.EXPECT().ReadFile(gomock.Any(), gomock.Eq(readLockReq)).Return(webdfLock, nil)
+	readLockReq := client.ReadRequest{Filename: "zbuild.lock"}
+	refBuildCtx.EXPECT().ReadFile(gomock.Any(), gomock.Eq(readLockReq)).Return(zbuildLock, nil)
 
 	handler := mocks.NewMockKindHandler(mockCtrl)
 	registry := registry.NewKindRegistry()
@@ -331,11 +331,11 @@ func failWhenKindHandlerFailsTC(mockCtrl *gomock.Controller) testCase {
 	}
 	c.EXPECT().Solve(gomock.Any(), gomock.Any()).Return(resBuildCtx, nil)
 
-	readYmlReq := client.ReadRequest{Filename: "webdf.yml"}
-	refBuildCtx.EXPECT().ReadFile(gomock.Any(), gomock.Eq(readYmlReq)).Return(webdfYml, nil)
+	readYmlReq := client.ReadRequest{Filename: "zbuild.yml"}
+	refBuildCtx.EXPECT().ReadFile(gomock.Any(), gomock.Eq(readYmlReq)).Return(zbuildYml, nil)
 
-	readLockReq := client.ReadRequest{Filename: "webdf.lock"}
-	refBuildCtx.EXPECT().ReadFile(gomock.Any(), gomock.Eq(readLockReq)).Return(webdfLock, nil)
+	readLockReq := client.ReadRequest{Filename: "zbuild.lock"}
+	refBuildCtx.EXPECT().ReadFile(gomock.Any(), gomock.Eq(readLockReq)).Return(zbuildLock, nil)
 
 	state := llb.State{}
 	img := image.Image{}
@@ -367,18 +367,18 @@ func failWhenKindHandlerReturnsUnsolvableState(mockCtrl *gomock.Controller) test
 	}
 	c.EXPECT().Solve(gomock.Any(), gomock.Any()).Return(resBuildCtx, nil)
 
-	readYmlReq := client.ReadRequest{Filename: "webdf.yml"}
-	refBuildCtx.EXPECT().ReadFile(gomock.Any(), gomock.Eq(readYmlReq)).Return(webdfYml, nil)
+	readYmlReq := client.ReadRequest{Filename: "zbuild.yml"}
+	refBuildCtx.EXPECT().ReadFile(gomock.Any(), gomock.Eq(readYmlReq)).Return(zbuildYml, nil)
 
-	readLockReq := client.ReadRequest{Filename: "webdf.lock"}
-	refBuildCtx.EXPECT().ReadFile(gomock.Any(), gomock.Eq(readLockReq)).Return(webdfLock, nil)
+	readLockReq := client.ReadRequest{Filename: "zbuild.lock"}
+	refBuildCtx.EXPECT().ReadFile(gomock.Any(), gomock.Eq(readLockReq)).Return(zbuildLock, nil)
 
 	c.EXPECT().Solve(gomock.Any(), gomock.Any()).Return(nil, errors.New("some solver error"))
 
 	state := llb.State{}
 	img := image.Image{
 		Image: specs.Image{
-			Author: "webdf",
+			Author: "zbuild",
 		},
 	}
 	handler := mocks.NewMockKindHandler(mockCtrl)

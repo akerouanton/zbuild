@@ -1,4 +1,4 @@
-# zbuild: Building Docker images without the hassle of writing system commands
+# zbuild: Building container images without the hassle of writing Dockerfiles
 
 zbuild is a high-level Buildkit syntax provider. That means, it provides
 a syntax for defining and building container images with higher-level concepts,
@@ -30,7 +30,7 @@ Moreover, whatever backend you want to use, you have to include the same header
 as following example. This is used by Buildkit to know which syntax provider to use.
 
 ```yaml
-# syntax=akerouanton/webdf-builder:test9
+# syntax=akerouanton/zbuilder:test9
 kind: php
 fpm: true
 version: 7.0.29
@@ -83,7 +83,7 @@ like you do with most modern package managers: `zbuild update`.
 Finally, you can build your images using
 
 ```bash
-$ docker build -f webdf.yml -t prod .
+$ docker build -f zbuild.yml -t prod .
 ```
 
 ## How to work on this?
@@ -91,7 +91,7 @@ $ docker build -f webdf.yml -t prod .
 #### Debug LLB DAG
 
 ```bash
-$ webdf debug-llb --target prod | buildctl debug dump-llb
+$ zbuild debug-llb --target prod | buildctl debug dump-llb
 ```
 
 #### Run with buildkitd
@@ -104,7 +104,7 @@ images, so you have to build and push using Docker before executing this command
 ```bash
 $ buildctl build \                         
     --frontend gateway.v0 \
-    --opt source=akerouanton/webdf-builder:test9 \
+    --opt source=akerouanton/zbuilder:test9 \
     --opt target=prod \
     --local context=. \
     --output type=image,name=some-image:dev

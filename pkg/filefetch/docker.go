@@ -76,7 +76,6 @@ func (f DockerFetcher) pullImage(ctx context.Context, image string) error {
 		var r io.ReadCloser
 		r, err = f.Client.ImagePull(ctx, image, types.ImagePullOptions{
 			// @TODO: add support for authenticated registries/private images
-			// @TODO: add arch param
 			Platform: "amd64",
 		})
 		if err == nil {

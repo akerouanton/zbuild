@@ -5,10 +5,10 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"github.com/NiR-/webdf/pkg/builddef"
-	"github.com/NiR-/webdf/pkg/defkinds/php"
-	"github.com/NiR-/webdf/pkg/llbtest"
-	"github.com/NiR-/webdf/pkg/mocks"
+	"github.com/NiR-/zbuild/pkg/builddef"
+	"github.com/NiR-/zbuild/pkg/defkinds/php"
+	"github.com/NiR-/zbuild/pkg/llbtest"
+	"github.com/NiR-/zbuild/pkg/mocks"
 	"github.com/golang/mock/gomock"
 	"github.com/moby/buildkit/frontend/gateway/client"
 	"golang.org/x/xerrors"
@@ -39,7 +39,7 @@ func initBuildLLBForDevStageTC(t *testing.T, mockCtrl *gomock.Controller) buildT
 	}).Return([]byte{}, xerrors.New("file does not exist"))
 
 	fetcher := mocks.NewMockFileFetcher(mockCtrl)
-	genericDef := loadGenericDef(t, "testdata/build/webdf.yml", "testdata/build/webdf.lock")
+	genericDef := loadGenericDef(t, "testdata/build/zbuild.yml", "testdata/build/zbuild.lock")
 
 	return buildTC{
 		handler: php.NewPHPHandler(fetcher),
@@ -70,7 +70,7 @@ func initBuildLLBForProdStageTC(t *testing.T, mockCtrl *gomock.Controller) build
 	}).Return([]byte{}, xerrors.New("file does not exist"))
 
 	fetcher := mocks.NewMockFileFetcher(mockCtrl)
-	genericDef := loadGenericDef(t, "testdata/build/webdf.yml", "testdata/build/webdf.lock")
+	genericDef := loadGenericDef(t, "testdata/build/zbuild.yml", "testdata/build/zbuild.lock")
 
 	return buildTC{
 		handler: php.NewPHPHandler(fetcher),
@@ -159,7 +159,7 @@ type debugTC struct {
 
 func initDebugLLBForDevStageTC(t *testing.T, mockCtrl *gomock.Controller) debugTC {
 	fetcher := mocks.NewMockFileFetcher(mockCtrl)
-	genericDef := loadGenericDef(t, "testdata/build/webdf.yml", "testdata/build/webdf.lock")
+	genericDef := loadGenericDef(t, "testdata/build/zbuild.yml", "testdata/build/zbuild.lock")
 
 	return debugTC{
 		handler: php.NewPHPHandler(fetcher),
@@ -174,7 +174,7 @@ func initDebugLLBForDevStageTC(t *testing.T, mockCtrl *gomock.Controller) debugT
 
 func initDebugLLBForProdStageTC(t *testing.T, mockCtrl *gomock.Controller) debugTC {
 	fetcher := mocks.NewMockFileFetcher(mockCtrl)
-	genericDef := loadGenericDef(t, "testdata/build/webdf.yml", "testdata/build/webdf.lock")
+	genericDef := loadGenericDef(t, "testdata/build/zbuild.yml", "testdata/build/zbuild.lock")
 
 	return debugTC{
 		handler: php.NewPHPHandler(fetcher),

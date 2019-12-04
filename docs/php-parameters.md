@@ -26,7 +26,7 @@ zbuild helps you there:
 zbuild files with php types have following structure:
 
 ```yaml
-# syntax=akerouanton/webdf-builder:test9
+# syntax=akerouanton/zbuilder:test9
 kind: php
 
 version: <string>
@@ -176,7 +176,7 @@ Some of [`<stage>` properties][#stage-properties] are local paths. All these pat
 ## Example
 
 ```yml
-# syntax=akerouanton/webdf-builder:test3
+# syntax=akerouanton/zbuilder:test3
 kind: php
 fpm: true
 version: 7.0.29
@@ -186,7 +186,7 @@ extensions:
   pdo_mysql: "*"
   soap: "*"
 
-# These parameters are automatically set by webdf using the "symfony" integration, so there're not needed in this case.
+# These parameters are automatically set by zbuild using the "symfony" integration, so there're not needed in this case.
 # source_dirs:
 #   - './app'
 #   - './src'

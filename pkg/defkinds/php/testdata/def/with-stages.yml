@@ -1,4 +1,4 @@
-# syntax=akerouanton/webdf-builder:test9
+# syntax=akerouanton/zbuilder:test9
 kind: php
 fpm: true
 version: 7.0.29

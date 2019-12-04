@@ -1,9 +1,9 @@
-# syntax=akerouanton/webdf-builder:test9
+# syntax=akerouanton/zbuilder:test9
 kind: php
 fpm: true
 version: 7.2
 
-# These parameters are automatically set by webdf using the "symfony" integration, so there're not needed in this case.
+# These parameters are automatically set by zbuild using the "symfony" integration, so there're not needed in this case.
 # source_dirs:
 #   - './app'
 #   - './src'

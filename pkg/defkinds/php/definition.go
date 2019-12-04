@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"path"
 
-	"github.com/NiR-/webdf/pkg/builddef"
-	"github.com/NiR-/webdf/pkg/llbutils"
+	"github.com/NiR-/zbuild/pkg/builddef"
+	"github.com/NiR-/zbuild/pkg/llbutils"
 	version "github.com/hashicorp/go-version"
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/xerrors"

@@ -22,7 +22,7 @@ const (
 
 var (
 	// UnsupportedPackageManager is thrown when the package manager used by the
-	// base image distro isn't supported by webdf.
+	// base image distro isn't supported by zbuild.
 	UnsupportedPackageManager = xerrors.New("unspported package manager")
 )
 
@@ -115,7 +115,6 @@ func Mkdir(state llb.State, owner string, dirs ...string) llb.State {
 // InstallSystemPackages installs the given packages with the given package
 // manager. Packages map have to be a set of package names associated to their
 // respective version.
-// @TODO: Add support for apk pkgMgr
 func InstallSystemPackages(
 	state llb.State,
 	pkgMgr string,

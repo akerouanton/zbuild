@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/NiR-/webdf/pkg/builddef"
-	"github.com/NiR-/webdf/pkg/defkinds/php"
-	"github.com/NiR-/webdf/pkg/llbtest"
+	"github.com/NiR-/zbuild/pkg/builddef"
+	"github.com/NiR-/zbuild/pkg/defkinds/php"
+	"github.com/NiR-/zbuild/pkg/llbtest"
 	"github.com/go-test/deep"
 	"github.com/golang/mock/gomock"
 	"github.com/moby/buildkit/frontend/gateway/client"

@@ -4,11 +4,11 @@ import (
 	"context"
 	"testing"
 
-	"github.com/NiR-/webdf/pkg/builddef"
-	"github.com/NiR-/webdf/pkg/image"
-	"github.com/NiR-/webdf/pkg/llbtest"
-	"github.com/NiR-/webdf/pkg/pkgsolver"
-	"github.com/NiR-/webdf/pkg/registry"
+	"github.com/NiR-/zbuild/pkg/builddef"
+	"github.com/NiR-/zbuild/pkg/image"
+	"github.com/NiR-/zbuild/pkg/llbtest"
+	"github.com/NiR-/zbuild/pkg/pkgsolver"
+	"github.com/NiR-/zbuild/pkg/registry"
 	"github.com/go-test/deep"
 	"github.com/golang/mock/gomock"
 	"github.com/moby/buildkit/client/llb"
@@ -71,7 +71,7 @@ func TestRegistry(t *testing.T) {
 func successfullyFindBuilderTC() registryTC {
 	expectedImage := image.Image{
 		Image: specs.Image{
-			Author: "webdf",
+			Author: "zbuild",
 		},
 	}
 

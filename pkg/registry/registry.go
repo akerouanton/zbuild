@@ -3,9 +3,9 @@ package registry
 import (
 	"context"
 
-	"github.com/NiR-/webdf/pkg/builddef"
-	"github.com/NiR-/webdf/pkg/image"
-	"github.com/NiR-/webdf/pkg/pkgsolver"
+	"github.com/NiR-/zbuild/pkg/builddef"
+	"github.com/NiR-/zbuild/pkg/image"
+	"github.com/NiR-/zbuild/pkg/pkgsolver"
 	"github.com/moby/buildkit/client/llb"
 	"github.com/moby/buildkit/frontend/gateway/client"
 	"golang.org/x/xerrors"
@@ -14,7 +14,7 @@ import (
 // KindHandler represents a series of methods used to build and update locks for a given kind of builddef.
 type KindHandler interface {
 	// Build is the method called by the builder package when buildkit daemon
-	// whenever a new build with webdf syntax provider starts. It returns a LLB
+	// whenever a new build with zbuild syntax provider starts. It returns a LLB
 	// DAG representing the build steps and the metadata of the final image, or
 	// an error if something goes wrong during the build.
 	Build(ctx context.Context, c client.Client, buildOpts builddef.BuildOpts) (llb.State, *image.Image, error)

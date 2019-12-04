@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/NiR-/webdf/pkg/pkgsolver"
+	"github.com/NiR-/zbuild/pkg/pkgsolver"
 	"github.com/snyh/go-dpkg-parser"
 )
 

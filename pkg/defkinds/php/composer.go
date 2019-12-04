@@ -7,8 +7,8 @@ import (
 	"path"
 	"strings"
 
-	"github.com/NiR-/webdf/pkg/builddef"
-	"github.com/NiR-/webdf/pkg/llbutils"
+	"github.com/NiR-/zbuild/pkg/builddef"
+	"github.com/NiR-/zbuild/pkg/llbutils"
 	"github.com/moby/buildkit/client/llb"
 	"github.com/moby/buildkit/frontend/gateway/client"
 	"github.com/sirupsen/logrus"
@@ -16,7 +16,7 @@ import (
 )
 
 // LoadPlatformReqsFromContext loads composer.lock from build conext and adds
-// any extensions declared there but not in webdf.yaml.
+// any extensions declared there but not in zbuild.yaml.
 func LoadPlatformReqsFromContext(
 	ctx context.Context,
 	c client.Client,
@@ -56,7 +56,7 @@ func LoadPlatformReqsFromContext(
 }
 
 // LoadPlatformReqsFromFS load composer.lock from the filesystem and add
-// any extensions declared there but not in webdf.yaml.
+// any extensions declared there but not in zbuild.yaml.
 func LoadPlatformReqsFromFS(stage *StageDefinition, basedir string) error {
 	fullpath := path.Join(basedir, "composer.lock")
 	lockdata, err := ioutil.ReadFile(fullpath)

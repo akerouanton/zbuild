@@ -5,20 +5,20 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/NiR-/webdf/pkg/llbutils"
+	"github.com/NiR-/zbuild/pkg/llbutils"
 	"github.com/moby/buildkit/client/llb"
 	"github.com/moby/buildkit/frontend/gateway/client"
 	"golang.org/x/xerrors"
 	"gopkg.in/yaml.v2"
 )
 
-// ConfigYMLNotFound is an error returned when there's no webdf.yml file
+// ConfigYMLNotFound is an error returned when there's no zbuild.yml file
 // found in the local build context. This file is looked for when one of
 // the Buildkit syntax provider (e.g. service kinds like php, node, etc...)
 // got invoked.
-var ConfigYMLNotFound = xerrors.New("webdf.yml not found in build context")
+var ConfigYMLNotFound = xerrors.New("zbuild.yml not found in build context")
 
-// LoadFromContext loads webdf.yml from build context using Buildkit client.
+// LoadFromContext loads zbuild.yml from build context using Buildkit client.
 // @TODO: read files from git context instead of local source?
 func LoadFromContext(
 	ctx context.Context,
@@ -31,8 +31,8 @@ func LoadFromContext(
 			buildOpts.LockFile,
 		}),
 		llb.SessionID(buildOpts.SessionID),
-		llb.SharedKeyHint("webdf-config-files"),
-		llb.WithCustomName("load webdf config files from build context"))
+		llb.SharedKeyHint("zbuild-config-files"),
+		llb.WithCustomName("load zbuild config files from build context"))
 
 	_, srcRef, err := llbutils.SolveState(ctx, c, src)
 	if err != nil {
@@ -63,8 +63,8 @@ func LoadFromContext(
 	return &def, nil
 }
 
-// LoadFromFS loads webdf config file from local filesystem. This is mostly
-// useful when webdf is running as CLI tool because it doesn't have access to a
+// LoadFromFS loads zbuild config file from local filesystem. This is mostly
+// useful when zbuild is running as CLI tool because it doesn't have access to a
 // Buildkit client, whereas syntax providers does.
 func LoadFromFS(file, lockFile string) (*BuildDef, error) {
 	ymlContent, err := ioutil.ReadFile(file)

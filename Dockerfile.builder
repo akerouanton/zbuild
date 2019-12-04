@@ -4,6 +4,6 @@ RUN apt-get update && \
     apt-get install -y ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
-COPY ./webdf-builder /bin/webdf
+COPY ./zbuilder /bin/zbuild
 
-ENTRYPOINT ["/bin/webdf"]
+ENTRYPOINT ["/bin/zbuild"]

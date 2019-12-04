@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	"github.com/NiR-/notpecl/extindex"
-	"github.com/NiR-/webdf/pkg/builddef"
-	"github.com/NiR-/webdf/pkg/pkgsolver"
+	"github.com/NiR-/zbuild/pkg/builddef"
+	"github.com/NiR-/zbuild/pkg/pkgsolver"
 	"golang.org/x/xerrors"
 	"gopkg.in/yaml.v2"
 )
@@ -82,7 +82,7 @@ func (h PHPHandler) updateStagesLocks(
 	locks := map[string]StageLocks{}
 
 	platformReqsLoader := func(stage *StageDefinition) error {
-		// @TODO: basedir should be the parent dir of the webdf.yml file
+		// @TODO: basedir should be the parent dir of the zbuild.yml file
 		return LoadPlatformReqsFromFS(stage, "")
 	}
 

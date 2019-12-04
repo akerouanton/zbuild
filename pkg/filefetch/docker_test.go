@@ -5,7 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/NiR-/webdf/pkg/filefetch"
+	"github.com/NiR-/zbuild/pkg/filefetch"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
 )

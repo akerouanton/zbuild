@@ -11,8 +11,8 @@ endif
 
 .PHONY: build
 build:
-	$(GO_BUILD_STATIC) -o bin/webdf ./cmd/webdf
-	$(GO_BUILD_STATIC) -o bin/webdf-builder ./cmd/webdf-builder
+	$(GO_BUILD_STATIC) -o bin/zbuild ./cmd/zbuild
+	$(GO_BUILD_STATIC) -o bin/zbuilder ./cmd/zbuilder
 
 .PHONY: test
 test:
@@ -31,15 +31,15 @@ gen-testdata:
 
 .PHONY: build-image
 build-image: .validate-image-tag build
-	docker build -t akerouanton/webdf-builder:$(IMAGE_TAG) -f Dockerfile.builder bin/
+	docker build -t akerouanton/zbuilder:$(IMAGE_TAG) -f Dockerfile.builder bin/
 
 .PHONY: push
 push: .validate-image-tag
-	docker push akerouanton/webdf-builder:$(IMAGE_TAG)
+	docker push akerouanton/zbuilder:$(IMAGE_TAG)
 
 .PHONY: install
 install:
-	cp webdf ~/go/bin
+	cp zbuild ~/go/bin
 
 
 ####################

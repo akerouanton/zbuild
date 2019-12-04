@@ -4,9 +4,9 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/NiR-/webdf/pkg/builddef"
-	"github.com/NiR-/webdf/pkg/defkinds/php"
-	"github.com/NiR-/webdf/pkg/llbutils"
+	"github.com/NiR-/zbuild/pkg/builddef"
+	"github.com/NiR-/zbuild/pkg/defkinds/php"
+	"github.com/NiR-/zbuild/pkg/llbutils"
 	"github.com/go-test/deep"
 	"golang.org/x/xerrors"
 )

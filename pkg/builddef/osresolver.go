@@ -5,10 +5,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/NiR-/webdf/pkg/filefetch"
+	"github.com/NiR-/zbuild/pkg/filefetch"
 )
 
-// OSRelease represents the data about the base image OS needed by webdf. These
+// OSRelease represents the data about the base image OS needed by zbuild. These
 // data typically come from /etc/os-release file.
 type OSRelease struct {
 	Name        string

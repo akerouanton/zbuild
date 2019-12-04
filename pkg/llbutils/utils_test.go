@@ -8,8 +8,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/NiR-/webdf/pkg/llbtest"
-	"github.com/NiR-/webdf/pkg/llbutils"
+	"github.com/NiR-/zbuild/pkg/llbtest"
+	"github.com/NiR-/zbuild/pkg/llbutils"
 	"github.com/go-test/deep"
 	"github.com/golang/mock/gomock"
 	"github.com/moby/buildkit/client/llb"

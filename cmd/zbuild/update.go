@@ -4,8 +4,8 @@ import (
 	"os"
 	"path"
 
-	"github.com/NiR-/webdf/pkg/builder"
-	"github.com/NiR-/webdf/pkg/pkgsolver"
+	"github.com/NiR-/zbuild/pkg/builder"
+	"github.com/NiR-/zbuild/pkg/pkgsolver"
 	"github.com/sirupsen/logrus"
 	dpkg "github.com/snyh/go-dpkg-parser"
 	"github.com/spf13/cobra"
@@ -22,7 +22,7 @@ func newUpdateCmd() *cobra.Command {
 		Short:             "Update version locks",
 		Run:               HandleUpdateCmd,
 	}
-	cmd.Flags().StringVarP(&updateFlags.file, "file", "f", "webdf.yml", "Path to the webdf.yml file to use. Webdf looks for a lock file with the same filename but with \".lock\" extension.")
+	cmd.Flags().StringVarP(&updateFlags.file, "file", "f", "zbuild.yml", "Path to the zbuild.yml file to use. Webdf looks for a lock file with the same filename but with \".lock\" extension.")
 
 	return cmd
 }
@@ -52,7 +52,7 @@ func initPackageSolver() (pkgsolver.PackageSolver, error) {
 		basepath = path.Join(home, ".local/share")
 	}
 
-	path := path.Join(basepath, "webdf/dpkg")
+	path := path.Join(basepath, "zbuild/dpkg")
 	dpkgRepo := dpkg.NewRepository(path)
 	pkgSolver = pkgsolver.NewDpkgSolver(dpkgRepo)
 
