@@ -120,12 +120,10 @@ func TestUpdateLocks(t *testing.T) {
 			}
 
 			if tc.expectedErr != nil {
-				if err == nil {
-					t.Fatalf("Expected error: %v\nGot: <nil>", tc.expectedErr.Error())
-				}
-				if tc.expectedErr.Error() != err.Error() {
+				if err == nil || err.Error() != tc.expectedErr.Error() {
 					t.Fatalf("Expected error: %v\nGot: %v", tc.expectedErr, err)
 				}
+				return
 			}
 			if err != nil {
 				t.Fatalf("Unexpected error: %v", err)

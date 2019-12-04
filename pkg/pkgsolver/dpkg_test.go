@@ -63,14 +63,14 @@ func TestDpkgResolveVersions(t *testing.T) {
 			})
 			_, err = pkgSolver.ResolveVersions(tc.toResolve)
 
-			if tc.expectedErr == nil && err != nil {
-				t.Fatalf("Expected no errors but got one: %v", err.Error())
+			if tc.expectedErr != nil {
+				if err == nil || err.Error() != tc.expectedErr.Error() {
+					t.Fatalf("Expected: %v\nGot: %v", tc.expectedErr, err)
+				}
+				return
 			}
-			if tc.expectedErr != nil && err == nil {
-				t.Fatalf("Expected error: %v\nGot: <nil>", tc.expectedErr.Error())
-			}
-			if tc.expectedErr != nil && tc.expectedErr.Error() != err.Error() {
-				t.Fatalf("Expected: %v\nGot: %v", tc.expectedErr.Error(), err.Error())
+			if err != nil {
+				t.Fatalf("Unexpected error: %v", err)
 			}
 		})
 	}

@@ -110,10 +110,7 @@ func TestFetchFileWithDocker(t *testing.T) {
 			res, err := tc.fetcher.FetchFile(ctx, tc.image, tc.path)
 
 			if tc.expectedErr != nil {
-				if err == nil {
-					t.Fatalf("Expected err: %v\nGot: <nil>", tc.expectedErr)
-				}
-				if tc.expectedErr.Error() != err.Error() {
+				if err == nil || err.Error() != tc.expectedErr.Error() {
 					t.Fatalf("Expected error: %v\nGot: %v", tc.expectedErr, err)
 				}
 				return

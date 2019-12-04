@@ -235,13 +235,13 @@ func TestNewKind(t *testing.T) {
 
 			def, err := php.NewKind(generic)
 			if tc.expectedErr != nil {
-				if err == nil {
-					t.Fatalf("Expected: %v\nGot: <nil>", tc.expectedErr.Error())
-				}
-				if tc.expectedErr.Error() != err.Error() {
-					t.Fatalf("Expected: %v\nGot: %v", tc.expectedErr.Error(), err.Error())
+				if err == nil || tc.expectedErr.Error() != err.Error() {
+					t.Fatalf("Expected: %v\nGot: %v", tc.expectedErr, err)
 				}
 				return
+			}
+			if err != nil {
+				t.Fatalf("Unexpected error: %v", err)
 			}
 
 			if diff := deep.Equal(tc.expected, def); diff != nil {
@@ -539,13 +539,13 @@ func TestResolveStageDefinition(t *testing.T) {
 			}
 			stageDef, err := def.ResolveStageDefinition(tc.stage, platformReqsLoader)
 			if tc.expectedErr != nil {
-				if err == nil {
-					t.Fatalf("Expected: %v\nGot: <nil>", tc.expectedErr.Error())
-				}
-				if tc.expectedErr.Error() != err.Error() {
-					t.Fatalf("Expected: %v\nGot: %v", tc.expectedErr.Error(), err.Error())
+				if err == nil || err.Error() != tc.expectedErr.Error() {
+					t.Fatalf("Expected: %v\nGot: %v", tc.expectedErr, err)
 				}
 				return
+			}
+			if err != nil {
+				t.Fatalf("Unexpected error: %v", err)
 			}
 			if diff := deep.Equal(tc.expected, stageDef); diff != nil {
 				t.Fatal(diff)
@@ -586,10 +586,7 @@ func TestComposerDumpFlags(t *testing.T) {
 
 			out, err := tc.obj.Flags()
 			if tc.expectedErr != nil {
-				if err == nil {
-					t.Fatalf("Expected error: %v\nGot: <nil>", tc.expectedErr)
-				}
-				if tc.expectedErr.Error() != err.Error() {
+				if err == nil || err.Error() != tc.expectedErr.Error() {
 					t.Fatalf("Expected error: %v\nGot: %v", tc.expectedErr, err)
 				}
 				return

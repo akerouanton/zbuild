@@ -35,19 +35,19 @@ func SolveState(
 ) (*client.Result, client.Reference, error) {
 	def, err := src.Marshal()
 	if err != nil {
-		return nil, nil, xerrors.Errorf("failed to marshal LLB state: %v", err)
+		return nil, nil, xerrors.Errorf("failed to marshal LLB state: %w", err)
 	}
 
 	res, err := c.Solve(ctx, client.SolveRequest{
 		Definition: def.ToPB(),
 	})
 	if err != nil {
-		return nil, nil, xerrors.Errorf("failed to execute solve request: %v", err)
+		return nil, nil, xerrors.Errorf("failed to execute solve request: %w", err)
 	}
 
 	ref, err := res.SingleRef()
 	if err != nil {
-		return nil, nil, xerrors.Errorf("failed to get a single ref for source: %v", err)
+		return nil, nil, xerrors.Errorf("failed to get a single ref for source: %w", err)
 	}
 
 	return res, ref, nil

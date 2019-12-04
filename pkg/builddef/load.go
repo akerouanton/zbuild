@@ -12,11 +12,9 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// ConfigYMLNotFound is an error returned when there's no zbuild.yml file
-// found in the local build context. This file is looked for when one of
-// the Buildkit syntax provider (e.g. service kinds like php, node, etc...)
-// got invoked.
-var ConfigYMLNotFound = xerrors.New("zbuild.yml not found in build context")
+// ZbuildfileNotFound is an error returned when there's no zbuild.yml file
+// found in the local build context or on the filesystem.
+var ZbuildfileNotFound = xerrors.New("zbuildfile not found")
 
 // LoadFromContext loads zbuild.yml from build context using Buildkit client.
 // @TODO: read files from git context instead of local source?
@@ -36,24 +34,24 @@ func LoadFromContext(
 
 	_, srcRef, err := llbutils.SolveState(ctx, c, src)
 	if err != nil {
-		return nil, xerrors.Errorf("failed to resolve build context: %v", err)
+		return nil, xerrors.Errorf("failed to resolve build context: %w", err)
 	}
 
 	ymlContent, ok, err := llbutils.ReadFile(ctx, srcRef, buildOpts.File)
 	if err != nil {
-		return nil, xerrors.Errorf("could not load %s from build context: %v", buildOpts.File, err)
+		return nil, xerrors.Errorf("could not load %s from build context: %w", buildOpts.File, err)
 	} else if !ok {
-		return nil, ConfigYMLNotFound
+		return nil, ZbuildfileNotFound
 	}
 
 	var def BuildDef
 	if err = yaml.Unmarshal(ymlContent, &def); err != nil {
-		return nil, xerrors.Errorf("could not decode %s: %v", buildOpts.File, err)
+		return nil, xerrors.Errorf("could not decode %s: %w", buildOpts.File, err)
 	}
 
 	lockContent, ok, err := llbutils.ReadFile(ctx, srcRef, buildOpts.LockFile)
 	if err != nil {
-		return nil, xerrors.Errorf("could not load %s from build context: %v", buildOpts.LockFile, err)
+		return nil, xerrors.Errorf("could not load %s from build context: %w", buildOpts.LockFile, err)
 	} else if !ok {
 		return &def, nil
 	}
@@ -69,22 +67,21 @@ func LoadFromContext(
 func LoadFromFS(file, lockFile string) (*BuildDef, error) {
 	ymlContent, err := ioutil.ReadFile(file)
 	if os.IsNotExist(err) {
-		// @TODO: include file path in error message
-		return nil, ConfigYMLNotFound
+		return nil, xerrors.Errorf("could not load %s: %w", file, ZbuildfileNotFound)
 	} else if err != nil {
-		return nil, xerrors.Errorf("could not load %s from filesystem: %v", file, err)
+		return nil, xerrors.Errorf("could not load %s from filesystem: %w", file, err)
 	}
 
 	var def BuildDef
 	if err = yaml.Unmarshal(ymlContent, &def); err != nil {
-		return nil, xerrors.Errorf("could not decode %s: %v", file, err)
+		return nil, xerrors.Errorf("could not decode %s: %w", file, err)
 	}
 
 	lockContent, err := ioutil.ReadFile(lockFile)
 	if os.IsNotExist(err) {
 		return &def, nil
 	} else if err != nil {
-		return nil, xerrors.Errorf("could not load %s from filesystem: %v", lockFile, err)
+		return nil, xerrors.Errorf("could not load %s from filesystem: %w", lockFile, err)
 	}
 	def.RawLocks = lockContent
 

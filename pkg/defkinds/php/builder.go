@@ -95,7 +95,7 @@ func Config2LLB(
 	stageName := opts.buildOpts.Stage
 	stage, err := def.ResolveStageDefinition(stageName, opts.platformReqsLoader)
 	if err != nil {
-		return state, img, xerrors.Errorf("could not resolve stage %q: %v", opts.buildOpts.Stage, err)
+		return state, img, xerrors.Errorf("could not resolve stage %q: %w", opts.buildOpts.Stage, err)
 	}
 
 	locks, ok := def.Locks.Stages[opts.buildOpts.Stage]
@@ -109,7 +109,7 @@ func Config2LLB(
 	state = llbutils.ImageSource(def.Locks.BaseImage, true)
 	baseImg, err := image.LoadMeta(ctx, def.Locks.BaseImage)
 	if err != nil {
-		return state, img, xerrors.Errorf("loading %q metadata: %v", def.Locks.BaseImage, err)
+		return state, img, xerrors.Errorf("loading %q metadata: %w", def.Locks.BaseImage, err)
 	}
 
 	img = image.CloneMeta(baseImg)
@@ -119,7 +119,7 @@ func Config2LLB(
 	state = llbutils.Copy(composer, "/usr/bin/composer", state, "/usr/bin/composer", "")
 	state, err = llbutils.InstallSystemPackages(state, llbutils.APT, locks.SystemPackages)
 	if err != nil {
-		return state, img, xerrors.Errorf("failed to install system pacakges: %v", err)
+		return state, img, xerrors.Errorf("failed to add \"install system pacakges\" steps: %w", err)
 	}
 
 	state = InstallExtensions(state, locks.Extensions)

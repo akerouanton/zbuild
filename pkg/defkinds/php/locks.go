@@ -21,7 +21,7 @@ type DefinitionLocks struct {
 func (l DefinitionLocks) RawLocks() ([]byte, error) {
 	lockdata, err := yaml.Marshal(l)
 	if err != nil {
-		return lockdata, xerrors.Errorf("could not marshal php locks: %v", err)
+		return lockdata, xerrors.Errorf("could not marshal php locks: %w", err)
 	}
 	return lockdata, nil
 }
@@ -57,17 +57,17 @@ func (h PHPHandler) UpdateLocks(
 	ctx := context.TODO()
 	osrelease, err := builddef.ResolveImageOS(ctx, h.fetcher, baseImageRef)
 	if err != nil {
-		return nil, xerrors.Errorf("could not resolve base image os-release: %v", err)
+		return nil, xerrors.Errorf("could not resolve base image os-release: %w", err)
 	}
 	def.Locks.OS = osrelease
 
 	solverCfg, err := pkgsolver.GuessSolverConfig(osrelease, "amd64")
 	if err != nil {
-		return nil, xerrors.Errorf("could not update stage locks: %v", err)
+		return nil, xerrors.Errorf("could not update stage locks: %w", err)
 	}
 	err = pkgSolver.Configure(solverCfg)
 	if err != nil {
-		return nil, xerrors.Errorf("could not update stage locks: %v", err)
+		return nil, xerrors.Errorf("could not update stage locks: %w", err)
 	}
 
 	stagesLocks, err := h.updateStagesLocks(def, pkgSolver)
@@ -89,18 +89,18 @@ func (h PHPHandler) updateStagesLocks(
 	for name := range def.Stages {
 		stage, err := def.ResolveStageDefinition(name, platformReqsLoader)
 		if err != nil {
-			return nil, xerrors.Errorf("could not resolve stage %q: %v", name, err)
+			return nil, xerrors.Errorf("could not resolve stage %q: %w", name, err)
 		}
 
 		stageLocks := StageLocks{}
 		stageLocks.SystemPackages, err = pkgSolver.ResolveVersions(stage.SystemPackages)
 		if err != nil {
-			return nil, xerrors.Errorf("could not resolve systems package versions: %v", err)
+			return nil, xerrors.Errorf("could not resolve systems package versions: %w", err)
 		}
 
 		stageLocks.Extensions, err = h.lockExtensions(stage.Extensions)
 		if err != nil {
-			return nil, xerrors.Errorf("could not resolve php extension versions: %v", err)
+			return nil, xerrors.Errorf("could not resolve php extension versions: %w", err)
 		}
 
 		locks[name] = stageLocks

@@ -42,14 +42,12 @@ func (reg *KindRegistry) Register(name string, handler KindHandler) {
 	reg.kinds[name] = handler
 }
 
-// FindHandler checks if there's a known handler for the given
-// kind. It returns the builder if one is found and
-// ErrUnknownDefKind otherwise.
-func (reg *KindRegistry) FindHandler(defKind string) (KindHandler, error) {
-	builder, ok := reg.kinds[defKind]
+// FindHandler checks if there's a known handler for the given kind. It returns
+// the builder if one is found and ErrUnknownDefKind otherwise.
+func (reg *KindRegistry) FindHandler(defkind string) (KindHandler, error) {
+	builder, ok := reg.kinds[defkind]
 	if !ok {
-		// @TODO: put the kind in the error message for better UX
-		return nil, ErrUnknownDefKind
+		return nil, xerrors.Errorf("kind %q is not supported: %w", defkind, ErrUnknownDefKind)
 	}
 
 	return builder, nil

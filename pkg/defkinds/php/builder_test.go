@@ -113,10 +113,7 @@ func TestBuild(t *testing.T) {
 			}
 
 			if tc.expectedErr != nil {
-				if err == nil {
-					t.Fatalf("Expected error: %v\nGot: <nil>", tc.expectedErr)
-				}
-				if tc.expectedErr.Error() != err.Error() {
+				if err == nil || tc.expectedErr.Error() != err.Error() {
 					t.Fatalf("Expected error: %v\nGot: %v", tc.expectedErr, err)
 				}
 				return
@@ -212,10 +209,7 @@ func TestDebugLLB(t *testing.T) {
 			jsonState := llbtest.StateToJSON(t, state)
 
 			if tc.expectedErr != nil {
-				if err == nil {
-					t.Fatalf("Expected error: %v\nGot: <nil>", tc.expectedErr)
-				}
-				if tc.expectedErr.Error() != err.Error() {
+				if err == nil || tc.expectedErr.Error() != err.Error() {
 					t.Fatalf("Expected error: %v\nGot: %v", tc.expectedErr, err)
 				}
 				return

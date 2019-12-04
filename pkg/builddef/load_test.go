@@ -134,7 +134,7 @@ func itFailsToLoadConfigFilesWhenTheresNoYmlFileFromContextTC(
 			File:     "zbuild.yml",
 			LockFile: "zbuild.lock",
 		},
-		expectedErr: builddef.ConfigYMLNotFound,
+		expectedErr: builddef.ZbuildfileNotFound,
 	}
 }
 
@@ -174,11 +174,14 @@ func TestLoadConfigFromBuildContext(t *testing.T) {
 			ctx := context.TODO()
 
 			buildDef, err := builddef.LoadFromContext(ctx, tc.client, tc.buildOpts)
-			if tc.expectedErr == nil && err != nil {
-				t.Fatalf("No error expected but got one: %v\n", err)
+			if tc.expectedErr != nil {
+				if err == nil || err.Error() != tc.expectedErr.Error() {
+					t.Fatalf("Expected error: %v\nGot: %v", tc.expectedErr, err)
+				}
+				return
 			}
-			if tc.expectedErr != nil && err.Error() != tc.expectedErr.Error() {
-				t.Fatalf("Expected error: %v\nGot: %v\n", tc.expectedErr, err)
+			if err != nil {
+				t.Fatalf("Unexpected error: %v", err)
 			}
 			if diff := deep.Equal(tc.expectedDef, buildDef); diff != nil {
 				t.Error(diff)
@@ -221,7 +224,7 @@ baz: plop
 		"it fails to load config files when there's no yml file": {
 			file:        "testdata/does-not-exist/zbuild.yml",
 			lockFile:    "testdata/does-not-exist/zbuild.lock",
-			expectedErr: errors.New("zbuild.yml not found in build context"),
+			expectedErr: errors.New("could not load testdata/does-not-exist/zbuild.yml: zbuildfile not found"),
 		},
 	}
 
@@ -232,8 +235,14 @@ baz: plop
 			t.Parallel()
 
 			out, err := builddef.LoadFromFS(tc.file, tc.lockFile)
-			if tc.expectedErr != nil && err.Error() != tc.expectedErr.Error() {
-				t.Errorf("Expected error: %v\nGot: %v\n", tc.expectedErr, err)
+			if tc.expectedErr != nil {
+				if err == nil || err.Error() != tc.expectedErr.Error() {
+					t.Fatalf("Expected error: %v\nGot: %v", tc.expectedErr, err)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("Unexpected error: %v", err)
 			}
 			if diff := deep.Equal(tc.expectedDef, out); diff != nil {
 				t.Error(diff)

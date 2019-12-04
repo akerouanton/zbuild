@@ -20,7 +20,7 @@ func NewDpkgSolver(dpkgRepo *dpkg.Repository) *DpkgSolver {
 func (s *DpkgSolver) Configure(config SolverConfig) error {
 	for _, suite := range config.DpkgSuites {
 		if err := s.dpkgRepo.AddSuite(suite[0], suite[1], ""); err != nil {
-			return xerrors.Errorf("could not add suite %s: %v", suite[1], err)
+			return xerrors.Errorf("could not add suite %s: %w", suite[1], err)
 		}
 	}
 

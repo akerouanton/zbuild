@@ -3,7 +3,6 @@ package builder_test
 import (
 	"context"
 	"errors"
-	"strings"
 	"testing"
 
 	"github.com/NiR-/zbuild/pkg/builddef"
@@ -32,8 +31,8 @@ func TestBuilder(t *testing.T) {
 		"successfully build default stage and file":       successfullyBuildDefaultStageAndFileTC,
 		"successfully build custom stage and file":        successfullyBuildCustomStageAndFileTC,
 		"fail to resolve build context":                   failToResolveBuildContextTC,
-		"fail to read zbuild.yml file":                     failToReadYmlTC,
-		"fail to read zbuild.lock file":                    failToReadLockTC,
+		"fail to read zbuild.yml file":                    failToReadYmlTC,
+		"fail to read zbuild.lock file":                   failToReadLockTC,
 		"fail to find a suitable kind handler":            failToFindASutableKindHandlerTC,
 		"fail when kind handler fails":                    failWhenKindHandlerFailsTC,
 		"fail when kind builder returns unsolvable state": failWhenKindHandlerReturnsUnsolvableState,
@@ -56,14 +55,13 @@ func TestBuilder(t *testing.T) {
 			outRes, outErr := b.Build(context.TODO(), tc.client)
 
 			if tc.expectedErr != nil {
-				if !strings.HasPrefix(outErr.Error(), tc.expectedErr.Error()) {
-					t.Fatalf("Expected error: %v\nGot: %v\n", tc.expectedErr.Error(), outErr.Error())
+				if outErr == nil || outErr.Error() != tc.expectedErr.Error() {
+					t.Fatalf("Expected error: %v\nGot: %v", tc.expectedErr.Error(), outErr.Error())
 				}
 				return
 			}
-
-			if tc.expectedErr == nil && outErr != nil {
-				t.Fatalf("Error not expected but got one: %v\n", outErr)
+			if outErr != nil {
+				t.Fatalf("Unexpected error: %v", outErr)
 			}
 			if diff := deep.Equal(tc.expectedRes, outRes); diff != nil {
 				t.Logf("expected metadata: %s", tc.expectedRes.Metadata)
@@ -313,7 +311,7 @@ func failToFindASutableKindHandlerTC(mockCtrl *gomock.Controller) testCase {
 	return testCase{
 		client:      c,
 		registry:    registry,
-		expectedErr: errors.New("unknown kind"),
+		expectedErr: errors.New("kind \"php\" is not supported: unknown kind"),
 	}
 }
 

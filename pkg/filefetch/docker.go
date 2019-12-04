@@ -96,7 +96,7 @@ func (f DockerFetcher) createContainer(ctx context.Context, image string) (strin
 	networkCfg := network.NetworkingConfig{}
 	resp, err := f.Client.ContainerCreate(ctx, &cfg, &hostCfg, &networkCfg, "")
 	if err != nil {
-		return "", xerrors.Errorf("could not create container: %v", err)
+		return "", xerrors.Errorf("could not create container: %w", err)
 	}
 	return resp.ID, nil
 }

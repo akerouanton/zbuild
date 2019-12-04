@@ -84,10 +84,7 @@ func TestLoadPlatformReqsFromFS(t *testing.T) {
 			err := php.LoadPlatformReqsFromFS(&stage, tc.basedir)
 
 			if tc.expectedErr != nil {
-				if err == nil {
-					t.Fatalf("Expected error: %v\nGot: <nil>", tc.expectedErr)
-				}
-				if tc.expectedErr.Error() != err.Error() {
+				if err == nil || tc.expectedErr.Error() != err.Error() {
 					t.Fatalf("Expected error: %v\nGot: %v", tc.expectedErr, err)
 				}
 				return
@@ -262,10 +259,7 @@ func TestLoadPlatformReqsFromContext(t *testing.T) {
 			err := php.LoadPlatformReqsFromContext(ctx, tc.client, &stage, tc.opts)
 
 			if tc.expectedErr != nil {
-				if err == nil {
-					t.Fatalf("Expected error: %v\nGot: <nil>", tc.expectedErr)
-				}
-				if tc.expectedErr.Error() != err.Error() {
+				if err == nil || tc.expectedErr.Error() != err.Error() {
 					t.Fatalf("Expected error: %v\nGot: %v", tc.expectedErr, err)
 				}
 				return

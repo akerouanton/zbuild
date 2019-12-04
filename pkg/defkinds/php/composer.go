@@ -82,7 +82,7 @@ func LoadPlatformReqsFromFS(stage *StageDefinition, basedir string) error {
 func parsePlatformReqs(lockdata []byte) (map[string]string, error) {
 	var composerLock map[string]interface{}
 	if err := json.Unmarshal(lockdata, &composerLock); err != nil {
-		return map[string]string{}, xerrors.Errorf("could not unmarshal composer.lock: %v", err)
+		return map[string]string{}, xerrors.Errorf("could not unmarshal composer.lock: %w", err)
 	}
 
 	platformReqs, ok := composerLock["platform"]

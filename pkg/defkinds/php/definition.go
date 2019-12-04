@@ -65,12 +65,12 @@ func NewKind(genericDef *builddef.BuildDef) (Definition, error) {
 	}
 
 	if err := decoder.Decode(genericDef.RawConfig); err != nil {
-		err := xerrors.Errorf("could not decode build manifest: %v", err)
+		err := xerrors.Errorf("could not decode build manifest: %w", err)
 		return def, err
 	}
 
 	if err := yaml.Unmarshal(genericDef.RawLocks, &def.Locks); err != nil {
-		err := xerrors.Errorf("could not decode lock manifest: %v", err)
+		err := xerrors.Errorf("could not decode lock manifest: %w", err)
 		return def, err
 	}
 
@@ -201,7 +201,7 @@ func (def *Definition) ResolveStageDefinition(
 
 	if def.Infer {
 		if err := platformReqsLoader(&stageDef); err != nil {
-			return stageDef, xerrors.Errorf("could not load platform-reqs from composer.lock: %v", err)
+			return stageDef, xerrors.Errorf("could not load platform-reqs from composer.lock: %w", err)
 		}
 
 		inferExtensions(&stageDef)

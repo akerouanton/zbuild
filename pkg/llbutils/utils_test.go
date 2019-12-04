@@ -95,11 +95,8 @@ func TestSolveState(t *testing.T) {
 			outRes, outRef, outErr := llbutils.SolveState(ctx, tc.client, tc.state)
 
 			if tc.expectedErr != nil {
-				if outErr == nil {
-					t.Fatalf("Expected: %v\nGot: <nil>", tc.expectedErr.Error())
-				}
-				if tc.expectedErr.Error() != outErr.Error() {
-					t.Fatalf("Expected: %v\nGot: %v", tc.expectedErr.Error(), outErr.Error())
+				if outErr == nil || outErr.Error() != tc.expectedErr.Error() {
+					t.Fatalf("Expected: %v\nGot: %v", tc.expectedErr, outErr)
 				}
 				return
 			}
@@ -176,11 +173,8 @@ func TestReadFile(t *testing.T) {
 			out, ok, err := llbutils.ReadFile(ctx, tc.ref, tc.filepath)
 
 			if tc.expectedErr != nil {
-				if err == nil {
-					t.Fatalf("Expected: %v\nGot: <nil>", tc.expectedErr.Error())
-				}
-				if tc.expectedErr.Error() != err.Error() {
-					t.Fatalf("Expected: %v\nGot: %v", tc.expectedErr.Error(), err.Error())
+				if err == nil || err.Error() != tc.expectedErr.Error() {
+					t.Fatalf("Expected: %v\nGot: %v", tc.expectedErr, err)
 				}
 				return
 			}

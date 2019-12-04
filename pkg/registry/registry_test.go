@@ -14,6 +14,7 @@ import (
 	"github.com/moby/buildkit/client/llb"
 	"github.com/moby/buildkit/frontend/gateway/client"
 	specs "github.com/opencontainers/image-spec/specs-go/v1"
+	"golang.org/x/xerrors"
 )
 
 type registryTC struct {
@@ -99,7 +100,7 @@ func failToFindBuilderTC() registryTC {
 			RawConfig: map[string]interface{}{},
 			RawLocks:  []byte{},
 		},
-		expectedErr: registry.ErrUnknownDefKind,
+		expectedErr: xerrors.New("kind \"some-kind\" is not supported: unknown kind"),
 	}
 }
 

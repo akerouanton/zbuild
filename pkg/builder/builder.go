@@ -79,7 +79,7 @@ func (b Builder) Build(ctx context.Context, c client.Client) (*client.Result, er
 
 	config, err := json.Marshal(img)
 	if err != nil {
-		return nil, xerrors.Errorf("failed to marshal image config: %v", err)
+		return nil, xerrors.Errorf("failed to marshal image config: %w", err)
 	}
 
 	res.AddMeta(exptypes.ExporterImageConfigKey, config)
@@ -136,7 +136,7 @@ func (b Builder) UpdateLockFile(file string) error {
 
 	err = ioutil.WriteFile(lockFile, lockdata, 0640)
 	if err != nil {
-		return xerrors.Errorf("could not write %s: %v", lockFile, err)
+		return xerrors.Errorf("could not write %s: %w", lockFile, err)
 	}
 
 	return nil
