@@ -87,7 +87,7 @@ func (h PHPHandler) DebugLLB(buildOpts builddef.BuildOpts) (llb.State, error) {
 		},
 	}
 
-	ctx := context.TODO()
+	ctx := context.Background()
 	llb, _, err := Config2LLB(ctx, opts)
 	return llb, err
 }
@@ -149,7 +149,7 @@ func Config2LLB(
 
 	// @TODO: copy files from git context instead of local source
 	if *stage.Dev {
-		configFilesSrc := llb.Local("context",
+		configFilesSrc := llb.Local(opts.buildOpts.ContextName,
 			llb.IncludePatterns([]string{
 				*stage.ConfigFiles.IniFile,
 				*stage.ConfigFiles.FPMConfigFile,
@@ -171,7 +171,7 @@ func Config2LLB(
 			"/usr/local/etc/php-fpm.conf",
 			"1000:1000")
 
-		composerSrc := llb.Local("context",
+		composerSrc := llb.Local(opts.buildOpts.ContextName,
 			llb.IncludePatterns([]string{"composer.json", "composer.lock"}),
 			llb.LocalUniqueID(opts.buildOpts.LocalUniqueID),
 			llb.SessionID(opts.buildOpts.SessionID),
@@ -180,7 +180,7 @@ func Config2LLB(
 		state = llbutils.Copy(composerSrc, "composer.*", state, "/app/", "1000:1000")
 		state = composerInstall(state)
 
-		buildContextSrc := llb.Local("context",
+		buildContextSrc := llb.Local(opts.buildOpts.ContextName,
 			llb.IncludePatterns(includePatterns(&stage)),
 			llb.ExcludePatterns(excludePatterns(&stage)),
 			llb.LocalUniqueID(opts.buildOpts.LocalUniqueID),

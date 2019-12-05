@@ -49,6 +49,7 @@ func initBuildLLBForDevStageTC(t *testing.T, mockCtrl *gomock.Controller) buildT
 			Stage:         "dev",
 			SessionID:     "<SESSION-ID>",
 			LocalUniqueID: "x1htr02606a9rk8b0daewh9es",
+			ContextName:   "context",
 		},
 		expectedState: "testdata/build/state-dev.json",
 	}
@@ -80,6 +81,7 @@ func initBuildLLBForProdStageTC(t *testing.T, mockCtrl *gomock.Controller) build
 			Stage:         "prod",
 			SessionID:     "<SESSION-ID>",
 			LocalUniqueID: "x1htr02606a9rk8b0daewh9es",
+			ContextName:   "context",
 		},
 		expectedState: "testdata/build/state-prod.json",
 	}
@@ -164,6 +166,7 @@ func initDebugLLBForDevStageTC(t *testing.T, mockCtrl *gomock.Controller) debugT
 			Def:           &genericDef,
 			Stage:         "dev",
 			LocalUniqueID: "x1htr02606a9rk8b0daewh9es",
+			ContextName:   "context",
 		},
 		expectedState: "testdata/build/state-dev.json",
 	}
@@ -179,6 +182,7 @@ func initDebugLLBForProdStageTC(t *testing.T, mockCtrl *gomock.Controller) debug
 			Def:           &genericDef,
 			Stage:         "prod",
 			LocalUniqueID: "x1htr02606a9rk8b0daewh9es",
+			ContextName:   "context",
 		},
 		expectedState: "testdata/build/state-prod.json",
 	}

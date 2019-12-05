@@ -47,7 +47,12 @@ func buildOptsFromBuildkitOpts(c client.Client) builddef.BuildOpts {
 		stage = v
 	}
 
-	return builddef.NewBuildOpts(file, stage, sessionID)
+	contextName := "context"
+	if v, ok := opts[keyNameContext]; ok {
+		contextName = v
+	}
+
+	return builddef.NewBuildOpts(file, stage, sessionID, contextName)
 }
 
 func (b Builder) Build(ctx context.Context, c client.Client) (*client.Result, error) {
@@ -90,7 +95,7 @@ func (b Builder) Build(ctx context.Context, c client.Client) (*client.Result, er
 
 func (b Builder) Debug(file, stage string) (llb.State, error) {
 	var state llb.State
-	opts := builddef.NewBuildOpts(file, stage, "<SESSION-ID>")
+	opts := builddef.NewBuildOpts(file, stage, "<SESSION-ID>", "context")
 
 	def, err := builddef.LoadFromFS(opts.File, opts.LockFile)
 	if err != nil {

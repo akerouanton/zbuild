@@ -23,7 +23,7 @@ func LoadPlatformReqsFromContext(
 	stage *StageDefinition,
 	opts builddef.BuildOpts,
 ) error {
-	composerSrc := llb.Local("context",
+	composerSrc := llb.Local(opts.ContextName,
 		llb.IncludePatterns([]string{"composer.json", "composer.lock"}),
 		llb.SessionID(opts.SessionID),
 		llb.SharedKeyHint("composer-files"),

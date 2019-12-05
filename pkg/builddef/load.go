@@ -23,7 +23,7 @@ func LoadFromContext(
 	c client.Client,
 	buildOpts BuildOpts,
 ) (*BuildDef, error) {
-	src := llb.Local("context",
+	src := llb.Local(buildOpts.ContextName,
 		llb.IncludePatterns([]string{
 			buildOpts.File,
 			buildOpts.LockFile,

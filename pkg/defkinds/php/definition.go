@@ -327,7 +327,6 @@ func reverseStages(stages []DerivedStage) []DerivedStage {
 	return reversed
 }
 
-// @TODO: detect these paths instead
 var phpExtDirs = map[string]string{
 	"7.2": "/usr/local/lib/php/extensions/no-debug-non-zts-20170718/",
 	"7.3": "/usr/local/lib/php/extensions/no-debug-non-zts-20180731/",

@@ -7,7 +7,6 @@ import (
 
 // BuildOpts represents the parameters passed to specialized builders.
 // (see github.com/NiR-/zbuild/pkg/defkinds/)
-// @TODO: add support for contextkey
 type BuildOpts struct {
 	Def       *BuildDef
 	SessionID string
@@ -17,14 +16,16 @@ type BuildOpts struct {
 	File          string
 	LockFile      string
 	Stage         string
+	ContextName   string
 }
 
-func NewBuildOpts(file, stage, sessionID string) BuildOpts {
+func NewBuildOpts(file, stage, sessionID, contextName string) BuildOpts {
 	return BuildOpts{
-		SessionID: sessionID,
-		File:      file,
-		LockFile:  LockFilepath(file),
-		Stage:     stage,
+		SessionID:   sessionID,
+		File:        file,
+		LockFile:    LockFilepath(file),
+		Stage:       stage,
+		ContextName: contextName,
 	}
 }
 
