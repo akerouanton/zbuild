@@ -16,7 +16,6 @@ import (
 // default values.
 func defaultDefinition() Definition {
 	fpm := true
-	version := "7.2"
 	healthcheck := false
 	infer := true
 	dev := true
@@ -40,7 +39,7 @@ func defaultDefinition() Definition {
 			PostInstall:  []string{},
 		},
 		BaseImage: "",
-		Version:   version,
+		Version:   "7.4",
 		Infer:     infer,
 		Stages: map[string]DerivedStage{
 			"dev": {
@@ -74,6 +73,24 @@ func NewKind(genericDef *builddef.BuildDef) (Definition, error) {
 		return def, err
 	}
 
+	majMinVersion, err := extractMajMinVersion(def.Version)
+	if err != nil {
+		return def, err
+	}
+	def.MajMinVersion = majMinVersion
+
+	if def.BaseImage == "" {
+		baseImages, ok := defaultBaseImages[def.MajMinVersion]
+		if !ok {
+			return def, xerrors.Errorf("no default base image defined for PHP v%s, you have to define it by yourself in your zbuild file", def.MajMinVersion)
+		}
+		if *def.BaseStage.FPM {
+			def.BaseImage = baseImages.FPM
+		} else {
+			def.BaseImage = baseImages.CLI
+		}
+	}
+
 	return def, nil
 }
 
@@ -83,10 +100,11 @@ func NewKind(genericDef *builddef.BuildDef) (Definition, error) {
 type Definition struct {
 	BaseStage Stage `mapstructure:",squash"`
 
-	BaseImage string                  `mapstructure:"base"`
-	Version   string                  `mapstructure:"version"`
-	Infer     bool                    `mapstructure:"infer"`
-	Stages    map[string]DerivedStage `mapstructure:"stages"`
+	BaseImage     string                  `mapstructure:"base"`
+	Version       string                  `mapstructure:"version"`
+	MajMinVersion string                  `mapstructure:"-"`
+	Infer         bool                    `mapstructure:"infer"`
+	Stages        map[string]DerivedStage `mapstructure:"stages"`
 
 	Locks DefinitionLocks `mapstructure:"-"`
 }
@@ -97,6 +115,7 @@ type Stage struct {
 	builddef.BaseConfig `mapstructure:",squash"`
 
 	FPM               *bool              `mapstructure:",omitempty"`
+	Command           *string            `mapstrture:"command,omitempty"`
 	Extensions        map[string]string  `mapstructure:"extensions"`
 	ConfigFiles       PHPConfigFiles     `mapstructure:"config_files"`
 	ComposerDumpFlags *ComposerDumpFlags `mapstructure:"composer_dump"`
@@ -148,6 +167,7 @@ func (fl ComposerDumpFlags) Flags() (string, error) {
 
 // StageDefinition represents the config of stage once it got merged with all
 // its ancestors.
+// @TODO: rename into FinalStageDefinition
 type StageDefinition struct {
 	Stage
 	Name          string
@@ -191,11 +211,9 @@ func (def *Definition) ResolveStageDefinition(
 	stageDef = mergeStages(def, stages...)
 	stageDef.Name = name
 
-	majMinVersion, err := extractMajMinVersion(stageDef.Version)
-	if err != nil {
-		return stageDef, err
+	if *stageDef.FPM == false && stageDef.Command == nil {
+		return stageDef, xerrors.New("FPM mode is disabled but no command was provided")
 	}
-	stageDef.MajMinVersion = majMinVersion
 
 	if def.Infer {
 		if *stageDef.FPM == false {
@@ -238,11 +256,12 @@ func extractMajMinVersion(versionString string) (string, error) {
 func mergeStages(base *Definition, stages ...DerivedStage) StageDefinition {
 	dev := false
 	stageDef := StageDefinition{
-		BaseImage: base.BaseImage,
-		Version:   base.Version,
-		Infer:     base.Infer,
-		Stage:     base.BaseStage,
-		Dev:       &dev,
+		BaseImage:     base.BaseImage,
+		Version:       base.Version,
+		MajMinVersion: base.MajMinVersion,
+		Infer:         base.Infer,
+		Stage:         base.BaseStage,
+		Dev:           &dev,
 	}
 
 	stages = reverseStages(stages)
@@ -286,6 +305,9 @@ func mergeStages(base *Definition, stages ...DerivedStage) StageDefinition {
 		if stage.Dev != nil {
 			stageDef.Dev = stage.Dev
 		}
+		if stage.Command != nil {
+			stageDef.Command = stage.Command
+		}
 	}
 
 	return stageDef
@@ -307,8 +329,6 @@ func reverseStages(stages []DerivedStage) []DerivedStage {
 
 // @TODO: detect these paths instead
 var phpExtDirs = map[string]string{
-	"7.0": "/usr/local/lib/php/extensions/no-debug-non-zts-20151012/",
-	"7.1": "/usr/local/lib/php/extensions/no-debug-non-zts-20160303/",
 	"7.2": "/usr/local/lib/php/extensions/no-debug-non-zts-20170718/",
 	"7.3": "/usr/local/lib/php/extensions/no-debug-non-zts-20180731/",
 	"7.4": "/usr/local/lib/php/extensions/no-debug-non-zts-20190902/",

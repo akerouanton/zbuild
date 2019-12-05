@@ -75,7 +75,7 @@ func TestBuilder(t *testing.T) {
 var (
 	zbuildYml = []byte(`
 kind: php
-version: 7.0.29
+version: 7.2.29
 
 extensions:
   intl: "*"`)

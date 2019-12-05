@@ -1,6 +1,6 @@
 kind: php
 fpm: true
-version: 7.0.29
+version: 7.4.0
 infer: false
 
 extensions:

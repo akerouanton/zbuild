@@ -18,8 +18,25 @@ import (
 	"golang.org/x/xerrors"
 )
 
+var defaultBaseImages = map[string]struct {
+	FPM string
+	CLI string
+}{
+	"7.2": {
+		FPM: "docker.io/library/php:7.2-fpm-buster",
+		CLI: "docker.io/library/php:7.2-cli-buster",
+	},
+	"7.3": {
+		FPM: "docker.io/library/php:7.3-fpm-buster",
+		CLI: "docker.io/library/php:7.3-cli-buster",
+	},
+	"7.4": {
+		FPM: "docker.io/library/php:7.4-fpm-buster",
+		CLI: "docker.io/library/php:7.4-cli-buster",
+	},
+}
+
 const (
-	defaultBaseImage        = "docker.io/library/php"
 	defaultComposerImageTag = "docker.io/library/composer:1.9.0"
 
 	zbuildLabel = "io.zbuild"
@@ -189,8 +206,6 @@ func Config2LLB(
 
 	if *stage.Healthcheck {
 		img.Config.Healthcheck = &image.HealthConfig{
-			// @TODO: FPM port can actually be changed by FPM config file,
-			// find a better way to set this up.
 			Test:     []string{"CMD", "http_proxy= test \"$(fcgi-client get 127.0.0.1:9000 /_ping)\" = \"pong\""},
 			Interval: 10 * time.Second,
 			Timeout:  1 * time.Second,

@@ -1,7 +1,7 @@
 # syntax=akerouanton/zbuilder:test9
 kind: php
 fpm: true
-version: 7.0.29
+version: 7.4.0
 
 extensions:
   intl: "*"
@@ -52,3 +52,4 @@ stages:
     post_install:
       - echo some other command
     fpm: false
+    command: bin/worker

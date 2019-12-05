@@ -26,48 +26,11 @@ refer to their specific parameters.
 * [php](docs/php-parameters.md)
 * More to come soon...
 
-Moreover, whatever backend you want to use, you have to include the same header
-as following example. This is used by Buildkit to know which syntax provider to use.
+Moreover, note that all zbuild files have to start with following header in order
+to use zbuild to build your images:
 
 ```yaml
 # syntax=akerouanton/zbuilder:test9
-kind: php
-fpm: true
-version: 7.0.29
-
-extensions:
-  intl: "*"
-  pdo_mysql: "*"
-  soap: "*"
-
-stateful_dirs:
-  - './web/uploads'
-
-config_files:
-  fpm.conf: 'docker/app/fpm.conf'
-
-integrations:
-  - symfony
-
-stages:
-  dev:
-    dev: true
-    config_files:
-      php.ini: 'docker/app/php.dev.ini'
-
-  prod:
-    healthcheck: true
-    config_files:
-      php.ini: 'docker/app/php.prod.ini'
-    extensions:
-      apcu: "*"
-      opcache: "*"
-    integrations:
-      - blackfire
-
-  worker:
-    derive_from: prod
-    healthcheck: false
 ```
 
 #### 2. Create or Update the lock file

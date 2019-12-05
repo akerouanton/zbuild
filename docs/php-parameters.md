@@ -179,7 +179,7 @@ Some of [`<stage>` properties][#stage-properties] are local paths. All these pat
 # syntax=akerouanton/zbuilder:test3
 kind: php
 fpm: true
-version: 7.0.29
+version: 7.4.0
 
 extensions:
   intl: "*"

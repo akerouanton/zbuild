@@ -43,18 +43,10 @@ func (h PHPHandler) UpdateLocks(
 	}
 
 	// @TODO: resolve sha256 of the base image and lock it
-	baseImageRef := def.BaseImage
-	if baseImageRef == "" {
-		baseImageRef = defaultBaseImage + ":" + def.Version
-		if *def.BaseStage.FPM {
-			// @TODO: Add a distro param?
-			baseImageRef += "-fpm-buster"
-		}
-	}
-	def.Locks.BaseImage = baseImageRef
+	def.Locks.BaseImage = def.BaseImage
 
 	ctx := context.TODO()
-	osrelease, err := builddef.ResolveImageOS(ctx, h.fetcher, baseImageRef)
+	osrelease, err := builddef.ResolveImageOS(ctx, h.fetcher, def.Locks.BaseImage)
 	if err != nil {
 		return nil, xerrors.Errorf("could not resolve OS details from base image: %w", err)
 	}

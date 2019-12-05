@@ -61,8 +61,10 @@ func initSuccessfullyParseRawDefinitionWithoutStagesTC() newDefinitionTC {
 					"another one",
 				},
 			},
-			Version: "7.0.29",
-			Infer:   false,
+			Version:       "7.4.0",
+			MajMinVersion: "7.4",
+			BaseImage:     "docker.io/library/php:7.4-fpm-buster",
+			Infer:         false,
 			Stages: map[string]php.DerivedStage{
 				"dev": {
 					DeriveFrom: "base",
@@ -112,6 +114,7 @@ func initSuccessfullyParseRawDefinitionWithStagesTC() newDefinitionTC {
 	isDev := true
 	isFPM := true
 	isNotFPM := false
+	workerCmd := "bin/worker"
 
 	return newDefinitionTC{
 		file:     "testdata/def/with-stages.yml",
@@ -144,8 +147,10 @@ func initSuccessfullyParseRawDefinitionWithStagesTC() newDefinitionTC {
 				Healthcheck:  &healthcheckDisabled,
 				PostInstall:  []string{"echo some command"},
 			},
-			Version: "7.0.29",
-			Infer:   true,
+			Version:       "7.4.0",
+			MajMinVersion: "7.4",
+			BaseImage:     "docker.io/library/php:7.4-fpm-buster",
+			Infer:         true,
 			Stages: map[string]php.DerivedStage{
 				"dev": {
 					DeriveFrom: "",
@@ -179,6 +184,7 @@ func initSuccessfullyParseRawDefinitionWithStagesTC() newDefinitionTC {
 						StatefulDirs: []string{"data/imports"},
 						PostInstall:  []string{"echo some other command"},
 						FPM:          &isNotFPM,
+						Command:      &workerCmd,
 					},
 				},
 			},
@@ -262,7 +268,12 @@ func initSuccessfullyResolveDefaultDevStageTC() resolveStageTC {
 		lockFile: lockFile,
 		stage:    "dev",
 		expected: php.StageDefinition{
-			Name: "dev",
+			Name:          "dev",
+			BaseImage:     "docker.io/library/php:7.4-fpm-buster",
+			Version:       "7.4.0",
+			MajMinVersion: "7.4",
+			Infer:         false,
+			Dev:           &isDev,
 			Stage: php.Stage{
 				BaseConfig: builddef.BaseConfig{
 					ExternalFiles: []llbutils.ExternalFile{
@@ -297,10 +308,6 @@ func initSuccessfullyResolveDefaultDevStageTC() resolveStageTC {
 				Healthcheck:  &healthcheckEnabled,
 				PostInstall:  []string{"some more commands", "another one"},
 			},
-			Version:       "7.0.29",
-			MajMinVersion: "7.0",
-			Infer:         false,
-			Dev:           &isDev,
 		},
 	}
 }
@@ -310,13 +317,19 @@ func initSuccessfullyResolveWorkerStageTC() resolveStageTC {
 	isNotDev := false
 	healthcheckDisabled := false
 	phpIni := "docker/app/php.prod.ini"
+	workerCmd := "bin/worker"
 
 	return resolveStageTC{
 		file:     "testdata/def/with-stages.yml",
 		lockFile: "",
 		stage:    "worker",
 		expected: php.StageDefinition{
-			Name: "worker",
+			Name:          "worker",
+			BaseImage:     "docker.io/library/php:7.4-fpm-buster",
+			Version:       "7.4.0",
+			MajMinVersion: "7.4",
+			Infer:         true,
+			Dev:           &isNotDev,
 			Stage: php.Stage{
 				BaseConfig: builddef.BaseConfig{
 					ExternalFiles: []llbutils.ExternalFile{
@@ -324,7 +337,7 @@ func initSuccessfullyResolveWorkerStageTC() resolveStageTC {
 							URL:         "https://blackfire.io/api/v1/releases/probe/php/linux/amd64/72",
 							Compressed:  true,
 							Pattern:     "blackfire-*.so",
-							Destination: "/usr/local/lib/php/extensions/no-debug-non-zts-20151012/blackfire.so",
+							Destination: "/usr/local/lib/php/extensions/no-debug-non-zts-20190902/blackfire.so",
 							Mode:        0644,
 						},
 					},
@@ -339,7 +352,8 @@ func initSuccessfullyResolveWorkerStageTC() resolveStageTC {
 						"openssl":      "*",
 					},
 				},
-				FPM: &isNotFPM,
+				FPM:     &isNotFPM,
+				Command: &workerCmd,
 				Extensions: map[string]string{
 					"intl":      "*",
 					"pdo_mysql": "*",
@@ -375,10 +389,6 @@ func initSuccessfullyResolveWorkerStageTC() resolveStageTC {
 					"echo some other command",
 				},
 			},
-			Version:       "7.0.29",
-			MajMinVersion: "7.0",
-			Infer:         true,
-			Dev:           &isNotDev,
 		},
 	}
 }
@@ -417,6 +427,7 @@ func initSuccessfullyAddSymfonyIntegrationTC() resolveStageTC {
 		stage:    "dev",
 		expected: php.StageDefinition{
 			Name:          "dev",
+			BaseImage:     "docker.io/library/php:7.2-fpm-buster",
 			Version:       "7.2",
 			MajMinVersion: "7.2",
 			Infer:         true,
@@ -463,8 +474,9 @@ func initRemoveDefaultExtensionsTC() resolveStageTC {
 		stage:    "dev",
 		expected: php.StageDefinition{
 			Name:          "dev",
-			Version:       "7.2",
-			MajMinVersion: "7.2",
+			BaseImage:     "docker.io/library/php:7.4-fpm-buster",
+			Version:       "7.4",
+			MajMinVersion: "7.4",
 			Infer:         true,
 			Dev:           &dev,
 			Stage: php.Stage{
