@@ -33,11 +33,9 @@ func initSuccessfullyParseRawDefinitionWithoutStagesTC() newDefinitionTC {
 		lockFile: lockFile,
 		expected: php.Definition{
 			BaseStage: php.Stage{
-				BaseConfig: builddef.BaseConfig{
-					ExternalFiles:  []llbutils.ExternalFile{},
-					SystemPackages: map[string]string{},
-				},
-				FPM: &isFPM,
+				ExternalFiles:  []llbutils.ExternalFile{},
+				SystemPackages: map[string]string{},
+				FPM:            &isFPM,
 				Extensions: map[string]string{
 					"intl":      "*",
 					"pdo_mysql": "*",
@@ -74,11 +72,9 @@ func initSuccessfullyParseRawDefinitionWithoutStagesTC() newDefinitionTC {
 			Locks: php.DefinitionLocks{
 				Stages: map[string]php.StageLocks{
 					"base": {
-						BaseStageLocks: builddef.BaseStageLocks{
-							SystemPackages: map[string]string{
-								"git":        "1:2.1.4-2.1+deb8u7",
-								"libicu-dev": "52.1-8+deb8u7",
-							},
+						SystemPackages: map[string]string{
+							"git":        "1:2.1.4-2.1+deb8u7",
+							"libicu-dev": "52.1-8+deb8u7",
 						},
 						Extensions: map[string]string{
 							"intl":      "*",
@@ -87,11 +83,9 @@ func initSuccessfullyParseRawDefinitionWithoutStagesTC() newDefinitionTC {
 						},
 					},
 					"dev": {
-						BaseStageLocks: builddef.BaseStageLocks{
-							SystemPackages: map[string]string{
-								"git":        "1:2.1.4-2.1+deb8u7",
-								"libicu-dev": "52.1-8+deb8u7",
-							},
+						SystemPackages: map[string]string{
+							"git":        "1:2.1.4-2.1+deb8u7",
+							"libicu-dev": "52.1-8+deb8u7",
 						},
 						Extensions: map[string]string{
 							"intl":      "*",
@@ -121,11 +115,9 @@ func initSuccessfullyParseRawDefinitionWithStagesTC() newDefinitionTC {
 		lockFile: "",
 		expected: php.Definition{
 			BaseStage: php.Stage{
-				BaseConfig: builddef.BaseConfig{
-					ExternalFiles:  []llbutils.ExternalFile{},
-					SystemPackages: map[string]string{},
-				},
-				FPM: &isFPM,
+				ExternalFiles:  []llbutils.ExternalFile{},
+				SystemPackages: map[string]string{},
+				FPM:            &isFPM,
 				Extensions: map[string]string{
 					"intl":      "*",
 					"pdo_mysql": "*",
@@ -275,19 +267,17 @@ func initSuccessfullyResolveDefaultDevStageTC() resolveStageTC {
 			Infer:         false,
 			Dev:           &isDev,
 			Stage: php.Stage{
-				BaseConfig: builddef.BaseConfig{
-					ExternalFiles: []llbutils.ExternalFile{
-						{
-							URL:         "https://github.com/NiR-/fcgi-client/releases/download/v0.1.0/fcgi-client.phar",
-							Compressed:  false,
-							Destination: "/usr/local/bin/fcgi-client",
-							Mode:        0750,
-							Owner:       "1000:1000",
-						},
+				ExternalFiles: []llbutils.ExternalFile{
+					{
+						URL:         "https://github.com/NiR-/fcgi-client/releases/download/v0.1.0/fcgi-client.phar",
+						Compressed:  false,
+						Destination: "/usr/local/bin/fcgi-client",
+						Mode:        0750,
+						Owner:       "1000:1000",
 					},
-					SystemPackages: map[string]string{},
 				},
-				FPM: &isFPM,
+				SystemPackages: map[string]string{},
+				FPM:            &isFPM,
 				Extensions: map[string]string{
 					"intl":      "*",
 					"pdo_mysql": "*",
@@ -331,26 +321,24 @@ func initSuccessfullyResolveWorkerStageTC() resolveStageTC {
 			Infer:         true,
 			Dev:           &isNotDev,
 			Stage: php.Stage{
-				BaseConfig: builddef.BaseConfig{
-					ExternalFiles: []llbutils.ExternalFile{
-						{
-							URL:         "https://blackfire.io/api/v1/releases/probe/php/linux/amd64/72",
-							Compressed:  true,
-							Pattern:     "blackfire-*.so",
-							Destination: "/usr/local/lib/php/extensions/no-debug-non-zts-20190902/blackfire.so",
-							Mode:        0644,
-						},
+				ExternalFiles: []llbutils.ExternalFile{
+					{
+						URL:         "https://blackfire.io/api/v1/releases/probe/php/linux/amd64/72",
+						Compressed:  true,
+						Pattern:     "blackfire-*.so",
+						Destination: "/usr/local/lib/php/extensions/no-debug-non-zts-20190902/blackfire.so",
+						Mode:        0644,
 					},
-					SystemPackages: map[string]string{
-						"zlib1g-dev":   "*",
-						"libicu-dev":   "*",
-						"libxml2-dev":  "*",
-						"unzip":        "*",
-						"git":          "*",
-						"libpcre3-dev": "*",
-						"libssl-dev":   "*",
-						"openssl":      "*",
-					},
+				},
+				SystemPackages: map[string]string{
+					"zlib1g-dev":   "*",
+					"libicu-dev":   "*",
+					"libxml2-dev":  "*",
+					"unzip":        "*",
+					"git":          "*",
+					"libpcre3-dev": "*",
+					"libssl-dev":   "*",
+					"openssl":      "*",
 				},
 				FPM:     &isNotFPM,
 				Command: &workerCmd,
@@ -433,14 +421,12 @@ func initSuccessfullyAddSymfonyIntegrationTC() resolveStageTC {
 			Infer:         true,
 			Dev:           &dev,
 			Stage: php.Stage{
-				BaseConfig: builddef.BaseConfig{
-					ExternalFiles: []llbutils.ExternalFile{},
-					SystemPackages: map[string]string{
-						"git":          "*",
-						"libpcre3-dev": "*",
-						"unzip":        "*",
-						"zlib1g-dev":   "*",
-					},
+				ExternalFiles: []llbutils.ExternalFile{},
+				SystemPackages: map[string]string{
+					"git":          "*",
+					"libpcre3-dev": "*",
+					"unzip":        "*",
+					"zlib1g-dev":   "*",
 				},
 				FPM: &fpm,
 				Extensions: map[string]string{
@@ -480,14 +466,12 @@ func initRemoveDefaultExtensionsTC() resolveStageTC {
 			Infer:         true,
 			Dev:           &dev,
 			Stage: php.Stage{
-				BaseConfig: builddef.BaseConfig{
-					ExternalFiles: []llbutils.ExternalFile{},
-					SystemPackages: map[string]string{
-						"zlib1g-dev":   "*",
-						"unzip":        "*",
-						"git":          "*",
-						"libpcre3-dev": "*",
-					},
+				ExternalFiles: []llbutils.ExternalFile{},
+				SystemPackages: map[string]string{
+					"zlib1g-dev":   "*",
+					"unzip":        "*",
+					"git":          "*",
+					"libpcre3-dev": "*",
 				},
 				FPM: &fpm,
 				Extensions: map[string]string{

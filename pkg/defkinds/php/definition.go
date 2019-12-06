@@ -22,12 +22,10 @@ func defaultDefinition() Definition {
 
 	return Definition{
 		BaseStage: Stage{
-			BaseConfig: builddef.BaseConfig{
-				ExternalFiles:  []llbutils.ExternalFile{},
-				SystemPackages: map[string]string{},
-			},
-			FPM:        &fpm,
-			Extensions: map[string]string{},
+			ExternalFiles:  []llbutils.ExternalFile{},
+			SystemPackages: map[string]string{},
+			FPM:            &fpm,
+			Extensions:     map[string]string{},
 			ComposerDumpFlags: &ComposerDumpFlags{
 				ClassmapAuthoritative: true,
 			},
@@ -112,19 +110,19 @@ type Definition struct {
 // Stage holds all the properties from the base stage that could also be
 // overriden by derived stages.
 type Stage struct {
-	builddef.BaseConfig `mapstructure:",squash"`
-
-	FPM               *bool              `mapstructure:",omitempty"`
-	Command           *string            `mapstrture:"command,omitempty"`
-	Extensions        map[string]string  `mapstructure:"extensions"`
-	ConfigFiles       PHPConfigFiles     `mapstructure:"config_files"`
-	ComposerDumpFlags *ComposerDumpFlags `mapstructure:"composer_dump"`
-	SourceDirs        []string           `mapstructure:"source_dirs"`
-	ExtraScripts      []string           `mapstructure:"extra_scripts"`
-	Integrations      []string           `mapstructure:"integrations"`
-	StatefulDirs      []string           `mapstructure:"stateful_dirs"`
-	Healthcheck       *bool              `mapstructure:"healthcheck"`
-	PostInstall       []string           `mapstructure:"post_install"`
+	ExternalFiles     []llbutils.ExternalFile `mapstructure:"external_files"`
+	SystemPackages    map[string]string       `mapstructure:"system_packages"`
+	FPM               *bool                   `mapstructure:",omitempty"`
+	Command           *string                 `mapstrture:"command,omitempty"`
+	Extensions        map[string]string       `mapstructure:"extensions"`
+	ConfigFiles       PHPConfigFiles          `mapstructure:"config_files"`
+	ComposerDumpFlags *ComposerDumpFlags      `mapstructure:"composer_dump"`
+	SourceDirs        []string                `mapstructure:"source_dirs"`
+	ExtraScripts      []string                `mapstructure:"extra_scripts"`
+	Integrations      []string                `mapstructure:"integrations"`
+	StatefulDirs      []string                `mapstructure:"stateful_dirs"`
+	Healthcheck       *bool                   `mapstructure:"healthcheck"`
+	PostInstall       []string                `mapstructure:"post_install"`
 }
 
 type DerivedStage struct {
@@ -266,7 +264,14 @@ func mergeStages(base *Definition, stages ...DerivedStage) StageDefinition {
 
 	stages = reverseStages(stages)
 	for _, stage := range stages {
-		// @TODO: merge base configs
+		if len(stage.ExternalFiles) > 0 {
+			stageDef.ExternalFiles = append(stageDef.ExternalFiles, stage.ExternalFiles...)
+		}
+		if len(stage.SystemPackages) > 0 {
+			for name, constraint := range stage.SystemPackages {
+				stageDef.SystemPackages[name] = constraint
+			}
+		}
 		if stage.FPM != nil {
 			stageDef.FPM = stage.FPM
 		}

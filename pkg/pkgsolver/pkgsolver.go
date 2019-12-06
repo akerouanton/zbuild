@@ -24,7 +24,6 @@ type SolverType string
 
 const (
 	Dpkg SolverType = "dpkg"
-	// Apk  SolverType = "apk"
 )
 
 type SolverConfig struct {
@@ -40,7 +39,6 @@ func GuessSolverConfig(osrelease builddef.OSRelease, arch string) (SolverConfig,
 	}
 
 	dpkgSuites := [][]string{}
-	// apkSuites := [][]string{}
 
 	switch solverType {
 	case Dpkg:
@@ -58,7 +56,6 @@ func GuessSolverConfig(osrelease builddef.OSRelease, arch string) (SolverConfig,
 	config := SolverConfig{
 		Arch:       arch,
 		DpkgSuites: dpkgSuites,
-		// apkSuites: apkSuites,
 	}
 	return config, nil
 }
