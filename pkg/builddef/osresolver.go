@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	"github.com/NiR-/zbuild/pkg/filefetch"
+	"github.com/NiR-/zbuild/pkg/statesolver"
 )
 
 // OSRelease represents the data about the base image OS needed by zbuild. These
@@ -37,12 +37,12 @@ func ParseOSRelease(file []byte) (OSRelease, error) {
 
 func ResolveImageOS(
 	ctx context.Context,
-	fetcher filefetch.FileFetcher,
+	solver statesolver.StateSolver,
 	imageRef string,
 ) (OSRelease, error) {
 	var res OSRelease
 
-	raw, err := fetcher.FetchFile(ctx, imageRef, "/etc/os-release")
+	raw, err := solver.FetchFile(ctx, imageRef, "/etc/os-release")
 	if err != nil {
 		return res, err
 	}

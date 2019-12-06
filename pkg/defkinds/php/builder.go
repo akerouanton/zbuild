@@ -9,7 +9,7 @@ import (
 
 	"github.com/NiR-/notpecl/backends"
 	"github.com/NiR-/zbuild/pkg/builddef"
-	"github.com/NiR-/zbuild/pkg/filefetch"
+	"github.com/NiR-/zbuild/pkg/statesolver"
 	"github.com/NiR-/zbuild/pkg/image"
 	"github.com/NiR-/zbuild/pkg/llbutils"
 	"github.com/NiR-/zbuild/pkg/registry"
@@ -44,18 +44,18 @@ const (
 
 // RegisterKind adds a LLB DAG builder to the given KindRegistry for php
 // definition kind.
-func RegisterKind(registry *registry.KindRegistry, fetcher filefetch.FileFetcher) {
-	registry.Register("php", NewPHPHandler(fetcher))
+func RegisterKind(registry *registry.KindRegistry, solver statesolver.StateSolver) {
+	registry.Register("php", NewPHPHandler(solver))
 }
 
 type PHPHandler struct {
-	fetcher filefetch.FileFetcher
+	solver statesolver.StateSolver
 	NotPecl backends.NotPeclBackend
 }
 
-func NewPHPHandler(fetcher filefetch.FileFetcher) PHPHandler {
+func NewPHPHandler(solver statesolver.StateSolver) PHPHandler {
 	return PHPHandler{
-		fetcher: fetcher,
+		solver: solver,
 		NotPecl: backends.NewNotPeclBackend(),
 	}
 }

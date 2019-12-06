@@ -1,4 +1,4 @@
-package filefetch
+package statesolver
 
 import (
 	"archive/tar"
@@ -15,12 +15,12 @@ import (
 	"golang.org/x/xerrors"
 )
 
-type DockerFetcher struct {
+type DockerSolver struct {
 	Client *client.Client
 	Labels map[string]string
 }
 
-func (f DockerFetcher) FetchFile(ctx context.Context, image, filepath string) ([]byte, error) {
+func (f DockerSolver) FetchFile(ctx context.Context, image, filepath string) ([]byte, error) {
 	var res []byte
 
 	err := f.pullImage(ctx, image)
@@ -70,7 +70,7 @@ func (f DockerFetcher) FetchFile(ctx context.Context, image, filepath string) ([
 	return ioutil.ReadAll(tarR)
 }
 
-func (f DockerFetcher) pullImage(ctx context.Context, image string) error {
+func (f DockerSolver) pullImage(ctx context.Context, image string) error {
 	_, _, err := f.Client.ImageInspectWithRaw(ctx, image)
 	if client.IsErrNotFound(err) {
 		var r io.ReadCloser
@@ -86,7 +86,7 @@ func (f DockerFetcher) pullImage(ctx context.Context, image string) error {
 	return err
 }
 
-func (f DockerFetcher) createContainer(ctx context.Context, image string) (string, error) {
+func (f DockerSolver) createContainer(ctx context.Context, image string) (string, error) {
 	cfg := container.Config{
 		Image:  image,
 		Cmd:    []string{},
@@ -101,7 +101,7 @@ func (f DockerFetcher) createContainer(ctx context.Context, image string) (strin
 	return resp.ID, nil
 }
 
-func (f DockerFetcher) removeContainer(ctx context.Context, ID string) {
+func (f DockerSolver) removeContainer(ctx context.Context, ID string) {
 	err := f.Client.ContainerRemove(ctx, ID, types.ContainerRemoveOptions{})
 	if err != nil {
 		logrus.Error(err)

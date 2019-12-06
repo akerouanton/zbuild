@@ -1,7 +1,7 @@
-package filefetch
+package statesolver
 
 import "context"
 
-type FileFetcher interface {
+type StateSolver interface {
 	FetchFile(ctx context.Context, image, path string) ([]byte, error)
 }

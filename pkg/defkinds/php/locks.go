@@ -45,7 +45,7 @@ func (h PHPHandler) UpdateLocks(
 	def.Locks.BaseImage = def.BaseImage
 
 	ctx := context.TODO()
-	osrelease, err := builddef.ResolveImageOS(ctx, h.fetcher, def.Locks.BaseImage)
+	osrelease, err := builddef.ResolveImageOS(ctx, h.solver, def.Locks.BaseImage)
 	if err != nil {
 		return nil, xerrors.Errorf("could not resolve OS details from base image: %w", err)
 	}

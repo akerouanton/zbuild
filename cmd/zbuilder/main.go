@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/NiR-/zbuild/pkg/builder"
 	"github.com/NiR-/zbuild/pkg/defkinds/php"
-	"github.com/NiR-/zbuild/pkg/filefetch"
+	"github.com/NiR-/zbuild/pkg/statesolver"
 	"github.com/NiR-/zbuild/pkg/registry"
 	"github.com/moby/buildkit/frontend/gateway/grpcclient"
 	"github.com/moby/buildkit/util/appcontext"
@@ -11,9 +11,9 @@ import (
 )
 
 func main() {
-	fetcher := filefetch.DockerFetcher{}
+	solver := statesolver.DockerSolver{}
 	reg := registry.NewKindRegistry()
-	php.RegisterKind(reg, fetcher)
+	php.RegisterKind(reg, solver)
 
 	b := builder.Builder{Registry: reg}
 	err := grpcclient.RunFromEnvironment(appcontext.Context(), b.Build)

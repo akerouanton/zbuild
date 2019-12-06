@@ -38,11 +38,11 @@ func initBuildLLBForDevStageTC(t *testing.T, mockCtrl *gomock.Controller) buildT
 		Filename: "composer.lock",
 	}).Return([]byte{}, xerrors.New("file does not exist"))
 
-	fetcher := mocks.NewMockFileFetcher(mockCtrl)
+	solver := mocks.NewMockStateSolver(mockCtrl)
 	genericDef := loadGenericDef(t, "testdata/build/zbuild.yml", "testdata/build/zbuild.lock")
 
 	return buildTC{
-		handler: php.NewPHPHandler(fetcher),
+		handler: php.NewPHPHandler(solver),
 		client:  c,
 		buildOpts: builddef.BuildOpts{
 			Def:           &genericDef,
@@ -70,11 +70,11 @@ func initBuildLLBForProdStageTC(t *testing.T, mockCtrl *gomock.Controller) build
 		Filename: "composer.lock",
 	}).Return([]byte{}, xerrors.New("file does not exist"))
 
-	fetcher := mocks.NewMockFileFetcher(mockCtrl)
+	solver := mocks.NewMockStateSolver(mockCtrl)
 	genericDef := loadGenericDef(t, "testdata/build/zbuild.yml", "testdata/build/zbuild.lock")
 
 	return buildTC{
-		handler: php.NewPHPHandler(fetcher),
+		handler: php.NewPHPHandler(solver),
 		client:  c,
 		buildOpts: builddef.BuildOpts{
 			Def:           &genericDef,
@@ -157,11 +157,11 @@ type debugTC struct {
 }
 
 func initDebugLLBForDevStageTC(t *testing.T, mockCtrl *gomock.Controller) debugTC {
-	fetcher := mocks.NewMockFileFetcher(mockCtrl)
+	solver := mocks.NewMockStateSolver(mockCtrl)
 	genericDef := loadGenericDef(t, "testdata/build/zbuild.yml", "testdata/build/zbuild.lock")
 
 	return debugTC{
-		handler: php.NewPHPHandler(fetcher),
+		handler: php.NewPHPHandler(solver),
 		buildOpts: builddef.BuildOpts{
 			Def:           &genericDef,
 			Stage:         "dev",
@@ -173,11 +173,11 @@ func initDebugLLBForDevStageTC(t *testing.T, mockCtrl *gomock.Controller) debugT
 }
 
 func initDebugLLBForProdStageTC(t *testing.T, mockCtrl *gomock.Controller) debugTC {
-	fetcher := mocks.NewMockFileFetcher(mockCtrl)
+	solver := mocks.NewMockStateSolver(mockCtrl)
 	genericDef := loadGenericDef(t, "testdata/build/zbuild.yml", "testdata/build/zbuild.lock")
 
 	return debugTC{
-		handler: php.NewPHPHandler(fetcher),
+		handler: php.NewPHPHandler(solver),
 		buildOpts: builddef.BuildOpts{
 			Def:           &genericDef,
 			Stage:         "prod",

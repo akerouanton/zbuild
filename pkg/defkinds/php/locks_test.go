@@ -38,8 +38,8 @@ BUG_REPORT_URL="https://bugs.debian.org/"`)
 func initSuccessfullyUpdateLocksTC(t *testing.T, mockCtrl *gomock.Controller) updateLocksTC {
 	ctx := context.TODO()
 
-	fetcher := mocks.NewMockFileFetcher(mockCtrl)
-	fetcher.EXPECT().FetchFile(
+	solver := mocks.NewMockStateSolver(mockCtrl)
+	solver.EXPECT().FetchFile(
 		ctx,
 		"docker.io/library/php:7.3-fpm-buster",
 		"/etc/os-release",
@@ -67,7 +67,7 @@ func initSuccessfullyUpdateLocksTC(t *testing.T, mockCtrl *gomock.Controller) up
 		"zlib1g-dev":   "zlib1g-dev-version",
 	}, nil)
 
-	h := php.NewPHPHandler(fetcher)
+	h := php.NewPHPHandler(solver)
 	h.NotPecl = h.NotPecl.WithExtensionIndex(extindex.ExtIndex{
 		"redis": extindex.ExtVersions{
 			"5.1.1": extindex.Beta,
@@ -98,8 +98,8 @@ BUG_REPORT_URL="https://bugs.alpinelinux.org/"
 func failToUpdateLocksForAlpineBaseImageTC(t *testing.T, mockCtrl *gomock.Controller) updateLocksTC {
 	ctx := context.TODO()
 
-	fetcher := mocks.NewMockFileFetcher(mockCtrl)
-	fetcher.EXPECT().FetchFile(
+	solver := mocks.NewMockStateSolver(mockCtrl)
+	solver.EXPECT().FetchFile(
 		ctx,
 		"docker.io/library/php:7.3-fpm-buster",
 		"/etc/os-release",
@@ -107,7 +107,7 @@ func failToUpdateLocksForAlpineBaseImageTC(t *testing.T, mockCtrl *gomock.Contro
 
 	return updateLocksTC{
 		deffile:     "testdata/locks/without-stages.yml",
-		handler:     php.NewPHPHandler(fetcher),
+		handler:     php.NewPHPHandler(solver),
 		pkgSolver:   mocks.NewMockPackageSolver(mockCtrl),
 		expectedErr: xerrors.New("unsupported OS \"alpine\": only debian-based base images are supported"),
 	}

@@ -1,17 +1,17 @@
-package filefetch_test
+package statesolver_test
 
 import (
 	"context"
 	"errors"
 	"testing"
 
-	"github.com/NiR-/zbuild/pkg/filefetch"
+	"github.com/NiR-/zbuild/pkg/statesolver"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
 )
 
 type dockerTC struct {
-	fetcher     filefetch.DockerFetcher
+	solver     statesolver.DockerSolver
 	image       string
 	path        string
 	expected    string
@@ -28,12 +28,12 @@ func newDockerClient(t *testing.T) *client.Client {
 
 func initFetchOSReleaseTC(t *testing.T) dockerTC {
 	c := newDockerClient(t)
-	f := filefetch.DockerFetcher{
+	f := statesolver.DockerSolver{
 		Client: c,
 		Labels: map[string]string{},
 	}
 	return dockerTC{
-		fetcher: f,
+		solver: f,
 		image:   "debian:buster-20191014-slim",
 		path:    "/etc/os-release",
 		expected: `PRETTY_NAME="Debian GNU/Linux 10 (buster)"
@@ -51,12 +51,12 @@ BUG_REPORT_URL="https://bugs.debian.org/"
 
 func initFailToFetchNonexistantPathTC(t *testing.T) dockerTC {
 	c := newDockerClient(t)
-	f := filefetch.DockerFetcher{
+	f := statesolver.DockerSolver{
 		Client: c,
 		Labels: map[string]string{},
 	}
 	return dockerTC{
-		fetcher:     f,
+		solver:     f,
 		image:       "debian:buster-20191014-slim",
 		path:        "/etc/nopenopenope",
 		expectedErr: errors.New(`path "/etc/nopenopenope" not found in "debian:buster-20191014-slim"`),
@@ -65,7 +65,7 @@ func initFailToFetchNonexistantPathTC(t *testing.T) dockerTC {
 
 func initPullImageAndFetchFileTC(t *testing.T) dockerTC {
 	c := newDockerClient(t)
-	f := filefetch.DockerFetcher{
+	f := statesolver.DockerSolver{
 		Client: c,
 		Labels: map[string]string{},
 	}
@@ -78,7 +78,7 @@ func initPullImageAndFetchFileTC(t *testing.T) dockerTC {
 	}
 
 	return dockerTC{
-		fetcher: f,
+		solver: f,
 		image:   "debian:bullseye-slim",
 		path:    "/etc/os-release",
 		expected: `PRETTY_NAME="Debian GNU/Linux bullseye/sid"
@@ -106,8 +106,8 @@ func TestFetchFileWithDocker(t *testing.T) {
 
 			tc := tcinit(t)
 
-			ctx := context.TODO()
-			res, err := tc.fetcher.FetchFile(ctx, tc.image, tc.path)
+			ctx := context.Background()
+			res, err := tc.solver.FetchFile(ctx, tc.image, tc.path)
 
 			if tc.expectedErr != nil {
 				if err == nil || err.Error() != tc.expectedErr.Error() {
