@@ -227,7 +227,7 @@ func failToResolveBuildContextTC(mockCtrl *gomock.Controller) testCase {
 	return testCase{
 		client:      c,
 		registry:    registry.NewKindRegistry(),
-		expectedErr: errors.New("failed to resolve build context: failed to execute solve request: some error"),
+		expectedErr: errors.New("failed to resolve build context: some error"),
 	}
 }
 
@@ -388,7 +388,7 @@ func failWhenKindHandlerReturnsUnsolvableState(mockCtrl *gomock.Controller) test
 	return testCase{
 		client:      c,
 		registry:    registry,
-		expectedErr: errors.New("failed to execute solve request: some solver error"),
+		expectedErr: errors.New("some solver error"),
 	}
 }
 

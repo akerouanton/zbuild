@@ -149,7 +149,7 @@ func itFailsToLoadConfigFilesWhenContextCannotBeResolvedTC(
 
 	return loadFromContextTC{
 		client:      c,
-		expectedErr: errors.New("failed to resolve build context: failed to execute solve request: some error"),
+		expectedErr: errors.New("failed to resolve build context: some error"),
 	}
 }
 

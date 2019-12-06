@@ -6,7 +6,9 @@ package mocks
 
 import (
 	context "context"
+	statesolver "github.com/NiR-/zbuild/pkg/statesolver"
 	gomock "github.com/golang/mock/gomock"
+	llb "github.com/moby/buildkit/client/llb"
 	reflect "reflect"
 )
 
@@ -33,15 +35,55 @@ func (m *MockStateSolver) EXPECT() *MockStateSolverMockRecorder {
 	return m.recorder
 }
 
-// FetchFile mocks base method
-func (m *MockStateSolver) FetchFile(arg0 context.Context, arg1, arg2 string) ([]byte, error) {
-	ret := m.ctrl.Call(m, "FetchFile", arg0, arg1, arg2)
+// FromBuildContext mocks base method
+func (m *MockStateSolver) FromBuildContext(arg0 ...llb.LocalOption) statesolver.ReadFileOpt {
+	varargs := []interface{}{}
+	for _, a := range arg0 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "FromBuildContext", varargs...)
+	ret0, _ := ret[0].(statesolver.ReadFileOpt)
+	return ret0
+}
+
+// FromBuildContext indicates an expected call of FromBuildContext
+func (mr *MockStateSolverMockRecorder) FromBuildContext(arg0 ...interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FromBuildContext", reflect.TypeOf((*MockStateSolver)(nil).FromBuildContext), arg0...)
+}
+
+// FromImage mocks base method
+func (m *MockStateSolver) FromImage(arg0 string) statesolver.ReadFileOpt {
+	ret := m.ctrl.Call(m, "FromImage", arg0)
+	ret0, _ := ret[0].(statesolver.ReadFileOpt)
+	return ret0
+}
+
+// FromImage indicates an expected call of FromImage
+func (mr *MockStateSolverMockRecorder) FromImage(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FromImage", reflect.TypeOf((*MockStateSolver)(nil).FromImage), arg0)
+}
+
+// FromLocalState mocks base method
+func (m *MockStateSolver) FromLocalState(arg0 llb.State) statesolver.ReadFileOpt {
+	ret := m.ctrl.Call(m, "FromLocalState", arg0)
+	ret0, _ := ret[0].(statesolver.ReadFileOpt)
+	return ret0
+}
+
+// FromLocalState indicates an expected call of FromLocalState
+func (mr *MockStateSolverMockRecorder) FromLocalState(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FromLocalState", reflect.TypeOf((*MockStateSolver)(nil).FromLocalState), arg0)
+}
+
+// ReadFile mocks base method
+func (m *MockStateSolver) ReadFile(arg0 context.Context, arg1 string, arg2 statesolver.ReadFileOpt) ([]byte, error) {
+	ret := m.ctrl.Call(m, "ReadFile", arg0, arg1, arg2)
 	ret0, _ := ret[0].([]byte)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// FetchFile indicates an expected call of FetchFile
-func (mr *MockStateSolverMockRecorder) FetchFile(arg0, arg1, arg2 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FetchFile", reflect.TypeOf((*MockStateSolver)(nil).FetchFile), arg0, arg1, arg2)
+// ReadFile indicates an expected call of ReadFile
+func (mr *MockStateSolverMockRecorder) ReadFile(arg0, arg1, arg2 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReadFile", reflect.TypeOf((*MockStateSolver)(nil).ReadFile), arg0, arg1, arg2)
 }

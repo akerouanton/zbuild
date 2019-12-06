@@ -47,8 +47,10 @@ BUG_REPORT_URL="https://bugs.debian.org/"`),
 
 			ctx := context.TODO()
 			solver := mocks.NewMockStateSolver(mockCtrl)
-			solver.EXPECT().FetchFile(
-				ctx, tc.imageRef, "/etc/os-release",
+
+			solver.EXPECT().FromImage(tc.imageRef).Times(1)
+			solver.EXPECT().ReadFile(
+				ctx, "/etc/os-release", gomock.Any(),
 			).Return(tc.file, nil)
 
 			res, err := builddef.ResolveImageOS(ctx, solver, tc.imageRef)

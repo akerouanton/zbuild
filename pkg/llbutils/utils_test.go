@@ -49,7 +49,7 @@ func initReturnsAnErrorWhenSolveFailsTC(mockCtrl *gomock.Controller) solveStateT
 	return solveStateTC{
 		client:      c,
 		state:       llb.State{},
-		expectedErr: errors.New("failed to execute solve request: some error"),
+		expectedErr: errors.New("some error"),
 	}
 }
 
