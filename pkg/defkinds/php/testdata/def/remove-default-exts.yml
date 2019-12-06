@@ -1,4 +1,3 @@
-kind: php
 # Default extensions aren't automatically removed when inference is disabled
 infer: true
 
@@ -10,3 +9,4 @@ extensions:
   sodium: "*"
   spl: "*"
   standard: "*"
+  mbstring: "*"

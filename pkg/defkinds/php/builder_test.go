@@ -11,11 +11,10 @@ import (
 	"github.com/NiR-/zbuild/pkg/mocks"
 	"github.com/golang/mock/gomock"
 	"github.com/moby/buildkit/frontend/gateway/client"
-	"golang.org/x/xerrors"
 )
 
 type buildTC struct {
-	handler       php.PHPHandler
+	handler       *php.PHPHandler
 	client        client.Client
 	buildOpts     builddef.BuildOpts
 	expectedState string
@@ -24,26 +23,22 @@ type buildTC struct {
 }
 
 func initBuildLLBForDevStageTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
-	contextRef := llbtest.NewMockReference(mockCtrl)
-	solvedContext := &client.Result{
-		Refs: map[string]client.Reference{"linux/amd64": contextRef},
-		Ref:  contextRef,
-	}
-
-	ctx := context.TODO()
-	c := llbtest.NewMockClient(mockCtrl)
-	c.EXPECT().Solve(ctx, gomock.Any()).Return(solvedContext, nil)
-
-	contextRef.EXPECT().ReadFile(ctx, client.ReadRequest{
-		Filename: "composer.lock",
-	}).Return([]byte{}, xerrors.New("file does not exist"))
-
-	solver := mocks.NewMockStateSolver(mockCtrl)
 	genericDef := loadGenericDef(t, "testdata/build/zbuild.yml", "testdata/build/zbuild.lock")
 
+	solver := mocks.NewMockStateSolver(mockCtrl)
+
+	raw := loadRawTestdata(t, "testdata/composer/composer-symfony4.4.lock")
+	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
+	solver.EXPECT().ReadFile(
+		gomock.Any(), "composer.lock", gomock.Any(),
+	).Return(raw, nil)
+
+	kindHandler := php.NewPHPHandler()
+	kindHandler.WithSolver(solver)
+
 	return buildTC{
-		handler: php.NewPHPHandler(solver),
-		client:  c,
+		handler: kindHandler,
+		client:  llbtest.NewMockClient(mockCtrl),
 		buildOpts: builddef.BuildOpts{
 			Def:           &genericDef,
 			Stage:         "dev",
@@ -56,26 +51,22 @@ func initBuildLLBForDevStageTC(t *testing.T, mockCtrl *gomock.Controller) buildT
 }
 
 func initBuildLLBForProdStageTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
-	contextRef := llbtest.NewMockReference(mockCtrl)
-	solvedContext := &client.Result{
-		Refs: map[string]client.Reference{"linux/amd64": contextRef},
-		Ref:  contextRef,
-	}
-
-	ctx := context.TODO()
-	c := llbtest.NewMockClient(mockCtrl)
-	c.EXPECT().Solve(ctx, gomock.Any()).Return(solvedContext, nil)
-
-	contextRef.EXPECT().ReadFile(ctx, client.ReadRequest{
-		Filename: "composer.lock",
-	}).Return([]byte{}, xerrors.New("file does not exist"))
-
-	solver := mocks.NewMockStateSolver(mockCtrl)
 	genericDef := loadGenericDef(t, "testdata/build/zbuild.yml", "testdata/build/zbuild.lock")
 
+	solver := mocks.NewMockStateSolver(mockCtrl)
+
+	raw := loadRawTestdata(t, "testdata/composer/composer-symfony4.4.lock")
+	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
+	solver.EXPECT().ReadFile(
+		gomock.Any(), "composer.lock", gomock.Any(),
+	).Return(raw, nil)
+
+	kindHandler := php.NewPHPHandler()
+	kindHandler.WithSolver(solver)
+
 	return buildTC{
-		handler: php.NewPHPHandler(solver),
-		client:  c,
+		handler: kindHandler,
+		client:  llbtest.NewMockClient(mockCtrl),
 		buildOpts: builddef.BuildOpts{
 			Def:           &genericDef,
 			Stage:         "prod",
@@ -105,7 +96,7 @@ func TestBuild(t *testing.T) {
 			tc := tcinit(t, mockCtrl)
 			ctx := context.TODO()
 
-			state, _, err := tc.handler.Build(ctx, tc.client, tc.buildOpts)
+			state, _, err := tc.handler.Build(ctx, tc.buildOpts)
 			jsonState := llbtest.StateToJSON(t, state)
 
 			if *flagTestdata {
@@ -147,88 +138,4 @@ func newTempFile(t *testing.T) string {
 	}
 	defer file.Close()
 	return file.Name()
-}
-
-type debugTC struct {
-	handler       php.PHPHandler
-	buildOpts     builddef.BuildOpts
-	expectedState string
-	expectedErr   error
-}
-
-func initDebugLLBForDevStageTC(t *testing.T, mockCtrl *gomock.Controller) debugTC {
-	solver := mocks.NewMockStateSolver(mockCtrl)
-	genericDef := loadGenericDef(t, "testdata/build/zbuild.yml", "testdata/build/zbuild.lock")
-
-	return debugTC{
-		handler: php.NewPHPHandler(solver),
-		buildOpts: builddef.BuildOpts{
-			Def:           &genericDef,
-			Stage:         "dev",
-			LocalUniqueID: "x1htr02606a9rk8b0daewh9es",
-			ContextName:   "context",
-		},
-		expectedState: "testdata/build/state-dev.json",
-	}
-}
-
-func initDebugLLBForProdStageTC(t *testing.T, mockCtrl *gomock.Controller) debugTC {
-	solver := mocks.NewMockStateSolver(mockCtrl)
-	genericDef := loadGenericDef(t, "testdata/build/zbuild.yml", "testdata/build/zbuild.lock")
-
-	return debugTC{
-		handler: php.NewPHPHandler(solver),
-		buildOpts: builddef.BuildOpts{
-			Def:           &genericDef,
-			Stage:         "prod",
-			LocalUniqueID: "x1htr02606a9rk8b0daewh9es",
-			ContextName:   "context",
-		},
-		expectedState: "testdata/build/state-prod.json",
-	}
-}
-
-func TestDebugLLB(t *testing.T) {
-	if *flagTestdata {
-		return
-	}
-
-	testcases := map[string]func(*testing.T, *gomock.Controller) debugTC{
-		"debug LLB DAG for dev stage":  initDebugLLBForDevStageTC,
-		"debug LLB DAG for prod stage": initDebugLLBForProdStageTC,
-	}
-
-	for tcname := range testcases {
-		tcinit := testcases[tcname]
-
-		t.Run(tcname, func(t *testing.T) {
-			t.Parallel()
-
-			mockCtrl := gomock.NewController(t)
-			defer mockCtrl.Finish()
-
-			tc := tcinit(t, mockCtrl)
-
-			state, err := tc.handler.DebugLLB(tc.buildOpts)
-			jsonState := llbtest.StateToJSON(t, state)
-
-			if tc.expectedErr != nil {
-				if err == nil || tc.expectedErr.Error() != err.Error() {
-					t.Fatalf("Expected error: %v\nGot: %v", tc.expectedErr, err)
-				}
-				return
-			}
-			if err != nil {
-				t.Fatalf("Unexpected error: %v", err)
-			}
-
-			expectedState := loadTestdata(t, tc.expectedState)
-			if expectedState != jsonState {
-				tempfile := newTempFile(t)
-				writeTestdata(t, tempfile, jsonState)
-
-				t.Fatalf("Expected: <%s>\nGot: <%s>", tc.expectedState, tempfile)
-			}
-		})
-	}
 }

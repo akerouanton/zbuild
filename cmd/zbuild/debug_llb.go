@@ -4,6 +4,8 @@ import (
 	"os"
 
 	"github.com/NiR-/zbuild/pkg/builder"
+	"github.com/NiR-/zbuild/pkg/statesolver"
+	"github.com/docker/docker/client"
 	"github.com/moby/buildkit/client/llb"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -39,9 +41,10 @@ func newDebugLLBCmd() *cobra.Command {
 
 func HandleDebugLLBCmd(cmd *cobra.Command, args []string) {
 	reg := buildKindRegistry()
+	solver := newDockerSolver()
 	b := builder.Builder{Registry: reg}
 
-	state, err := b.Debug(debugFlags.file, debugFlags.stage)
+	state, err := b.Debug(solver, debugFlags.file, debugFlags.stage)
 	if err != nil {
 		logrus.Fatal(err)
 	}
@@ -52,4 +55,16 @@ func HandleDebugLLBCmd(cmd *cobra.Command, args []string) {
 	}
 
 	llb.WriteTo(out, os.Stdout)
+}
+
+func newDockerSolver() statesolver.DockerSolver {
+	docker, err := client.NewClientWithOpts(client.FromEnv)
+	if err != nil {
+		logrus.Fatal(err)
+	}
+
+	return statesolver.DockerSolver{
+		Client: docker,
+		Labels: map[string]string{},
+	}
 }

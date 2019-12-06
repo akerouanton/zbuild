@@ -1,6 +1,7 @@
 package php_test
 
 import (
+	"context"
 	"io/ioutil"
 	"testing"
 
@@ -9,6 +10,7 @@ import (
 	"github.com/NiR-/zbuild/pkg/defkinds/php"
 	"github.com/NiR-/zbuild/pkg/mocks"
 	"github.com/NiR-/zbuild/pkg/pkgsolver"
+	"github.com/NiR-/zbuild/pkg/statesolver"
 	"github.com/golang/mock/gomock"
 	"golang.org/x/xerrors"
 	"gopkg.in/yaml.v2"
@@ -17,7 +19,7 @@ import (
 type updateLocksTC struct {
 	// deffile is a path to a yaml file containing a php build definition
 	deffile   string
-	handler   php.PHPHandler
+	handler   *php.PHPHandler
 	pkgSolver pkgsolver.PackageSolver
 	// expected is the path to a lock file in testdata/ folder
 	expected    string
@@ -36,12 +38,17 @@ BUG_REPORT_URL="https://bugs.debian.org/"`)
 
 func initSuccessfullyUpdateLocksTC(t *testing.T, mockCtrl *gomock.Controller) updateLocksTC {
 	solver := mocks.NewMockStateSolver(mockCtrl)
-	solver.EXPECT().FromImage(
-		"docker.io/library/php:7.3-fpm-buster",
-	).Times(1)
+	solver.EXPECT().FromImage("docker.io/library/php:7.3-fpm-buster").Times(1)
 	solver.EXPECT().ReadFile(
-		gomock.Any(), "/etc/os-release", gomock.Any(),
+		gomock.Any(),
+		"/etc/os-release",
+		gomock.Any(),
 	).Return(rawDebianOSRelease, nil)
+
+	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
+	solver.EXPECT().ReadFile(
+		gomock.Any(), "composer.lock", gomock.Any(),
+	).Return([]byte{}, statesolver.FileNotFound)
 
 	pkgSolver := mocks.NewMockPackageSolver(mockCtrl)
 	pkgSolver.EXPECT().Configure(gomock.Any()).Times(1)
@@ -65,7 +72,7 @@ func initSuccessfullyUpdateLocksTC(t *testing.T, mockCtrl *gomock.Controller) up
 		"zlib1g-dev":   "zlib1g-dev-version",
 	}, nil)
 
-	h := php.NewPHPHandler(solver)
+	h := php.NewPHPHandler()
 	h.NotPecl = h.NotPecl.WithExtensionIndex(extindex.ExtIndex{
 		"redis": extindex.ExtVersions{
 			"5.1.1": extindex.Beta,
@@ -76,6 +83,7 @@ func initSuccessfullyUpdateLocksTC(t *testing.T, mockCtrl *gomock.Controller) up
 			"1.1.0": extindex.Beta,
 		},
 	})
+	h.WithSolver(solver)
 
 	return updateLocksTC{
 		deffile:   "testdata/locks/without-stages.yml",
@@ -95,16 +103,19 @@ BUG_REPORT_URL="https://bugs.alpinelinux.org/"
 
 func failToUpdateLocksForAlpineBaseImageTC(t *testing.T, mockCtrl *gomock.Controller) updateLocksTC {
 	solver := mocks.NewMockStateSolver(mockCtrl)
-	solver.EXPECT().FromImage(
-		"docker.io/library/php:7.3-fpm-alpine3.10",
-	).Times(1)
+	solver.EXPECT().FromImage("docker.io/library/php:7.3-fpm-buster").Times(1)
 	solver.EXPECT().ReadFile(
-		gomock.Any(), "/etc/os-release", gomock.Any(),
+		gomock.Any(),
+		"/etc/os-release",
+		gomock.Any(),
 	).Return(rawAlpineOSRelease, nil)
 
+	kindHandler := php.NewPHPHandler()
+	kindHandler.WithSolver(solver)
+
 	return updateLocksTC{
-		deffile:     "testdata/locks/with-base-image.yml",
-		handler:     php.NewPHPHandler(solver),
+		deffile:     "testdata/locks/without-stages.yml",
+		handler:     kindHandler,
 		pkgSolver:   mocks.NewMockPackageSolver(mockCtrl),
 		expectedErr: xerrors.New("unsupported OS \"alpine\": only debian-based base images are supported"),
 	}
@@ -132,7 +143,8 @@ func TestUpdateLocks(t *testing.T) {
 			var rawLocks []byte
 			var err error
 
-			locks, err = tc.handler.UpdateLocks(&genericDef, tc.pkgSolver)
+			ctx := context.Background()
+			locks, err = tc.handler.UpdateLocks(ctx, tc.pkgSolver, &genericDef)
 			if err == nil {
 				rawLocks, err = locks.RawLocks()
 			}

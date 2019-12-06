@@ -1,5 +1,3 @@
-kind: php
-
 stages:
   dev:
     derive_from: prod

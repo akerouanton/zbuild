@@ -11,6 +11,24 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+var defaultBaseImages = map[string]struct {
+	FPM string
+	CLI string
+}{
+	"7.2": {
+		FPM: "docker.io/library/php:7.2-fpm-buster",
+		CLI: "docker.io/library/php:7.2-cli-buster",
+	},
+	"7.3": {
+		FPM: "docker.io/library/php:7.3-fpm-buster",
+		CLI: "docker.io/library/php:7.3-cli-buster",
+	},
+	"7.4": {
+		FPM: "docker.io/library/php:7.4-fpm-buster",
+		CLI: "docker.io/library/php:7.4-cli-buster",
+	},
+}
+
 // DefinitionLocks defines version locks for system packages and PHP extensions used
 // by each stage.
 type DefinitionLocks struct {
@@ -32,9 +50,10 @@ type StageLocks struct {
 	Extensions     map[string]string `yaml:"extensions"`
 }
 
-func (h PHPHandler) UpdateLocks(
-	genericDef *builddef.BuildDef,
+func (h *PHPHandler) UpdateLocks(
+	ctx context.Context,
 	pkgSolver pkgsolver.PackageSolver,
+	genericDef *builddef.BuildDef,
 ) (builddef.Locks, error) {
 	def, err := NewKind(genericDef)
 	if err != nil {
@@ -44,7 +63,6 @@ func (h PHPHandler) UpdateLocks(
 	// @TODO: resolve sha256 of the base image and lock it
 	def.Locks.BaseImage = def.BaseImage
 
-	ctx := context.TODO()
 	osrelease, err := builddef.ResolveImageOS(ctx, h.solver, def.Locks.BaseImage)
 	if err != nil {
 		return nil, xerrors.Errorf("could not resolve OS details from base image: %w", err)
@@ -62,24 +80,23 @@ func (h PHPHandler) UpdateLocks(
 		return nil, xerrors.Errorf("could not update stage locks: %w", err)
 	}
 
-	stagesLocks, err := h.updateStagesLocks(def, pkgSolver)
+	stagesLocks, err := h.updateStagesLocks(ctx, pkgSolver, def)
 	def.Locks.Stages = stagesLocks
 	return def.Locks, err
 }
 
-func (h PHPHandler) updateStagesLocks(
-	def Definition,
+func (h *PHPHandler) updateStagesLocks(
+	ctx context.Context,
 	pkgSolver pkgsolver.PackageSolver,
+	def Definition,
 ) (map[string]StageLocks, error) {
 	locks := map[string]StageLocks{}
-
-	platformReqsLoader := func(stage *StageDefinition) error {
-		// @TODO: basedir should be the parent dir of the zbuild.yml file
-		return LoadPlatformReqsFromFS(stage, "")
+	composerLockLoader := func(stageDef *StageDefinition) error {
+		return LoadComposerLock(ctx, h.solver, stageDef)
 	}
 
 	for name := range def.Stages {
-		stage, err := def.ResolveStageDefinition(name, platformReqsLoader)
+		stage, err := def.ResolveStageDefinition(name, composerLockLoader)
 		if err != nil {
 			return nil, xerrors.Errorf("could not resolve stage %q: %w", name, err)
 		}
@@ -101,7 +118,7 @@ func (h PHPHandler) updateStagesLocks(
 	return locks, nil
 }
 
-func (h PHPHandler) lockExtensions(extensions map[string]string) (map[string]string, error) {
+func (h *PHPHandler) lockExtensions(extensions map[string]string) (map[string]string, error) {
 	resolved := map[string]string{}
 	ctx := context.Background()
 

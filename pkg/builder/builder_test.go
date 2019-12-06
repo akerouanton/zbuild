@@ -128,8 +128,9 @@ func successfullyBuildDefaultStageAndFileTC(mockCtrl *gomock.Controller) testCas
 		},
 	}
 	handler := mocks.NewMockKindHandler(mockCtrl)
+	handler.EXPECT().WithSolver(gomock.Any()).Times(1)
 	handler.EXPECT().Build(
-		ctx, c, MatchBuildOpts(buildOpts),
+		ctx, MatchBuildOpts(buildOpts),
 	).Return(state, &img, nil)
 
 	registry := registry.NewKindRegistry()
@@ -193,8 +194,9 @@ func successfullyBuildCustomStageAndFileTC(mockCtrl *gomock.Controller) testCase
 		},
 	}
 	handler := mocks.NewMockKindHandler(mockCtrl)
+	handler.EXPECT().WithSolver(gomock.Any()).Times(1)
 	handler.EXPECT().Build(
-		ctx, c, MatchBuildOpts(buildOpts),
+		ctx, MatchBuildOpts(buildOpts),
 	).Return(state, &img, nil)
 
 	registry := registry.NewKindRegistry()
@@ -335,11 +337,13 @@ func failWhenKindHandlerFailsTC(mockCtrl *gomock.Controller) testCase {
 	readLockReq := client.ReadRequest{Filename: "zbuild.lock"}
 	refBuildCtx.EXPECT().ReadFile(gomock.Any(), gomock.Eq(readLockReq)).Return(zbuildLock, nil)
 
+	handler := mocks.NewMockKindHandler(mockCtrl)
+	handler.EXPECT().WithSolver(gomock.Any()).Times(1)
+
 	state := llb.State{}
 	img := image.Image{}
 	err := xerrors.New("some build error")
-	handler := mocks.NewMockKindHandler(mockCtrl)
-	handler.EXPECT().Build(gomock.Any(), c, gomock.Any()).Return(state, &img, err)
+	handler.EXPECT().Build(gomock.Any(), gomock.Any()).Return(state, &img, err)
 
 	registry := registry.NewKindRegistry()
 	registry.Register("php", handler)
@@ -368,6 +372,8 @@ func failWhenKindHandlerReturnsUnsolvableState(mockCtrl *gomock.Controller) test
 	readYmlReq := client.ReadRequest{Filename: "zbuild.yml"}
 	refBuildCtx.EXPECT().ReadFile(gomock.Any(), gomock.Eq(readYmlReq)).Return(zbuildYml, nil)
 
+	handler := mocks.NewMockKindHandler(mockCtrl)
+	handler.EXPECT().WithSolver(gomock.Any()).Times(1)
 	readLockReq := client.ReadRequest{Filename: "zbuild.lock"}
 	refBuildCtx.EXPECT().ReadFile(gomock.Any(), gomock.Eq(readLockReq)).Return(zbuildLock, nil)
 
@@ -379,8 +385,7 @@ func failWhenKindHandlerReturnsUnsolvableState(mockCtrl *gomock.Controller) test
 			Author: "zbuild",
 		},
 	}
-	handler := mocks.NewMockKindHandler(mockCtrl)
-	handler.EXPECT().Build(gomock.Any(), c, gomock.Any()).Return(state, &img, nil)
+	handler.EXPECT().Build(gomock.Any(), gomock.Any()).Return(state, &img, nil)
 
 	registry := registry.NewKindRegistry()
 	registry.Register("php", handler)
