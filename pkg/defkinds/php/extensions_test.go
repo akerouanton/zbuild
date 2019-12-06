@@ -12,12 +12,14 @@ import (
 )
 
 type installExtensionsTC struct {
+	def        php.Definition
 	extensions map[string]string
 	testdata   string
 }
 
 func initInstallGDWithAllFormatsTC(t *testing.T) installExtensionsTC {
 	return installExtensionsTC{
+		def: php.Definition{},
 		extensions: map[string]string{
 			"gd":          "*",
 			"gd.freetype": "*",
@@ -30,6 +32,7 @@ func initInstallGDWithAllFormatsTC(t *testing.T) installExtensionsTC {
 
 func initInstallPeclExtensionsTC(t *testing.T) installExtensionsTC {
 	return installExtensionsTC{
+		def: php.Definition{},
 		extensions: map[string]string{
 			"redis": "*",
 		},
@@ -54,7 +57,7 @@ func TestInstallExtensions(t *testing.T) {
 			tc := tcinit(t)
 
 			state := llb.Scratch()
-			res := php.InstallExtensions(state, tc.extensions)
+			res := php.InstallExtensions(state, tc.def, tc.extensions)
 			jsonState := llbtest.StateToJSON(t, res)
 
 			if *flagTestdata {

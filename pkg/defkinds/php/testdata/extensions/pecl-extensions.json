@@ -11,7 +11,7 @@
               "-o",
               "pipefail",
               "-c",
-              "pecl install -o -f redis \u0026\u0026 docker-php-ext-enable redis \u0026\u0026 rm -rf /tmp/pear"
+              "curl -f -o /usr/local/sbin/notpecl https://storage.googleapis.com/notpecl/notpecl \u0026\u0026 chmod +x /usr/local/sbin/notpecl \u0026\u0026 notpecl install redis \u0026\u0026 docker-php-ext-enable redis \u0026\u0026 rm -rf /usr/local/sbin/notpecl"
             ],
             "cwd": "/"
           },
@@ -30,7 +30,7 @@
       },
       "constraints": {}
     },
-    "Digest": "sha256:78f19250bbd6af3ba65559933f37f4b89cf0d72fac1dec2c281c6eb2f7f36611",
+    "Digest": "sha256:6dca0d4b9eaf38d434a36b8f25be72ef5d284535309eff754a5dd1e4a99e8400",
     "OpMetadata": {
       "description": {
         "llb.customname": "Install PHP extensions (redis)"
@@ -44,13 +44,13 @@
     "Op": {
       "inputs": [
         {
-          "digest": "sha256:78f19250bbd6af3ba65559933f37f4b89cf0d72fac1dec2c281c6eb2f7f36611",
+          "digest": "sha256:6dca0d4b9eaf38d434a36b8f25be72ef5d284535309eff754a5dd1e4a99e8400",
           "index": 0
         }
       ],
       "Op": null
     },
-    "Digest": "sha256:ff65ce857a11b26f9ba07461cb17d7ab30efe96e9840de8b940617961df05edf",
+    "Digest": "sha256:d31efaf92c26e3f2e627116e07feb1e5feb5c89ed340c81ed985a8c670eb2743",
     "OpMetadata": {
       "caps": {
         "constraints": true,

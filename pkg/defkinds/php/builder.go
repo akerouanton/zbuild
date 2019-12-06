@@ -139,7 +139,7 @@ func Config2LLB(
 		return state, img, xerrors.Errorf("failed to add \"install system pacakges\" steps: %w", err)
 	}
 
-	state = InstallExtensions(state, locks.Extensions)
+	state = InstallExtensions(state, def, locks.Extensions)
 	state = llbutils.CopyExternalFiles(state, stage.ExternalFiles)
 
 	state = llbutils.Mkdir(state, "1000:1000", "/app", "/composer")

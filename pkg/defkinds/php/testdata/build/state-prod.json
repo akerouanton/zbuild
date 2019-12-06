@@ -3,7 +3,11 @@
     "Op": {
       "inputs": [
         {
-          "digest": "sha256:85277b2cbdd860c5658093b2925b90975b92dcd4c4acf5e9eb8040f47f2530e2",
+          "digest": "sha256:af5edf54accdce266b70c54abd5237d73539bde0015d4f7ad7f2d37055ef5712",
+          "index": 0
+        },
+        {
+          "digest": "sha256:7cffb793bd922ad76b496aa6cd853024e7fde645979b2124306af11575a7318e",
           "index": 0
         }
       ],
@@ -12,13 +16,12 @@
           "actions": [
             {
               "input": 0,
-              "secondaryInput": -1,
+              "secondaryInput": 1,
               "output": 0,
               "Action": {
-                "Mkdir": {
-                  "path": "/composer",
-                  "mode": 488,
-                  "makeParents": true,
+                "Copy": {
+                  "src": "/out",
+                  "dest": "/usr/local/bin/fcgi-client",
                   "owner": {
                     "user": {
                       "User": {
@@ -31,6 +34,11 @@
                       }
                     }
                   },
+                  "mode": 488,
+                  "followSymlink": true,
+                  "dirCopyContents": true,
+                  "createDestPath": true,
+                  "allowWildcard": true,
                   "timestamp": -1
                 }
               }
@@ -44,8 +52,11 @@
       },
       "constraints": {}
     },
-    "Digest": "sha256:0203fefaf306353c2450079e4641eb797b874c671445bd474e1d8be5e5cb524a",
+    "Digest": "sha256:006a8d2b247698035195a9bff723387c2d91db650832212eba9bfd5d5b241fa0",
     "OpMetadata": {
+      "description": {
+        "llb.customname": "Copy https://github.com/NiR-/fcgi-client/releases/download/v0.1.0/fcgi-client.phar to /usr/local/bin/fcgi-client"
+      },
       "caps": {
         "file.base": true
       }
@@ -75,6 +86,88 @@
   },
   {
     "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:c2a2afcdb572597869588f42c1e4fc32f109360948240dd9a4c2c1fc1fadc8ff",
+          "index": 0
+        }
+      ],
+      "Op": null
+    },
+    "Digest": "sha256:27e4e0b4eafb809ee6dcf35df47ce3b015eab8ed1393061db324465c3bcd25fe",
+    "OpMetadata": {
+      "caps": {
+        "constraints": true,
+        "meta.description": true,
+        "platform": true
+      }
+    }
+  },
+  {
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:8d81e3db3b19680c8c97f827533f52b72c4cc03f27a8b677f9e72261316b9790",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "Exec": {
+          "meta": {
+            "args": [
+              "/bin/sh",
+              "-o",
+              "errexit",
+              "-o",
+              "pipefail",
+              "-c",
+              "docker-php-ext-configure intl  \u0026\u0026 docker-php-ext-configure pdo_mysql  \u0026\u0026 docker-php-ext-configure soap  \u0026\u0026 docker-php-ext-configure sockets  \u0026\u0026 docker-php-ext-configure zip  \u0026\u0026 docker-php-ext-install -j\"$(nproc)\" intl pdo_mysql soap sockets zip \u0026\u0026 docker-php-source delete"
+            ],
+            "env": [
+              "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+              "PHPIZE_DEPS=autoconf \t\tdpkg-dev \t\tfile \t\tg++ \t\tgcc \t\tlibc-dev \t\tmake \t\tpkg-config \t\tre2c",
+              "PHP_INI_DIR=/usr/local/etc/php",
+              "PHP_EXTRA_CONFIGURE_ARGS=--enable-fpm --with-fpm-user=www-data --with-fpm-group=www-data --disable-cgi",
+              "PHP_CFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
+              "PHP_CPPFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
+              "PHP_LDFLAGS=-Wl,-O1 -Wl,--hash-style=both -pie",
+              "GPG_KEYS=CBAF69F173A0FEA4B537F470D66C9593118BCCB6 F38252826ACD957EF380D39F2F7956BC5DA04B5D",
+              "PHP_VERSION=7.3.12",
+              "PHP_URL=https://www.php.net/get/php-7.3.12.tar.xz/from/this/mirror",
+              "PHP_ASC_URL=https://www.php.net/get/php-7.3.12.tar.xz.asc/from/this/mirror",
+              "PHP_SHA256=aafe5e9861ad828860c6af8c88cdc1488314785962328eb1783607c1fdd855df",
+              "PHP_MD5="
+            ],
+            "cwd": "/var/www/html"
+          },
+          "mounts": [
+            {
+              "input": 0,
+              "dest": "/",
+              "output": 0
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:352a5c3df313660e5071915d7b72867f519c0429af9e59704aa9701c91370456",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Install PHP extensions (intl, pdo_mysql, soap, sockets, zip)"
+      },
+      "caps": {
+        "exec.meta.base": true,
+        "exec.mount.bind": true
+      }
+    }
+  },
+  {
+    "Op": {
       "Op": {
         "Source": {
           "identifier": "docker-image://docker.io/library/composer:1.9.0"
@@ -90,57 +183,6 @@
     "OpMetadata": {
       "caps": {
         "source.image": true
-      }
-    }
-  },
-  {
-    "Op": {
-      "inputs": [
-        {
-          "digest": "sha256:c96f7edd696c7b06ec7b35cf8e65579d93f1d2f42cd529def587e7463af91774",
-          "index": 0
-        },
-        {
-          "digest": "sha256:806d26598f6a6ef38c88faa1a2f18ffb34bac0e3eba7911d283dbc6e7cd6bd8a",
-          "index": 0
-        }
-      ],
-      "Op": {
-        "File": {
-          "actions": [
-            {
-              "input": 0,
-              "secondaryInput": 1,
-              "output": 0,
-              "Action": {
-                "Copy": {
-                  "src": "/unpacked",
-                  "dest": "/usr/local/lib/php/extensions/no-debug-non-zts-20180731/blackfire.so",
-                  "mode": 488,
-                  "followSymlink": true,
-                  "dirCopyContents": true,
-                  "createDestPath": true,
-                  "allowWildcard": true,
-                  "timestamp": -1
-                }
-              }
-            }
-          ]
-        }
-      },
-      "platform": {
-        "Architecture": "amd64",
-        "OS": "linux"
-      },
-      "constraints": {}
-    },
-    "Digest": "sha256:6bc890064f6af7d9dcbcb2c24db52c5cf23a87530ed1eb2be83b3de84404eacd",
-    "OpMetadata": {
-      "description": {
-        "llb.customname": "Copy unpacked https://blackfire.io/api/v1/releases/probe/php/linux/amd64/72 to /usr/local/lib/php/extensions/no-debug-non-zts-20180731/blackfire.so"
-      },
-      "caps": {
-        "file.base": true
       }
     }
   },
@@ -206,58 +248,6 @@
       "description": {
         "llb.customname": "Unpack https://blackfire.io/api/v1/releases/probe/php/linux/amd64/72"
       },
-      "caps": {
-        "file.base": true
-      }
-    }
-  },
-  {
-    "Op": {
-      "inputs": [
-        {
-          "digest": "sha256:ce6f16220e4b056190e6d3932715c9c1ffbf11944868099b1038bb78866ffaf1",
-          "index": 0
-        }
-      ],
-      "Op": {
-        "File": {
-          "actions": [
-            {
-              "input": 0,
-              "secondaryInput": -1,
-              "output": 0,
-              "Action": {
-                "Mkdir": {
-                  "path": "/app",
-                  "mode": 488,
-                  "makeParents": true,
-                  "owner": {
-                    "user": {
-                      "User": {
-                        "ByID": 1000
-                      }
-                    },
-                    "group": {
-                      "User": {
-                        "ByID": 1000
-                      }
-                    }
-                  },
-                  "timestamp": -1
-                }
-              }
-            }
-          ]
-        }
-      },
-      "platform": {
-        "Architecture": "amd64",
-        "OS": "linux"
-      },
-      "constraints": {}
-    },
-    "Digest": "sha256:85277b2cbdd860c5658093b2925b90975b92dcd4c4acf5e9eb8040f47f2530e2",
-    "OpMetadata": {
       "caps": {
         "file.base": true
       }
@@ -401,44 +391,33 @@
     "Op": {
       "inputs": [
         {
-          "digest": "sha256:8d81e3db3b19680c8c97f827533f52b72c4cc03f27a8b677f9e72261316b9790",
+          "digest": "sha256:352a5c3df313660e5071915d7b72867f519c0429af9e59704aa9701c91370456",
+          "index": 0
+        },
+        {
+          "digest": "sha256:806d26598f6a6ef38c88faa1a2f18ffb34bac0e3eba7911d283dbc6e7cd6bd8a",
           "index": 0
         }
       ],
       "Op": {
-        "Exec": {
-          "meta": {
-            "args": [
-              "/bin/sh",
-              "-o",
-              "errexit",
-              "-o",
-              "pipefail",
-              "-c",
-              "docker-php-ext-configure intl  \u0026\u0026 docker-php-ext-configure pdo_mysql  \u0026\u0026 docker-php-ext-configure soap  \u0026\u0026 docker-php-ext-configure sockets  \u0026\u0026 docker-php-ext-configure zip  \u0026\u0026 docker-php-ext-install -j\"$(nproc)\" intl pdo_mysql soap sockets zip"
-            ],
-            "env": [
-              "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
-              "PHPIZE_DEPS=autoconf \t\tdpkg-dev \t\tfile \t\tg++ \t\tgcc \t\tlibc-dev \t\tmake \t\tpkg-config \t\tre2c",
-              "PHP_INI_DIR=/usr/local/etc/php",
-              "PHP_EXTRA_CONFIGURE_ARGS=--enable-fpm --with-fpm-user=www-data --with-fpm-group=www-data --disable-cgi",
-              "PHP_CFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
-              "PHP_CPPFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
-              "PHP_LDFLAGS=-Wl,-O1 -Wl,--hash-style=both -pie",
-              "GPG_KEYS=CBAF69F173A0FEA4B537F470D66C9593118BCCB6 F38252826ACD957EF380D39F2F7956BC5DA04B5D",
-              "PHP_VERSION=7.3.12",
-              "PHP_URL=https://www.php.net/get/php-7.3.12.tar.xz/from/this/mirror",
-              "PHP_ASC_URL=https://www.php.net/get/php-7.3.12.tar.xz.asc/from/this/mirror",
-              "PHP_SHA256=aafe5e9861ad828860c6af8c88cdc1488314785962328eb1783607c1fdd855df",
-              "PHP_MD5="
-            ],
-            "cwd": "/var/www/html"
-          },
-          "mounts": [
+        "File": {
+          "actions": [
             {
               "input": 0,
-              "dest": "/",
-              "output": 0
+              "secondaryInput": 1,
+              "output": 0,
+              "Action": {
+                "Copy": {
+                  "src": "/unpacked",
+                  "dest": "/usr/local/lib/php/extensions/no-debug-non-zts-20180731/blackfire.so",
+                  "mode": 488,
+                  "followSymlink": true,
+                  "dirCopyContents": true,
+                  "createDestPath": true,
+                  "allowWildcard": true,
+                  "timestamp": -1
+                }
+              }
             }
           ]
         }
@@ -449,14 +428,117 @@
       },
       "constraints": {}
     },
-    "Digest": "sha256:c96f7edd696c7b06ec7b35cf8e65579d93f1d2f42cd529def587e7463af91774",
+    "Digest": "sha256:af5edf54accdce266b70c54abd5237d73539bde0015d4f7ad7f2d37055ef5712",
     "OpMetadata": {
       "description": {
-        "llb.customname": "Install PHP extensions (intl, pdo_mysql, soap, sockets, zip)"
+        "llb.customname": "Copy unpacked https://blackfire.io/api/v1/releases/probe/php/linux/amd64/72 to /usr/local/lib/php/extensions/no-debug-non-zts-20180731/blackfire.so"
       },
       "caps": {
-        "exec.meta.base": true,
-        "exec.mount.bind": true
+        "file.base": true
+      }
+    }
+  },
+  {
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:006a8d2b247698035195a9bff723387c2d91db650832212eba9bfd5d5b241fa0",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "File": {
+          "actions": [
+            {
+              "input": 0,
+              "secondaryInput": -1,
+              "output": 0,
+              "Action": {
+                "Mkdir": {
+                  "path": "/app",
+                  "mode": 488,
+                  "makeParents": true,
+                  "owner": {
+                    "user": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    },
+                    "group": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    }
+                  },
+                  "timestamp": -1
+                }
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:b8fd42fb8cf5b28cf466c994a1c088d5a8a5fa40362fe800816a34f6f4e81200",
+    "OpMetadata": {
+      "caps": {
+        "file.base": true
+      }
+    }
+  },
+  {
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:b8fd42fb8cf5b28cf466c994a1c088d5a8a5fa40362fe800816a34f6f4e81200",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "File": {
+          "actions": [
+            {
+              "input": 0,
+              "secondaryInput": -1,
+              "output": 0,
+              "Action": {
+                "Mkdir": {
+                  "path": "/composer",
+                  "mode": 488,
+                  "makeParents": true,
+                  "owner": {
+                    "user": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    },
+                    "group": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    }
+                  },
+                  "timestamp": -1
+                }
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:c2a2afcdb572597869588f42c1e4fc32f109360948240dd9a4c2c1fc1fadc8ff",
+    "OpMetadata": {
+      "caps": {
+        "file.base": true
       }
     }
   },
@@ -501,88 +583,6 @@
       },
       "caps": {
         "file.base": true
-      }
-    }
-  },
-  {
-    "Op": {
-      "inputs": [
-        {
-          "digest": "sha256:6bc890064f6af7d9dcbcb2c24db52c5cf23a87530ed1eb2be83b3de84404eacd",
-          "index": 0
-        },
-        {
-          "digest": "sha256:7cffb793bd922ad76b496aa6cd853024e7fde645979b2124306af11575a7318e",
-          "index": 0
-        }
-      ],
-      "Op": {
-        "File": {
-          "actions": [
-            {
-              "input": 0,
-              "secondaryInput": 1,
-              "output": 0,
-              "Action": {
-                "Copy": {
-                  "src": "/out",
-                  "dest": "/usr/local/bin/fcgi-client",
-                  "owner": {
-                    "user": {
-                      "User": {
-                        "ByID": 1000
-                      }
-                    },
-                    "group": {
-                      "User": {
-                        "ByID": 1000
-                      }
-                    }
-                  },
-                  "mode": 488,
-                  "followSymlink": true,
-                  "dirCopyContents": true,
-                  "createDestPath": true,
-                  "allowWildcard": true,
-                  "timestamp": -1
-                }
-              }
-            }
-          ]
-        }
-      },
-      "platform": {
-        "Architecture": "amd64",
-        "OS": "linux"
-      },
-      "constraints": {}
-    },
-    "Digest": "sha256:ce6f16220e4b056190e6d3932715c9c1ffbf11944868099b1038bb78866ffaf1",
-    "OpMetadata": {
-      "description": {
-        "llb.customname": "Copy https://github.com/NiR-/fcgi-client/releases/download/v0.1.0/fcgi-client.phar to /usr/local/bin/fcgi-client"
-      },
-      "caps": {
-        "file.base": true
-      }
-    }
-  },
-  {
-    "Op": {
-      "inputs": [
-        {
-          "digest": "sha256:0203fefaf306353c2450079e4641eb797b874c671445bd474e1d8be5e5cb524a",
-          "index": 0
-        }
-      ],
-      "Op": null
-    },
-    "Digest": "sha256:f22e05db5bf713fc829fa4d35b9d39239f501ddecd61bcf3f6cac1a25c6b017a",
-    "OpMetadata": {
-      "caps": {
-        "constraints": true,
-        "meta.description": true,
-        "platform": true
       }
     }
   }

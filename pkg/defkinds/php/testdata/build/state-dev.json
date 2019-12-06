@@ -1,6 +1,69 @@
 [
   {
     "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:bb97e9cc87895b7fb029fdff8e7264a223b29c57ac08a92e28fb7990299ecb96",
+          "index": 0
+        },
+        {
+          "digest": "sha256:d3c7f4b1de9501fc7678bac3d9258c0da84bf0c13ac644220165eebf5a2e9c52",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "File": {
+          "actions": [
+            {
+              "input": 0,
+              "secondaryInput": 1,
+              "output": 0,
+              "Action": {
+                "Copy": {
+                  "src": "/",
+                  "dest": "/app/",
+                  "owner": {
+                    "user": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    },
+                    "group": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    }
+                  },
+                  "mode": -1,
+                  "followSymlink": true,
+                  "dirCopyContents": true,
+                  "createDestPath": true,
+                  "allowWildcard": true,
+                  "timestamp": -1
+                }
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:0dc420e6e83c976ac8f5438104d3d3ebe446dcdc6641b8cf3316d87659be7cda",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Copy /"
+      },
+      "caps": {
+        "file.base": true
+      }
+    }
+  },
+  {
+    "Op": {
       "Op": {
         "Source": {
           "identifier": "local://context",
@@ -28,6 +91,140 @@
   },
   {
     "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:8d81e3db3b19680c8c97f827533f52b72c4cc03f27a8b677f9e72261316b9790",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "Exec": {
+          "meta": {
+            "args": [
+              "/bin/sh",
+              "-o",
+              "errexit",
+              "-o",
+              "pipefail",
+              "-c",
+              "docker-php-ext-configure intl  \u0026\u0026 docker-php-ext-configure pdo_mysql  \u0026\u0026 docker-php-ext-configure soap  \u0026\u0026 docker-php-ext-configure sockets  \u0026\u0026 docker-php-ext-configure zip  \u0026\u0026 docker-php-ext-install -j\"$(nproc)\" intl pdo_mysql soap sockets zip \u0026\u0026 docker-php-source delete"
+            ],
+            "env": [
+              "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+              "PHPIZE_DEPS=autoconf \t\tdpkg-dev \t\tfile \t\tg++ \t\tgcc \t\tlibc-dev \t\tmake \t\tpkg-config \t\tre2c",
+              "PHP_INI_DIR=/usr/local/etc/php",
+              "PHP_EXTRA_CONFIGURE_ARGS=--enable-fpm --with-fpm-user=www-data --with-fpm-group=www-data --disable-cgi",
+              "PHP_CFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
+              "PHP_CPPFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
+              "PHP_LDFLAGS=-Wl,-O1 -Wl,--hash-style=both -pie",
+              "GPG_KEYS=CBAF69F173A0FEA4B537F470D66C9593118BCCB6 F38252826ACD957EF380D39F2F7956BC5DA04B5D",
+              "PHP_VERSION=7.3.12",
+              "PHP_URL=https://www.php.net/get/php-7.3.12.tar.xz/from/this/mirror",
+              "PHP_ASC_URL=https://www.php.net/get/php-7.3.12.tar.xz.asc/from/this/mirror",
+              "PHP_SHA256=aafe5e9861ad828860c6af8c88cdc1488314785962328eb1783607c1fdd855df",
+              "PHP_MD5="
+            ],
+            "cwd": "/var/www/html"
+          },
+          "mounts": [
+            {
+              "input": 0,
+              "dest": "/",
+              "output": 0
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:352a5c3df313660e5071915d7b72867f519c0429af9e59704aa9701c91370456",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Install PHP extensions (intl, pdo_mysql, soap, sockets, zip)"
+      },
+      "caps": {
+        "exec.meta.base": true,
+        "exec.mount.bind": true
+      }
+    }
+  },
+  {
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:6a53b57bab4533ecd09c7a0fc6dff7c157dd3901e8bb7860f82a4dc63185ee37",
+          "index": 0
+        }
+      ],
+      "Op": null
+    },
+    "Digest": "sha256:402a7e561331199ce8fcd31a26df9680e46bf26993f628716853ee981b6ba6a1",
+    "OpMetadata": {
+      "caps": {
+        "constraints": true,
+        "meta.description": true,
+        "platform": true
+      }
+    }
+  },
+  {
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:b9f10a55063de603c39ec622c7567bd68e1e502c24f280c58cfea650be3c06ef",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "File": {
+          "actions": [
+            {
+              "input": 0,
+              "secondaryInput": -1,
+              "output": 0,
+              "Action": {
+                "Mkdir": {
+                  "path": "/composer",
+                  "mode": 488,
+                  "makeParents": true,
+                  "owner": {
+                    "user": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    },
+                    "group": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    }
+                  },
+                  "timestamp": -1
+                }
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:54fdb104a0d582af08f29ae19e2bda31b7c83b3ca1576b55d1d0b64bfad25f61",
+    "OpMetadata": {
+      "caps": {
+        "file.base": true
+      }
+    }
+  },
+  {
+    "Op": {
       "Op": {
         "Source": {
           "identifier": "docker-image://docker.io/library/composer:1.9.0"
@@ -50,7 +247,7 @@
     "Op": {
       "inputs": [
         {
-          "digest": "sha256:9b5e7bb751fb51eaa4150e11022f67009c81d287845f39b74cc08fd5f22ca50e",
+          "digest": "sha256:0dc420e6e83c976ac8f5438104d3d3ebe446dcdc6641b8cf3316d87659be7cda",
           "index": 0
         }
       ],
@@ -100,7 +297,7 @@
       },
       "constraints": {}
     },
-    "Digest": "sha256:6a7ce1fd4b582a19a7f5e5e44b1670740f63daf3d70bb65e01f1a7128afd07f4",
+    "Digest": "sha256:6a53b57bab4533ecd09c7a0fc6dff7c157dd3901e8bb7860f82a4dc63185ee37",
     "OpMetadata": {
       "description": {
         "llb.customname": "Dump autoloader and execute custom post-install steps"
@@ -205,30 +402,11 @@
     "Op": {
       "inputs": [
         {
-          "digest": "sha256:6a7ce1fd4b582a19a7f5e5e44b1670740f63daf3d70bb65e01f1a7128afd07f4",
-          "index": 0
-        }
-      ],
-      "Op": null
-    },
-    "Digest": "sha256:99e61c699ff75cde2a1a63feb24e375401e8d1ca52c977ae8584786c3e253619",
-    "OpMetadata": {
-      "caps": {
-        "constraints": true,
-        "meta.description": true,
-        "platform": true
-      }
-    }
-  },
-  {
-    "Op": {
-      "inputs": [
-        {
-          "digest": "sha256:aeef8b47248064f0165e7f53c4a890ac7640c72f6d2503fe263da80e35c2380c",
+          "digest": "sha256:e5334d23dfc3ba4cd5e1109127206bd80b2a0ff61557543d5efc159421e131c1",
           "index": 0
         },
         {
-          "digest": "sha256:d3c7f4b1de9501fc7678bac3d9258c0da84bf0c13ac644220165eebf5a2e9c52",
+          "digest": "sha256:0e16c24b18eae2f2bcc40859484d8a0cfbc6ff4fe85d6a487fb1b3dc37ac88d2",
           "index": 0
         }
       ],
@@ -241,8 +419,8 @@
               "output": 0,
               "Action": {
                 "Copy": {
-                  "src": "/",
-                  "dest": "/app/",
+                  "src": "/docker/app/fpm.conf",
+                  "dest": "/usr/local/etc/php-fpm.conf",
                   "owner": {
                     "user": {
                       "User": {
@@ -273,10 +451,10 @@
       },
       "constraints": {}
     },
-    "Digest": "sha256:9b5e7bb751fb51eaa4150e11022f67009c81d287845f39b74cc08fd5f22ca50e",
+    "Digest": "sha256:918c29b75a3748721e369ff6840e2ac91bc8b110c13732e2d1c5134860ef7893",
     "OpMetadata": {
       "description": {
-        "llb.customname": "Copy /"
+        "llb.customname": "Copy docker/app/fpm.conf"
       },
       "caps": {
         "file.base": true
@@ -358,11 +536,7 @@
     "Op": {
       "inputs": [
         {
-          "digest": "sha256:f5de999b4df9581cadbc3f9f21e286c531e099f0173948f4142a494659082f79",
-          "index": 0
-        },
-        {
-          "digest": "sha256:0e16c24b18eae2f2bcc40859484d8a0cfbc6ff4fe85d6a487fb1b3dc37ac88d2",
+          "digest": "sha256:352a5c3df313660e5071915d7b72867f519c0429af9e59704aa9701c91370456",
           "index": 0
         }
       ],
@@ -371,12 +545,13 @@
           "actions": [
             {
               "input": 0,
-              "secondaryInput": 1,
+              "secondaryInput": -1,
               "output": 0,
               "Action": {
-                "Copy": {
-                  "src": "/docker/app/php.ini",
-                  "dest": "/usr/local/etc/php/php.ini",
+                "Mkdir": {
+                  "path": "/app",
+                  "mode": 488,
+                  "makeParents": true,
                   "owner": {
                     "user": {
                       "User": {
@@ -389,11 +564,6 @@
                       }
                     }
                   },
-                  "mode": -1,
-                  "followSymlink": true,
-                  "dirCopyContents": true,
-                  "createDestPath": true,
-                  "allowWildcard": true,
                   "timestamp": -1
                 }
               }
@@ -407,11 +577,8 @@
       },
       "constraints": {}
     },
-    "Digest": "sha256:a6719b985fe321354f6a61b39843cadfb40810e6ebec1a6a14ef02229783928b",
+    "Digest": "sha256:b9f10a55063de603c39ec622c7567bd68e1e502c24f280c58cfea650be3c06ef",
     "OpMetadata": {
-      "description": {
-        "llb.customname": "Copy docker/app/php.ini"
-      },
       "caps": {
         "file.base": true
       }
@@ -421,7 +588,7 @@
     "Op": {
       "inputs": [
         {
-          "digest": "sha256:f114c82879f0a648219a901b7ca08e7a6ec15e9c5bc6ac28f63da815c78f029b",
+          "digest": "sha256:cba9a151c52df8e6a76dac0110b0186a3b51a392c85815998d26cff796b0c600",
           "index": 0
         }
       ],
@@ -471,7 +638,7 @@
       },
       "constraints": {}
     },
-    "Digest": "sha256:aeef8b47248064f0165e7f53c4a890ac7640c72f6d2503fe263da80e35c2380c",
+    "Digest": "sha256:bb97e9cc87895b7fb029fdff8e7264a223b29c57ac08a92e28fb7990299ecb96",
     "OpMetadata": {
       "description": {
         "llb.customname": "Run composer install"
@@ -486,212 +653,7 @@
     "Op": {
       "inputs": [
         {
-          "digest": "sha256:8d81e3db3b19680c8c97f827533f52b72c4cc03f27a8b677f9e72261316b9790",
-          "index": 0
-        }
-      ],
-      "Op": {
-        "Exec": {
-          "meta": {
-            "args": [
-              "/bin/sh",
-              "-o",
-              "errexit",
-              "-o",
-              "pipefail",
-              "-c",
-              "docker-php-ext-configure intl  \u0026\u0026 docker-php-ext-configure pdo_mysql  \u0026\u0026 docker-php-ext-configure soap  \u0026\u0026 docker-php-ext-configure sockets  \u0026\u0026 docker-php-ext-configure zip  \u0026\u0026 docker-php-ext-install -j\"$(nproc)\" intl pdo_mysql soap sockets zip"
-            ],
-            "env": [
-              "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
-              "PHPIZE_DEPS=autoconf \t\tdpkg-dev \t\tfile \t\tg++ \t\tgcc \t\tlibc-dev \t\tmake \t\tpkg-config \t\tre2c",
-              "PHP_INI_DIR=/usr/local/etc/php",
-              "PHP_EXTRA_CONFIGURE_ARGS=--enable-fpm --with-fpm-user=www-data --with-fpm-group=www-data --disable-cgi",
-              "PHP_CFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
-              "PHP_CPPFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
-              "PHP_LDFLAGS=-Wl,-O1 -Wl,--hash-style=both -pie",
-              "GPG_KEYS=CBAF69F173A0FEA4B537F470D66C9593118BCCB6 F38252826ACD957EF380D39F2F7956BC5DA04B5D",
-              "PHP_VERSION=7.3.12",
-              "PHP_URL=https://www.php.net/get/php-7.3.12.tar.xz/from/this/mirror",
-              "PHP_ASC_URL=https://www.php.net/get/php-7.3.12.tar.xz.asc/from/this/mirror",
-              "PHP_SHA256=aafe5e9861ad828860c6af8c88cdc1488314785962328eb1783607c1fdd855df",
-              "PHP_MD5="
-            ],
-            "cwd": "/var/www/html"
-          },
-          "mounts": [
-            {
-              "input": 0,
-              "dest": "/",
-              "output": 0
-            }
-          ]
-        }
-      },
-      "platform": {
-        "Architecture": "amd64",
-        "OS": "linux"
-      },
-      "constraints": {}
-    },
-    "Digest": "sha256:c96f7edd696c7b06ec7b35cf8e65579d93f1d2f42cd529def587e7463af91774",
-    "OpMetadata": {
-      "description": {
-        "llb.customname": "Install PHP extensions (intl, pdo_mysql, soap, sockets, zip)"
-      },
-      "caps": {
-        "exec.meta.base": true,
-        "exec.mount.bind": true
-      }
-    }
-  },
-  {
-    "Op": {
-      "Op": {
-        "Source": {
-          "identifier": "local://context",
-          "attrs": {
-            "local.includepattern": "[\"app/\",\"src/\",\"bin/console\",\"web/app.php\"]",
-            "local.session": "\u003cSESSION-ID\u003e",
-            "local.sharedkeyhint": "build-context"
-          }
-        }
-      },
-      "constraints": {}
-    },
-    "Digest": "sha256:d3c7f4b1de9501fc7678bac3d9258c0da84bf0c13ac644220165eebf5a2e9c52",
-    "OpMetadata": {
-      "description": {
-        "llb.customname": "load build context"
-      },
-      "caps": {
-        "source.local": true,
-        "source.local.includepatterns": true,
-        "source.local.sessionid": true,
-        "source.local.sharedkeyhint": true
-      }
-    }
-  },
-  {
-    "Op": {
-      "inputs": [
-        {
-          "digest": "sha256:c96f7edd696c7b06ec7b35cf8e65579d93f1d2f42cd529def587e7463af91774",
-          "index": 0
-        }
-      ],
-      "Op": {
-        "File": {
-          "actions": [
-            {
-              "input": 0,
-              "secondaryInput": -1,
-              "output": 0,
-              "Action": {
-                "Mkdir": {
-                  "path": "/app",
-                  "mode": 488,
-                  "makeParents": true,
-                  "owner": {
-                    "user": {
-                      "User": {
-                        "ByID": 1000
-                      }
-                    },
-                    "group": {
-                      "User": {
-                        "ByID": 1000
-                      }
-                    }
-                  },
-                  "timestamp": -1
-                }
-              }
-            }
-          ]
-        }
-      },
-      "platform": {
-        "Architecture": "amd64",
-        "OS": "linux"
-      },
-      "constraints": {}
-    },
-    "Digest": "sha256:dbbbe9cfcd39c2cff53563fbae6c84ce7522d06461477688745473e14d9760a4",
-    "OpMetadata": {
-      "caps": {
-        "file.base": true
-      }
-    }
-  },
-  {
-    "Op": {
-      "inputs": [
-        {
-          "digest": "sha256:a6719b985fe321354f6a61b39843cadfb40810e6ebec1a6a14ef02229783928b",
-          "index": 0
-        },
-        {
-          "digest": "sha256:0e16c24b18eae2f2bcc40859484d8a0cfbc6ff4fe85d6a487fb1b3dc37ac88d2",
-          "index": 0
-        }
-      ],
-      "Op": {
-        "File": {
-          "actions": [
-            {
-              "input": 0,
-              "secondaryInput": 1,
-              "output": 0,
-              "Action": {
-                "Copy": {
-                  "src": "/docker/app/fpm.conf",
-                  "dest": "/usr/local/etc/php-fpm.conf",
-                  "owner": {
-                    "user": {
-                      "User": {
-                        "ByID": 1000
-                      }
-                    },
-                    "group": {
-                      "User": {
-                        "ByID": 1000
-                      }
-                    }
-                  },
-                  "mode": -1,
-                  "followSymlink": true,
-                  "dirCopyContents": true,
-                  "createDestPath": true,
-                  "allowWildcard": true,
-                  "timestamp": -1
-                }
-              }
-            }
-          ]
-        }
-      },
-      "platform": {
-        "Architecture": "amd64",
-        "OS": "linux"
-      },
-      "constraints": {}
-    },
-    "Digest": "sha256:efc6cbbb7aac097cd5585a1e6e7d3a6857e37fbdf6e0075b98f02d5623fbe9fc",
-    "OpMetadata": {
-      "description": {
-        "llb.customname": "Copy docker/app/fpm.conf"
-      },
-      "caps": {
-        "file.base": true
-      }
-    }
-  },
-  {
-    "Op": {
-      "inputs": [
-        {
-          "digest": "sha256:efc6cbbb7aac097cd5585a1e6e7d3a6857e37fbdf6e0075b98f02d5623fbe9fc",
+          "digest": "sha256:918c29b75a3748721e369ff6840e2ac91bc8b110c13732e2d1c5134860ef7893",
           "index": 0
         },
         {
@@ -740,7 +702,7 @@
       },
       "constraints": {}
     },
-    "Digest": "sha256:f114c82879f0a648219a901b7ca08e7a6ec15e9c5bc6ac28f63da815c78f029b",
+    "Digest": "sha256:cba9a151c52df8e6a76dac0110b0186a3b51a392c85815998d26cff796b0c600",
     "OpMetadata": {
       "description": {
         "llb.customname": "Copy composer.*"
@@ -752,9 +714,40 @@
   },
   {
     "Op": {
+      "Op": {
+        "Source": {
+          "identifier": "local://context",
+          "attrs": {
+            "local.includepattern": "[\"app/\",\"src/\",\"bin/console\",\"web/app.php\"]",
+            "local.session": "\u003cSESSION-ID\u003e",
+            "local.sharedkeyhint": "build-context"
+          }
+        }
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:d3c7f4b1de9501fc7678bac3d9258c0da84bf0c13ac644220165eebf5a2e9c52",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "load build context"
+      },
+      "caps": {
+        "source.local": true,
+        "source.local.includepatterns": true,
+        "source.local.sessionid": true,
+        "source.local.sharedkeyhint": true
+      }
+    }
+  },
+  {
+    "Op": {
       "inputs": [
         {
-          "digest": "sha256:dbbbe9cfcd39c2cff53563fbae6c84ce7522d06461477688745473e14d9760a4",
+          "digest": "sha256:54fdb104a0d582af08f29ae19e2bda31b7c83b3ca1576b55d1d0b64bfad25f61",
+          "index": 0
+        },
+        {
+          "digest": "sha256:0e16c24b18eae2f2bcc40859484d8a0cfbc6ff4fe85d6a487fb1b3dc37ac88d2",
           "index": 0
         }
       ],
@@ -763,13 +756,12 @@
           "actions": [
             {
               "input": 0,
-              "secondaryInput": -1,
+              "secondaryInput": 1,
               "output": 0,
               "Action": {
-                "Mkdir": {
-                  "path": "/composer",
-                  "mode": 488,
-                  "makeParents": true,
+                "Copy": {
+                  "src": "/docker/app/php.ini",
+                  "dest": "/usr/local/etc/php/php.ini",
                   "owner": {
                     "user": {
                       "User": {
@@ -782,6 +774,11 @@
                       }
                     }
                   },
+                  "mode": -1,
+                  "followSymlink": true,
+                  "dirCopyContents": true,
+                  "createDestPath": true,
+                  "allowWildcard": true,
                   "timestamp": -1
                 }
               }
@@ -795,8 +792,11 @@
       },
       "constraints": {}
     },
-    "Digest": "sha256:f5de999b4df9581cadbc3f9f21e286c531e099f0173948f4142a494659082f79",
+    "Digest": "sha256:e5334d23dfc3ba4cd5e1109127206bd80b2a0ff61557543d5efc159421e131c1",
     "OpMetadata": {
+      "description": {
+        "llb.customname": "Copy docker/app/php.ini"
+      },
       "caps": {
         "file.base": true
       }

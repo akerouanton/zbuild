@@ -11,6 +11,7 @@ require (
 	github.com/golang/mock v1.1.1
 	github.com/gorilla/mux v1.7.3 // indirect
 	github.com/hashicorp/go-version v1.2.0
+	github.com/mcuadros/go-version v0.0.0-20190830083331-035f6764e8d2
 	github.com/mitchellh/mapstructure v1.1.2
 	github.com/moby/buildkit v0.6.2-0.20191002152821-f7042823e340
 	github.com/opencontainers/go-digest v1.0.0-rc1

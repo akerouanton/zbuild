@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/NiR-/zbuild/pkg/llbutils"
+	"github.com/mcuadros/go-version"
 	"github.com/moby/buildkit/client/llb"
 )
 
@@ -196,8 +197,7 @@ func getPeclExtensionSpecs(extensions map[string]string) []string {
 	return specs
 }
 
-// @TODO: Use docker-php-source extract/delete
-func InstallExtensions(state llb.State, extensions map[string]string) llb.State {
+func InstallExtensions(state llb.State, def Definition, extensions map[string]string) llb.State {
 	coreExtensions := filterExtensions(extensions, isCoreExtension)
 	peclExtensions := filterExtensions(extensions, isNotCoreExtension)
 
@@ -208,20 +208,19 @@ func InstallExtensions(state llb.State, extensions map[string]string) llb.State 
 		cmds = append(cmds, configureExtensionBuilds(coreExtensionNames)...)
 		cmds = append(cmds,
 			"docker-php-ext-install -j\"$(nproc)\" "+strings.Join(coreExtensionSpecs, " "))
+		if version.Compare(def.MajMinVersion, "7.3", ">=") {
+			cmds = append(cmds, "docker-php-source delete")
+		}
 	}
-	// @TODO: install pecl if needed (for PHP 7.4+)
 	if len(peclExtensions) > 0 {
-		pecl := "pecl install -o -f"
 		peclExtensionNames := getExtensionNames(peclExtensions)
 		peclExtensionSpecs := getPeclExtensionSpecs(peclExtensions)
 		cmds = append(cmds,
-			pecl+" "+strings.Join(peclExtensionSpecs, " "),
+			"curl -f -o /usr/local/sbin/notpecl https://storage.googleapis.com/notpecl/notpecl",
+			"chmod +x /usr/local/sbin/notpecl",
+			"notpecl install "+strings.Join(peclExtensionSpecs, " "),
 			"docker-php-ext-enable "+strings.Join(peclExtensionNames, " "),
-			"rm -rf /tmp/pear")
-	}
-
-	if len(cmds) == 0 {
-		return state
+			"rm -rf /usr/local/sbin/notpecl")
 	}
 
 	extensionNames := getExtensionNames(extensions)
