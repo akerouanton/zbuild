@@ -113,7 +113,7 @@ func initSuccessfullyParseRawDefinitionWithStagesTC() newDefinitionTC {
 	workerCmd := "bin/worker"
 
 	return newDefinitionTC{
-		file:     "testdata/def/with-stages.yml",
+		file:     "testdata/def/merge-all.yml",
 		lockFile: "",
 		expected: php.Definition{
 			BaseStage: php.Stage{
@@ -361,21 +361,18 @@ func initSuccessfullyResolveWorkerStageTC(t *testing.T, mockCtrl *gomock.Control
 					APCU:                  true,
 					ClassmapAuthoritative: false,
 				},
-				SourceDirs: []string{"generated/", "worker/", "app/", "src/"},
+				SourceDirs: []string{"generated/", "worker/"},
 				ExtraScripts: []string{
 					"gencode.php",
 					"bin/worker",
-					"bin/console",
-					"web/app.php",
 				},
-				Integrations: []string{"symfony"},
+				Integrations: []string{},
 				StatefulDirs: []string{
 					"public/uploads",
 					"data/imports",
 				},
 				Healthcheck: &healthcheckDisabled,
 				PostInstall: []string{
-					"php -d display_errors=on bin/console cache:warmup --env=prod",
 					"echo some command",
 					"echo some other command",
 				},
@@ -462,8 +459,8 @@ func initSuccessfullyAddSymfonyIntegrationTC(t *testing.T, mockCtrl *gomock.Cont
 				ComposerDumpFlags: &php.ComposerDumpFlags{
 					ClassmapAuthoritative: true,
 				},
-				SourceDirs:   []string{"app/", "src/"},
-				ExtraScripts: []string{"bin/console", "web/app.php"},
+				SourceDirs:   []string{"config/", "src/", "templates/", "translations/"},
+				ExtraScripts: []string{"bin/console", "public/index.php"},
 				Integrations: []string{"symfony"},
 				StatefulDirs: []string{},
 				Healthcheck:  &healthcheck,
