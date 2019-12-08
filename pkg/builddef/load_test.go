@@ -2,55 +2,42 @@ package builddef_test
 
 import (
 	"context"
-	"errors"
 	"io/ioutil"
-	"path/filepath"
 	"testing"
 
 	"github.com/NiR-/zbuild/pkg/builddef"
-	"github.com/NiR-/zbuild/pkg/llbtest"
+	"github.com/NiR-/zbuild/pkg/mocks"
+	"github.com/NiR-/zbuild/pkg/statesolver"
 	"github.com/go-test/deep"
 	"github.com/golang/mock/gomock"
-	"github.com/moby/buildkit/frontend/gateway/client"
 )
 
-type loadFromContextTC struct {
-	client      *llbtest.MockClient
+type loadTC struct {
+	solver      statesolver.StateSolver
 	buildOpts   builddef.BuildOpts
 	expectedDef *builddef.BuildDef
 	expectedErr error
 }
 
-func itLoadsConfigAndLockFilesFromContextTC(
+func itLoadsConfigAndLockFilesTC(
 	t *testing.T,
 	mockCtrl *gomock.Controller,
-) loadFromContextTC {
-	ctx := context.TODO()
-	basedir := "testdata/config-files"
+) loadTC {
+	solver := mocks.NewMockStateSolver(mockCtrl)
+	ymlContent := readTestdata(t, "testdata/config-files/zbuild.yml")
 
-	c := llbtest.NewMockClient(mockCtrl)
+	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
+	solver.EXPECT().ReadFile(
+		gomock.Any(), "zbuild.yml", gomock.Any(),
+	).Return(ymlContent, nil)
 
-	contextRef := llbtest.NewMockReference(mockCtrl)
-	solvedContext := &client.Result{
-		Refs: map[string]client.Reference{"linux/amd64": contextRef},
-		Ref:  contextRef,
-	}
-	c.EXPECT().Solve(ctx, gomock.Any()).Return(solvedContext, nil)
+	lockContent := readTestdata(t, "testdata/config-files/zbuild.lock")
+	solver.EXPECT().ReadFile(
+		gomock.Any(), "zbuild.lock", gomock.Any(),
+	).Return(lockContent, nil)
 
-	ymlPath := filepath.Join(basedir, "zbuild.yml")
-	ymlContent := readTestdata(t, ymlPath)
-	contextRef.EXPECT().ReadFile(ctx, client.ReadRequest{
-		Filename: "zbuild.yml",
-	}).Return(ymlContent, nil)
-
-	lockPath := filepath.Join(basedir, "zbuild.lock")
-	lockContent := readTestdata(t, lockPath)
-	contextRef.EXPECT().ReadFile(ctx, client.ReadRequest{
-		Filename: "zbuild.lock",
-	}).Return(lockContent, nil)
-
-	return loadFromContextTC{
-		client: c,
+	return loadTC{
+		solver: solver,
 		buildOpts: builddef.BuildOpts{
 			File:     "zbuild.yml",
 			LockFile: "zbuild.lock",
@@ -67,34 +54,26 @@ baz: plop
 	}
 }
 
-func itLoadsConfigFileWithoutLockFromContextTC(
+func itLoadsConfigFileWithoutLockTC(
 	t *testing.T,
 	mockCtrl *gomock.Controller,
-) loadFromContextTC {
-	ctx := context.TODO()
-	basedir := "testdata/without-lock"
+) loadTC {
+	solver := mocks.NewMockStateSolver(mockCtrl)
+	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
 
-	c := llbtest.NewMockClient(mockCtrl)
+	ymlContent := readTestdata(t, "testdata/without-lock/zbuild.yml")
+	solver.EXPECT().ReadFile(
+		gomock.Any(),
+		"zbuild.yml",
+		gomock.Any(),
+	).Return(ymlContent, nil)
 
-	contextRef := llbtest.NewMockReference(mockCtrl)
-	solvedContext := &client.Result{
-		Refs: map[string]client.Reference{"linux/amd64": contextRef},
-		Ref:  contextRef,
-	}
-	c.EXPECT().Solve(ctx, gomock.Any()).Return(solvedContext, nil)
+	solver.EXPECT().ReadFile(
+		gomock.Any(), "zbuild.lock", gomock.Any(),
+	).Return([]byte{}, statesolver.FileNotFound)
 
-	ymlPath := filepath.Join(basedir, "zbuild.yml")
-	ymlContent := readTestdata(t, ymlPath)
-	contextRef.EXPECT().ReadFile(ctx, client.ReadRequest{
-		Filename: "zbuild.yml",
-	}).Return(ymlContent, nil)
-
-	contextRef.EXPECT().ReadFile(ctx, client.ReadRequest{
-		Filename: "zbuild.lock",
-	}).Return([]byte{}, errors.New("file does not exist"))
-
-	return loadFromContextTC{
-		client: c,
+	return loadTC{
+		solver: solver,
 		buildOpts: builddef.BuildOpts{
 			File:     "zbuild.yml",
 			LockFile: "zbuild.lock",
@@ -109,27 +88,21 @@ func itLoadsConfigFileWithoutLockFromContextTC(
 	}
 }
 
-func itFailsToLoadConfigFilesWhenTheresNoYmlFileFromContextTC(
+func itFailsToLoadConfigFilesWhenTheresNoYmlFileTC(
 	t *testing.T,
 	mockCtrl *gomock.Controller,
-) loadFromContextTC {
-	ctx := context.TODO()
+) loadTC {
+	solver := mocks.NewMockStateSolver(mockCtrl)
+	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
 
-	c := llbtest.NewMockClient(mockCtrl)
+	solver.EXPECT().ReadFile(
+		gomock.Any(),
+		"zbuild.yml",
+		gomock.Any(),
+	).Return([]byte{}, statesolver.FileNotFound)
 
-	contextRef := llbtest.NewMockReference(mockCtrl)
-	solvedContext := &client.Result{
-		Refs: map[string]client.Reference{"linux/amd64": contextRef},
-		Ref:  contextRef,
-	}
-	c.EXPECT().Solve(ctx, gomock.Any()).Return(solvedContext, nil)
-
-	contextRef.EXPECT().ReadFile(ctx, client.ReadRequest{
-		Filename: "zbuild.yml",
-	}).Return([]byte{}, errors.New("file does not exist"))
-
-	return loadFromContextTC{
-		client: c,
+	return loadTC{
+		solver: solver,
 		buildOpts: builddef.BuildOpts{
 			File:     "zbuild.yml",
 			LockFile: "zbuild.lock",
@@ -138,27 +111,11 @@ func itFailsToLoadConfigFilesWhenTheresNoYmlFileFromContextTC(
 	}
 }
 
-func itFailsToLoadConfigFilesWhenContextCannotBeResolvedTC(
-	t *testing.T,
-	mockCtrl *gomock.Controller,
-) loadFromContextTC {
-	ctx := context.TODO()
-
-	c := llbtest.NewMockClient(mockCtrl)
-	c.EXPECT().Solve(ctx, gomock.Any()).Return(nil, errors.New("some error"))
-
-	return loadFromContextTC{
-		client:      c,
-		expectedErr: errors.New("failed to resolve build context: some error"),
-	}
-}
-
-func TestLoadConfigFromBuildContext(t *testing.T) {
-	testcases := map[string]func(*testing.T, *gomock.Controller) loadFromContextTC{
-		"it loads config and lock files":                                itLoadsConfigAndLockFilesFromContextTC,
-		"it loads config file without lock":                             itLoadsConfigFileWithoutLockFromContextTC,
-		"it fails to load config files when there's no yml file":        itFailsToLoadConfigFilesWhenTheresNoYmlFileFromContextTC,
-		"it fails to load config files when context cannot be resolved": itFailsToLoadConfigFilesWhenContextCannotBeResolvedTC,
+func TestLoadConfig(t *testing.T) {
+	testcases := map[string]func(*testing.T, *gomock.Controller) loadTC{
+		"it loads config and lock files":                         itLoadsConfigAndLockFilesTC,
+		"it loads config file without lock":                      itLoadsConfigFileWithoutLockTC,
+		"it fails to load config files when there's no yml file": itFailsToLoadConfigFilesWhenTheresNoYmlFileTC,
 	}
 
 	for tcname := range testcases {
@@ -173,7 +130,9 @@ func TestLoadConfigFromBuildContext(t *testing.T) {
 			tc := tcinit(t, mockCtrl)
 			ctx := context.TODO()
 
-			buildDef, err := builddef.LoadFromContext(ctx, tc.client, tc.buildOpts)
+			buildDef, err := builddef.Load(
+				ctx, tc.solver, tc.buildOpts,
+			)
 			if tc.expectedErr != nil {
 				if err == nil || err.Error() != tc.expectedErr.Error() {
 					t.Fatalf("Expected error: %v\nGot: %v", tc.expectedErr, err)
@@ -184,67 +143,6 @@ func TestLoadConfigFromBuildContext(t *testing.T) {
 				t.Fatalf("Unexpected error: %v", err)
 			}
 			if diff := deep.Equal(buildDef, tc.expectedDef); diff != nil {
-				t.Error(diff)
-			}
-		})
-	}
-}
-
-func TestLoadFromFS(t *testing.T) {
-	testcases := map[string]struct {
-		basedir     string
-		file        string
-		lockFile    string
-		expectedDef *builddef.BuildDef
-		expectedErr error
-	}{
-		"it loads config and lock files": {
-			file:     "testdata/config-files/zbuild.yml",
-			lockFile: "testdata/config-files/zbuild.lock",
-			expectedDef: &builddef.BuildDef{
-				Kind: "some-kind",
-				RawConfig: map[string]interface{}{
-					"foo": "bar",
-				},
-				RawLocks: []byte(`foo: bar
-baz: plop
-`),
-			},
-		},
-		"it loads config file without lock": {
-			file:     "testdata/without-lock/zbuild.yml",
-			lockFile: "testdata/without-lock/zbuild.lock",
-			expectedDef: &builddef.BuildDef{
-				Kind: "some-kind",
-				RawConfig: map[string]interface{}{
-					"bar": "baz",
-				},
-			},
-		},
-		"it fails to load config files when there's no yml file": {
-			file:        "testdata/does-not-exist/zbuild.yml",
-			lockFile:    "testdata/does-not-exist/zbuild.lock",
-			expectedErr: errors.New("could not load testdata/does-not-exist/zbuild.yml: zbuildfile not found"),
-		},
-	}
-
-	for tcname := range testcases {
-		tc := testcases[tcname]
-
-		t.Run(tcname, func(t *testing.T) {
-			t.Parallel()
-
-			out, err := builddef.LoadFromFS(tc.file, tc.lockFile)
-			if tc.expectedErr != nil {
-				if err == nil || err.Error() != tc.expectedErr.Error() {
-					t.Fatalf("Expected error: %v\nGot: %v", tc.expectedErr, err)
-				}
-				return
-			}
-			if err != nil {
-				t.Fatalf("Unexpected error: %v", err)
-			}
-			if diff := deep.Equal(out, tc.expectedDef); diff != nil {
 				t.Error(diff)
 			}
 		})

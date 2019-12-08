@@ -56,9 +56,13 @@ func buildOptsFromBuildkitOpts(c client.Client) builddef.BuildOpts {
 	return builddef.NewBuildOpts(file, stage, sessionID, contextName)
 }
 
-func (b Builder) Build(ctx context.Context, c client.Client) (*client.Result, error) {
+func (b Builder) Build(
+	ctx context.Context,
+	solver statesolver.StateSolver,
+	c client.Client,
+) (*client.Result, error) {
 	buildOpts := buildOptsFromBuildkitOpts(c)
-	def, err := builddef.LoadFromContext(ctx, c, buildOpts)
+	def, err := builddef.Load(ctx, solver, buildOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -67,11 +71,9 @@ func (b Builder) Build(ctx context.Context, c client.Client) (*client.Result, er
 	if err != nil {
 		return nil, err
 	}
-
-	buildOpts.Def = def
-	solver := statesolver.NewBuildkitSolver(c)
 	handler.WithSolver(solver)
 
+	buildOpts.Def = def
 	state, img, err := handler.Build(ctx, buildOpts)
 	if err != nil {
 		return nil, err
@@ -103,9 +105,10 @@ func (b Builder) Debug(
 	stage string,
 ) (llb.State, error) {
 	var state llb.State
-	opts := builddef.NewBuildOpts(file, stage, "<SESSION-ID>", "context")
+	buildOpts := builddef.NewBuildOpts(file, stage, "<SESSION-ID>", "context")
 
-	def, err := builddef.LoadFromFS(opts.File, opts.LockFile)
+	ctx := context.Background()
+	def, err := builddef.Load(ctx, solver, buildOpts)
 	if err != nil {
 		return state, err
 	}
@@ -114,11 +117,10 @@ func (b Builder) Debug(
 	if err != nil {
 		return state, err
 	}
+	handler.WithSolver(solver)
 
-	opts.Def = def
-	ctx := context.Background()
-
-	state, _, err = handler.Build(ctx, opts)
+	buildOpts.Def = def
+	state, _, err = handler.Build(ctx, buildOpts)
 	if err != nil {
 		return state, err
 	}
@@ -126,9 +128,14 @@ func (b Builder) Debug(
 	return state, nil
 }
 
-func (b Builder) UpdateLockFile(file string) error {
-	lockFile := builddef.LockFilepath(file)
-	def, err := builddef.LoadFromFS(file, lockFile)
+func (b Builder) UpdateLockFile(
+	solver statesolver.StateSolver,
+	file string,
+) error {
+	ctx := context.Background()
+	// @TODO: remove empty options?
+	buildOpts := builddef.NewBuildOpts(file, "", "", "")
+	def, err := builddef.Load(ctx, solver, buildOpts)
 	if err != nil {
 		return err
 	}
@@ -137,8 +144,8 @@ func (b Builder) UpdateLockFile(file string) error {
 	if err != nil {
 		return err
 	}
+	handler.WithSolver(solver)
 
-	ctx := context.Background()
 	locks, err := handler.UpdateLocks(ctx, b.PkgSolver, def)
 	if err != nil {
 		return err
@@ -149,9 +156,9 @@ func (b Builder) UpdateLockFile(file string) error {
 		return err
 	}
 
-	err = ioutil.WriteFile(lockFile, lockdata, 0640)
+	err = ioutil.WriteFile(buildOpts.LockFile, lockdata, 0640)
 	if err != nil {
-		return xerrors.Errorf("could not write %s: %w", lockFile, err)
+		return xerrors.Errorf("could not write %s: %w", buildOpts.LockFile, err)
 	}
 
 	return nil
