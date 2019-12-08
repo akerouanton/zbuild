@@ -31,12 +31,12 @@ type testCase struct {
 
 func TestBuilder(t *testing.T) {
 	testcases := map[string]func(*gomock.Controller) testCase{
-		"successfully build default stage and file": successfullyBuildDefaultStageAndFileTC,
-		"successfully build custom stage and file":  successfullyBuildCustomStageAndFileTC,
-		"fail to read zbuild.yml file":              failToReadYmlTC,
-		"fail to read zbuild.lock file":             failToReadLockTC,
-		"fail to find a suitable kind handler":      failToFindASutableKindHandlerTC,
-		"fail when kind handler fails":              failWhenKindHandlerFailsTC,
+		"successfully build default stage and file":                 successfullyBuildDefaultStageAndFileTC,
+		"successfully build custom stage and file":                  successfullyBuildCustomStageAndFileTC,
+		"fail to read zbuild.yml file":                              failToReadYmlTC,
+		"failing to read zbuild.lock file doesn't prevent building": failToReadLockTC,
+		"fail to find a suitable kind handler":                      failToFindASutableKindHandlerTC,
+		"fail when kind handler fails":                              failWhenKindHandlerFailsTC,
 	}
 
 	for tcname := range testcases {
@@ -183,10 +183,11 @@ func successfullyBuildCustomStageAndFileTC(mockCtrl *gomock.Controller) testCase
 
 	ctx := context.TODO()
 	buildOpts := builddef.BuildOpts{
-		File:      "api.zbuild.yml",
-		LockFile:  "api.zbuild.lock",
-		Stage:     "prod",
-		SessionID: "<SESSION-ID>",
+		File:        "api.zbuild.yml",
+		LockFile:    "api.zbuild.lock",
+		Stage:       "prod",
+		SessionID:   "<SESSION-ID>",
+		ContextName: "context",
 	}
 	state := llb.State{}
 	img := image.Image{
@@ -245,7 +246,7 @@ func failToReadLockTC(mockCtrl *gomock.Controller) testCase {
 	c.EXPECT().BuildOpts().AnyTimes().Return(client.BuildOpts{
 		SessionID: "<SESSION-ID>",
 		Opts: map[string]string{
-			"context": "some-context-name",
+			"contextkey": "some-context-name",
 		},
 	})
 
@@ -266,7 +267,7 @@ func failToReadLockTC(mockCtrl *gomock.Controller) testCase {
 		LockFile:    "zbuild.lock",
 		Stage:       "dev",
 		SessionID:   "<SESSION-ID>",
-		ContextName: "context",
+		ContextName: "some-context-name",
 	}
 	state := llb.State{}
 	img := image.Image{
@@ -392,7 +393,8 @@ func (m buildOptsMatcher) Matches(x interface{}) bool {
 	return opts.SessionID == m.opts.SessionID &&
 		opts.File == m.opts.File &&
 		opts.LockFile == m.opts.LockFile &&
-		opts.Stage == m.opts.Stage
+		opts.Stage == m.opts.Stage &&
+		opts.ContextName == m.opts.ContextName
 }
 
 func (m buildOptsMatcher) String() string {
