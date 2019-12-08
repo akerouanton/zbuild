@@ -53,7 +53,12 @@ func buildOptsFromBuildkitOpts(c client.Client) builddef.BuildOpts {
 		contextName = v
 	}
 
-	return builddef.NewBuildOpts(file, stage, sessionID, contextName)
+	buildOpts := builddef.NewBuildOpts(file)
+	buildOpts.Stage = stage
+	buildOpts.SessionID = sessionID
+	buildOpts.ContextName = contextName
+
+	return buildOpts
 }
 
 func (b Builder) Build(
@@ -105,7 +110,10 @@ func (b Builder) Debug(
 	stage string,
 ) (llb.State, error) {
 	var state llb.State
-	buildOpts := builddef.NewBuildOpts(file, stage, "<SESSION-ID>", "context")
+
+	buildOpts := builddef.NewBuildOpts(file)
+	buildOpts.Stage = stage
+	buildOpts.SessionID = "<SESSION-ID>"
 
 	ctx := context.Background()
 	def, err := builddef.Load(ctx, solver, buildOpts)
@@ -133,8 +141,7 @@ func (b Builder) UpdateLockFile(
 	file string,
 ) error {
 	ctx := context.Background()
-	// @TODO: remove empty options?
-	buildOpts := builddef.NewBuildOpts(file, "", "", "")
+	buildOpts := builddef.NewBuildOpts(file)
 	def, err := builddef.Load(ctx, solver, buildOpts)
 	if err != nil {
 		return err

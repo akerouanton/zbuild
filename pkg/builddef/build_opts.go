@@ -19,13 +19,11 @@ type BuildOpts struct {
 	ContextName   string
 }
 
-func NewBuildOpts(file, stage, sessionID, contextName string) BuildOpts {
+func NewBuildOpts(file string) BuildOpts {
 	return BuildOpts{
-		SessionID:   sessionID,
 		File:        file,
 		LockFile:    LockFilepath(file),
-		Stage:       stage,
-		ContextName: contextName,
+		ContextName: "context",
 	}
 }
 
