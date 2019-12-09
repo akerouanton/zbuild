@@ -7,7 +7,6 @@ import (
 
 	"github.com/NiR-/zbuild/pkg/builddef"
 	"github.com/NiR-/zbuild/pkg/llbutils"
-	hashiversion "github.com/hashicorp/go-version"
 	"github.com/mcuadros/go-version"
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/xerrors"
@@ -73,10 +72,7 @@ func NewKind(genericDef *builddef.BuildDef) (Definition, error) {
 		return def, err
 	}
 
-	def.MajMinVersion, err = extractMajMinVersion(def.Version)
-	if err != nil {
-		return def, err
-	}
+	def.MajMinVersion = extractMajMinVersion(def.Version)
 
 	if def.BaseImage == "" {
 		baseImages, ok := defaultBaseImages[def.MajMinVersion]
@@ -243,15 +239,9 @@ func (def *Definition) ResolveStageDefinition(
 	return stageDef, nil
 }
 
-func extractMajMinVersion(versionString string) (string, error) {
-	// @TODO: remove this deps
-	ver, err := hashiversion.NewVersion(versionString)
-	if err != nil {
-		return "", err
-	}
-
-	segments := ver.Segments()
-	return fmt.Sprintf("%d.%d", segments[0], segments[1]), nil
+func extractMajMinVersion(versionString string) string {
+	segments := strings.SplitN(versionString, ".", 3)
+	return fmt.Sprintf("%s.%s", segments[0], segments[1])
 }
 
 func mergeStages(base *Definition, stages ...DerivedStage) StageDefinition {
