@@ -12,7 +12,8 @@ import (
 )
 
 var updateFlags = struct {
-	file string
+	file    string
+	context string
 }{}
 
 func newUpdateCmd() *cobra.Command {
@@ -22,7 +23,9 @@ func newUpdateCmd() *cobra.Command {
 		Short:             "Update version locks",
 		Run:               HandleUpdateCmd,
 	}
-	cmd.Flags().StringVarP(&updateFlags.file, "file", "f", "zbuild.yml", "Path to the zbuild.yml file to use. Webdf looks for a lock file with the same filename but with \".lock\" extension.")
+
+	AddFileFlag(cmd, &updateFlags.file)
+	AddContextFlag(cmd, &updateFlags.context)
 
 	return cmd
 }
@@ -34,7 +37,7 @@ func HandleUpdateCmd(cmd *cobra.Command, args []string) {
 		logrus.Fatal(err)
 	}
 
-	solver := newDockerSolver()
+	solver := newDockerSolver(updateFlags.context)
 	b := builder.Builder{Registry: reg, PkgSolver: pkgSolver}
 
 	if err := b.UpdateLockFile(solver, updateFlags.file); err != nil {

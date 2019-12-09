@@ -83,7 +83,7 @@ func initFailToFetchFromNonexistantImageTC(t *testing.T, solver statesolver.Dock
 func initDockerReadFileFromBuildContextTC(t *testing.T, solver statesolver.DockerSolver) dockerReadFileTC {
 	return dockerReadFileTC{
 		opt:      solver.FromBuildContext(),
-		path:     "testdata/testfile",
+		path:     "testfile",
 		expected: string(loadRawTestdata(t, "testdata/testfile")),
 	}
 }
@@ -91,8 +91,8 @@ func initDockerReadFileFromBuildContextTC(t *testing.T, solver statesolver.Docke
 func initFailToReadNonexistantFileFromBuildContextTC(t *testing.T, solver statesolver.DockerSolver) dockerReadFileTC {
 	return dockerReadFileTC{
 		opt:         solver.FromBuildContext(),
-		path:        "testdata/nonexistant",
-		expectedErr: xerrors.Errorf("failed to read testdata/nonexistant from build context: %w", statesolver.FileNotFound),
+		path:        "nonexistant",
+		expectedErr: xerrors.Errorf("failed to read nonexistant from build context: %w", statesolver.FileNotFound),
 	}
 }
 
@@ -117,8 +117,9 @@ func TestDockerReadFile(t *testing.T) {
 			t.Parallel()
 
 			solver := statesolver.DockerSolver{
-				Client: c,
-				Labels: map[string]string{},
+				Client:  c,
+				Labels:  map[string]string{},
+				RootDir: "testdata",
 			}
 			tc := tcinit(t, solver)
 

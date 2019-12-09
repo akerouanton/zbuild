@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	"github.com/NiR-/zbuild/pkg/defkinds/php"
 	"github.com/NiR-/zbuild/pkg/registry"
 	"github.com/NiR-/zbuild/pkg/statesolver"
@@ -36,14 +38,31 @@ func buildKindRegistry() *registry.KindRegistry {
 	return reg
 }
 
-func newDockerSolver() statesolver.DockerSolver {
+func newDockerSolver(rootDir string) statesolver.DockerSolver {
 	docker, err := client.NewClientWithOpts(client.FromEnv)
 	if err != nil {
 		logrus.Fatal(err)
 	}
 
-	return statesolver.DockerSolver{
-		Client: docker,
-		Labels: map[string]string{},
+	if rootDir == "" {
+		var err error
+		rootDir, err = os.Getwd()
+		if err != nil {
+			logrus.Fatal(err)
+		}
 	}
+
+	return statesolver.DockerSolver{
+		Client:  docker,
+		Labels:  map[string]string{},
+		RootDir: rootDir,
+	}
+}
+
+func AddFileFlag(cmd *cobra.Command, val *string) {
+	cmd.Flags().StringVarP(val, "file", "f", "zbuild.yml", "Path to the zbuild.yml file to debug")
+}
+
+func AddContextFlag(cmd *cobra.Command, val *string) {
+	cmd.Flags().StringVarP(val, "context", "c", "", "Root dir of the build context")
 }
