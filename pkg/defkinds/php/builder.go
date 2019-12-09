@@ -23,6 +23,16 @@ const (
 	zbuildLabel = "io.zbuild"
 )
 
+var SharedKeys = struct {
+	BuildContext  string
+	ComposerFiles string
+	ConfigFiles   string
+}{
+	BuildContext:  "build-context",
+	ComposerFiles: "composer-files",
+	ConfigFiles:   "config-files",
+}
+
 // RegisterKind adds a LLB DAG builder to the given KindRegistry for php
 // definition kind.
 func RegisterKind(registry *registry.KindRegistry) {
@@ -106,7 +116,7 @@ func (h *PHPHandler) Build(
 			}),
 			llb.LocalUniqueID(buildOpts.LocalUniqueID),
 			llb.SessionID(buildOpts.SessionID),
-			llb.SharedKeyHint("config-files"),
+			llb.SharedKeyHint(SharedKeys.ConfigFiles),
 			llb.WithCustomName("load config files from build context"))
 		state = llbutils.Copy(
 			configFilesSrc,
@@ -125,7 +135,7 @@ func (h *PHPHandler) Build(
 			llb.IncludePatterns([]string{"composer.json", "composer.lock"}),
 			llb.LocalUniqueID(buildOpts.LocalUniqueID),
 			llb.SessionID(buildOpts.SessionID),
-			llb.SharedKeyHint("composer-files"),
+			llb.SharedKeyHint(SharedKeys.ComposerFiles),
 			llb.WithCustomName("load composer files from build context"))
 		state = llbutils.Copy(composerSrc, "composer.*", state, "/app/", "1000:1000")
 		state = composerInstall(state)
@@ -135,7 +145,7 @@ func (h *PHPHandler) Build(
 			llb.ExcludePatterns(excludePatterns(&stage)),
 			llb.LocalUniqueID(buildOpts.LocalUniqueID),
 			llb.SessionID(buildOpts.SessionID),
-			llb.SharedKeyHint("build-context"),
+			llb.SharedKeyHint(SharedKeys.BuildContext),
 			llb.WithCustomName("load build context"))
 		state = llbutils.Copy(buildContextSrc, "/", state, "/app/", "1000:1000")
 

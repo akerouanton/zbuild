@@ -26,8 +26,7 @@ func LoadComposerLock(
 ) error {
 	composerSrc := solver.FromBuildContext(
 		llb.IncludePatterns([]string{"composer.json", "composer.lock"}),
-		// @TODO: use a struct to share SharedKeyHints across code source
-		llb.SharedKeyHint("composer-files"),
+		llb.SharedKeyHint(SharedKeys.ComposerFiles),
 		llb.WithCustomName("load composer files from build context"))
 
 	lockdata, err := solver.ReadFile(ctx, "composer.lock", composerSrc)

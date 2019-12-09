@@ -13,6 +13,8 @@ import (
 // found in the local build context or on the filesystem.
 var ZbuildfileNotFound = xerrors.New("zbuildfile not found")
 
+const SharedKeyZbuildfiles = "zbuildfiles"
+
 // @TODO: read files from git context instead of local source?
 func Load(
 	ctx context.Context,
@@ -24,7 +26,7 @@ func Load(
 			buildOpts.File,
 			buildOpts.LockFile,
 		}),
-		llb.SharedKeyHint("zbuild-config-files"),
+		llb.SharedKeyHint(SharedKeyZbuildfiles),
 		llb.WithCustomName("load zbuild config files from build context"))
 
 	ymlContent, err := solver.ReadFile(ctx, buildOpts.File, src)
