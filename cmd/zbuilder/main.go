@@ -15,7 +15,7 @@ import (
 
 func main() {
 	b := builder.Builder{
-		Registry: registry.DefaultRegistry,
+		Registry: registry.Registry,
 	}
 	f := func(ctx context.Context, c client.Client) (*client.Result, error) {
 		solver := statesolver.NewBuildkitSolver(c)

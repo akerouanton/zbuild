@@ -19,7 +19,8 @@ func defaultDefinition() Definition {
 	fpm := true
 	healthcheck := false
 	infer := true
-	dev := true
+	isDev := true
+	isNotDev := false
 
 	return Definition{
 		BaseStage: Stage{
@@ -43,7 +44,11 @@ func defaultDefinition() Definition {
 		Stages: map[string]DerivedStage{
 			"dev": {
 				DeriveFrom: "base",
-				Dev:        &dev,
+				Dev:        &isDev,
+			},
+			"prod": {
+				DeriveFrom: "base",
+				Dev:        &isNotDev,
 			},
 		},
 	}

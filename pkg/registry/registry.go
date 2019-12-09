@@ -58,12 +58,12 @@ func (reg *KindRegistry) FindHandler(defkind string) (KindHandler, error) {
 // kind.
 var ErrUnknownDefKind = xerrors.New("unknown kind")
 
-var DefaultRegistry = NewKindRegistry()
+var Registry = NewKindRegistry()
 
 func Register(name string, handler KindHandler) {
-	DefaultRegistry.Register(name, handler)
+	Registry.Register(name, handler)
 }
 
 func FindHandler(defkind string) (KindHandler, error) {
-	return DefaultRegistry.FindHandler(defkind)
+	return Registry.FindHandler(defkind)
 }

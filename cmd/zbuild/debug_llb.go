@@ -43,7 +43,7 @@ func newDebugLLBCmd() *cobra.Command {
 
 func HandleDebugLLBCmd(cmd *cobra.Command, args []string) {
 	b := builder.Builder{
-		Registry: registry.DefaultRegistry,
+		Registry: registry.Registry,
 	}
 	solver := newDockerSolver(debugFlags.context)
 

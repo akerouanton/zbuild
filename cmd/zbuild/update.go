@@ -38,7 +38,7 @@ func HandleUpdateCmd(cmd *cobra.Command, args []string) {
 	}
 
 	b := builder.Builder{
-		Registry:  registry.DefaultRegistry,
+		Registry:  registry.Registry,
 		PkgSolver: pkgSolver,
 	}
 	solver := newDockerSolver(updateFlags.context)
