@@ -6,6 +6,7 @@ import (
 
 	"github.com/NiR-/zbuild/pkg/builder"
 	"github.com/NiR-/zbuild/pkg/pkgsolver"
+	"github.com/NiR-/zbuild/pkg/registry"
 	"github.com/sirupsen/logrus"
 	dpkg "github.com/snyh/go-dpkg-parser"
 	"github.com/spf13/cobra"
@@ -31,14 +32,16 @@ func newUpdateCmd() *cobra.Command {
 }
 
 func HandleUpdateCmd(cmd *cobra.Command, args []string) {
-	reg := buildKindRegistry()
 	pkgSolver, err := initPackageSolver()
 	if err != nil {
 		logrus.Fatal(err)
 	}
 
+	b := builder.Builder{
+		Registry:  registry.DefaultRegistry,
+		PkgSolver: pkgSolver,
+	}
 	solver := newDockerSolver(updateFlags.context)
-	b := builder.Builder{Registry: reg, PkgSolver: pkgSolver}
 
 	if err := b.UpdateLockFile(solver, updateFlags.file); err != nil {
 		logrus.Fatal(err)

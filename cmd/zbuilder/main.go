@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/NiR-/zbuild/pkg/builder"
-	"github.com/NiR-/zbuild/pkg/defkinds/php"
+	_ "github.com/NiR-/zbuild/pkg/defkinds/php"
 	"github.com/NiR-/zbuild/pkg/registry"
 	"github.com/NiR-/zbuild/pkg/statesolver"
 	"github.com/moby/buildkit/frontend/gateway/client"
@@ -14,11 +14,9 @@ import (
 )
 
 func main() {
-	// @TODO: use a default kind registry
-	reg := registry.NewKindRegistry()
-	php.RegisterKind(reg)
-
-	b := builder.Builder{Registry: reg}
+	b := builder.Builder{
+		Registry: registry.DefaultRegistry,
+	}
 	f := func(ctx context.Context, c client.Client) (*client.Result, error) {
 		solver := statesolver.NewBuildkitSolver(c)
 		return b.Build(ctx, solver, c)

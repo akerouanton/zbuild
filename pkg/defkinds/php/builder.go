@@ -33,6 +33,10 @@ var SharedKeys = struct {
 	ConfigFiles:   "config-files",
 }
 
+func init() {
+	RegisterKind(registry.DefaultRegistry)
+}
+
 // RegisterKind adds a LLB DAG builder to the given KindRegistry for php
 // definition kind.
 func RegisterKind(registry *registry.KindRegistry) {

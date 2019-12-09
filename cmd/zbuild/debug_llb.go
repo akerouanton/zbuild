@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/NiR-/zbuild/pkg/builder"
+	"github.com/NiR-/zbuild/pkg/registry"
 	"github.com/moby/buildkit/client/llb"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -41,9 +42,10 @@ func newDebugLLBCmd() *cobra.Command {
 }
 
 func HandleDebugLLBCmd(cmd *cobra.Command, args []string) {
+	b := builder.Builder{
+		Registry: registry.DefaultRegistry,
+	}
 	solver := newDockerSolver(debugFlags.context)
-	reg := buildKindRegistry()
-	b := builder.Builder{Registry: reg}
 
 	state, err := b.Debug(solver, debugFlags.file, debugFlags.stage)
 	if err != nil {
@@ -57,4 +59,3 @@ func HandleDebugLLBCmd(cmd *cobra.Command, args []string) {
 
 	llb.WriteTo(out, os.Stdout)
 }
-
