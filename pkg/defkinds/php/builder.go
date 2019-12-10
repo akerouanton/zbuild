@@ -111,30 +111,40 @@ func (h *PHPHandler) Build(
 	state = state.Dir("/app")
 	state = state.AddEnv("COMPOSER_HOME", "/composer")
 
-	// @TODO: copy files from git context instead of local source
-	if *stage.Dev {
-		configFilesSrc := llb.Local(buildOpts.ContextName,
-			llb.IncludePatterns([]string{
-				*stage.ConfigFiles.IniFile,
-				*stage.ConfigFiles.FPMConfigFile,
-			}),
-			llb.LocalUniqueID(buildOpts.LocalUniqueID),
-			llb.SessionID(buildOpts.SessionID),
-			llb.SharedKeyHint(SharedKeys.ConfigFiles),
-			llb.WithCustomName("load config files from build context"))
+	configFiles := []string{}
+	if stage.ConfigFiles.IniFile != nil {
+		configFiles = append(configFiles, *stage.ConfigFiles.IniFile)
+	}
+	if stage.ConfigFiles.FPMConfigFile != nil {
+		configFiles = append(configFiles, *stage.ConfigFiles.FPMConfigFile)
+	}
+
+	configFilesSrc := llb.Local(buildOpts.ContextName,
+		llb.IncludePatterns(configFiles),
+		llb.LocalUniqueID(buildOpts.LocalUniqueID),
+		llb.SessionID(buildOpts.SessionID),
+		llb.SharedKeyHint(SharedKeys.ConfigFiles),
+		llb.WithCustomName("load config files from build context"))
+
+	if stage.ConfigFiles.IniFile != nil {
 		state = llbutils.Copy(
 			configFilesSrc,
 			*stage.ConfigFiles.IniFile,
 			state,
 			"/usr/local/etc/php/php.ini",
 			"1000:1000")
+	}
+	if stage.ConfigFiles.FPMConfigFile != nil {
 		state = llbutils.Copy(
 			configFilesSrc,
 			*stage.ConfigFiles.FPMConfigFile,
 			state,
 			"/usr/local/etc/php-fpm.conf",
 			"1000:1000")
+	}
 
+	// @TODO: copy files from git context instead of local source
+	if *stage.Dev == false {
 		composerSrc := llb.Local(buildOpts.ContextName,
 			llb.IncludePatterns([]string{"composer.json", "composer.lock"}),
 			llb.LocalUniqueID(buildOpts.LocalUniqueID),
