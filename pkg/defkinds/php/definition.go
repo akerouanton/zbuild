@@ -115,7 +115,7 @@ type Stage struct {
 	ExternalFiles     []llbutils.ExternalFile `mapstructure:"external_files"`
 	SystemPackages    map[string]string       `mapstructure:"system_packages"`
 	FPM               *bool                   `mapstructure:",omitempty"`
-	Command           *string                 `mapstrture:"command,omitempty"`
+	Command           *[]string               `mapstrture:"command,omitempty"`
 	Extensions        map[string]string       `mapstructure:"extensions"`
 	ConfigFiles       PHPConfigFiles          `mapstructure:"config_files"`
 	ComposerDumpFlags *ComposerDumpFlags      `mapstructure:"composer_dump"`

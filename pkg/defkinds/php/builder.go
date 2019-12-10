@@ -198,6 +198,10 @@ func (h *PHPHandler) Build(
 	now := time.Now()
 	img.Created = &now
 
+	if *stage.FPM == false && stage.Command != nil {
+		img.Config.Cmd = *stage.Command
+	}
+
 	return state, img, nil
 }
 
