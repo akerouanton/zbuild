@@ -32,11 +32,7 @@ func newUpdateCmd() *cobra.Command {
 }
 
 func HandleUpdateCmd(cmd *cobra.Command, args []string) {
-	pkgSolver, err := initPackageSolver()
-	if err != nil {
-		logrus.Fatal(err)
-	}
-
+	pkgSolver := initPackageSolver()
 	b := builder.Builder{
 		Registry:  registry.Registry,
 		PkgSolver: pkgSolver,
@@ -44,18 +40,18 @@ func HandleUpdateCmd(cmd *cobra.Command, args []string) {
 	solver := newDockerSolver(updateFlags.context)
 
 	if err := b.UpdateLockFile(solver, updateFlags.file); err != nil {
-		logrus.Fatal(err)
+		logrus.Fatalf("%+v", err)
 	}
 }
 
-func initPackageSolver() (pkgsolver.PackageSolver, error) {
+func initPackageSolver() pkgsolver.PackageSolver {
 	var pkgSolver pkgsolver.PackageSolver
 
 	basepath := os.Getenv("XDG_DATA_HOME")
 	if basepath == "" {
 		home, err := os.UserHomeDir()
 		if err != nil {
-			return pkgSolver, err
+			logrus.Fatalf("%+v", err)
 		}
 		basepath = path.Join(home, ".local/share")
 	}
@@ -64,5 +60,5 @@ func initPackageSolver() (pkgsolver.PackageSolver, error) {
 	dpkgRepo := dpkg.NewRepository(path)
 	pkgSolver = pkgsolver.NewDpkgSolver(dpkgRepo)
 
-	return pkgSolver, nil
+	return pkgSolver
 }

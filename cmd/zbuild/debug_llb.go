@@ -49,12 +49,12 @@ func HandleDebugLLBCmd(cmd *cobra.Command, args []string) {
 
 	state, err := b.Debug(solver, debugFlags.file, debugFlags.stage)
 	if err != nil {
-		logrus.Fatal(err)
+		logrus.Fatalf("%+v", err)
 	}
 
 	out, err := state.Marshal(llb.LinuxAmd64)
 	if err != nil {
-		logrus.Fatal(err)
+		logrus.Fatalf("%+v", err)
 	}
 
 	llb.WriteTo(out, os.Stdout)

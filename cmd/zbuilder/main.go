@@ -24,6 +24,6 @@ func main() {
 
 	err := grpcclient.RunFromEnvironment(appcontext.Context(), f)
 	if err != nil {
-		logrus.Fatal(err)
+		logrus.Fatalf("%+v", err)
 	}
 }

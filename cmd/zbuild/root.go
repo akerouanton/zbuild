@@ -25,21 +25,21 @@ func main() {
 	zbuildCmd.AddCommand(newDebugLLBCmd())
 
 	if err := zbuildCmd.Execute(); err != nil {
-		logrus.Fatal(err)
+		logrus.Fatalf("%+v", err)
 	}
 }
 
 func newDockerSolver(rootDir string) statesolver.DockerSolver {
 	docker, err := client.NewClientWithOpts(client.FromEnv)
 	if err != nil {
-		logrus.Fatal(err)
+		logrus.Fatalf("%+v", err)
 	}
 
 	if rootDir == "" {
 		var err error
 		rootDir, err = os.Getwd()
 		if err != nil {
-			logrus.Fatal(err)
+			logrus.Fatalf("%+v", err)
 		}
 	}
 
