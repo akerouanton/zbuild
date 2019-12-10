@@ -1,4 +1,3 @@
-# kind: php
 fpm: true
 version: 7.4.0
 infer: false

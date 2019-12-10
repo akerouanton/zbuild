@@ -3,10 +3,12 @@ package php
 import (
 	"fmt"
 	"path"
+	"strings"
 
 	"github.com/NiR-/zbuild/pkg/builddef"
 	"github.com/NiR-/zbuild/pkg/llbutils"
 	hashiversion "github.com/hashicorp/go-version"
+	"github.com/mcuadros/go-version"
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/xerrors"
 	"gopkg.in/yaml.v2"
@@ -217,7 +219,9 @@ func (def *Definition) ResolveStageDefinition(
 		return stageDef, xerrors.New("FPM mode is disabled but no command was provided")
 	}
 
-	addIntegrations(&stageDef)
+	if err := addIntegrations(&stageDef); err != nil {
+		return stageDef, err
+	}
 
 	if !def.Infer {
 		return stageDef, nil
@@ -240,6 +244,7 @@ func (def *Definition) ResolveStageDefinition(
 }
 
 func extractMajMinVersion(versionString string) (string, error) {
+	// @TODO: remove this deps
 	ver, err := hashiversion.NewVersion(versionString)
 	if err != nil {
 		return "", err
@@ -347,7 +352,39 @@ var phpExtDirs = map[string]string{
 	"7.4": "/usr/local/lib/php/extensions/no-debug-non-zts-20190902/",
 }
 
-func addIntegrations(def *StageDefinition) {
+var symfonySourceDirs = map[string][]string{
+	"~3.0": []string{"app/", "src/"},
+	"~4.0": []string{"config/", "src/", "templates/", "translations/"},
+	"~5.0": []string{"config/", "src/", "templates/", "translations/"},
+}
+
+var symfonyExtraScripts = map[string][]string{
+	"~3.0": []string{"bin/console", "web/app.php"},
+	"~4.0": []string{"bin/console", "public/index.php"},
+	"~5.0": []string{"bin/console", "public/index.php"},
+}
+
+func findSymfonySourceDirs(symfonyVer string) []string {
+	for constraint, sourceDirs := range symfonySourceDirs {
+		c := version.NewConstrainGroupFromString(constraint)
+		if c.Match(symfonyVer) {
+			return sourceDirs
+		}
+	}
+	return []string{}
+}
+
+func findSymfonyExtraScripts(symfonyVer string) []string {
+	for constraint, extraScripts := range symfonyExtraScripts {
+		c := version.NewConstrainGroupFromString(constraint)
+		if c.Match(symfonyVer) {
+			return extraScripts
+		}
+	}
+	return []string{}
+}
+
+func addIntegrations(def *StageDefinition) error {
 	for _, integration := range def.Integrations {
 		switch integration {
 		case "blackfire":
@@ -359,14 +396,22 @@ func addIntegrations(def *StageDefinition) {
 				Destination: dest,
 				Mode:        0644,
 			})
-		// @TODO: check symfony version
 		case "symfony":
+			symfonyVer, ok := def.LockedPackages["symfony/framework-bundle"]
+			if !ok {
+				return xerrors.New("Symfony integration is enabled but symfony/framework-bundle was not found in composer.lock")
+			}
+			symfonyVer = strings.TrimLeft(symfonyVer, "v")
+
 			postInstall := []string{
 				"php -d display_errors=on bin/console cache:warmup --env=prod",
 			}
 			def.PostInstall = append(postInstall, def.PostInstall...)
-			def.SourceDirs = append(def.SourceDirs, "app/", "src/")
-			def.ExtraScripts = append(def.ExtraScripts, "bin/console", "web/app.php")
+
+			def.SourceDirs = append(def.SourceDirs,
+				findSymfonySourceDirs(symfonyVer)...)
+			def.ExtraScripts = append(def.ExtraScripts,
+				findSymfonyExtraScripts(symfonyVer)...)
 		}
 	}
 
@@ -378,6 +423,8 @@ func addIntegrations(def *StageDefinition) {
 			Owner:       "1000:1000",
 		})
 	}
+
+	return nil
 }
 
 func removeIntegration(stageDef *StageDefinition, toRemove string) {

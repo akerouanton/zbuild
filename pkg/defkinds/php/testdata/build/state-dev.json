@@ -7,7 +7,7 @@
           "index": 0
         },
         {
-          "digest": "sha256:d3c7f4b1de9501fc7678bac3d9258c0da84bf0c13ac644220165eebf5a2e9c52",
+          "digest": "sha256:f6d031c02670b7fce0076bc48b912f7295b9b16f080b4cd3d0268783dc5b0aff",
           "index": 0
         }
       ],
@@ -52,7 +52,7 @@
       },
       "constraints": {}
     },
-    "Digest": "sha256:0dc420e6e83c976ac8f5438104d3d3ebe446dcdc6641b8cf3316d87659be7cda",
+    "Digest": "sha256:055c2daf39c8fac5859f27e7b288c252283a3db5fbcd2709109b9fb8d48d783b",
     "OpMetadata": {
       "description": {
         "llb.customname": "Copy /"
@@ -156,25 +156,6 @@
     "Op": {
       "inputs": [
         {
-          "digest": "sha256:6a53b57bab4533ecd09c7a0fc6dff7c157dd3901e8bb7860f82a4dc63185ee37",
-          "index": 0
-        }
-      ],
-      "Op": null
-    },
-    "Digest": "sha256:402a7e561331199ce8fcd31a26df9680e46bf26993f628716853ee981b6ba6a1",
-    "OpMetadata": {
-      "caps": {
-        "constraints": true,
-        "meta.description": true,
-        "platform": true
-      }
-    }
-  },
-  {
-    "Op": {
-      "inputs": [
-        {
           "digest": "sha256:b9f10a55063de603c39ec622c7567bd68e1e502c24f280c58cfea650be3c06ef",
           "index": 0
         }
@@ -245,9 +226,36 @@
   },
   {
     "Op": {
+      "Op": {
+        "Source": {
+          "identifier": "local://context",
+          "attrs": {
+            "local.includepattern": "[\"composer.json\",\"composer.lock\"]",
+            "local.session": "\u003cSESSION-ID\u003e",
+            "local.sharedkeyhint": "composer-files"
+          }
+        }
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:6c2ebeb5c8483c2d0cef692223fb140cc054ddaf43068f3d9915039ce221f180",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "load composer files from build context"
+      },
+      "caps": {
+        "source.local": true,
+        "source.local.includepatterns": true,
+        "source.local.sessionid": true,
+        "source.local.sharedkeyhint": true
+      }
+    }
+  },
+  {
+    "Op": {
       "inputs": [
         {
-          "digest": "sha256:0dc420e6e83c976ac8f5438104d3d3ebe446dcdc6641b8cf3316d87659be7cda",
+          "digest": "sha256:055c2daf39c8fac5859f27e7b288c252283a3db5fbcd2709109b9fb8d48d783b",
           "index": 0
         }
       ],
@@ -297,7 +305,7 @@
       },
       "constraints": {}
     },
-    "Digest": "sha256:6a53b57bab4533ecd09c7a0fc6dff7c157dd3901e8bb7860f82a4dc63185ee37",
+    "Digest": "sha256:79a5c6c76f0be2c3810835b92de884c639642ef4eaafa0dea3d12e7f635f0df1",
     "OpMetadata": {
       "description": {
         "llb.customname": "Dump autoloader and execute custom post-install steps"
@@ -305,33 +313,6 @@
       "caps": {
         "exec.meta.base": true,
         "exec.mount.bind": true
-      }
-    }
-  },
-  {
-    "Op": {
-      "Op": {
-        "Source": {
-          "identifier": "local://context",
-          "attrs": {
-            "local.includepattern": "[\"composer.json\",\"composer.lock\"]",
-            "local.session": "\u003cSESSION-ID\u003e",
-            "local.sharedkeyhint": "composer-files"
-          }
-        }
-      },
-      "constraints": {}
-    },
-    "Digest": "sha256:6c2ebeb5c8483c2d0cef692223fb140cc054ddaf43068f3d9915039ce221f180",
-    "OpMetadata": {
-      "description": {
-        "llb.customname": "load composer files from build context"
-      },
-      "caps": {
-        "source.local": true,
-        "source.local.includepatterns": true,
-        "source.local.sessionid": true,
-        "source.local.sharedkeyhint": true
       }
     }
   },
@@ -458,6 +439,25 @@
       },
       "caps": {
         "file.base": true
+      }
+    }
+  },
+  {
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:79a5c6c76f0be2c3810835b92de884c639642ef4eaafa0dea3d12e7f635f0df1",
+          "index": 0
+        }
+      ],
+      "Op": null
+    },
+    "Digest": "sha256:9fef5293e5ad39b2ad5a11f53cff368555909402095907f0c5d5cf78a6c07ff5",
+    "OpMetadata": {
+      "caps": {
+        "constraints": true,
+        "meta.description": true,
+        "platform": true
       }
     }
   },
@@ -714,33 +714,6 @@
   },
   {
     "Op": {
-      "Op": {
-        "Source": {
-          "identifier": "local://context",
-          "attrs": {
-            "local.includepattern": "[\"app/\",\"src/\",\"bin/console\",\"web/app.php\"]",
-            "local.session": "\u003cSESSION-ID\u003e",
-            "local.sharedkeyhint": "build-context"
-          }
-        }
-      },
-      "constraints": {}
-    },
-    "Digest": "sha256:d3c7f4b1de9501fc7678bac3d9258c0da84bf0c13ac644220165eebf5a2e9c52",
-    "OpMetadata": {
-      "description": {
-        "llb.customname": "load build context"
-      },
-      "caps": {
-        "source.local": true,
-        "source.local.includepatterns": true,
-        "source.local.sessionid": true,
-        "source.local.sharedkeyhint": true
-      }
-    }
-  },
-  {
-    "Op": {
       "inputs": [
         {
           "digest": "sha256:54fdb104a0d582af08f29ae19e2bda31b7c83b3ca1576b55d1d0b64bfad25f61",
@@ -799,6 +772,33 @@
       },
       "caps": {
         "file.base": true
+      }
+    }
+  },
+  {
+    "Op": {
+      "Op": {
+        "Source": {
+          "identifier": "local://context",
+          "attrs": {
+            "local.includepattern": "[\"config/\",\"src/\",\"templates/\",\"translations/\",\"bin/console\",\"public/index.php\"]",
+            "local.session": "\u003cSESSION-ID\u003e",
+            "local.sharedkeyhint": "build-context"
+          }
+        }
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:f6d031c02670b7fce0076bc48b912f7295b9b16f080b4cd3d0268783dc5b0aff",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "load build context"
+      },
+      "caps": {
+        "source.local": true,
+        "source.local.includepatterns": true,
+        "source.local.sessionid": true,
+        "source.local.sharedkeyhint": true
       }
     }
   }

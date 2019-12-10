@@ -1,5 +1,4 @@
 # syntax=akerouanton/zbuilder:test9
-# kind: php
 fpm: true
 version: 7.4.0
 

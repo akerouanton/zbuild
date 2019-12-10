@@ -1,5 +1,4 @@
 # syntax=akerouanton/zbuilder:test9
-# kind: php
 fpm: true
 version: 7.4.0
 
@@ -19,9 +18,6 @@ stateful_dirs:
 
 config_files:
   fpm.conf: 'docker/app/fpm.conf'
-
-integrations:
-  - symfony
 
 post_install:
   - echo some command
