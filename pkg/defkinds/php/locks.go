@@ -14,8 +14,8 @@ import (
 // DefinitionLocks defines version locks for system packages and PHP extensions used
 // by each stage.
 type DefinitionLocks struct {
-	builddef.BaseLocks `yaml:",inline"`
-	Stages             map[string]StageLocks `yaml:"stages"`
+	BaseImage string                `yaml:"base_image"`
+	Stages    map[string]StageLocks `yaml:"stages"`
 }
 
 func (l DefinitionLocks) RawLocks() ([]byte, error) {
@@ -28,9 +28,8 @@ func (l DefinitionLocks) RawLocks() ([]byte, error) {
 
 // StageLocks represents the version locks for a single stage.
 type StageLocks struct {
-	builddef.BaseStageLocks `yaml:",inline"`
-
-	Extensions map[string]string `yaml:"extensions"`
+	SystemPackages map[string]string `yaml:"system_packages"`
+	Extensions     map[string]string `yaml:"extensions"`
 }
 
 func (h PHPHandler) UpdateLocks(
