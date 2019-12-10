@@ -3,6 +3,7 @@ package builder_test
 import (
 	"context"
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/NiR-/zbuild/pkg/builddef"
@@ -11,6 +12,7 @@ import (
 	"github.com/NiR-/zbuild/pkg/llbtest"
 	"github.com/NiR-/zbuild/pkg/mocks"
 	"github.com/NiR-/zbuild/pkg/registry"
+	"github.com/NiR-/zbuild/pkg/statesolver"
 	"github.com/go-test/deep"
 	"github.com/golang/mock/gomock"
 	"github.com/moby/buildkit/client/llb"
@@ -21,6 +23,7 @@ import (
 
 type testCase struct {
 	client      client.Client
+	solver      statesolver.StateSolver
 	registry    *registry.KindRegistry
 	expectedErr error
 	expectedRes *client.Result
@@ -28,14 +31,12 @@ type testCase struct {
 
 func TestBuilder(t *testing.T) {
 	testcases := map[string]func(*gomock.Controller) testCase{
-		"successfully build default stage and file":       successfullyBuildDefaultStageAndFileTC,
-		"successfully build custom stage and file":        successfullyBuildCustomStageAndFileTC,
-		"fail to resolve build context":                   failToResolveBuildContextTC,
-		"fail to read zbuild.yml file":                    failToReadYmlTC,
-		"fail to read zbuild.lock file":                   failToReadLockTC,
-		"fail to find a suitable kind handler":            failToFindASutableKindHandlerTC,
-		"fail when kind handler fails":                    failWhenKindHandlerFailsTC,
-		"fail when kind builder returns unsolvable state": failWhenKindHandlerReturnsUnsolvableState,
+		"successfully build default stage and file":                 successfullyBuildDefaultStageAndFileTC,
+		"successfully build custom stage and file":                  successfullyBuildCustomStageAndFileTC,
+		"fail to read zbuild.yml file":                              failToReadYmlTC,
+		"failing to read zbuild.lock file doesn't prevent building": failToReadLockTC,
+		"fail to find a suitable kind handler":                      failToFindASutableKindHandlerTC,
+		"fail when kind handler fails":                              failWhenKindHandlerFailsTC,
 	}
 
 	for tcname := range testcases {
@@ -52,7 +53,7 @@ func TestBuilder(t *testing.T) {
 				Registry: tc.registry,
 			}
 
-			outRes, outErr := b.Build(context.TODO(), tc.client)
+			outRes, outErr := b.Build(context.TODO(), tc.solver, tc.client)
 
 			if tc.expectedErr != nil {
 				if outErr == nil || outErr.Error() != tc.expectedErr.Error() {
@@ -90,36 +91,30 @@ extensions:
 func successfullyBuildDefaultStageAndFileTC(mockCtrl *gomock.Controller) testCase {
 	c := llbtest.NewMockClient(mockCtrl)
 	c.EXPECT().BuildOpts().AnyTimes().Return(client.BuildOpts{
-		SessionID: "sessid",
-		Opts:      map[string]string{},
+		SessionID: "<SESSION-ID>",
+		Opts: map[string]string{
+			"context": "some-context-name",
+		},
 	})
 
-	refBuildCtx := llbtest.NewMockReference(mockCtrl)
-	resBuildCtx := &client.Result{
-		Refs: map[string]client.Reference{"linux/amd64": refBuildCtx},
-		Ref:  refBuildCtx,
-	}
-	c.EXPECT().Solve(gomock.Any(), gomock.Any()).Return(resBuildCtx, nil)
+	solver := mocks.NewMockStateSolver(mockCtrl)
+	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
 
-	readYmlReq := client.ReadRequest{Filename: "zbuild.yml"}
-	refBuildCtx.EXPECT().ReadFile(gomock.Any(), gomock.Eq(readYmlReq)).Return(zbuildYml, nil)
+	solver.EXPECT().ReadFile(
+		gomock.Any(), "zbuild.yml", gomock.Any(),
+	).Return(zbuildYml, nil)
 
-	readLockReq := client.ReadRequest{Filename: "zbuild.lock"}
-	refBuildCtx.EXPECT().ReadFile(gomock.Any(), gomock.Eq(readLockReq)).Return(zbuildLock, nil)
-
-	refImage := llbtest.NewMockReference(mockCtrl)
-	resImg := &client.Result{
-		Refs: map[string]client.Reference{"linux/amd64": refImage},
-		Ref:  refImage,
-	}
-	c.EXPECT().Solve(gomock.Any(), gomock.Any()).Return(resImg, nil)
+	solver.EXPECT().ReadFile(
+		gomock.Any(), "zbuild.lock", gomock.Any(),
+	).Return(zbuildLock, nil)
 
 	ctx := context.TODO()
 	buildOpts := builddef.BuildOpts{
-		File:      "zbuild.yml",
-		LockFile:  "zbuild.lock",
-		Stage:     "dev",
-		SessionID: "sessid",
+		File:        "zbuild.yml",
+		LockFile:    "zbuild.lock",
+		Stage:       "dev",
+		SessionID:   "<SESSION-ID>",
+		ContextName: "context",
 	}
 	state := llb.State{}
 	img := image.Image{
@@ -136,9 +131,17 @@ func successfullyBuildDefaultStageAndFileTC(mockCtrl *gomock.Controller) testCas
 	registry := registry.NewKindRegistry()
 	registry.Register("php", handler)
 
+	refImage := llbtest.NewMockReference(mockCtrl)
+	resImg := &client.Result{
+		Refs: map[string]client.Reference{"linux/amd64": refImage},
+		Ref:  refImage,
+	}
+	c.EXPECT().Solve(gomock.Any(), gomock.Any()).Return(resImg, nil)
+
 	imgConfig := `{"author":"zbuild","architecture":"","os":"","rootfs":{"type":"","diff_ids":null},"config":{}}`
 	return testCase{
 		client:   c,
+		solver:   solver,
 		registry: registry,
 		expectedRes: &client.Result{
 			Refs: map[string]client.Reference{"linux/amd64": refImage},
@@ -153,25 +156,23 @@ func successfullyBuildDefaultStageAndFileTC(mockCtrl *gomock.Controller) testCas
 func successfullyBuildCustomStageAndFileTC(mockCtrl *gomock.Controller) testCase {
 	c := llbtest.NewMockClient(mockCtrl)
 	c.EXPECT().BuildOpts().AnyTimes().Return(client.BuildOpts{
-		SessionID: "sessid",
+		SessionID: "<SESSION-ID>",
 		Opts: map[string]string{
 			"dockerfilekey": "api.zbuild.yml",
 			"target":        "prod",
 		},
 	})
 
-	refBuildCtx := llbtest.NewMockReference(mockCtrl)
-	resBuildCtx := &client.Result{
-		Refs: map[string]client.Reference{"linux/amd64": refBuildCtx},
-		Ref:  refBuildCtx,
-	}
-	c.EXPECT().Solve(gomock.Any(), gomock.Any()).Return(resBuildCtx, nil)
+	solver := mocks.NewMockStateSolver(mockCtrl)
+	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
 
-	readYmlReq := client.ReadRequest{Filename: "api.zbuild.yml"}
-	refBuildCtx.EXPECT().ReadFile(gomock.Any(), gomock.Eq(readYmlReq)).Return(zbuildYml, nil)
+	solver.EXPECT().ReadFile(
+		gomock.Any(), "api.zbuild.yml", gomock.Any(),
+	).Return(zbuildYml, nil)
 
-	readLockReq := client.ReadRequest{Filename: "api.zbuild.lock"}
-	refBuildCtx.EXPECT().ReadFile(gomock.Any(), gomock.Eq(readLockReq)).Return(zbuildLock, nil)
+	solver.EXPECT().ReadFile(
+		gomock.Any(), "api.zbuild.lock", gomock.Any(),
+	).Return(zbuildLock, nil)
 
 	refImage := llbtest.NewMockReference(mockCtrl)
 	resImg := &client.Result{
@@ -182,10 +183,11 @@ func successfullyBuildCustomStageAndFileTC(mockCtrl *gomock.Controller) testCase
 
 	ctx := context.TODO()
 	buildOpts := builddef.BuildOpts{
-		File:      "api.zbuild.yml",
-		LockFile:  "api.zbuild.lock",
-		Stage:     "prod",
-		SessionID: "sessid",
+		File:        "api.zbuild.yml",
+		LockFile:    "api.zbuild.lock",
+		Stage:       "prod",
+		SessionID:   "<SESSION-ID>",
+		ContextName: "context",
 	}
 	state := llb.State{}
 	img := image.Image{
@@ -205,6 +207,7 @@ func successfullyBuildCustomStageAndFileTC(mockCtrl *gomock.Controller) testCase
 	imgConfig := `{"author":"zbuild","architecture":"","os":"","rootfs":{"type":"","diff_ids":null},"config":{}}`
 	return testCase{
 		client:   c,
+		solver:   solver,
 		registry: registry,
 		expectedRes: &client.Result{
 			Refs: map[string]client.Reference{"linux/amd64": refImage},
@@ -216,95 +219,112 @@ func successfullyBuildCustomStageAndFileTC(mockCtrl *gomock.Controller) testCase
 	}
 }
 
-func failToResolveBuildContextTC(mockCtrl *gomock.Controller) testCase {
-	c := llbtest.NewMockClient(mockCtrl)
-	c.EXPECT().BuildOpts().AnyTimes().Return(client.BuildOpts{
-		SessionID: "sessid",
-		Opts:      map[string]string{},
-	})
-
-	err := errors.New("some error")
-	c.EXPECT().Solve(gomock.Any(), gomock.Any()).Return(nil, err)
-
-	return testCase{
-		client:      c,
-		registry:    registry.NewKindRegistry(),
-		expectedErr: errors.New("failed to resolve build context: some error"),
-	}
-}
-
 func failToReadYmlTC(mockCtrl *gomock.Controller) testCase {
 	c := llbtest.NewMockClient(mockCtrl)
 	c.EXPECT().BuildOpts().AnyTimes().Return(client.BuildOpts{
-		SessionID: "sessid",
+		SessionID: "<SESSION-ID>",
 		Opts:      map[string]string{},
 	})
 
-	refBuildCtx := llbtest.NewMockReference(mockCtrl)
-	resBuildCtx := &client.Result{
-		Refs: map[string]client.Reference{"linux/amd64": refBuildCtx},
-		Ref:  refBuildCtx,
-	}
-	c.EXPECT().Solve(gomock.Any(), gomock.Any()).Return(resBuildCtx, nil)
+	solver := mocks.NewMockStateSolver(mockCtrl)
+	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
 
-	readYmlReq := client.ReadRequest{Filename: "zbuild.yml"}
-	err := errors.New("some error")
-	refBuildCtx.EXPECT().ReadFile(gomock.Any(), gomock.Eq(readYmlReq)).Return([]byte{}, err)
+	solver.EXPECT().ReadFile(
+		gomock.Any(), "zbuild.yml", gomock.Any(),
+	).Return([]byte{}, statesolver.FileNotFound)
 
 	return testCase{
 		client:      c,
+		solver:      solver,
 		registry:    registry.NewKindRegistry(),
-		expectedErr: errors.New("could not load zbuild.yml from build context: some error"),
+		expectedErr: errors.New("zbuildfile not found"),
 	}
 }
 
 func failToReadLockTC(mockCtrl *gomock.Controller) testCase {
 	c := llbtest.NewMockClient(mockCtrl)
 	c.EXPECT().BuildOpts().AnyTimes().Return(client.BuildOpts{
-		SessionID: "sessid",
-		Opts:      map[string]string{},
+		SessionID: "<SESSION-ID>",
+		Opts: map[string]string{
+			"contextkey": "some-context-name",
+		},
 	})
 
-	refBuildCtx := llbtest.NewMockReference(mockCtrl)
-	resBuildCtx := &client.Result{
-		Refs: map[string]client.Reference{"linux/amd64": refBuildCtx},
-		Ref:  refBuildCtx,
+	solver := mocks.NewMockStateSolver(mockCtrl)
+	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
+
+	solver.EXPECT().ReadFile(
+		gomock.Any(), "zbuild.yml", gomock.Any(),
+	).Return(zbuildYml, nil)
+
+	solver.EXPECT().ReadFile(
+		gomock.Any(), "zbuild.lock", gomock.Any(),
+	).Return([]byte{}, statesolver.FileNotFound)
+
+	ctx := context.TODO()
+	buildOpts := builddef.BuildOpts{
+		File:        "zbuild.yml",
+		LockFile:    "zbuild.lock",
+		Stage:       "dev",
+		SessionID:   "<SESSION-ID>",
+		ContextName: "some-context-name",
 	}
-	c.EXPECT().Solve(gomock.Any(), gomock.Any()).Return(resBuildCtx, nil)
+	state := llb.State{}
+	img := image.Image{
+		Image: specs.Image{
+			Author: "zbuild",
+		},
+	}
+	handler := mocks.NewMockKindHandler(mockCtrl)
+	handler.EXPECT().WithSolver(gomock.Any()).Times(1)
+	handler.EXPECT().Build(
+		ctx, MatchBuildOpts(buildOpts),
+	).Return(state, &img, nil)
 
-	readYmlReq := client.ReadRequest{Filename: "zbuild.yml"}
-	refBuildCtx.EXPECT().ReadFile(gomock.Any(), gomock.Eq(readYmlReq)).Return(zbuildYml, nil)
+	registry := registry.NewKindRegistry()
+	registry.Register("php", handler)
 
-	readLockReq := client.ReadRequest{Filename: "zbuild.lock"}
-	err := errors.New("some error")
-	refBuildCtx.EXPECT().ReadFile(gomock.Any(), gomock.Eq(readLockReq)).Return([]byte{}, err)
+	refImage := llbtest.NewMockReference(mockCtrl)
+	resImg := &client.Result{
+		Refs: map[string]client.Reference{"linux/amd64": refImage},
+		Ref:  refImage,
+	}
+	c.EXPECT().Solve(gomock.Any(), gomock.Any()).Return(resImg, nil)
 
+	imgConfig := `{"author":"zbuild","architecture":"","os":"","rootfs":{"type":"","diff_ids":null},"config":{}}`
 	return testCase{
-		client:      c,
-		registry:    registry.NewKindRegistry(),
-		expectedErr: errors.New("could not load zbuild.lock from build context: some error"),
+		client:   c,
+		solver:   solver,
+		registry: registry,
+		expectedRes: &client.Result{
+			Refs: map[string]client.Reference{"linux/amd64": refImage},
+			Ref:  refImage,
+			Metadata: map[string][]byte{
+				"containerimage.config": []byte(imgConfig),
+			},
+		},
 	}
 }
 
 func failToFindASutableKindHandlerTC(mockCtrl *gomock.Controller) testCase {
 	c := llbtest.NewMockClient(mockCtrl)
 	c.EXPECT().BuildOpts().AnyTimes().Return(client.BuildOpts{
-		SessionID: "sessid",
-		Opts:      map[string]string{},
+		SessionID: "<SESSION-ID>",
+		Opts: map[string]string{
+			"context": "some-context-name",
+		},
 	})
 
-	refBuildCtx := llbtest.NewMockReference(mockCtrl)
-	resBuildCtx := &client.Result{
-		Refs: map[string]client.Reference{"linux/amd64": refBuildCtx},
-		Ref:  refBuildCtx,
-	}
-	c.EXPECT().Solve(gomock.Any(), gomock.Any()).Return(resBuildCtx, nil)
+	solver := mocks.NewMockStateSolver(mockCtrl)
+	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
 
-	readYmlReq := client.ReadRequest{Filename: "zbuild.yml"}
-	refBuildCtx.EXPECT().ReadFile(gomock.Any(), gomock.Eq(readYmlReq)).Return(zbuildYml, nil)
+	solver.EXPECT().ReadFile(
+		gomock.Any(), "zbuild.yml", gomock.Any(),
+	).Return(zbuildYml, nil)
 
-	readLockReq := client.ReadRequest{Filename: "zbuild.lock"}
-	refBuildCtx.EXPECT().ReadFile(gomock.Any(), gomock.Eq(readLockReq)).Return(zbuildLock, nil)
+	solver.EXPECT().ReadFile(
+		gomock.Any(), "zbuild.lock", gomock.Any(),
+	).Return(zbuildLock, nil)
 
 	handler := mocks.NewMockKindHandler(mockCtrl)
 	registry := registry.NewKindRegistry()
@@ -312,6 +332,7 @@ func failToFindASutableKindHandlerTC(mockCtrl *gomock.Controller) testCase {
 
 	return testCase{
 		client:      c,
+		solver:      solver,
 		registry:    registry,
 		expectedErr: errors.New("kind \"php\" is not supported: unknown kind"),
 	}
@@ -320,22 +341,22 @@ func failToFindASutableKindHandlerTC(mockCtrl *gomock.Controller) testCase {
 func failWhenKindHandlerFailsTC(mockCtrl *gomock.Controller) testCase {
 	c := llbtest.NewMockClient(mockCtrl)
 	c.EXPECT().BuildOpts().AnyTimes().Return(client.BuildOpts{
-		SessionID: "sessid",
-		Opts:      map[string]string{},
+		SessionID: "<SESSION-ID>",
+		Opts: map[string]string{
+			"context": "some-context-name",
+		},
 	})
 
-	refBuildCtx := llbtest.NewMockReference(mockCtrl)
-	resBuildCtx := &client.Result{
-		Refs: map[string]client.Reference{"linux/amd64": refBuildCtx},
-		Ref:  refBuildCtx,
-	}
-	c.EXPECT().Solve(gomock.Any(), gomock.Any()).Return(resBuildCtx, nil)
+	solver := mocks.NewMockStateSolver(mockCtrl)
+	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
 
-	readYmlReq := client.ReadRequest{Filename: "zbuild.yml"}
-	refBuildCtx.EXPECT().ReadFile(gomock.Any(), gomock.Eq(readYmlReq)).Return(zbuildYml, nil)
+	solver.EXPECT().ReadFile(
+		gomock.Any(), "zbuild.yml", gomock.Any(),
+	).Return(zbuildYml, nil)
 
-	readLockReq := client.ReadRequest{Filename: "zbuild.lock"}
-	refBuildCtx.EXPECT().ReadFile(gomock.Any(), gomock.Eq(readLockReq)).Return(zbuildLock, nil)
+	solver.EXPECT().ReadFile(
+		gomock.Any(), "zbuild.lock", gomock.Any(),
+	).Return(zbuildLock, nil)
 
 	handler := mocks.NewMockKindHandler(mockCtrl)
 	handler.EXPECT().WithSolver(gomock.Any()).Times(1)
@@ -350,50 +371,9 @@ func failWhenKindHandlerFailsTC(mockCtrl *gomock.Controller) testCase {
 
 	return testCase{
 		client:      c,
+		solver:      solver,
 		registry:    registry,
 		expectedErr: errors.New("some build error"),
-	}
-}
-
-func failWhenKindHandlerReturnsUnsolvableState(mockCtrl *gomock.Controller) testCase {
-	c := llbtest.NewMockClient(mockCtrl)
-	c.EXPECT().BuildOpts().AnyTimes().Return(client.BuildOpts{
-		SessionID: "sessid",
-		Opts:      map[string]string{},
-	})
-
-	refBuildCtx := llbtest.NewMockReference(mockCtrl)
-	resBuildCtx := &client.Result{
-		Refs: map[string]client.Reference{"linux/amd64": refBuildCtx},
-		Ref:  refBuildCtx,
-	}
-	c.EXPECT().Solve(gomock.Any(), gomock.Any()).Return(resBuildCtx, nil)
-
-	readYmlReq := client.ReadRequest{Filename: "zbuild.yml"}
-	refBuildCtx.EXPECT().ReadFile(gomock.Any(), gomock.Eq(readYmlReq)).Return(zbuildYml, nil)
-
-	handler := mocks.NewMockKindHandler(mockCtrl)
-	handler.EXPECT().WithSolver(gomock.Any()).Times(1)
-	readLockReq := client.ReadRequest{Filename: "zbuild.lock"}
-	refBuildCtx.EXPECT().ReadFile(gomock.Any(), gomock.Eq(readLockReq)).Return(zbuildLock, nil)
-
-	c.EXPECT().Solve(gomock.Any(), gomock.Any()).Return(nil, errors.New("some solver error"))
-
-	state := llb.State{}
-	img := image.Image{
-		Image: specs.Image{
-			Author: "zbuild",
-		},
-	}
-	handler.EXPECT().Build(gomock.Any(), gomock.Any()).Return(state, &img, nil)
-
-	registry := registry.NewKindRegistry()
-	registry.Register("php", handler)
-
-	return testCase{
-		client:      c,
-		registry:    registry,
-		expectedErr: errors.New("some solver error"),
 	}
 }
 
@@ -413,9 +393,15 @@ func (m buildOptsMatcher) Matches(x interface{}) bool {
 	return opts.SessionID == m.opts.SessionID &&
 		opts.File == m.opts.File &&
 		opts.LockFile == m.opts.LockFile &&
-		opts.Stage == m.opts.Stage
+		opts.Stage == m.opts.Stage &&
+		opts.ContextName == m.opts.ContextName
 }
 
 func (m buildOptsMatcher) String() string {
-	return "opts.SessionID && opts.File && opts.LockFile && opts.Stage"
+	return fmt.Sprintf("{%s %s %s %s %s}",
+		m.opts.File,
+		m.opts.LockFile,
+		m.opts.Stage,
+		m.opts.SessionID,
+		m.opts.ContextName)
 }

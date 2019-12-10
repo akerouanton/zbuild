@@ -34,8 +34,10 @@ func HandleUpdateCmd(cmd *cobra.Command, args []string) {
 		logrus.Fatal(err)
 	}
 
+	solver := newDockerSolver()
 	b := builder.Builder{Registry: reg, PkgSolver: pkgSolver}
-	if err := b.UpdateLockFile(updateFlags.file); err != nil {
+
+	if err := b.UpdateLockFile(solver, updateFlags.file); err != nil {
 		logrus.Fatal(err)
 	}
 }
