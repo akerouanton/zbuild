@@ -6,7 +6,7 @@ import (
 
 	"github.com/NiR-/zbuild/pkg/builddef"
 	"github.com/NiR-/zbuild/pkg/llbutils"
-	version "github.com/hashicorp/go-version"
+	hashiversion "github.com/hashicorp/go-version"
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/xerrors"
 	"gopkg.in/yaml.v2"
@@ -71,11 +71,10 @@ func NewKind(genericDef *builddef.BuildDef) (Definition, error) {
 		return def, err
 	}
 
-	majMinVersion, err := extractMajMinVersion(def.Version)
+	def.MajMinVersion, err = extractMajMinVersion(def.Version)
 	if err != nil {
 		return def, err
 	}
-	def.MajMinVersion = majMinVersion
 
 	if def.BaseImage == "" {
 		baseImages, ok := defaultBaseImages[def.MajMinVersion]
@@ -165,20 +164,21 @@ func (fl ComposerDumpFlags) Flags() (string, error) {
 
 // StageDefinition represents the config of stage once it got merged with all
 // its ancestors.
-// @TODO: rename into FinalStageDefinition
 type StageDefinition struct {
 	Stage
-	Name          string
-	BaseImage     string
-	Version       string
-	MajMinVersion string
-	Infer         bool
-	Dev           *bool
+	Name           string
+	BaseImage      string
+	Version        string
+	MajMinVersion  string
+	Infer          bool
+	Dev            *bool
+	LockedPackages map[string]string
+	PlatformReqs   map[string]string
 }
 
 func (def *Definition) ResolveStageDefinition(
 	name string,
-	platformReqsLoader func(*StageDefinition) error,
+	composerLockLoader func(*StageDefinition) error,
 ) (StageDefinition, error) {
 	var stageDef StageDefinition
 
@@ -209,40 +209,38 @@ func (def *Definition) ResolveStageDefinition(
 	stageDef = mergeStages(def, stages...)
 	stageDef.Name = name
 
+	if err := composerLockLoader(&stageDef); err != nil {
+		return stageDef, err
+	}
+
 	if *stageDef.FPM == false && stageDef.Command == nil {
 		return stageDef, xerrors.New("FPM mode is disabled but no command was provided")
 	}
 
-	if def.Infer {
-		if *stageDef.FPM == false {
-			stageDef.ConfigFiles.FPMConfigFile = nil
-		}
-		if *stageDef.Dev == true || *stageDef.FPM == false {
-			disabled := false
-			stageDef.Healthcheck = &disabled
-		}
-		if *stageDef.Dev == false {
-			stageDef.Extensions["apcu"] = "*"
-			stageDef.Extensions["opcache"] = "*"
-		}
-	}
-
 	addIntegrations(&stageDef)
 
-	if def.Infer {
-		if err := platformReqsLoader(&stageDef); err != nil {
-			return stageDef, xerrors.Errorf("could not load platform-reqs from composer.lock: %w", err)
-		}
-
-		inferExtensions(&stageDef)
-		inferSystemPackages(&stageDef)
+	if !def.Infer {
+		return stageDef, nil
 	}
+
+	if *stageDef.Dev == false {
+		stageDef.Extensions["apcu"] = "*"
+		stageDef.Extensions["opcache"] = "*"
+	}
+	for name, constraint := range stageDef.PlatformReqs {
+		if _, ok := stageDef.Extensions[name]; !ok {
+			stageDef.Extensions[name] = constraint
+		}
+	}
+
+	inferExtensions(&stageDef)
+	inferSystemPackages(&stageDef)
 
 	return stageDef, nil
 }
 
 func extractMajMinVersion(versionString string) (string, error) {
-	ver, err := version.NewVersion(versionString)
+	ver, err := hashiversion.NewVersion(versionString)
 	if err != nil {
 		return "", err
 	}
@@ -254,12 +252,14 @@ func extractMajMinVersion(versionString string) (string, error) {
 func mergeStages(base *Definition, stages ...DerivedStage) StageDefinition {
 	dev := false
 	stageDef := StageDefinition{
-		BaseImage:     base.BaseImage,
-		Version:       base.Version,
-		MajMinVersion: base.MajMinVersion,
-		Infer:         base.Infer,
-		Stage:         base.BaseStage,
-		Dev:           &dev,
+		BaseImage:      base.BaseImage,
+		Version:        base.Version,
+		MajMinVersion:  base.MajMinVersion,
+		Infer:          base.Infer,
+		Stage:          base.BaseStage,
+		Dev:            &dev,
+		PlatformReqs:   map[string]string{},
+		LockedPackages: map[string]string{},
 	}
 
 	stages = reverseStages(stages)
@@ -315,6 +315,15 @@ func mergeStages(base *Definition, stages ...DerivedStage) StageDefinition {
 		}
 	}
 
+	if *stageDef.FPM == false {
+		stageDef.ConfigFiles.FPMConfigFile = nil
+	}
+	if *stageDef.Dev == true || *stageDef.FPM == false {
+		disabled := false
+		stageDef.Healthcheck = &disabled
+		removeIntegration(&stageDef, "blackfire")
+	}
+
 	return stageDef
 }
 
@@ -342,10 +351,6 @@ func addIntegrations(def *StageDefinition) {
 	for _, integration := range def.Integrations {
 		switch integration {
 		case "blackfire":
-			if *def.Dev {
-				continue
-			}
-
 			dest := path.Join(phpExtDirs[def.MajMinVersion], "blackfire.so")
 			def.ExternalFiles = append(def.ExternalFiles, llbutils.ExternalFile{
 				URL:         "https://blackfire.io/api/v1/releases/probe/php/linux/amd64/72",
@@ -375,6 +380,61 @@ func addIntegrations(def *StageDefinition) {
 	}
 }
 
+func removeIntegration(stageDef *StageDefinition, toRemove string) {
+	integrations := make([]string, len(stageDef.Integrations))
+	cur := 0
+	for i := 0; i < len(stageDef.Integrations); i++ {
+		if stageDef.Integrations[i] == toRemove {
+			continue
+		}
+		integrations[cur] = stageDef.Integrations[i]
+		cur++
+	}
+
+	stageDef.Integrations = integrations[:cur]
+}
+
+// List of extensions preinstalled in official PHP images. Fortunately enough,
+// currently all images have the same set of preinstalled extensions.
+//
+// This list has been obtained using:
+// docker run --rm -t php:7.2-fpm-buster php -r 'var_dump(get_loaded_extensions());'
+var preinstalledExtensions = []string{
+	"core",
+	"date",
+	"libxml",
+	"openssl",
+	"pcre",
+	"sqlite3",
+	"zlib",
+	"ctype",
+	"curl",
+	"dom",
+	"fileinfo",
+	"filter",
+	"ftp",
+	"hash",
+	"iconv",
+	"json",
+	"mbstring",
+	"spl",
+	"pdo",
+	"session",
+	"posix",
+	"readline",
+	"reflection",
+	"standard",
+	"simplexml",
+	"pdo_sqlite",
+	"phar",
+	"tokenizer",
+	"xml",
+	"xmlreader",
+	"xmlwriter",
+	"mysqlnd",
+	"sodium",
+}
+
 func inferExtensions(def *StageDefinition) {
 	// soap extension needs sockets extension to work properly
 	if _, ok := def.Extensions["soap"]; ok {
@@ -389,8 +449,7 @@ func inferExtensions(def *StageDefinition) {
 	}
 
 	// Remove extensions installed by default
-	toRemove := []string{"filter", "json", "reflection", "session", "sodium", "spl", "standard"}
-	for _, name := range toRemove {
+	for _, name := range preinstalledExtensions {
 		if _, ok := def.Extensions[name]; ok {
 			delete(def.Extensions, name)
 		}

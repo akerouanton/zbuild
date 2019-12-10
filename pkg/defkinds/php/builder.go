@@ -9,32 +9,13 @@ import (
 
 	"github.com/NiR-/notpecl/backends"
 	"github.com/NiR-/zbuild/pkg/builddef"
-	"github.com/NiR-/zbuild/pkg/statesolver"
 	"github.com/NiR-/zbuild/pkg/image"
 	"github.com/NiR-/zbuild/pkg/llbutils"
 	"github.com/NiR-/zbuild/pkg/registry"
+	"github.com/NiR-/zbuild/pkg/statesolver"
 	"github.com/moby/buildkit/client/llb"
-	"github.com/moby/buildkit/frontend/gateway/client"
 	"golang.org/x/xerrors"
 )
-
-var defaultBaseImages = map[string]struct {
-	FPM string
-	CLI string
-}{
-	"7.2": {
-		FPM: "docker.io/library/php:7.2-fpm-buster",
-		CLI: "docker.io/library/php:7.2-cli-buster",
-	},
-	"7.3": {
-		FPM: "docker.io/library/php:7.3-fpm-buster",
-		CLI: "docker.io/library/php:7.3-cli-buster",
-	},
-	"7.4": {
-		FPM: "docker.io/library/php:7.4-fpm-buster",
-		CLI: "docker.io/library/php:7.4-cli-buster",
-	},
-}
 
 const (
 	defaultComposerImageTag = "docker.io/library/composer:1.9.0"
@@ -44,82 +25,51 @@ const (
 
 // RegisterKind adds a LLB DAG builder to the given KindRegistry for php
 // definition kind.
-func RegisterKind(registry *registry.KindRegistry, solver statesolver.StateSolver) {
-	registry.Register("php", NewPHPHandler(solver))
+func RegisterKind(registry *registry.KindRegistry) {
+	registry.Register("php", NewPHPHandler())
 }
 
 type PHPHandler struct {
-	solver statesolver.StateSolver
 	NotPecl backends.NotPeclBackend
+	solver  statesolver.StateSolver
 }
 
-func NewPHPHandler(solver statesolver.StateSolver) PHPHandler {
-	return PHPHandler{
-		solver: solver,
+func NewPHPHandler() *PHPHandler {
+	return &PHPHandler{
 		NotPecl: backends.NewNotPeclBackend(),
 	}
 }
 
-func (h PHPHandler) Build(
+func (h *PHPHandler) WithSolver(solver statesolver.StateSolver) {
+	h.solver = solver
+}
+
+func (h *PHPHandler) Build(
 	ctx context.Context,
-	c client.Client,
 	buildOpts builddef.BuildOpts,
-) (llb.State, *image.Image, error) {
-	opts := toLLBOpts{
-		buildOpts: buildOpts,
-		platformReqsLoader: func(stage *StageDefinition) error {
-			// @TODO: LoadPlatformReqsFromContext and LoadPlatformReqsFromFS by
-			// a single func and use filefetch package to
-			return LoadPlatformReqsFromContext(ctx, c, stage, buildOpts)
-		},
-	}
-
-	return Config2LLB(ctx, opts)
-}
-
-func (h PHPHandler) DebugLLB(buildOpts builddef.BuildOpts) (llb.State, error) {
-	buildOpts.SessionID = "<SESSION-ID>"
-	opts := toLLBOpts{
-		buildOpts: buildOpts,
-		platformReqsLoader: func(stage *StageDefinition) error {
-			basedir := path.Dir(buildOpts.File)
-			return LoadPlatformReqsFromFS(stage, basedir)
-		},
-	}
-
-	ctx := context.Background()
-	llb, _, err := Config2LLB(ctx, opts)
-	return llb, err
-}
-
-type toLLBOpts struct {
-	buildOpts          builddef.BuildOpts
-	platformReqsLoader func(*StageDefinition) error
-}
-
-func Config2LLB(
-	ctx context.Context,
-	opts toLLBOpts,
 ) (llb.State, *image.Image, error) {
 	var state llb.State
 	var img *image.Image
 
-	def, err := NewKind(opts.buildOpts.Def)
+	def, err := NewKind(buildOpts.Def)
 	if err != nil {
 		return state, img, err
 	}
 
-	stageName := opts.buildOpts.Stage
-	stage, err := def.ResolveStageDefinition(stageName, opts.platformReqsLoader)
+	stageName := buildOpts.Stage
+	composerLockLoader := func(stageDef *StageDefinition) error {
+		return LoadComposerLock(ctx, h.solver, stageDef)
+	}
+	stage, err := def.ResolveStageDefinition(stageName, composerLockLoader)
 	if err != nil {
-		return state, img, xerrors.Errorf("could not resolve stage %q: %w", opts.buildOpts.Stage, err)
+		return state, img, xerrors.Errorf("could not resolve stage %q: %w", buildOpts.Stage, err)
 	}
 
-	locks, ok := def.Locks.Stages[opts.buildOpts.Stage]
+	locks, ok := def.Locks.Stages[buildOpts.Stage]
 	if !ok {
 		return state, img, xerrors.Errorf(
 			"could not build stage %q: no locks available. Please update your lockfile",
-			opts.buildOpts.Stage,
+			buildOpts.Stage,
 		)
 	}
 
@@ -149,13 +99,13 @@ func Config2LLB(
 
 	// @TODO: copy files from git context instead of local source
 	if *stage.Dev {
-		configFilesSrc := llb.Local(opts.buildOpts.ContextName,
+		configFilesSrc := llb.Local(buildOpts.ContextName,
 			llb.IncludePatterns([]string{
 				*stage.ConfigFiles.IniFile,
 				*stage.ConfigFiles.FPMConfigFile,
 			}),
-			llb.LocalUniqueID(opts.buildOpts.LocalUniqueID),
-			llb.SessionID(opts.buildOpts.SessionID),
+			llb.LocalUniqueID(buildOpts.LocalUniqueID),
+			llb.SessionID(buildOpts.SessionID),
 			llb.SharedKeyHint("config-files"),
 			llb.WithCustomName("load config files from build context"))
 		state = llbutils.Copy(
@@ -171,20 +121,20 @@ func Config2LLB(
 			"/usr/local/etc/php-fpm.conf",
 			"1000:1000")
 
-		composerSrc := llb.Local(opts.buildOpts.ContextName,
+		composerSrc := llb.Local(buildOpts.ContextName,
 			llb.IncludePatterns([]string{"composer.json", "composer.lock"}),
-			llb.LocalUniqueID(opts.buildOpts.LocalUniqueID),
-			llb.SessionID(opts.buildOpts.SessionID),
+			llb.LocalUniqueID(buildOpts.LocalUniqueID),
+			llb.SessionID(buildOpts.SessionID),
 			llb.SharedKeyHint("composer-files"),
 			llb.WithCustomName("load composer files from build context"))
 		state = llbutils.Copy(composerSrc, "composer.*", state, "/app/", "1000:1000")
 		state = composerInstall(state)
 
-		buildContextSrc := llb.Local(opts.buildOpts.ContextName,
+		buildContextSrc := llb.Local(buildOpts.ContextName,
 			llb.IncludePatterns(includePatterns(&stage)),
 			llb.ExcludePatterns(excludePatterns(&stage)),
-			llb.LocalUniqueID(opts.buildOpts.LocalUniqueID),
-			llb.SessionID(opts.buildOpts.SessionID),
+			llb.LocalUniqueID(buildOpts.LocalUniqueID),
+			llb.SessionID(buildOpts.SessionID),
 			llb.SharedKeyHint("build-context"),
 			llb.WithCustomName("load build context"))
 		state = llbutils.Copy(buildContextSrc, "/", state, "/app/", "1000:1000")

@@ -6,13 +6,12 @@ import (
 
 	"github.com/NiR-/zbuild/pkg/builddef"
 	"github.com/NiR-/zbuild/pkg/image"
-	"github.com/NiR-/zbuild/pkg/llbtest"
 	"github.com/NiR-/zbuild/pkg/pkgsolver"
 	"github.com/NiR-/zbuild/pkg/registry"
+	"github.com/NiR-/zbuild/pkg/statesolver"
 	"github.com/go-test/deep"
 	"github.com/golang/mock/gomock"
 	"github.com/moby/buildkit/client/llb"
-	"github.com/moby/buildkit/frontend/gateway/client"
 	specs "github.com/opencontainers/image-spec/specs-go/v1"
 	"golang.org/x/xerrors"
 )
@@ -51,14 +50,13 @@ func TestRegistry(t *testing.T) {
 			mockCtrl := gomock.NewController(t)
 			defer mockCtrl.Finish()
 
-			c := llbtest.NewMockClient(mockCtrl)
 			buildOpts := builddef.BuildOpts{
 				Def:       &tc.builddef,
 				SessionID: "sessid",
 				Stage:     "base",
 			}
 
-			_, img, err := handler.Build(context.TODO(), c, buildOpts)
+			_, img, err := handler.Build(context.TODO(), buildOpts)
 			if err != nil {
 				t.Fatalf("Unexpected error: %v\n", err)
 			}
@@ -108,17 +106,16 @@ type mockKindHandler struct {
 	builtImage *image.Image
 }
 
-func (h mockKindHandler) Build(ctx context.Context, c client.Client, opts builddef.BuildOpts) (llb.State, *image.Image, error) {
+func (h mockKindHandler) WithSolver(solver statesolver.StateSolver) {
+	return
+}
+
+func (h mockKindHandler) Build(ctx context.Context, opts builddef.BuildOpts) (llb.State, *image.Image, error) {
 	state := llb.State{}
 	return state, h.builtImage, nil
 }
 
-func (h mockKindHandler) DebugLLB(buildOpts builddef.BuildOpts) (llb.State, error) {
-	state := llb.State{}
-	return state, nil
-}
-
-func (h mockKindHandler) UpdateLocks(genericDef *builddef.BuildDef, pkgSolver pkgsolver.PackageSolver) (builddef.Locks, error) {
+func (h mockKindHandler) UpdateLocks(ctx context.Context, pkgSolver pkgsolver.PackageSolver, genericDef *builddef.BuildDef) (builddef.Locks, error) {
 	return mockLocks{}, nil
 }
 

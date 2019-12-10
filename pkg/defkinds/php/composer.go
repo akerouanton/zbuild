@@ -3,102 +3,99 @@ package php
 import (
 	"context"
 	"encoding/json"
-	"io/ioutil"
-	"path"
 	"strings"
 
-	"github.com/NiR-/zbuild/pkg/builddef"
-	"github.com/NiR-/zbuild/pkg/llbutils"
+	"github.com/NiR-/zbuild/pkg/statesolver"
 	"github.com/moby/buildkit/client/llb"
-	"github.com/moby/buildkit/frontend/gateway/client"
-	"github.com/sirupsen/logrus"
 	"golang.org/x/xerrors"
 )
 
-// LoadPlatformReqsFromContext loads composer.lock from build conext and adds
-// any extensions declared there but not in zbuild.yaml.
-func LoadPlatformReqsFromContext(
+type composerLock struct {
+	packages     map[string]string
+	platformReqs map[string]string
+}
+
+// LoadComposerLockFromContext loads composer.lock file from build context and
+// adds packages and packages-dev (if stageDef is dev) to stageDef.LockedPackages.
+// Also, it adds extensions listed in platform-reqs key to stageDef.PlatformReqs.
+// It returns nil if the composer.lock file couldn't be found.
+func LoadComposerLock(
 	ctx context.Context,
-	c client.Client,
-	stage *StageDefinition,
-	opts builddef.BuildOpts,
+	solver statesolver.StateSolver,
+	stageDef *StageDefinition,
 ) error {
-	composerSrc := llb.Local(opts.ContextName,
+	composerSrc := solver.FromBuildContext(
 		llb.IncludePatterns([]string{"composer.json", "composer.lock"}),
-		llb.SessionID(opts.SessionID),
+		// @TODO: use a struct to share SharedKeyHints across code source
 		llb.SharedKeyHint("composer-files"),
 		llb.WithCustomName("load composer files from build context"))
-	_, ref, err := llbutils.SolveState(ctx, c, composerSrc)
-	if err != nil {
-		return err
-	}
 
-	lockdata, ok, err := llbutils.ReadFile(ctx, ref, "composer.lock")
-	if !ok {
+	lockdata, err := solver.ReadFile(ctx, "composer.lock", composerSrc)
+	if xerrors.Is(err, statesolver.FileNotFound) {
 		return nil
-	}
-	if err != nil {
+	} else if err != nil {
 		return xerrors.Errorf("could not load composer.lock: %v", err)
 	}
 
-	parsed, err := parsePlatformReqs(lockdata)
+	parsed, err := parseComposerLock(lockdata, *stageDef.Dev)
 	if err != nil {
 		return err
 	}
 
-	for ext, constraint := range parsed {
-		if _, ok := stage.Extensions[ext]; !ok {
-			stage.Extensions[ext] = constraint
-		}
-	}
+	stageDef.LockedPackages = parsed.packages
+	stageDef.PlatformReqs = parsed.platformReqs
 
 	return nil
 }
 
-// LoadPlatformReqsFromFS load composer.lock from the filesystem and add
-// any extensions declared there but not in zbuild.yaml.
-func LoadPlatformReqsFromFS(stage *StageDefinition, basedir string) error {
-	fullpath := path.Join(basedir, "composer.lock")
-	lockdata, err := ioutil.ReadFile(fullpath)
-	if err != nil {
-		logrus.Debugf("Could not load composer.lock: %+v", err)
-		return nil
+func parseComposerLock(lockdata []byte, isDev bool) (composerLock, error) {
+	var parsed map[string]interface{}
+	lock := composerLock{
+		packages:     map[string]string{},
+		platformReqs: map[string]string{},
 	}
 
-	parsed, err := parsePlatformReqs(lockdata)
-	if err != nil {
-		return err
+	if err := json.Unmarshal(lockdata, &parsed); err != nil {
+		return lock, xerrors.Errorf("could not unmarshal composer.lock: %w", err)
 	}
 
-	for ext, constraint := range parsed {
-		if _, ok := stage.Extensions[ext]; !ok {
-			stage.Extensions[ext] = constraint
-		}
-	}
-
-	return nil
-}
-
-func parsePlatformReqs(lockdata []byte) (map[string]string, error) {
-	var composerLock map[string]interface{}
-	if err := json.Unmarshal(lockdata, &composerLock); err != nil {
-		return map[string]string{}, xerrors.Errorf("could not unmarshal composer.lock: %w", err)
-	}
-
-	platformReqs, ok := composerLock["platform"]
+	packages, ok := parsed["packages"]
 	if !ok {
-		return map[string]string{}, nil
+		return lock, xerrors.New("composer.lock has no packages key")
 	}
 
-	exts := make(map[string]string)
+	for _, rawPkg := range packages.([]interface{}) {
+		pkg := rawPkg.(map[string]interface{})
+		pkgName := pkg["name"].(string)
+		pkgVersion := pkg["version"].(string)
+
+		lock.packages[pkgName] = pkgVersion
+	}
+
+	devPackages, ok := parsed["packages-dev"]
+	if isDev && ok {
+		for _, rawPkg := range devPackages.([]interface{}) {
+			pkg := rawPkg.(map[string]interface{})
+			pkgName := pkg["name"].(string)
+			pkgVersion := pkg["version"].(string)
+
+			lock.packages[pkgName] = pkgVersion
+		}
+	}
+
+	platformReqs, ok := parsed["platform"]
+	if !ok {
+		return lock, nil
+	}
+
 	for req, constraint := range platformReqs.(map[string]interface{}) {
 		if !strings.HasPrefix(req, "ext-") {
 			continue
 		}
 
 		ext := strings.TrimPrefix(req, "ext-")
-		exts[ext] = constraint.(string)
+		lock.platformReqs[ext] = constraint.(string)
 	}
 
-	return exts, nil
+	return lock, nil
 }

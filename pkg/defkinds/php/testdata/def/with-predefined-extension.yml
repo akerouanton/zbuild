@@ -1,0 +1,5 @@
+# Default extensions aren't automatically removed when inference is disabled
+infer: true
+
+extensions:
+  redis: "^5.1"

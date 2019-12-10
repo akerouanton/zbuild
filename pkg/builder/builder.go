@@ -10,6 +10,7 @@ import (
 	"github.com/NiR-/zbuild/pkg/llbutils"
 	"github.com/NiR-/zbuild/pkg/pkgsolver"
 	"github.com/NiR-/zbuild/pkg/registry"
+	"github.com/NiR-/zbuild/pkg/statesolver"
 	"github.com/moby/buildkit/client/llb"
 	"github.com/moby/buildkit/exporter/containerimage/exptypes"
 	"github.com/moby/buildkit/frontend/gateway/client"
@@ -68,7 +69,10 @@ func (b Builder) Build(ctx context.Context, c client.Client) (*client.Result, er
 	}
 
 	buildOpts.Def = def
-	state, img, err := handler.Build(ctx, c, buildOpts)
+	solver := statesolver.NewBuildkitSolver(c)
+	handler.WithSolver(solver)
+
+	state, img, err := handler.Build(ctx, buildOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -93,7 +97,11 @@ func (b Builder) Build(ctx context.Context, c client.Client) (*client.Result, er
 	return res, nil
 }
 
-func (b Builder) Debug(file, stage string) (llb.State, error) {
+func (b Builder) Debug(
+	solver statesolver.StateSolver,
+	file,
+	stage string,
+) (llb.State, error) {
 	var state llb.State
 	opts := builddef.NewBuildOpts(file, stage, "<SESSION-ID>", "context")
 
@@ -108,7 +116,9 @@ func (b Builder) Debug(file, stage string) (llb.State, error) {
 	}
 
 	opts.Def = def
-	state, err = handler.DebugLLB(opts)
+	ctx := context.Background()
+
+	state, _, err = handler.Build(ctx, opts)
 	if err != nil {
 		return state, err
 	}
@@ -118,7 +128,6 @@ func (b Builder) Debug(file, stage string) (llb.State, error) {
 
 func (b Builder) UpdateLockFile(file string) error {
 	lockFile := builddef.LockFilepath(file)
-
 	def, err := builddef.LoadFromFS(file, lockFile)
 	if err != nil {
 		return err
@@ -129,7 +138,8 @@ func (b Builder) UpdateLockFile(file string) error {
 		return err
 	}
 
-	locks, err := handler.UpdateLocks(def, b.PkgSolver)
+	ctx := context.Background()
+	locks, err := handler.UpdateLocks(ctx, b.PkgSolver, def)
 	if err != nil {
 		return err
 	}

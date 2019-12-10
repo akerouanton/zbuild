@@ -9,9 +9,9 @@ import (
 	builddef "github.com/NiR-/zbuild/pkg/builddef"
 	image "github.com/NiR-/zbuild/pkg/image"
 	pkgsolver "github.com/NiR-/zbuild/pkg/pkgsolver"
+	statesolver "github.com/NiR-/zbuild/pkg/statesolver"
 	gomock "github.com/golang/mock/gomock"
 	llb "github.com/moby/buildkit/client/llb"
-	client "github.com/moby/buildkit/frontend/gateway/client"
 	reflect "reflect"
 )
 
@@ -39,8 +39,8 @@ func (m *MockKindHandler) EXPECT() *MockKindHandlerMockRecorder {
 }
 
 // Build mocks base method
-func (m *MockKindHandler) Build(arg0 context.Context, arg1 client.Client, arg2 builddef.BuildOpts) (llb.State, *image.Image, error) {
-	ret := m.ctrl.Call(m, "Build", arg0, arg1, arg2)
+func (m *MockKindHandler) Build(arg0 context.Context, arg1 builddef.BuildOpts) (llb.State, *image.Image, error) {
+	ret := m.ctrl.Call(m, "Build", arg0, arg1)
 	ret0, _ := ret[0].(llb.State)
 	ret1, _ := ret[1].(*image.Image)
 	ret2, _ := ret[2].(error)
@@ -48,32 +48,29 @@ func (m *MockKindHandler) Build(arg0 context.Context, arg1 client.Client, arg2 b
 }
 
 // Build indicates an expected call of Build
-func (mr *MockKindHandlerMockRecorder) Build(arg0, arg1, arg2 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Build", reflect.TypeOf((*MockKindHandler)(nil).Build), arg0, arg1, arg2)
-}
-
-// DebugLLB mocks base method
-func (m *MockKindHandler) DebugLLB(arg0 builddef.BuildOpts) (llb.State, error) {
-	ret := m.ctrl.Call(m, "DebugLLB", arg0)
-	ret0, _ := ret[0].(llb.State)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// DebugLLB indicates an expected call of DebugLLB
-func (mr *MockKindHandlerMockRecorder) DebugLLB(arg0 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DebugLLB", reflect.TypeOf((*MockKindHandler)(nil).DebugLLB), arg0)
+func (mr *MockKindHandlerMockRecorder) Build(arg0, arg1 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Build", reflect.TypeOf((*MockKindHandler)(nil).Build), arg0, arg1)
 }
 
 // UpdateLocks mocks base method
-func (m *MockKindHandler) UpdateLocks(arg0 *builddef.BuildDef, arg1 pkgsolver.PackageSolver) (builddef.Locks, error) {
-	ret := m.ctrl.Call(m, "UpdateLocks", arg0, arg1)
+func (m *MockKindHandler) UpdateLocks(arg0 context.Context, arg1 pkgsolver.PackageSolver, arg2 *builddef.BuildDef) (builddef.Locks, error) {
+	ret := m.ctrl.Call(m, "UpdateLocks", arg0, arg1, arg2)
 	ret0, _ := ret[0].(builddef.Locks)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // UpdateLocks indicates an expected call of UpdateLocks
-func (mr *MockKindHandlerMockRecorder) UpdateLocks(arg0, arg1 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateLocks", reflect.TypeOf((*MockKindHandler)(nil).UpdateLocks), arg0, arg1)
+func (mr *MockKindHandlerMockRecorder) UpdateLocks(arg0, arg1, arg2 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateLocks", reflect.TypeOf((*MockKindHandler)(nil).UpdateLocks), arg0, arg1, arg2)
+}
+
+// WithSolver mocks base method
+func (m *MockKindHandler) WithSolver(arg0 statesolver.StateSolver) {
+	m.ctrl.Call(m, "WithSolver", arg0)
+}
+
+// WithSolver indicates an expected call of WithSolver
+func (mr *MockKindHandlerMockRecorder) WithSolver(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WithSolver", reflect.TypeOf((*MockKindHandler)(nil).WithSolver), arg0)
 }

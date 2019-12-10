@@ -2,9 +2,7 @@ package main
 
 import (
 	"github.com/NiR-/zbuild/pkg/defkinds/php"
-	"github.com/NiR-/zbuild/pkg/statesolver"
 	"github.com/NiR-/zbuild/pkg/registry"
-	"github.com/docker/docker/client"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -28,19 +26,10 @@ func main() {
 	}
 }
 
+// @TODO: use a default kind registry
 func buildKindRegistry() *registry.KindRegistry {
-	docker, err := client.NewClientWithOpts(client.FromEnv)
-	if err != nil {
-		logrus.Fatal(err)
-	}
-
-	solver := statesolver.DockerSolver{
-		Client: docker,
-		Labels: map[string]string{},
-	}
-
 	reg := registry.NewKindRegistry()
-	php.RegisterKind(reg, solver)
+	php.RegisterKind(reg)
 
 	return reg
 }

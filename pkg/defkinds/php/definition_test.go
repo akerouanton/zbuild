@@ -8,7 +8,9 @@ import (
 	"github.com/NiR-/zbuild/pkg/defkinds/php"
 	"github.com/NiR-/zbuild/pkg/llbutils"
 	"github.com/go-test/deep"
+	"github.com/golang/mock/gomock"
 	"golang.org/x/xerrors"
+	"gopkg.in/yaml.v2"
 )
 
 type newDefinitionTC struct {
@@ -186,12 +188,9 @@ func initSuccessfullyParseRawDefinitionWithStagesTC() newDefinitionTC {
 }
 
 func initFailToParseUnknownPropertiesTC() newDefinitionTC {
-	file := "testdata/def/with-invalid-properties.yml"
-	lockFile := "testdata/def/with-invalid-properties.lock"
-
 	return newDefinitionTC{
-		file:        file,
-		lockFile:    lockFile,
+		file:        "testdata/def/with-invalid-properties.yml",
+		lockFile:    "",
 		expectedErr: errors.New("could not decode build manifest: 1 error(s) decoding:\n\n* '' has invalid keys: foo"),
 	}
 }
@@ -214,9 +213,9 @@ func TestNewKind(t *testing.T) {
 			t.Parallel()
 			tc := tcinit()
 
-			generic, err := builddef.LoadFromFS(tc.file, tc.lockFile)
-			if err != nil {
-				t.Fatal(err)
+			generic := loadBuildDef(t, tc.file)
+			if tc.lockFile != "" {
+				generic.RawLocks = loadRawTestdata(t, tc.lockFile)
 			}
 
 			def, err := php.NewKind(generic)
@@ -238,20 +237,21 @@ func TestNewKind(t *testing.T) {
 }
 
 type resolveStageTC struct {
-	file        string
-	lockFile    string
-	stage       string
-	expected    php.StageDefinition
-	expectedErr error
+	file               string
+	lockFile           string
+	stage              string
+	composerLockLoader func(*php.StageDefinition) error
+	expected           php.StageDefinition
+	expectedErr        error
 }
 
-func initSuccessfullyResolveDefaultDevStageTC() resolveStageTC {
+func initSuccessfullyResolveDefaultDevStageTC(t *testing.T, mockCtrl *gomock.Controller) resolveStageTC {
 	file := "testdata/def/without-stages.yml"
 	lockFile := "testdata/def/without-stages.lock"
 
 	isFPM := true
 	isDev := true
-	healthcheckEnabled := true
+	healthckeck := false
 	phpIni := "docker/app/php.ini"
 	fpmConfigFile := "docker/app/fpm.conf"
 
@@ -259,23 +259,20 @@ func initSuccessfullyResolveDefaultDevStageTC() resolveStageTC {
 		file:     file,
 		lockFile: lockFile,
 		stage:    "dev",
+		composerLockLoader: func(stageDef *php.StageDefinition) error {
+			return nil
+		},
 		expected: php.StageDefinition{
-			Name:          "dev",
-			BaseImage:     "docker.io/library/php:7.4-fpm-buster",
-			Version:       "7.4.0",
-			MajMinVersion: "7.4",
-			Infer:         false,
-			Dev:           &isDev,
+			Name:           "dev",
+			BaseImage:      "docker.io/library/php:7.4-fpm-buster",
+			Version:        "7.4.0",
+			MajMinVersion:  "7.4",
+			Infer:          false,
+			Dev:            &isDev,
+			LockedPackages: map[string]string{},
+			PlatformReqs:   map[string]string{},
 			Stage: php.Stage{
-				ExternalFiles: []llbutils.ExternalFile{
-					{
-						URL:         "https://github.com/NiR-/fcgi-client/releases/download/v0.1.0/fcgi-client.phar",
-						Compressed:  false,
-						Destination: "/usr/local/bin/fcgi-client",
-						Mode:        0750,
-						Owner:       "1000:1000",
-					},
-				},
+				ExternalFiles:  []llbutils.ExternalFile{},
 				SystemPackages: map[string]string{},
 				FPM:            &isFPM,
 				Extensions: map[string]string{
@@ -294,15 +291,15 @@ func initSuccessfullyResolveDefaultDevStageTC() resolveStageTC {
 					APCU:                  false,
 					ClassmapAuthoritative: true,
 				},
-				Integrations: []string{"blackfire"},
-				Healthcheck:  &healthcheckEnabled,
+				Integrations: []string{},
+				Healthcheck:  &healthckeck,
 				PostInstall:  []string{"some more commands", "another one"},
 			},
 		},
 	}
 }
 
-func initSuccessfullyResolveWorkerStageTC() resolveStageTC {
+func initSuccessfullyResolveWorkerStageTC(t *testing.T, mockCtrl *gomock.Controller) resolveStageTC {
 	isNotFPM := false
 	isNotDev := false
 	healthcheckDisabled := false
@@ -313,6 +310,14 @@ func initSuccessfullyResolveWorkerStageTC() resolveStageTC {
 		file:     "testdata/def/with-stages.yml",
 		lockFile: "",
 		stage:    "worker",
+		composerLockLoader: mockComposerLockLoader(
+			map[string]string{
+				"clue/stream-filter": "v1.4.0",
+			},
+			map[string]string{
+				"mbstring": "*",
+			},
+		),
 		expected: php.StageDefinition{
 			Name:          "worker",
 			BaseImage:     "docker.io/library/php:7.4-fpm-buster",
@@ -320,16 +325,14 @@ func initSuccessfullyResolveWorkerStageTC() resolveStageTC {
 			MajMinVersion: "7.4",
 			Infer:         true,
 			Dev:           &isNotDev,
+			LockedPackages: map[string]string{
+				"clue/stream-filter": "v1.4.0",
+			},
+			PlatformReqs: map[string]string{
+				"mbstring": "*",
+			},
 			Stage: php.Stage{
-				ExternalFiles: []llbutils.ExternalFile{
-					{
-						URL:         "https://blackfire.io/api/v1/releases/probe/php/linux/amd64/72",
-						Compressed:  true,
-						Pattern:     "blackfire-*.so",
-						Destination: "/usr/local/lib/php/extensions/no-debug-non-zts-20190902/blackfire.so",
-						Mode:        0644,
-					},
-				},
+				ExternalFiles: []llbutils.ExternalFile{},
 				SystemPackages: map[string]string{
 					"zlib1g-dev":   "*",
 					"libicu-dev":   "*",
@@ -365,7 +368,7 @@ func initSuccessfullyResolveWorkerStageTC() resolveStageTC {
 					"bin/console",
 					"web/app.php",
 				},
-				Integrations: []string{"symfony", "blackfire"},
+				Integrations: []string{"symfony"},
 				StatefulDirs: []string{
 					"public/uploads",
 					"data/imports",
@@ -381,30 +384,34 @@ func initSuccessfullyResolveWorkerStageTC() resolveStageTC {
 	}
 }
 
-func initFailToResolveUnknownStageTC() resolveStageTC {
+func initFailToResolveUnknownStageTC(t *testing.T, mockCtrl *gomock.Controller) resolveStageTC {
 	file := "testdata/def/without-stages.yml"
 	lockFile := "testdata/def/without-stages.lock"
 
+	composerLockLoader := mockComposerLockLoader(map[string]string{}, map[string]string{})
+
 	return resolveStageTC{
-		file:        file,
-		lockFile:    lockFile,
-		stage:       "foo",
-		expectedErr: errors.New(`stage "foo" not found`),
+		file:               file,
+		lockFile:           lockFile,
+		stage:              "foo",
+		composerLockLoader: composerLockLoader,
+		expectedErr:        errors.New(`stage "foo" not found`),
 	}
 }
 
-func initFailToResolveStageWithCyclicDepsTC() resolveStageTC {
-	file := "testdata/def/cyclic-stage-deps.yml"
-	lockFile := "testdata/def/cyclic-stage-deps.lock"
+func initFailToResolveStageWithCyclicDepsTC(t *testing.T, mockCtrl *gomock.Controller) resolveStageTC {
+	composerLockLoader := mockComposerLockLoader(map[string]string{}, map[string]string{})
+
 	return resolveStageTC{
-		file:        file,
-		lockFile:    lockFile,
-		stage:       "dev",
-		expectedErr: errors.New(`there's a cyclic dependency between "dev" and itself`),
+		file:               "testdata/def/cyclic-stage-deps.yml",
+		lockFile:           "",
+		stage:              "dev",
+		composerLockLoader: composerLockLoader,
+		expectedErr:        errors.New(`there's a cyclic dependency between "dev" and itself`),
 	}
 }
 
-func initSuccessfullyAddSymfonyIntegrationTC() resolveStageTC {
+func initSuccessfullyAddSymfonyIntegrationTC(t *testing.T, mockCtrl *gomock.Controller) resolveStageTC {
 	dev := true
 	fpm := true
 	healthcheck := false
@@ -413,6 +420,15 @@ func initSuccessfullyAddSymfonyIntegrationTC() resolveStageTC {
 		file:     "testdata/def/symfony-integration.yml",
 		lockFile: "",
 		stage:    "dev",
+		composerLockLoader: mockComposerLockLoader(
+			map[string]string{
+				"symfony/framework-bundle": "v4.4.1",
+			},
+			map[string]string{
+				"ctype": "*",
+				"iconv": "*",
+			},
+		),
 		expected: php.StageDefinition{
 			Name:          "dev",
 			BaseImage:     "docker.io/library/php:7.2-fpm-buster",
@@ -420,6 +436,13 @@ func initSuccessfullyAddSymfonyIntegrationTC() resolveStageTC {
 			MajMinVersion: "7.2",
 			Infer:         true,
 			Dev:           &dev,
+			LockedPackages: map[string]string{
+				"symfony/framework-bundle": "v4.4.1",
+			},
+			PlatformReqs: map[string]string{
+				"ctype": "*",
+				"iconv": "*",
+			},
 			Stage: php.Stage{
 				ExternalFiles: []llbutils.ExternalFile{},
 				SystemPackages: map[string]string{
@@ -430,6 +453,9 @@ func initSuccessfullyAddSymfonyIntegrationTC() resolveStageTC {
 				},
 				FPM: &fpm,
 				Extensions: map[string]string{
+					// Symfony requirements (ctype and iconv) aren't included
+					// here as they're already available in the official PHP
+					// images.
 					"zip": "*",
 				},
 				ConfigFiles: php.PHPConfigFiles{},
@@ -449,22 +475,27 @@ func initSuccessfullyAddSymfonyIntegrationTC() resolveStageTC {
 	}
 }
 
-func initRemoveDefaultExtensionsTC() resolveStageTC {
+func initRemoveDefaultExtensionsTC(t *testing.T, mockCtrl *gomock.Controller) resolveStageTC {
 	dev := true
 	fpm := true
 	healthcheck := false
 
+	composerLockLoader := mockComposerLockLoader(map[string]string{}, map[string]string{})
+
 	return resolveStageTC{
-		file:     "testdata/def/remove-default-exts.yml",
-		lockFile: "",
-		stage:    "dev",
+		file:               "testdata/def/remove-default-exts.yml",
+		lockFile:           "",
+		stage:              "dev",
+		composerLockLoader: composerLockLoader,
 		expected: php.StageDefinition{
-			Name:          "dev",
-			BaseImage:     "docker.io/library/php:7.4-fpm-buster",
-			Version:       "7.4",
-			MajMinVersion: "7.4",
-			Infer:         true,
-			Dev:           &dev,
+			Name:           "dev",
+			BaseImage:      "docker.io/library/php:7.4-fpm-buster",
+			Version:        "7.4",
+			MajMinVersion:  "7.4",
+			Infer:          true,
+			Dev:            &dev,
+			LockedPackages: map[string]string{},
+			PlatformReqs:   map[string]string{},
 			Stage: php.Stage{
 				ExternalFiles: []llbutils.ExternalFile{},
 				SystemPackages: map[string]string{
@@ -492,18 +523,75 @@ func initRemoveDefaultExtensionsTC() resolveStageTC {
 	}
 }
 
+// This TC ensures that the extensions infered from composer.lock aren't
+// erasing version constraints defined in the zbuildfile.
+func initPreservePredefinedExtensionConstraintsTC(t *testing.T, mockCtrl *gomock.Controller) resolveStageTC {
+	dev := true
+	fpm := true
+	healthcheck := false
+
+	return resolveStageTC{
+		file:     "testdata/def/with-predefined-extension.yml",
+		lockFile: "",
+		stage:    "dev",
+		composerLockLoader: mockComposerLockLoader(
+			map[string]string{},
+			map[string]string{
+				"redis": "*",
+			},
+		),
+		expected: php.StageDefinition{
+			Name:           "dev",
+			BaseImage:      "docker.io/library/php:7.4-fpm-buster",
+			Version:        "7.4",
+			MajMinVersion:  "7.4",
+			Infer:          true,
+			Dev:            &dev,
+			LockedPackages: map[string]string{},
+			PlatformReqs: map[string]string{
+				"redis": "*",
+			},
+			Stage: php.Stage{
+				ExternalFiles: []llbutils.ExternalFile{},
+				SystemPackages: map[string]string{
+					"zlib1g-dev":   "*",
+					"unzip":        "*",
+					"git":          "*",
+					"libpcre3-dev": "*",
+				},
+				FPM: &fpm,
+				Extensions: map[string]string{
+					"zip":   "*",
+					"redis": "^5.1",
+				},
+				ConfigFiles: php.PHPConfigFiles{},
+				ComposerDumpFlags: &php.ComposerDumpFlags{
+					ClassmapAuthoritative: true,
+				},
+				SourceDirs:   []string{},
+				ExtraScripts: []string{},
+				Integrations: []string{},
+				StatefulDirs: []string{},
+				Healthcheck:  &healthcheck,
+				PostInstall:  []string{},
+			},
+		},
+	}
+}
+
 func TestResolveStageDefinition(t *testing.T) {
 	if *flagTestdata {
 		return
 	}
 
-	testcases := map[string]func() resolveStageTC{
-		"successfully resolve default dev stage": initSuccessfullyResolveDefaultDevStageTC,
-		"successfully resolve worker stage":      initSuccessfullyResolveWorkerStageTC,
-		"successfully add symfony integration":   initSuccessfullyAddSymfonyIntegrationTC,
-		"fail to resolve unknown stage":          initFailToResolveUnknownStageTC,
-		"fail to resolve stage with cyclic deps": initFailToResolveStageWithCyclicDepsTC,
-		"remove default extensions":              initRemoveDefaultExtensionsTC,
+	testcases := map[string]func(*testing.T, *gomock.Controller) resolveStageTC{
+		"successfully resolve default dev stage":    initSuccessfullyResolveDefaultDevStageTC,
+		"successfully resolve worker stage":         initSuccessfullyResolveWorkerStageTC,
+		"successfully add symfony integration":      initSuccessfullyAddSymfonyIntegrationTC,
+		"fail to resolve unknown stage":             initFailToResolveUnknownStageTC,
+		"fail to resolve stage with cyclic deps":    initFailToResolveStageWithCyclicDepsTC,
+		"remove default extensions":                 initRemoveDefaultExtensionsTC,
+		"preserve predefined extension constraints": initPreservePredefinedExtensionConstraintsTC,
 	}
 
 	for tcname := range testcases {
@@ -511,11 +599,15 @@ func TestResolveStageDefinition(t *testing.T) {
 
 		t.Run(tcname, func(t *testing.T) {
 			t.Parallel()
-			tc := tcinit()
 
-			generic, err := builddef.LoadFromFS(tc.file, tc.lockFile)
-			if err != nil {
-				t.Fatal(err)
+			mockCtrl := gomock.NewController(t)
+			defer mockCtrl.Finish()
+
+			tc := tcinit(t, mockCtrl)
+
+			generic := loadBuildDef(t, tc.file)
+			if tc.lockFile != "" {
+				generic.RawLocks = loadRawTestdata(t, tc.lockFile)
 			}
 
 			def, err := php.NewKind(generic)
@@ -523,10 +615,9 @@ func TestResolveStageDefinition(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			platformReqsLoader := func(stage *php.StageDefinition) error {
-				return php.LoadPlatformReqsFromFS(stage, "")
-			}
-			stageDef, err := def.ResolveStageDefinition(tc.stage, platformReqsLoader)
+			t.Logf("extensions: %v", def.BaseStage.Extensions)
+
+			stageDef, err := def.ResolveStageDefinition(tc.stage, tc.composerLockLoader)
 			if tc.expectedErr != nil {
 				if err == nil || err.Error() != tc.expectedErr.Error() {
 					t.Fatalf("Expected: %v\nGot: %v", tc.expectedErr, err)
@@ -588,5 +679,28 @@ func TestComposerDumpFlags(t *testing.T) {
 				t.Fatalf("Expected: %s\nGot: %s", tc.expected, out)
 			}
 		})
+	}
+}
+
+func loadBuildDef(t *testing.T, filepath string) *builddef.BuildDef {
+	raw := loadRawTestdata(t, filepath)
+
+	var def builddef.BuildDef
+	if err := yaml.Unmarshal(raw, &def); err != nil {
+		t.Fatal(err)
+	}
+
+	return &def
+}
+
+// @TODO: use a proper ComposerLock struct
+func mockComposerLockLoader(
+	lockedPackages map[string]string,
+	platformReqs map[string]string,
+) func(*php.StageDefinition) error {
+	return func(stageDef *php.StageDefinition) error {
+		stageDef.LockedPackages = lockedPackages
+		stageDef.PlatformReqs = platformReqs
+		return nil
 	}
 }

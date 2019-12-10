@@ -6,23 +6,24 @@ import (
 	"github.com/NiR-/zbuild/pkg/builddef"
 	"github.com/NiR-/zbuild/pkg/image"
 	"github.com/NiR-/zbuild/pkg/pkgsolver"
+	"github.com/NiR-/zbuild/pkg/statesolver"
 	"github.com/moby/buildkit/client/llb"
-	"github.com/moby/buildkit/frontend/gateway/client"
 	"golang.org/x/xerrors"
 )
 
 // KindHandler represents a series of methods used to build and update locks for a given kind of builddef.
 type KindHandler interface {
+	// WithSolver sets the state solver that should be used when building or
+	// update the locks. It serves as a generic way to read files or resolve
+	// image references, whether the KindHandler is used inside a Buildkit
+	// client or as a CLI tool.
+	WithSolver(statesolver.StateSolver)
 	// Build is the method called by the builder package when buildkit daemon
 	// whenever a new build with zbuild syntax provider starts. It returns a LLB
 	// DAG representing the build steps and the metadata of the final image, or
 	// an error if something goes wrong during the build.
-	Build(ctx context.Context, c client.Client, buildOpts builddef.BuildOpts) (llb.State, *image.Image, error)
-	// DebugLLB returns a LLB DAG like a call to BUild method does, but unlike
-	// this other method, DebugLLB is never called during a buildkit session,
-	// so there's no buildkit client available.
-	DebugLLB(buildOpts builddef.BuildOpts) (llb.State, error)
-	UpdateLocks(genericDef *builddef.BuildDef, pkgSolver pkgsolver.PackageSolver) (builddef.Locks, error)
+	Build(context.Context, builddef.BuildOpts) (llb.State, *image.Image, error)
+	UpdateLocks(context.Context, pkgsolver.PackageSolver, *builddef.BuildDef) (builddef.Locks, error)
 }
 
 // KindRegistry associates kinds with their respective handler.
