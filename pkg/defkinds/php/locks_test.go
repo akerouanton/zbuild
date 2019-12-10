@@ -1,7 +1,6 @@
 package php_test
 
 import (
-	"context"
 	"io/ioutil"
 	"testing"
 
@@ -36,13 +35,12 @@ SUPPORT_URL="https://www.debian.org/support"
 BUG_REPORT_URL="https://bugs.debian.org/"`)
 
 func initSuccessfullyUpdateLocksTC(t *testing.T, mockCtrl *gomock.Controller) updateLocksTC {
-	ctx := context.TODO()
-
-	fetcher := mocks.NewMockFileFetcher(mockCtrl)
-	fetcher.EXPECT().FetchFile(
-		ctx,
+	solver := mocks.NewMockStateSolver(mockCtrl)
+	solver.EXPECT().FromImage(
 		"docker.io/library/php:7.3-fpm-buster",
-		"/etc/os-release",
+	).Times(1)
+	solver.EXPECT().ReadFile(
+		gomock.Any(), "/etc/os-release", gomock.Any(),
 	).Return(rawDebianOSRelease, nil)
 
 	pkgSolver := mocks.NewMockPackageSolver(mockCtrl)
@@ -67,7 +65,7 @@ func initSuccessfullyUpdateLocksTC(t *testing.T, mockCtrl *gomock.Controller) up
 		"zlib1g-dev":   "zlib1g-dev-version",
 	}, nil)
 
-	h := php.NewPHPHandler(fetcher)
+	h := php.NewPHPHandler(solver)
 	h.NotPecl = h.NotPecl.WithExtensionIndex(extindex.ExtIndex{
 		"redis": extindex.ExtVersions{
 			"5.1.1": extindex.Beta,
@@ -96,18 +94,17 @@ BUG_REPORT_URL="https://bugs.alpinelinux.org/"
 `)
 
 func failToUpdateLocksForAlpineBaseImageTC(t *testing.T, mockCtrl *gomock.Controller) updateLocksTC {
-	ctx := context.TODO()
-
-	fetcher := mocks.NewMockFileFetcher(mockCtrl)
-	fetcher.EXPECT().FetchFile(
-		ctx,
-		"docker.io/library/php:7.3-fpm-buster",
-		"/etc/os-release",
+	solver := mocks.NewMockStateSolver(mockCtrl)
+	solver.EXPECT().FromImage(
+		"docker.io/library/php:7.3-fpm-alpine3.10",
+	).Times(1)
+	solver.EXPECT().ReadFile(
+		gomock.Any(), "/etc/os-release", gomock.Any(),
 	).Return(rawAlpineOSRelease, nil)
 
 	return updateLocksTC{
-		deffile:     "testdata/locks/without-stages.yml",
-		handler:     php.NewPHPHandler(fetcher),
+		deffile:     "testdata/locks/with-base-image.yml",
+		handler:     php.NewPHPHandler(solver),
 		pkgSolver:   mocks.NewMockPackageSolver(mockCtrl),
 		expectedErr: xerrors.New("unsupported OS \"alpine\": only debian-based base images are supported"),
 	}

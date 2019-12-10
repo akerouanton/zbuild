@@ -46,12 +46,14 @@ BUG_REPORT_URL="https://bugs.debian.org/"`),
 			defer mockCtrl.Finish()
 
 			ctx := context.TODO()
-			fetcher := mocks.NewMockFileFetcher(mockCtrl)
-			fetcher.EXPECT().FetchFile(
-				ctx, tc.imageRef, "/etc/os-release",
+			solver := mocks.NewMockStateSolver(mockCtrl)
+
+			solver.EXPECT().FromImage(tc.imageRef).Times(1)
+			solver.EXPECT().ReadFile(
+				ctx, "/etc/os-release", gomock.Any(),
 			).Return(tc.file, nil)
 
-			res, err := builddef.ResolveImageOS(ctx, fetcher, tc.imageRef)
+			res, err := builddef.ResolveImageOS(ctx, solver, tc.imageRef)
 			if err != nil {
 				t.Fatalf("Unexpected error: %v", err)
 			}

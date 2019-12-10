@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/NiR-/zbuild/pkg/defkinds/php"
-	"github.com/NiR-/zbuild/pkg/filefetch"
+	"github.com/NiR-/zbuild/pkg/statesolver"
 	"github.com/NiR-/zbuild/pkg/registry"
 	"github.com/docker/docker/client"
 	"github.com/sirupsen/logrus"
@@ -34,13 +34,13 @@ func buildKindRegistry() *registry.KindRegistry {
 		logrus.Fatal(err)
 	}
 
-	fetcher := filefetch.DockerFetcher{
+	solver := statesolver.DockerSolver{
 		Client: docker,
 		Labels: map[string]string{},
 	}
 
 	reg := registry.NewKindRegistry()
-	php.RegisterKind(reg, fetcher)
+	php.RegisterKind(reg, solver)
 
 	return reg
 }

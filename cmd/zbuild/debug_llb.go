@@ -32,6 +32,7 @@ func newDebugLLBCmd() *cobra.Command {
 	}
 	cmd.Flags().StringVarP(&debugFlags.file, "file", "f", "zbuild.yml", "Path to the zbuild.yml file to debug")
 	cmd.Flags().StringVar(&debugFlags.stage, "target", "dev", "Name of the stage to debug")
+	// @TODO: add a flag to define build context root dir
 
 	return cmd
 }

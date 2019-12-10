@@ -42,7 +42,7 @@ func SolveState(
 		Definition: def.ToPB(),
 	})
 	if err != nil {
-		return nil, nil, xerrors.Errorf("failed to execute solve request: %w", err)
+		return nil, nil, err
 	}
 
 	ref, err := res.SingleRef()
