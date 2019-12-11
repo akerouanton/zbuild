@@ -98,7 +98,7 @@ func Copy(src llb.State, srcPath string, dest llb.State, destPath string, chown 
 }
 
 func Shellf(format string, v ...interface{}) llb.RunOption {
-	return llb.Shlexf("/bin/sh -o errexit -o pipefail -c '"+format+"'", v...)
+	return llb.Shlexf("/bin/sh -o errexit -c '"+format+"'", v...)
 }
 
 func Mkdir(state llb.State, owner string, dirs ...string) llb.State {
