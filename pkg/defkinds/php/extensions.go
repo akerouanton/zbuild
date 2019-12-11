@@ -188,7 +188,7 @@ func getPeclExtensionSpecs(extensions map[string]string) []string {
 		extVersion := extensions[key]
 		spec := key
 		if extVersion != "" && extVersion != "*" {
-			spec = key + "-" + extVersion
+			spec = key + ":" + extVersion
 		}
 
 		specs = append(specs, spec)
