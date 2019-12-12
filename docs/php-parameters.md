@@ -8,16 +8,25 @@
 
 ## Multi-stages and dev builds
 
-Using Docker for dev and prod purpose is not exactly the same thing. In the first
-case, you probably want some development tools, an unoptimized autoloader, bind-mounts between your container and local sources etc... Whereas you probably want an autoloader with some optimizations and no bind-mounts, etc... for your prod environment.
+Using Docker for dev and prod purpose is not exactly the same thing. In the
+first case, you probably want some development tools, an unoptimized PHP
+autoloader, bind-mounts between your container and local sources etc... Whereas
+for your prod environment, you probably want an optimized autoloader, no
+bind-mounts, etc...
 
-Moreover, if you already used Dockerfile and its advanced features, you probably have used the multi-stage feature to build a FPM server and some workers, all from a single `Dockerfile`, using a common `base` stage.
+Moreover, if you're used to use docker and write Dockerfiles to build complex
+PHP project, you probably have used the multi-stage feature to build the FPM
+server along with some workers, all from a single `Dockerfile`, using a common
+stage.
 
 zbuild helps you there:
 
-1. it supports multi-stage workflows, so you can easily create a base config and derive it to make specialized stages ;
+1. it supports multi-stage workflows, so you can easily create a base config
+and derive it to make specialized stages ;
 
-2. you can also mark stages as dev. This will build lighter images that include only what's needed to start a container with bind-mounts (no composer install, no autoload dump, no post install steps, etc...) ;
+2. you can also mark stages as dev. This will build lighter images that include
+only what's needed to start a container with bind-mounts (no composer install,
+no autoload dump, no post install steps, etc...) ;
 
 ## Config Inference
 
@@ -29,6 +38,7 @@ zbuild files with php types have following structure:
 # syntax=akerouanton/zbuilder:test9
 kind: php
 
+base: <string>
 version: <string>
 infer: <bool>
 
@@ -56,6 +66,7 @@ parameters that can be both in the base definition (the `base` stage) and in sub
 
 ```yaml
 fpm: <bool>
+command: <string>
 healthcheck: <healthcheck> # False by default
 external_files: <external_files>
 system_packages: <system_packages>
@@ -155,16 +166,22 @@ When merging with parent stages, all the `interactions` lists are merged togethe
 
 #### stateful_dirs - `<stateful_dirs>`
 
-This is the list of directories **in the image** that are going to contain stateful data when you run the image. These "stateful data" should be preserved restart and deployment. As such, zbuild marks these directories as volumes (you stil have to configure a persistent volume when you run the image).
+This is the list of directories containing stateful data when you run the image.
+These "stateful data" should be preserved restart and deployment. As such,
+zbuild marks these directories as volumes (you stil have to configure a
+persistent volume when you run the image).
 
-Common example of such stateful dirs are: upload folders, PHP session storage folders, etc...
+Common example of such stateful dirs are: upload folders, PHP session storage
+folders, etc...
 
 ```yaml
 stateful_dis:
   - <container_path>
 ```
 
-When merging with parent stages, all the `stateful_dirs` are merged together. You can't remove a stateful dir from a parent stage (you should reorganize your stages instead).
+When merging with parent stages, all the `stateful_dirs` are merged together.
+You can't remove a stateful dir from a parent stage (you should reorganize your
+stages instead).
 
 #### post_install - `<post_install>`
 
