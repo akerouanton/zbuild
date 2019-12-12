@@ -46,9 +46,10 @@ func initSuccessfullyUpdateLocksTC(t *testing.T, mockCtrl *gomock.Controller) up
 	).Return(rawDebianOSRelease, nil)
 
 	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
+	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
 	solver.EXPECT().ReadFile(
 		gomock.Any(), "composer.lock", gomock.Any(),
-	).Return([]byte{}, statesolver.FileNotFound)
+	).AnyTimes().Return([]byte{}, statesolver.FileNotFound)
 
 	pkgSolver := mocks.NewMockPackageSolver(mockCtrl)
 	pkgSolver.EXPECT().Configure(gomock.Any()).Times(1)
@@ -58,15 +59,17 @@ func initSuccessfullyUpdateLocksTC(t *testing.T, mockCtrl *gomock.Controller) up
 		"libpcre3-dev": "*",
 		"libssl-dev":   "*",
 		"libxml2-dev":  "*",
+		"libzip-dev":   "*",
 		"openssl":      "*",
 		"unzip":        "*",
 		"zlib1g-dev":   "*",
-	}).Return(map[string]string{
+	}).AnyTimes().Return(map[string]string{
 		"git":          "git-version",
 		"libicu-dev":   "libicu-dev-version",
 		"libpcre3-dev": "libpcre3-dev-version",
 		"libssl-dev":   "libssl-dev-version",
 		"libxml2-dev":  "libxml2-dev-version",
+		"libzip-dev":   "libzip-dev-version",
 		"openssl":      "openssl-version",
 		"unzip":        "unzip-version",
 		"zlib1g-dev":   "zlib1g-dev-version",

@@ -489,13 +489,6 @@ func inferExtensions(def *StageDefinition) {
 	if _, ok := def.Extensions["zip"]; !ok {
 		def.Extensions["zip"] = "*"
 	}
-
-	// Remove extensions installed by default
-	for _, name := range preinstalledExtensions {
-		if _, ok := def.Extensions[name]; ok {
-			delete(def.Extensions, name)
-		}
-	}
 }
 
 func inferSystemPackages(def *StageDefinition) {

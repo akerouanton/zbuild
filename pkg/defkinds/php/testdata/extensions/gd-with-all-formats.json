@@ -1,6 +1,25 @@
 [
   {
     "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:9514169ab9e856550ad6d83641be82ef7311f5f74416859c3e6bc76325de166e",
+          "index": 0
+        }
+      ],
+      "Op": null
+    },
+    "Digest": "sha256:06ec01a479800b6358f483f3687d323828a3b505588360493ee833bf22ca908b",
+    "OpMetadata": {
+      "caps": {
+        "constraints": true,
+        "meta.description": true,
+        "platform": true
+      }
+    }
+  },
+  {
+    "Op": {
       "Op": {
         "Exec": {
           "meta": {
@@ -8,8 +27,6 @@
               "/bin/sh",
               "-o",
               "errexit",
-              "-o",
-              "pipefail",
               "-c",
               "docker-php-ext-configure gd --with-freetype-dir --with-jpeg-dir --with-webp-dir \u0026\u0026 docker-php-ext-install -j\"$(nproc)\" gd"
             ],
@@ -30,32 +47,13 @@
       },
       "constraints": {}
     },
-    "Digest": "sha256:dd7ef7d95bc99c911141ab7f278d2edcbbb7e7f5608ed69f10a1e3e04fc151a1",
+    "Digest": "sha256:9514169ab9e856550ad6d83641be82ef7311f5f74416859c3e6bc76325de166e",
     "OpMetadata": {
       "description": {
         "llb.customname": "Install PHP extensions (gd, gd.freetype, gd.jpeg, gd.webp)"
       },
       "caps": {
         "exec.meta.base": true
-      }
-    }
-  },
-  {
-    "Op": {
-      "inputs": [
-        {
-          "digest": "sha256:dd7ef7d95bc99c911141ab7f278d2edcbbb7e7f5608ed69f10a1e3e04fc151a1",
-          "index": 0
-        }
-      ],
-      "Op": null
-    },
-    "Digest": "sha256:f38f4536874c01c781daa17244cc9596388e590dc8841f7f1f4f99cfe6d24944",
-    "OpMetadata": {
-      "caps": {
-        "constraints": true,
-        "meta.description": true,
-        "platform": true
       }
     }
   }

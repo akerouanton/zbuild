@@ -67,8 +67,15 @@ func parseComposerLock(lockdata []byte, isDev bool) (composerLock, error) {
 		pkg := rawPkg.(map[string]interface{})
 		pkgName := pkg["name"].(string)
 		pkgVersion := pkg["version"].(string)
-
 		lock.packages[pkgName] = pkgVersion
+
+		require := pkg["require"].(map[string]interface{})
+		for name, val := range require {
+			if strings.HasPrefix(name, "ext-") {
+				ext := strings.TrimPrefix(name, "ext-")
+				lock.platformReqs[ext] = val.(string)
+			}
+		}
 	}
 
 	devPackages, ok := parsed["packages-dev"]
@@ -79,6 +86,14 @@ func parseComposerLock(lockdata []byte, isDev bool) (composerLock, error) {
 			pkgVersion := pkg["version"].(string)
 
 			lock.packages[pkgName] = pkgVersion
+
+			require := pkg["require"].(map[string]interface{})
+			for name, val := range require {
+				if strings.HasPrefix(name, "ext-") {
+					ext := strings.TrimPrefix(name, "ext-")
+					lock.platformReqs[ext] = val.(string)
+				}
+			}
 		}
 	}
 
