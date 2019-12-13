@@ -26,8 +26,7 @@ func LoadComposerLock(
 ) error {
 	composerSrc := solver.FromBuildContext(
 		llb.IncludePatterns([]string{"composer.json", "composer.lock"}),
-		// @TODO: use a struct to share SharedKeyHints across code source
-		llb.SharedKeyHint("composer-files"),
+		llb.SharedKeyHint(SharedKeys.ComposerFiles),
 		llb.WithCustomName("load composer files from build context"))
 
 	lockdata, err := solver.ReadFile(ctx, "composer.lock", composerSrc)
@@ -68,8 +67,15 @@ func parseComposerLock(lockdata []byte, isDev bool) (composerLock, error) {
 		pkg := rawPkg.(map[string]interface{})
 		pkgName := pkg["name"].(string)
 		pkgVersion := pkg["version"].(string)
-
 		lock.packages[pkgName] = pkgVersion
+
+		require := pkg["require"].(map[string]interface{})
+		for name, val := range require {
+			if strings.HasPrefix(name, "ext-") {
+				ext := strings.TrimPrefix(name, "ext-")
+				lock.platformReqs[ext] = val.(string)
+			}
+		}
 	}
 
 	devPackages, ok := parsed["packages-dev"]
@@ -80,6 +86,14 @@ func parseComposerLock(lockdata []byte, isDev bool) (composerLock, error) {
 			pkgVersion := pkg["version"].(string)
 
 			lock.packages[pkgName] = pkgVersion
+
+			require := pkg["require"].(map[string]interface{})
+			for name, val := range require {
+				if strings.HasPrefix(name, "ext-") {
+					ext := strings.TrimPrefix(name, "ext-")
+					lock.platformReqs[ext] = val.(string)
+				}
+			}
 		}
 	}
 

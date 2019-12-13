@@ -110,7 +110,7 @@ func initSuccessfullyParseRawDefinitionWithStagesTC() newDefinitionTC {
 	isDev := true
 	isFPM := true
 	isNotFPM := false
-	workerCmd := "bin/worker"
+	workerCmd := []string{"bin/worker"}
 
 	return newDefinitionTC{
 		file:     "testdata/def/merge-all.yml",
@@ -304,7 +304,7 @@ func initSuccessfullyResolveWorkerStageTC(t *testing.T, mockCtrl *gomock.Control
 	isNotDev := false
 	healthcheckDisabled := false
 	phpIni := "docker/app/php.prod.ini"
-	workerCmd := "bin/worker"
+	workerCmd := []string{"bin/worker"}
 
 	return resolveStageTC{
 		file:     "testdata/def/with-stages.yml",

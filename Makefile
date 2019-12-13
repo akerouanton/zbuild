@@ -9,6 +9,10 @@ ifneq ($(shell which gotest),)
 	GOTEST := gotest
 endif
 
+ifeq ($(IMAGE_TAG),GIT_SHA)
+	IMAGE_TAG := $(shell git rev-parse --short HEAD)
+endif
+
 .PHONY: build
 build:
 	$(GO_BUILD_STATIC) -o bin/zbuild ./cmd/zbuild
@@ -39,7 +43,7 @@ push: .validate-image-tag
 
 .PHONY: install
 install:
-	cp zbuild ~/go/bin
+	cp bin/zbuild ~/go/bin
 
 
 ####################

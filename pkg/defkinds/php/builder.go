@@ -23,6 +23,20 @@ const (
 	zbuildLabel = "io.zbuild"
 )
 
+var SharedKeys = struct {
+	BuildContext  string
+	ComposerFiles string
+	ConfigFiles   string
+}{
+	BuildContext:  "build-context",
+	ComposerFiles: "composer-files",
+	ConfigFiles:   "config-files",
+}
+
+func init() {
+	RegisterKind(registry.Registry)
+}
+
 // RegisterKind adds a LLB DAG builder to the given KindRegistry for php
 // definition kind.
 func RegisterKind(registry *registry.KindRegistry) {
@@ -97,35 +111,45 @@ func (h *PHPHandler) Build(
 	state = state.Dir("/app")
 	state = state.AddEnv("COMPOSER_HOME", "/composer")
 
-	// @TODO: copy files from git context instead of local source
-	if *stage.Dev {
-		configFilesSrc := llb.Local(buildOpts.ContextName,
-			llb.IncludePatterns([]string{
-				*stage.ConfigFiles.IniFile,
-				*stage.ConfigFiles.FPMConfigFile,
-			}),
-			llb.LocalUniqueID(buildOpts.LocalUniqueID),
-			llb.SessionID(buildOpts.SessionID),
-			llb.SharedKeyHint("config-files"),
-			llb.WithCustomName("load config files from build context"))
+	configFiles := []string{}
+	if stage.ConfigFiles.IniFile != nil {
+		configFiles = append(configFiles, *stage.ConfigFiles.IniFile)
+	}
+	if stage.ConfigFiles.FPMConfigFile != nil {
+		configFiles = append(configFiles, *stage.ConfigFiles.FPMConfigFile)
+	}
+
+	configFilesSrc := llb.Local(buildOpts.ContextName,
+		llb.IncludePatterns(configFiles),
+		llb.LocalUniqueID(buildOpts.LocalUniqueID),
+		llb.SessionID(buildOpts.SessionID),
+		llb.SharedKeyHint(SharedKeys.ConfigFiles),
+		llb.WithCustomName("load config files from build context"))
+
+	if stage.ConfigFiles.IniFile != nil {
 		state = llbutils.Copy(
 			configFilesSrc,
 			*stage.ConfigFiles.IniFile,
 			state,
 			"/usr/local/etc/php/php.ini",
 			"1000:1000")
+	}
+	if stage.ConfigFiles.FPMConfigFile != nil {
 		state = llbutils.Copy(
 			configFilesSrc,
 			*stage.ConfigFiles.FPMConfigFile,
 			state,
 			"/usr/local/etc/php-fpm.conf",
 			"1000:1000")
+	}
 
+	// @TODO: copy files from git context instead of local source
+	if *stage.Dev == false {
 		composerSrc := llb.Local(buildOpts.ContextName,
 			llb.IncludePatterns([]string{"composer.json", "composer.lock"}),
 			llb.LocalUniqueID(buildOpts.LocalUniqueID),
 			llb.SessionID(buildOpts.SessionID),
-			llb.SharedKeyHint("composer-files"),
+			llb.SharedKeyHint(SharedKeys.ComposerFiles),
 			llb.WithCustomName("load composer files from build context"))
 		state = llbutils.Copy(composerSrc, "composer.*", state, "/app/", "1000:1000")
 		state = composerInstall(state)
@@ -135,7 +159,7 @@ func (h *PHPHandler) Build(
 			llb.ExcludePatterns(excludePatterns(&stage)),
 			llb.LocalUniqueID(buildOpts.LocalUniqueID),
 			llb.SessionID(buildOpts.SessionID),
-			llb.SharedKeyHint("build-context"),
+			llb.SharedKeyHint(SharedKeys.BuildContext),
 			llb.WithCustomName("load build context"))
 		state = llbutils.Copy(buildContextSrc, "/", state, "/app/", "1000:1000")
 
@@ -173,6 +197,10 @@ func (h *PHPHandler) Build(
 	}
 	now := time.Now()
 	img.Created = &now
+
+	if *stage.FPM == false && stage.Command != nil {
+		img.Config.Cmd = *stage.Command
+	}
 
 	return state, img, nil
 }

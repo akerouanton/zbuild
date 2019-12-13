@@ -5,6 +5,8 @@ a syntax for defining and building container images with higher-level concepts,
 such that you don't have to write system commands anymore and you can instead
 focus on what matters.
 
+[![asciicast](https://asciinema.org/a/287488.svg)](https://asciinema.org/a/287488)
+
 ## How to use?
 
 #### 0. Enable Docker Experimental features
@@ -65,11 +67,12 @@ $ zbuild debug-llb --target prod | buildctl debug dump-llb
 images, so you have to build and push using Docker before executing this command:
 
 ```bash
-$ buildctl build \                         
-    --frontend gateway.v0 \
-    --opt source=akerouanton/zbuilder:test9 \
+$ buildctl build \
+    --frontend dockerfile.v0 \
     --opt target=prod \
+    --opt filename=zbuild.yml \
     --local context=. \
+    --local dockerfile=. \
     --output type=image,name=some-image:dev
 ```
 

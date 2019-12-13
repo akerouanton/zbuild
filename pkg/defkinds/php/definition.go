@@ -7,7 +7,6 @@ import (
 
 	"github.com/NiR-/zbuild/pkg/builddef"
 	"github.com/NiR-/zbuild/pkg/llbutils"
-	hashiversion "github.com/hashicorp/go-version"
 	"github.com/mcuadros/go-version"
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/xerrors"
@@ -20,7 +19,8 @@ func defaultDefinition() Definition {
 	fpm := true
 	healthcheck := false
 	infer := true
-	dev := true
+	isDev := true
+	isNotDev := false
 
 	return Definition{
 		BaseStage: Stage{
@@ -44,7 +44,11 @@ func defaultDefinition() Definition {
 		Stages: map[string]DerivedStage{
 			"dev": {
 				DeriveFrom: "base",
-				Dev:        &dev,
+				Dev:        &isDev,
+			},
+			"prod": {
+				DeriveFrom: "base",
+				Dev:        &isNotDev,
 			},
 		},
 	}
@@ -73,10 +77,7 @@ func NewKind(genericDef *builddef.BuildDef) (Definition, error) {
 		return def, err
 	}
 
-	def.MajMinVersion, err = extractMajMinVersion(def.Version)
-	if err != nil {
-		return def, err
-	}
+	def.MajMinVersion = extractMajMinVersion(def.Version)
 
 	if def.BaseImage == "" {
 		baseImages, ok := defaultBaseImages[def.MajMinVersion]
@@ -114,7 +115,7 @@ type Stage struct {
 	ExternalFiles     []llbutils.ExternalFile `mapstructure:"external_files"`
 	SystemPackages    map[string]string       `mapstructure:"system_packages"`
 	FPM               *bool                   `mapstructure:",omitempty"`
-	Command           *string                 `mapstrture:"command,omitempty"`
+	Command           *[]string               `mapstrture:"command,omitempty"`
 	Extensions        map[string]string       `mapstructure:"extensions"`
 	ConfigFiles       PHPConfigFiles          `mapstructure:"config_files"`
 	ComposerDumpFlags *ComposerDumpFlags      `mapstructure:"composer_dump"`
@@ -243,15 +244,9 @@ func (def *Definition) ResolveStageDefinition(
 	return stageDef, nil
 }
 
-func extractMajMinVersion(versionString string) (string, error) {
-	// @TODO: remove this deps
-	ver, err := hashiversion.NewVersion(versionString)
-	if err != nil {
-		return "", err
-	}
-
-	segments := ver.Segments()
-	return fmt.Sprintf("%d.%d", segments[0], segments[1]), nil
+func extractMajMinVersion(versionString string) string {
+	segments := strings.SplitN(versionString, ".", 3)
+	return fmt.Sprintf("%s.%s", segments[0], segments[1])
 }
 
 func mergeStages(base *Definition, stages ...DerivedStage) StageDefinition {
@@ -493,13 +488,6 @@ func inferExtensions(def *StageDefinition) {
 	// Add zip extension if it's missing as it's used by composer to install packages.
 	if _, ok := def.Extensions["zip"]; !ok {
 		def.Extensions["zip"] = "*"
-	}
-
-	// Remove extensions installed by default
-	for _, name := range preinstalledExtensions {
-		if _, ok := def.Extensions[name]; ok {
-			delete(def.Extensions, name)
-		}
 	}
 }
 

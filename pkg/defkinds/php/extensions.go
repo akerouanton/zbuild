@@ -124,7 +124,7 @@ var extensionsDeps = map[string]map[string]string{
 	"xmlrpc":       {"libxml2-dev": "*"},
 	"xmlwriter":    {"libxml2-dev": "*"},
 	"xsl":          {"libxslt1-dev": "*"},
-	"zip":          {"zlib1g-dev": "*"},
+	"zip":          {"libzip-dev": "*", "zlib1g-dev": "*"},
 }
 
 func filterExtensions(extensions map[string]string, filterFunc func(string) bool) map[string]string {
@@ -188,7 +188,7 @@ func getPeclExtensionSpecs(extensions map[string]string) []string {
 		extVersion := extensions[key]
 		spec := key
 		if extVersion != "" && extVersion != "*" {
-			spec = key + "-" + extVersion
+			spec = key + ":" + extVersion
 		}
 
 		specs = append(specs, spec)

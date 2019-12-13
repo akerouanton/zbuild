@@ -122,6 +122,13 @@ func (h *PHPHandler) lockExtensions(extensions map[string]string) (map[string]st
 	resolved := map[string]string{}
 	ctx := context.Background()
 
+	// Remove extensions installed by default
+	for _, name := range preinstalledExtensions {
+		if _, ok := extensions[name]; ok {
+			delete(extensions, name)
+		}
+	}
+
 	for extName, constraint := range extensions {
 		if isCoreExtension(extName) {
 			resolved[extName] = constraint

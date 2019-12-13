@@ -98,7 +98,7 @@ func Copy(src llb.State, srcPath string, dest llb.State, destPath string, chown 
 }
 
 func Shellf(format string, v ...interface{}) llb.RunOption {
-	return llb.Shlexf("/bin/sh -o errexit -o pipefail -c '"+format+"'", v...)
+	return llb.Shlexf("/bin/sh -o errexit -c '"+format+"'", v...)
 }
 
 func Mkdir(state llb.State, owner string, dirs ...string) llb.State {
@@ -128,9 +128,10 @@ func InstallSystemPackages(
 	}
 	sort.Strings(pkgNames)
 
+	packageSpecs := []string{}
+
 	switch pkgMgr {
 	case APT:
-		packageSpecs := []string{}
 		for _, pkgName := range pkgNames {
 			packageSpecs = append(packageSpecs, pkgName+"="+locks[pkgName])
 		}
@@ -144,7 +145,7 @@ func InstallSystemPackages(
 		return llb.State{}, UnsupportedPackageManager
 	}
 
-	stepName := fmt.Sprintf("Install system packages (%s)", strings.Join(pkgNames, ", "))
+	stepName := fmt.Sprintf("Install system packages (%s)", strings.Join(packageSpecs, ", "))
 	state = state.Run(
 		Shellf(strings.Join(cmds, "; ")),
 		llb.WithCustomName(stepName),

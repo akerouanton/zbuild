@@ -4,13 +4,12 @@ go 1.12
 
 require (
 	github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78 // indirect
-	github.com/NiR-/notpecl v0.0.0-20191203181030-776d9e829a9e
+	github.com/NiR-/notpecl v0.0.0-20191209012103-b55aaac8c3de
 	github.com/bbuck/go-lexer v0.0.0-20150530081543-8752f4c00663 // indirect
 	github.com/docker/docker v1.14.0-0.20190319215453-e7b5f7dbe98c
 	github.com/go-test/deep v1.0.4
 	github.com/golang/mock v1.1.1
 	github.com/gorilla/mux v1.7.3 // indirect
-	github.com/hashicorp/go-version v1.2.0
 	github.com/mcuadros/go-version v0.0.0-20190830083331-035f6764e8d2
 	github.com/mitchellh/mapstructure v1.1.2
 	github.com/moby/buildkit v0.6.2-0.20191002152821-f7042823e340

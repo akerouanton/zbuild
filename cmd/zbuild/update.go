@@ -6,13 +6,15 @@ import (
 
 	"github.com/NiR-/zbuild/pkg/builder"
 	"github.com/NiR-/zbuild/pkg/pkgsolver"
+	"github.com/NiR-/zbuild/pkg/registry"
 	"github.com/sirupsen/logrus"
 	dpkg "github.com/snyh/go-dpkg-parser"
 	"github.com/spf13/cobra"
 )
 
 var updateFlags = struct {
-	file string
+	file    string
+	context string
 }{}
 
 func newUpdateCmd() *cobra.Command {
@@ -22,34 +24,34 @@ func newUpdateCmd() *cobra.Command {
 		Short:             "Update version locks",
 		Run:               HandleUpdateCmd,
 	}
-	cmd.Flags().StringVarP(&updateFlags.file, "file", "f", "zbuild.yml", "Path to the zbuild.yml file to use. Webdf looks for a lock file with the same filename but with \".lock\" extension.")
+
+	AddFileFlag(cmd, &updateFlags.file)
+	AddContextFlag(cmd, &updateFlags.context)
 
 	return cmd
 }
 
 func HandleUpdateCmd(cmd *cobra.Command, args []string) {
-	reg := buildKindRegistry()
-	pkgSolver, err := initPackageSolver()
-	if err != nil {
-		logrus.Fatal(err)
+	pkgSolver := initPackageSolver()
+	b := builder.Builder{
+		Registry:  registry.Registry,
+		PkgSolver: pkgSolver,
 	}
-
-	solver := newDockerSolver()
-	b := builder.Builder{Registry: reg, PkgSolver: pkgSolver}
+	solver := newDockerSolver(updateFlags.context)
 
 	if err := b.UpdateLockFile(solver, updateFlags.file); err != nil {
-		logrus.Fatal(err)
+		logrus.Fatalf("%+v", err)
 	}
 }
 
-func initPackageSolver() (pkgsolver.PackageSolver, error) {
+func initPackageSolver() pkgsolver.PackageSolver {
 	var pkgSolver pkgsolver.PackageSolver
 
 	basepath := os.Getenv("XDG_DATA_HOME")
 	if basepath == "" {
 		home, err := os.UserHomeDir()
 		if err != nil {
-			return pkgSolver, err
+			logrus.Fatalf("%+v", err)
 		}
 		basepath = path.Join(home, ".local/share")
 	}
@@ -58,5 +60,5 @@ func initPackageSolver() (pkgsolver.PackageSolver, error) {
 	dpkgRepo := dpkg.NewRepository(path)
 	pkgSolver = pkgsolver.NewDpkgSolver(dpkgRepo)
 
-	return pkgSolver, nil
+	return pkgSolver
 }

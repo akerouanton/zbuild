@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/NiR-/zbuild/pkg/defkinds/php"
-	"github.com/NiR-/zbuild/pkg/registry"
+	"os"
+
+	_ "github.com/NiR-/zbuild/pkg/defkinds/php"
 	"github.com/NiR-/zbuild/pkg/statesolver"
 	"github.com/docker/docker/client"
 	"github.com/sirupsen/logrus"
@@ -24,26 +25,35 @@ func main() {
 	zbuildCmd.AddCommand(newDebugLLBCmd())
 
 	if err := zbuildCmd.Execute(); err != nil {
-		logrus.Fatal(err)
+		logrus.Fatalf("%+v", err)
 	}
 }
 
-// @TODO: use a default kind registry
-func buildKindRegistry() *registry.KindRegistry {
-	reg := registry.NewKindRegistry()
-	php.RegisterKind(reg)
-
-	return reg
-}
-
-func newDockerSolver() statesolver.DockerSolver {
+func newDockerSolver(rootDir string) statesolver.DockerSolver {
 	docker, err := client.NewClientWithOpts(client.FromEnv)
 	if err != nil {
-		logrus.Fatal(err)
+		logrus.Fatalf("%+v", err)
+	}
+
+	if rootDir == "" {
+		var err error
+		rootDir, err = os.Getwd()
+		if err != nil {
+			logrus.Fatalf("%+v", err)
+		}
 	}
 
 	return statesolver.DockerSolver{
-		Client: docker,
-		Labels: map[string]string{},
+		Client:  docker,
+		Labels:  map[string]string{},
+		RootDir: rootDir,
 	}
+}
+
+func AddFileFlag(cmd *cobra.Command, val *string) {
+	cmd.Flags().StringVarP(val, "file", "f", "zbuild.yml", "Path to the zbuild.yml file to debug")
+}
+
+func AddContextFlag(cmd *cobra.Command, val *string) {
+	cmd.Flags().StringVarP(val, "context", "c", "", "Root dir of the build context")
 }

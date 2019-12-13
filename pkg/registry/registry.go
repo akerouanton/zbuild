@@ -57,3 +57,13 @@ func (reg *KindRegistry) FindHandler(defkind string) (KindHandler, error) {
 // ErrUnknownDefKind is returned when the decoded service has an unknown
 // kind.
 var ErrUnknownDefKind = xerrors.New("unknown kind")
+
+var Registry = NewKindRegistry()
+
+func Register(name string, handler KindHandler) {
+	Registry.Register(name, handler)
+}
+
+func FindHandler(defkind string) (KindHandler, error) {
+	return Registry.FindHandler(defkind)
+}

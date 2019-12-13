@@ -4,16 +4,19 @@ import (
 	"os"
 
 	"github.com/NiR-/zbuild/pkg/builder"
+	"github.com/NiR-/zbuild/pkg/registry"
 	"github.com/moby/buildkit/client/llb"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
 var debugFlags = struct {
-	file  string
-	stage string
+	file    string
+	stage   string
+	context string
 }{}
 
+// @TODO: buildctl should not be required
 const debugDescription = `Output LLB DAG in binary format.
 
 This command alone is not really useful. To have a readable output, you have to
@@ -30,28 +33,29 @@ func newDebugLLBCmd() *cobra.Command {
 		Long:   debugDescription,
 		Run:    HandleDebugLLBCmd,
 	}
-	cmd.Flags().StringVarP(&debugFlags.file, "file", "f", "zbuild.yml", "Path to the zbuild.yml file to debug")
-	cmd.Flags().StringVar(&debugFlags.stage, "target", "dev", "Name of the stage to debug")
-	// @TODO: add a flag to define build context root dir
+
+	cmd.Flags().StringVarP(&debugFlags.stage, "target", "t", "dev", "Name of the stage to debug")
+	AddFileFlag(cmd, &debugFlags.file)
+	AddContextFlag(cmd, &debugFlags.context)
 
 	return cmd
 }
 
 func HandleDebugLLBCmd(cmd *cobra.Command, args []string) {
-	reg := buildKindRegistry()
-	solver := newDockerSolver()
-	b := builder.Builder{Registry: reg}
+	b := builder.Builder{
+		Registry: registry.Registry,
+	}
+	solver := newDockerSolver(debugFlags.context)
 
 	state, err := b.Debug(solver, debugFlags.file, debugFlags.stage)
 	if err != nil {
-		logrus.Fatal(err)
+		logrus.Fatalf("%+v", err)
 	}
 
 	out, err := state.Marshal(llb.LinuxAmd64)
 	if err != nil {
-		logrus.Fatal(err)
+		logrus.Fatalf("%+v", err)
 	}
 
 	llb.WriteTo(out, os.Stdout)
 }
-

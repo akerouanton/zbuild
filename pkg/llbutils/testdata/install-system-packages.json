@@ -3,6 +3,25 @@
     "Op": {
       "inputs": [
         {
+          "digest": "sha256:8556261910d51ab6d3597a5364d5227ab5d0d3a926103a4790607097636fc20e",
+          "index": 0
+        }
+      ],
+      "Op": null
+    },
+    "Digest": "sha256:537d06760280de9b60e03d5546d8e0e1fad381b971c3bb718f02742ab785c7bb",
+    "OpMetadata": {
+      "caps": {
+        "constraints": true,
+        "meta.description": true,
+        "platform": true
+      }
+    }
+  },
+  {
+    "Op": {
+      "inputs": [
+        {
           "digest": "sha256:c1aaee8a38ba6dec64d5b8c919c7cf6bddc04f0bd18763678342d33a25c06844",
           "index": 0
         }
@@ -14,8 +33,6 @@
               "/bin/sh",
               "-o",
               "errexit",
-              "-o",
-              "pipefail",
               "-c",
               "apt-get update; apt-get install -y --no-install-recommends ca-certficiates=ca-certificates-version curl=curl-version zlib1g-dev=zlib1g-dev-version; rm -rf /var/lib/apt/lists/*"
             ],
@@ -36,33 +53,14 @@
       },
       "constraints": {}
     },
-    "Digest": "sha256:66fdb8f9218647b140e1b2de5b3b9df7a6e473da9e351307f53e7af2f2e1d29a",
+    "Digest": "sha256:8556261910d51ab6d3597a5364d5227ab5d0d3a926103a4790607097636fc20e",
     "OpMetadata": {
       "description": {
-        "llb.customname": "Install system packages (ca-certficiates, curl, zlib1g-dev)"
+        "llb.customname": "Install system packages (ca-certficiates=ca-certificates-version, curl=curl-version, zlib1g-dev=zlib1g-dev-version)"
       },
       "caps": {
         "exec.meta.base": true,
         "exec.mount.bind": true
-      }
-    }
-  },
-  {
-    "Op": {
-      "inputs": [
-        {
-          "digest": "sha256:66fdb8f9218647b140e1b2de5b3b9df7a6e473da9e351307f53e7af2f2e1d29a",
-          "index": 0
-        }
-      ],
-      "Op": null
-    },
-    "Digest": "sha256:946d13ae23487314bcc8e3e106e658208eeab32696a48c0c288942ca6e3fcf12",
-    "OpMetadata": {
-      "caps": {
-        "constraints": true,
-        "meta.description": true,
-        "platform": true
       }
     }
   },

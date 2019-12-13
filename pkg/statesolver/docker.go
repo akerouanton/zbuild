@@ -23,6 +23,8 @@ import (
 type DockerSolver struct {
 	Client *client.Client
 	Labels map[string]string
+	// RootDir is the path to the root of the build context.
+	RootDir string
 }
 
 func (s DockerSolver) ReadFile(
@@ -35,7 +37,8 @@ func (s DockerSolver) ReadFile(
 
 func (s DockerSolver) FromBuildContext(opts ...llb.LocalOption) ReadFileOpt {
 	return func(ctx context.Context, filepath string) ([]byte, error) {
-		raw, err := ioutil.ReadFile(filepath)
+		fullpath := path.Join(s.RootDir, filepath)
+		raw, err := ioutil.ReadFile(fullpath)
 		if os.IsNotExist(err) {
 			return raw, xerrors.Errorf("failed to read %s from build context: %w", filepath, FileNotFound)
 		} else if err != nil {
