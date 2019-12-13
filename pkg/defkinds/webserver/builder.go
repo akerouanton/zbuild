@@ -43,6 +43,10 @@ func (h *WebserverHandler) Build(
 		return state, img, err
 	}
 
+	if def.Healthcheck {
+		def.SystemPackages["curl"] = "*"
+	}
+
 	state = llbutils.ImageSource(def.Locks.BaseImage, true)
 	baseImg, err := image.LoadMeta(ctx, def.Locks.BaseImage)
 	if err != nil {

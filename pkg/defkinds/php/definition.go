@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/NiR-/zbuild/pkg/builddef"
+	"github.com/NiR-/zbuild/pkg/defkinds/webserver"
 	"github.com/NiR-/zbuild/pkg/llbutils"
 	"github.com/mcuadros/go-version"
 	"github.com/mitchellh/mapstructure"
@@ -39,7 +40,6 @@ func defaultDefinition() Definition {
 			PostInstall:  []string{},
 		},
 		BaseImage: "",
-		Webserver: "",
 		Version:   "7.4",
 		Infer:     infer,
 		Stages: map[string]DerivedStage{
@@ -106,7 +106,7 @@ type Definition struct {
 	MajMinVersion string                  `mapstructure:"-"`
 	Infer         bool                    `mapstructure:"infer"`
 	Stages        map[string]DerivedStage `mapstructure:"stages"`
-	Webserver     string                  `mapstructure:"webserver"`
+	Webserver     *webserver.Definition   `mapstructure:"webserver"`
 
 	Locks DefinitionLocks `mapstructure:"-"`
 }
@@ -179,7 +179,7 @@ type StageDefinition struct {
 	Dev            *bool
 	LockedPackages map[string]string
 	PlatformReqs   map[string]string
-	Webserver      string
+	Webserver      *webserver.Definition
 }
 
 func (def *Definition) ResolveStageDefinition(
