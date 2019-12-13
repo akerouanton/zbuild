@@ -10,8 +10,6 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// var flagTestdata = flag.Bool("testdata", false, "Use this flag to (re)generate testdata (dumps of LLB states)")
-
 type newDefinitionTC struct {
 	file        string
 	lockFile    string
