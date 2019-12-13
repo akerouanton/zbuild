@@ -1,0 +1,8 @@
+kind: webserver
+webserver: nginx
+
+healthcheck: true
+system_packages:
+  curl: '*'
+
+config_file: ./docker/nginx.conf

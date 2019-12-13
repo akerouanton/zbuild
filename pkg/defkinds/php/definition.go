@@ -39,6 +39,7 @@ func defaultDefinition() Definition {
 			PostInstall:  []string{},
 		},
 		BaseImage: "",
+		Webserver: "",
 		Version:   "7.4",
 		Infer:     infer,
 		Stages: map[string]DerivedStage{
@@ -105,6 +106,7 @@ type Definition struct {
 	MajMinVersion string                  `mapstructure:"-"`
 	Infer         bool                    `mapstructure:"infer"`
 	Stages        map[string]DerivedStage `mapstructure:"stages"`
+	Webserver     string                  `mapstructure:"webserver"`
 
 	Locks DefinitionLocks `mapstructure:"-"`
 }
@@ -177,6 +179,7 @@ type StageDefinition struct {
 	Dev            *bool
 	LockedPackages map[string]string
 	PlatformReqs   map[string]string
+	Webserver      string
 }
 
 func (def *Definition) ResolveStageDefinition(
@@ -260,6 +263,7 @@ func mergeStages(base *Definition, stages ...DerivedStage) StageDefinition {
 		Dev:            &dev,
 		PlatformReqs:   map[string]string{},
 		LockedPackages: map[string]string{},
+		Webserver:      base.Webserver,
 	}
 
 	stages = reverseStages(stages)

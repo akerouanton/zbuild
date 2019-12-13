@@ -1,5 +1,9 @@
 package builddef
 
+var (
+	ZbuildLabel = "io.zbuild"
+)
+
 // BuildDef represents a service as declared in zbuild config file.
 type BuildDef struct {
 	Kind      string                 `yaml:"kind"`

@@ -1,0 +1,6 @@
+kind: webserver
+webserver: nginx
+
+assets:
+  - from: /app/public
+    to: /app/public

@@ -4,6 +4,7 @@ import (
 	"os"
 
 	_ "github.com/NiR-/zbuild/pkg/defkinds/php"
+	_ "github.com/NiR-/zbuild/pkg/defkinds/webserver"
 	"github.com/NiR-/zbuild/pkg/statesolver"
 	"github.com/docker/docker/client"
 	"github.com/sirupsen/logrus"

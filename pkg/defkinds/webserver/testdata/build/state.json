@@ -1,0 +1,183 @@
+[
+  {
+    "Op": {
+      "Op": {
+        "Source": {
+          "identifier": "docker-image://docker.io/library/nginx:latest"
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:62549b609c62be5d4a072c8b1697ba6e0f40e59bf6b340565f5132922031518b",
+    "OpMetadata": {
+      "caps": {
+        "source.image": true
+      }
+    }
+  },
+  {
+    "Op": {
+      "Op": {
+        "Source": {
+          "identifier": "local://context",
+          "attrs": {
+            "local.includepattern": "[\"./docker/nginx.conf\"]",
+            "local.session": "\u003cSESSION-ID\u003e",
+            "local.sharedkeyhint": "config-file"
+          }
+        }
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:97db469777c5b9bc9f7308144bd68cdcc77eb5dc42ade44cf795d17db07994ad",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "load config file from build context"
+      },
+      "caps": {
+        "source.local": true,
+        "source.local.includepatterns": true,
+        "source.local.sessionid": true,
+        "source.local.sharedkeyhint": true
+      }
+    }
+  },
+  {
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:e375eec25ea2b2e21cd3ebb2547038adddaee7c52c64bc7fdfa98cfcf1b61b20",
+          "index": 0
+        },
+        {
+          "digest": "sha256:97db469777c5b9bc9f7308144bd68cdcc77eb5dc42ade44cf795d17db07994ad",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "File": {
+          "actions": [
+            {
+              "input": 0,
+              "secondaryInput": 1,
+              "output": 0,
+              "Action": {
+                "Copy": {
+                  "src": "/docker/nginx.conf",
+                  "dest": "/etc/nginx/nginx.conf",
+                  "owner": {
+                    "user": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    },
+                    "group": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    }
+                  },
+                  "mode": -1,
+                  "followSymlink": true,
+                  "dirCopyContents": true,
+                  "createDestPath": true,
+                  "allowWildcard": true,
+                  "timestamp": -1
+                }
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:be1e4889406a229c6172c074773a5f66bf990274a00229c35772f30a7b5a1de1",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Copy ./docker/nginx.conf"
+      },
+      "caps": {
+        "file.base": true
+      }
+    }
+  },
+  {
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:be1e4889406a229c6172c074773a5f66bf990274a00229c35772f30a7b5a1de1",
+          "index": 0
+        }
+      ],
+      "Op": null
+    },
+    "Digest": "sha256:dddecd8713264a96bf363570eff49af9a5bf28627b768e6b3c1ccb750d61ef48",
+    "OpMetadata": {
+      "caps": {
+        "constraints": true,
+        "meta.description": true,
+        "platform": true
+      }
+    }
+  },
+  {
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:62549b609c62be5d4a072c8b1697ba6e0f40e59bf6b340565f5132922031518b",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "Exec": {
+          "meta": {
+            "args": [
+              "/bin/sh",
+              "-o",
+              "errexit",
+              "-c",
+              "apt-get update; apt-get install -y --no-install-recommends curl=7.64.0-4; rm -rf /var/lib/apt/lists/*"
+            ],
+            "env": [
+              "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+              "NGINX_VERSION=1.17.6",
+              "NJS_VERSION=0.3.7",
+              "PKG_RELEASE=1~buster"
+            ],
+            "cwd": "/"
+          },
+          "mounts": [
+            {
+              "input": 0,
+              "dest": "/",
+              "output": 0
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:e375eec25ea2b2e21cd3ebb2547038adddaee7c52c64bc7fdfa98cfcf1b61b20",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Install system packages (curl=7.64.0-4)"
+      },
+      "caps": {
+        "exec.meta.base": true,
+        "exec.mount.bind": true
+      }
+    }
+  }
+]

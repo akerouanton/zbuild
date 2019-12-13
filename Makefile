@@ -31,6 +31,7 @@ gen-mocks:
 gen-testdata:
 	@$(GOTEST) -v ./pkg/llbutils -testdata
 	@$(GOTEST) -v ./pkg/defkinds/php -testdata
+	@$(GOTEST) -v ./pkg/defkinds/webserver -testdata
 	@echo "WARNING: Be sure to review regenerated testdata files before committing them."
 
 .PHONY: build-image

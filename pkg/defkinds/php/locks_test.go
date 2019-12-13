@@ -45,7 +45,7 @@ func initSuccessfullyUpdateLocksTC(t *testing.T, mockCtrl *gomock.Controller) up
 		gomock.Any(),
 	).Return(rawDebianOSRelease, nil)
 
-	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
+	// solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
 	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
 	solver.EXPECT().ReadFile(
 		gomock.Any(), "composer.lock", gomock.Any(),
