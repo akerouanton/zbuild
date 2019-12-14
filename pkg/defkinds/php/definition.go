@@ -117,7 +117,7 @@ type Stage struct {
 	ExternalFiles     []llbutils.ExternalFile `mapstructure:"external_files"`
 	SystemPackages    map[string]string       `mapstructure:"system_packages"`
 	FPM               *bool                   `mapstructure:",omitempty"`
-	Command           *[]string               `mapstrture:"command,omitempty"`
+	Command           *[]string               `mapstructure:"command"`
 	Extensions        map[string]string       `mapstructure:"extensions"`
 	ConfigFiles       PHPConfigFiles          `mapstructure:"config_files"`
 	ComposerDumpFlags *ComposerDumpFlags      `mapstructure:"composer_dump"`
@@ -215,6 +215,8 @@ func (def *Definition) ResolveStageDefinition(
 	stageDef = mergeStages(def, stages...)
 	stageDef.Name = name
 
+	// @TODO: this should not be called here as composer.lock content
+	// won't change between stage resolution
 	if err := composerLockLoader(&stageDef); err != nil {
 		return stageDef, err
 	}
@@ -231,7 +233,7 @@ func (def *Definition) ResolveStageDefinition(
 		return stageDef, nil
 	}
 
-	if *stageDef.Dev == false {
+	if *stageDef.Dev == false && *stageDef.FPM == true {
 		stageDef.Extensions["apcu"] = "*"
 		stageDef.Extensions["opcache"] = "*"
 	}
@@ -447,14 +449,9 @@ func removeIntegration(stageDef *StageDefinition, toRemove string) {
 // docker run --rm -t php:7.2-fpm-buster php -r 'var_dump(get_loaded_extensions());'
 var preinstalledExtensions = []string{
 	"core",
-	"date",
-	"libxml",
-	"openssl",
-	"pcre",
-	"sqlite3",
-	"zlib",
 	"ctype",
 	"curl",
+	"date",
 	"dom",
 	"fileinfo",
 	"filter",
@@ -462,23 +459,28 @@ var preinstalledExtensions = []string{
 	"hash",
 	"iconv",
 	"json",
+	"libxml",
 	"mbstring",
-	"spl",
+	"mysqlnd",
+	"openssl",
+	"pcre",
 	"pdo",
-	"session",
+	"pdo_sqlite",
+	"phar",
 	"posix",
 	"readline",
 	"reflection",
-	"standard",
+	"session",
 	"simplexml",
-	"pdo_sqlite",
-	"phar",
+	"sodium",
+	"spl",
+	"sqlite3",
+	"standard",
 	"tokenizer",
 	"xml",
 	"xmlreader",
 	"xmlwriter",
-	"mysqlnd",
-	"sodium",
+	"zlib",
 }
 
 func inferExtensions(def *StageDefinition) {

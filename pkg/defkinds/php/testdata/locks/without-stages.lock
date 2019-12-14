@@ -1,0 +1,43 @@
+base_image: docker.io/library/php:7.3-fpm-buster
+stages:
+  dev:
+    system_packages:
+      git: git-version
+      libicu-dev: libicu-dev-version
+      libpcre3-dev: libpcre3-dev-version
+      libssl-dev: libssl-dev-version
+      libxml2-dev: libxml2-dev-version
+      libzip-dev: libzip-dev-version
+      openssl: openssl-version
+      unzip: unzip-version
+      zlib1g-dev: zlib1g-dev-version
+    extensions:
+      intl: '*'
+      pdo_mysql: '*'
+      redis: 5.1.0
+      soap: '*'
+      sockets: '*'
+      yaml: 1.1.0
+      zip: '*'
+  prod:
+    system_packages:
+      git: git-version
+      libicu-dev: libicu-dev-version
+      libpcre3-dev: libpcre3-dev-version
+      libssl-dev: libssl-dev-version
+      libxml2-dev: libxml2-dev-version
+      libzip-dev: libzip-dev-version
+      openssl: openssl-version
+      unzip: unzip-version
+      zlib1g-dev: zlib1g-dev-version
+    extensions:
+      apcu: 5.1.18
+      intl: '*'
+      opcache: '*'
+      pdo_mysql: '*'
+      redis: 5.1.0
+      soap: '*'
+      sockets: '*'
+      yaml: 1.1.0
+      zip: '*'
+webserver: null

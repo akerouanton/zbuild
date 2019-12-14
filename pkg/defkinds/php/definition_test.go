@@ -29,6 +29,7 @@ func initSuccessfullyParseRawDefinitionWithoutStagesTC() newDefinitionTC {
 	fpmConfigFile := "docker/app/fpm.conf"
 	healthcheck := true
 	isDev := true
+	isNotDev := false
 
 	return newDefinitionTC{
 		file:     file,
@@ -70,20 +71,13 @@ func initSuccessfullyParseRawDefinitionWithoutStagesTC() newDefinitionTC {
 					DeriveFrom: "base",
 					Dev:        &isDev,
 				},
+				"prod": {
+					DeriveFrom: "base",
+					Dev:        &isNotDev,
+				},
 			},
 			Locks: php.DefinitionLocks{
 				Stages: map[string]php.StageLocks{
-					"base": {
-						SystemPackages: map[string]string{
-							"git":        "1:2.1.4-2.1+deb8u7",
-							"libicu-dev": "52.1-8+deb8u7",
-						},
-						Extensions: map[string]string{
-							"intl":      "*",
-							"pdo_mysql": "*",
-							"soap":      "*",
-						},
-					},
 					"dev": {
 						SystemPackages: map[string]string{
 							"git":        "1:2.1.4-2.1+deb8u7",
@@ -303,13 +297,12 @@ func initSuccessfullyResolveWorkerStageTC(t *testing.T, mockCtrl *gomock.Control
 	isNotFPM := false
 	isNotDev := false
 	healthcheckDisabled := false
-	phpIni := "docker/app/php.prod.ini"
 	workerCmd := []string{"bin/worker"}
 
 	return resolveStageTC{
-		file:     "testdata/def/with-stages.yml",
+		file:     "testdata/def/worker.yml",
 		lockFile: "",
-		stage:    "worker",
+		stage:    "prod",
 		composerLockLoader: mockComposerLockLoader(
 			map[string]string{
 				"clue/stream-filter": "v1.4.0",
@@ -319,8 +312,8 @@ func initSuccessfullyResolveWorkerStageTC(t *testing.T, mockCtrl *gomock.Control
 			},
 		),
 		expected: php.StageDefinition{
-			Name:          "worker",
-			BaseImage:     "docker.io/library/php:7.4-fpm-buster",
+			Name:          "prod",
+			BaseImage:     "docker.io/library/php:7.4-cli-buster",
 			Version:       "7.4.0",
 			MajMinVersion: "7.4",
 			Infer:         true,
@@ -335,47 +328,27 @@ func initSuccessfullyResolveWorkerStageTC(t *testing.T, mockCtrl *gomock.Control
 				ExternalFiles: []llbutils.ExternalFile{},
 				SystemPackages: map[string]string{
 					"zlib1g-dev":   "*",
-					"libicu-dev":   "*",
-					"libxml2-dev":  "*",
 					"unzip":        "*",
 					"git":          "*",
 					"libpcre3-dev": "*",
-					"libssl-dev":   "*",
-					"openssl":      "*",
+					"libzip-dev":   "*",
 				},
 				FPM:     &isNotFPM,
 				Command: &workerCmd,
 				Extensions: map[string]string{
-					"intl":      "*",
-					"pdo_mysql": "*",
-					"soap":      "*",
-					"sockets":   "*",
-					"apcu":      "*",
-					"opcache":   "*",
-					"zip":       "*",
-				},
-				ConfigFiles: php.PHPConfigFiles{
-					IniFile: &phpIni,
+					"mbstring": "*",
+					"zip":      "*",
 				},
 				ComposerDumpFlags: &php.ComposerDumpFlags{
-					APCU:                  true,
-					ClassmapAuthoritative: false,
+					APCU:                  false,
+					ClassmapAuthoritative: true,
 				},
-				SourceDirs: []string{"generated/", "worker/"},
-				ExtraScripts: []string{
-					"gencode.php",
-					"bin/worker",
-				},
+				SourceDirs:   []string{"bin/", "src/"},
+				ExtraScripts: []string{},
 				Integrations: []string{},
-				StatefulDirs: []string{
-					"public/uploads",
-					"data/imports",
-				},
-				Healthcheck: &healthcheckDisabled,
-				PostInstall: []string{
-					"echo some command",
-					"echo some other command",
-				},
+				StatefulDirs: []string{},
+				Healthcheck:  &healthcheckDisabled,
+				PostInstall:  []string{},
 			},
 		},
 	}
@@ -445,15 +418,15 @@ func initSuccessfullyAddSymfonyIntegrationTC(t *testing.T, mockCtrl *gomock.Cont
 				SystemPackages: map[string]string{
 					"git":          "*",
 					"libpcre3-dev": "*",
+					"libzip-dev":   "*",
 					"unzip":        "*",
 					"zlib1g-dev":   "*",
 				},
 				FPM: &fpm,
 				Extensions: map[string]string{
-					// Symfony requirements (ctype and iconv) aren't included
-					// here as they're already available in the official PHP
-					// images.
-					"zip": "*",
+					"ctype": "*",
+					"iconv": "*",
+					"zip":   "*",
 				},
 				ConfigFiles: php.PHPConfigFiles{},
 				ComposerDumpFlags: &php.ComposerDumpFlags{
@@ -496,14 +469,24 @@ func initRemoveDefaultExtensionsTC(t *testing.T, mockCtrl *gomock.Controller) re
 			Stage: php.Stage{
 				ExternalFiles: []llbutils.ExternalFile{},
 				SystemPackages: map[string]string{
-					"zlib1g-dev":   "*",
-					"unzip":        "*",
-					"git":          "*",
-					"libpcre3-dev": "*",
+					"zlib1g-dev":    "*",
+					"unzip":         "*",
+					"git":           "*",
+					"libpcre3-dev":  "*",
+					"libsodium-dev": "*",
+					"libzip-dev":    "*",
 				},
 				FPM: &fpm,
 				Extensions: map[string]string{
-					"zip": "*",
+					"zip":        "*",
+					"mbstring":   "*",
+					"reflection": "*",
+					"sodium":     "*",
+					"spl":        "*",
+					"standard":   "*",
+					"filter":     "*",
+					"json":       "*",
+					"session":    "*",
 				},
 				ConfigFiles: php.PHPConfigFiles{},
 				ComposerDumpFlags: &php.ComposerDumpFlags{
@@ -555,6 +538,7 @@ func initPreservePredefinedExtensionConstraintsTC(t *testing.T, mockCtrl *gomock
 					"unzip":        "*",
 					"git":          "*",
 					"libpcre3-dev": "*",
+					"libzip-dev":   "*",
 				},
 				FPM: &fpm,
 				Extensions: map[string]string{
@@ -612,8 +596,6 @@ func TestResolveStageDefinition(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			t.Logf("extensions: %v", def.BaseStage.Extensions)
-
 			stageDef, err := def.ResolveStageDefinition(tc.stage, tc.composerLockLoader)
 			if tc.expectedErr != nil {
 				if err == nil || err.Error() != tc.expectedErr.Error() {
@@ -624,6 +606,7 @@ func TestResolveStageDefinition(t *testing.T) {
 			if err != nil {
 				t.Fatalf("Unexpected error: %v", err)
 			}
+
 			if diff := deep.Equal(stageDef, tc.expected); diff != nil {
 				t.Fatal(diff)
 			}

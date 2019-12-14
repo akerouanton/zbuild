@@ -45,8 +45,7 @@ func initSuccessfullyUpdateLocksTC(t *testing.T, mockCtrl *gomock.Controller) up
 		gomock.Any(),
 	).Return(rawDebianOSRelease, nil)
 
-	// solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
-	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
+	solver.EXPECT().FromBuildContext(gomock.Any()).Times(2)
 	solver.EXPECT().ReadFile(
 		gomock.Any(), "composer.lock", gomock.Any(),
 	).AnyTimes().Return([]byte{}, statesolver.FileNotFound)
@@ -77,6 +76,9 @@ func initSuccessfullyUpdateLocksTC(t *testing.T, mockCtrl *gomock.Controller) up
 
 	h := php.NewPHPHandler()
 	h.NotPecl = h.NotPecl.WithExtensionIndex(extindex.ExtIndex{
+		"apcu": extindex.ExtVersions{
+			"5.1.18": extindex.Stable,
+		},
 		"redis": extindex.ExtVersions{
 			"5.1.1": extindex.Beta,
 			"5.1.0": extindex.Stable,
@@ -171,7 +173,10 @@ func TestUpdateLocks(t *testing.T) {
 
 			expectedRaw := loadTestdata(t, tc.expected)
 			if expectedRaw != string(rawLocks) {
-				t.Fatalf("Expected: %s\nGot: %s", expectedRaw, rawLocks)
+				tempfile := newTempFile(t)
+				ioutil.WriteFile(tempfile, rawLocks, 0640)
+
+				t.Fatalf("Expected: <%s>\nGot: <%s>", tc.expected, tempfile)
 			}
 		})
 	}

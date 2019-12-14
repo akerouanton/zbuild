@@ -19,6 +19,7 @@ type buildTC struct {
 	client        client.Client
 	buildOpts     builddef.BuildOpts
 	expectedState string
+	// @TODO: test image metadata
 	// expectedImage *image.Image
 	expectedErr error
 }

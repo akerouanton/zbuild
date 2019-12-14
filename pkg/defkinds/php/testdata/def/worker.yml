@@ -1,0 +1,6 @@
+fpm: false
+version: 7.4.0
+command: bin/worker
+source_dirs:
+  - bin/
+  - src/

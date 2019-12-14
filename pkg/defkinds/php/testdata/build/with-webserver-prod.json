@@ -54,7 +54,7 @@
     "Op": {
       "inputs": [
         {
-          "digest": "sha256:b9037bdebc05bd3971511cfbed74c2738dd9c951ed1addfaf0ae55ade710d5f4",
+          "digest": "sha256:9a20efcc140b44b9f19df204a0d7d92c6422f707f25ddca020aea3cbaef67128",
           "index": 0
         }
       ],
@@ -66,7 +66,7 @@
               "-o",
               "errexit",
               "-c",
-              "docker-php-ext-configure opcache  \u0026\u0026 docker-php-ext-configure zip  \u0026\u0026 docker-php-ext-install -j\"$(nproc)\" opcache zip \u0026\u0026 docker-php-source delete \u0026\u0026 curl -f -o /usr/local/sbin/notpecl https://storage.googleapis.com/notpecl/notpecl \u0026\u0026 chmod +x /usr/local/sbin/notpecl \u0026\u0026 notpecl install apcu:5.1.18 \u0026\u0026 docker-php-ext-enable apcu \u0026\u0026 rm -rf /usr/local/sbin/notpecl"
+              "composer dump-autoload --no-dev --optimize --classmap-authoritative"
             ],
             "env": [
               "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
@@ -77,71 +77,10 @@
               "PHP_CPPFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
               "PHP_LDFLAGS=-Wl,-O1 -Wl,--hash-style=both -pie",
               "GPG_KEYS=42670A7FE4D0441C8E4632349E4FDC074A4EF02D 5A52880781F755608BF815FC910DEB46F53EA312",
-              "PHP_VERSION=7.4.0",
-              "PHP_URL=https://www.php.net/get/php-7.4.0.tar.xz/from/this/mirror",
-              "PHP_ASC_URL=https://www.php.net/get/php-7.4.0.tar.xz.asc/from/this/mirror",
-              "PHP_SHA256=9bb751b20e5d6cc1ea9b1ebf23ef2d5f07f99b2d9cc417bf1d70c04f8b20ec42",
-              "PHP_MD5="
-            ],
-            "cwd": "/var/www/html"
-          },
-          "mounts": [
-            {
-              "input": 0,
-              "dest": "/",
-              "output": 0
-            }
-          ]
-        }
-      },
-      "platform": {
-        "Architecture": "amd64",
-        "OS": "linux"
-      },
-      "constraints": {}
-    },
-    "Digest": "sha256:1748eb748cfc4237b34e7d1e6e9d65f20f395b95d2ae93803d01e994678cab2a",
-    "OpMetadata": {
-      "description": {
-        "llb.customname": "Install PHP extensions (apcu, opcache, zip)"
-      },
-      "caps": {
-        "exec.meta.base": true,
-        "exec.mount.bind": true
-      }
-    }
-  },
-  {
-    "Op": {
-      "inputs": [
-        {
-          "digest": "sha256:fa829a35e3735315ac62ca1d3916f86756a5bfbd7cd7b36e7890fe0f7a7338ae",
-          "index": 0
-        }
-      ],
-      "Op": {
-        "Exec": {
-          "meta": {
-            "args": [
-              "/bin/sh",
-              "-o",
-              "errexit",
-              "-c",
-              "composer global require --prefer-dist hirak/prestissimo \u0026\u0026 composer install --no-dev --prefer-dist --no-scripts \u0026\u0026 composer clear-cache"
-            ],
-            "env": [
-              "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
-              "PHPIZE_DEPS=autoconf \t\tdpkg-dev \t\tfile \t\tg++ \t\tgcc \t\tlibc-dev \t\tmake \t\tpkg-config \t\tre2c",
-              "PHP_INI_DIR=/usr/local/etc/php",
-              "PHP_EXTRA_CONFIGURE_ARGS=--enable-fpm --with-fpm-user=www-data --with-fpm-group=www-data --disable-cgi",
-              "PHP_CFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
-              "PHP_CPPFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
-              "PHP_LDFLAGS=-Wl,-O1 -Wl,--hash-style=both -pie",
-              "GPG_KEYS=42670A7FE4D0441C8E4632349E4FDC074A4EF02D 5A52880781F755608BF815FC910DEB46F53EA312",
-              "PHP_VERSION=7.4.0",
-              "PHP_URL=https://www.php.net/get/php-7.4.0.tar.xz/from/this/mirror",
-              "PHP_ASC_URL=https://www.php.net/get/php-7.4.0.tar.xz.asc/from/this/mirror",
-              "PHP_SHA256=9bb751b20e5d6cc1ea9b1ebf23ef2d5f07f99b2d9cc417bf1d70c04f8b20ec42",
+              "PHP_VERSION=7.4.1",
+              "PHP_URL=https://www.php.net/get/php-7.4.1.tar.xz/from/this/mirror",
+              "PHP_ASC_URL=https://www.php.net/get/php-7.4.1.tar.xz.asc/from/this/mirror",
+              "PHP_SHA256=561bb866bdd509094be00f4ece7c3543ec971c4d878645ee81437e291cffc762",
               "PHP_MD5=",
               "COMPOSER_HOME=/composer"
             ],
@@ -163,10 +102,10 @@
       },
       "constraints": {}
     },
-    "Digest": "sha256:26790deaba3aab4ea3bb3a8c22f1e12b27a4f3f15b3bcebfa630eac999120051",
+    "Digest": "sha256:0b5422ed267fca3ee1417ac7f1337f0c585992698bfe1627c3d3c4ba452cbdce",
     "OpMetadata": {
       "description": {
-        "llb.customname": "Run composer install"
+        "llb.customname": "Dump autoloader and execute custom post-install steps"
       },
       "caps": {
         "exec.meta.base": true,
@@ -178,11 +117,11 @@
     "Op": {
       "inputs": [
         {
-          "digest": "sha256:26790deaba3aab4ea3bb3a8c22f1e12b27a4f3f15b3bcebfa630eac999120051",
+          "digest": "sha256:e375eec25ea2b2e21cd3ebb2547038adddaee7c52c64bc7fdfa98cfcf1b61b20",
           "index": 0
         },
         {
-          "digest": "sha256:9b51e3ad866a51fc1fb76e2ada24d3ae8074199279e26556dd3ac7dfbe17d9e6",
+          "digest": "sha256:0b5422ed267fca3ee1417ac7f1337f0c585992698bfe1627c3d3c4ba452cbdce",
           "index": 0
         }
       ],
@@ -195,8 +134,8 @@
               "output": 0,
               "Action": {
                 "Copy": {
-                  "src": "/",
-                  "dest": "/app/",
+                  "src": "/app/public",
+                  "dest": "/app/public",
                   "owner": {
                     "user": {
                       "User": {
@@ -227,10 +166,10 @@
       },
       "constraints": {}
     },
-    "Digest": "sha256:29cb8b15aef6492ae09930f39f942781b400683c92bc33388f2104cabf63976c",
+    "Digest": "sha256:125d30f3a15342580046b973053291fdddb12a5ea223398722320ac7f9c3671e",
     "OpMetadata": {
       "description": {
-        "llb.customname": "Copy /"
+        "llb.customname": "Copy /app/public"
       },
       "caps": {
         "file.base": true
@@ -241,51 +180,18 @@
     "Op": {
       "inputs": [
         {
-          "digest": "sha256:976b7615da6560156d7ce0933897c7f4a9b9ebd2634a6c3efe6a09c8150ada8c",
+          "digest": "sha256:125d30f3a15342580046b973053291fdddb12a5ea223398722320ac7f9c3671e",
           "index": 0
         }
       ],
-      "Op": {
-        "File": {
-          "actions": [
-            {
-              "input": 0,
-              "secondaryInput": -1,
-              "output": 0,
-              "Action": {
-                "Mkdir": {
-                  "path": "/composer",
-                  "mode": 488,
-                  "makeParents": true,
-                  "owner": {
-                    "user": {
-                      "User": {
-                        "ByID": 1000
-                      }
-                    },
-                    "group": {
-                      "User": {
-                        "ByID": 1000
-                      }
-                    }
-                  },
-                  "timestamp": -1
-                }
-              }
-            }
-          ]
-        }
-      },
-      "platform": {
-        "Architecture": "amd64",
-        "OS": "linux"
-      },
-      "constraints": {}
+      "Op": null
     },
-    "Digest": "sha256:3b841ceb80658c16116c2b5395562019b28c86b7e544ac0127508de8dedafb4f",
+    "Digest": "sha256:2b4a0e11d27e6e37fb56d553aec2d2aedf25a1ff1396c35eb529cd1269570de5",
     "OpMetadata": {
       "caps": {
-        "file.base": true
+        "constraints": true,
+        "meta.description": true,
+        "platform": true
       }
     }
   },
@@ -360,7 +266,11 @@
     "Op": {
       "inputs": [
         {
-          "digest": "sha256:1748eb748cfc4237b34e7d1e6e9d65f20f395b95d2ae93803d01e994678cab2a",
+          "digest": "sha256:b8c13787539fc8cdc941e0574d88d033cd4247096e90b2ae9b9eb5f78c1c6aa9",
+          "index": 0
+        },
+        {
+          "digest": "sha256:6c2ebeb5c8483c2d0cef692223fb140cc054ddaf43068f3d9915039ce221f180",
           "index": 0
         }
       ],
@@ -369,13 +279,12 @@
           "actions": [
             {
               "input": 0,
-              "secondaryInput": -1,
+              "secondaryInput": 1,
               "output": 0,
               "Action": {
-                "Mkdir": {
-                  "path": "/app",
-                  "mode": 488,
-                  "makeParents": true,
+                "Copy": {
+                  "src": "/composer.*",
+                  "dest": "/app/",
                   "owner": {
                     "user": {
                       "User": {
@@ -388,6 +297,11 @@
                       }
                     }
                   },
+                  "mode": -1,
+                  "followSymlink": true,
+                  "dirCopyContents": true,
+                  "createDestPath": true,
+                  "allowWildcard": true,
                   "timestamp": -1
                 }
               }
@@ -401,8 +315,135 @@
       },
       "constraints": {}
     },
-    "Digest": "sha256:976b7615da6560156d7ce0933897c7f4a9b9ebd2634a6c3efe6a09c8150ada8c",
+    "Digest": "sha256:715a148df8607b036184dbcf43f8eba79dede8e54fae0377c9cff92eb033fa0e",
     "OpMetadata": {
+      "description": {
+        "llb.customname": "Copy composer.*"
+      },
+      "caps": {
+        "file.base": true
+      }
+    }
+  },
+  {
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:bb8eef094bea6399f4c0e25e32fc988732622365a34f9b0faa369155e806dbe1",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "Exec": {
+          "meta": {
+            "args": [
+              "/bin/sh",
+              "-o",
+              "errexit",
+              "-c",
+              "docker-php-ext-configure opcache  \u0026\u0026 docker-php-ext-configure zip  \u0026\u0026 docker-php-ext-install -j\"$(nproc)\" opcache zip \u0026\u0026 docker-php-source delete \u0026\u0026 curl -f -o /usr/local/sbin/notpecl https://storage.googleapis.com/notpecl/notpecl \u0026\u0026 chmod +x /usr/local/sbin/notpecl \u0026\u0026 notpecl install apcu:5.1.18 \u0026\u0026 docker-php-ext-enable apcu \u0026\u0026 rm -rf /usr/local/sbin/notpecl"
+            ],
+            "env": [
+              "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+              "PHPIZE_DEPS=autoconf \t\tdpkg-dev \t\tfile \t\tg++ \t\tgcc \t\tlibc-dev \t\tmake \t\tpkg-config \t\tre2c",
+              "PHP_INI_DIR=/usr/local/etc/php",
+              "PHP_EXTRA_CONFIGURE_ARGS=--enable-fpm --with-fpm-user=www-data --with-fpm-group=www-data --disable-cgi",
+              "PHP_CFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
+              "PHP_CPPFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
+              "PHP_LDFLAGS=-Wl,-O1 -Wl,--hash-style=both -pie",
+              "GPG_KEYS=42670A7FE4D0441C8E4632349E4FDC074A4EF02D 5A52880781F755608BF815FC910DEB46F53EA312",
+              "PHP_VERSION=7.4.1",
+              "PHP_URL=https://www.php.net/get/php-7.4.1.tar.xz/from/this/mirror",
+              "PHP_ASC_URL=https://www.php.net/get/php-7.4.1.tar.xz.asc/from/this/mirror",
+              "PHP_SHA256=561bb866bdd509094be00f4ece7c3543ec971c4d878645ee81437e291cffc762",
+              "PHP_MD5="
+            ],
+            "cwd": "/var/www/html"
+          },
+          "mounts": [
+            {
+              "input": 0,
+              "dest": "/",
+              "output": 0
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:9863868aa4681bc48fabed72aafecab30835895ff640f3eeec9a19a85889df36",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Install PHP extensions (apcu, opcache, zip)"
+      },
+      "caps": {
+        "exec.meta.base": true,
+        "exec.mount.bind": true
+      }
+    }
+  },
+  {
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:a56fcca94dffcf6b3bdf0006f031a84ac48af2c28a55316f772e866fbe7fa244",
+          "index": 0
+        },
+        {
+          "digest": "sha256:9b51e3ad866a51fc1fb76e2ada24d3ae8074199279e26556dd3ac7dfbe17d9e6",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "File": {
+          "actions": [
+            {
+              "input": 0,
+              "secondaryInput": 1,
+              "output": 0,
+              "Action": {
+                "Copy": {
+                  "src": "/",
+                  "dest": "/app/",
+                  "owner": {
+                    "user": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    },
+                    "group": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    }
+                  },
+                  "mode": -1,
+                  "followSymlink": true,
+                  "dirCopyContents": true,
+                  "createDestPath": true,
+                  "allowWildcard": true,
+                  "timestamp": -1
+                }
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:9a20efcc140b44b9f19df204a0d7d92c6422f707f25ddca020aea3cbaef67128",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Copy /"
+      },
       "caps": {
         "file.base": true
       }
@@ -437,6 +478,121 @@
     "Op": {
       "inputs": [
         {
+          "digest": "sha256:715a148df8607b036184dbcf43f8eba79dede8e54fae0377c9cff92eb033fa0e",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "Exec": {
+          "meta": {
+            "args": [
+              "/bin/sh",
+              "-o",
+              "errexit",
+              "-c",
+              "composer global require --prefer-dist hirak/prestissimo \u0026\u0026 composer install --no-dev --prefer-dist --no-scripts \u0026\u0026 composer clear-cache"
+            ],
+            "env": [
+              "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+              "PHPIZE_DEPS=autoconf \t\tdpkg-dev \t\tfile \t\tg++ \t\tgcc \t\tlibc-dev \t\tmake \t\tpkg-config \t\tre2c",
+              "PHP_INI_DIR=/usr/local/etc/php",
+              "PHP_EXTRA_CONFIGURE_ARGS=--enable-fpm --with-fpm-user=www-data --with-fpm-group=www-data --disable-cgi",
+              "PHP_CFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
+              "PHP_CPPFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
+              "PHP_LDFLAGS=-Wl,-O1 -Wl,--hash-style=both -pie",
+              "GPG_KEYS=42670A7FE4D0441C8E4632349E4FDC074A4EF02D 5A52880781F755608BF815FC910DEB46F53EA312",
+              "PHP_VERSION=7.4.1",
+              "PHP_URL=https://www.php.net/get/php-7.4.1.tar.xz/from/this/mirror",
+              "PHP_ASC_URL=https://www.php.net/get/php-7.4.1.tar.xz.asc/from/this/mirror",
+              "PHP_SHA256=561bb866bdd509094be00f4ece7c3543ec971c4d878645ee81437e291cffc762",
+              "PHP_MD5=",
+              "COMPOSER_HOME=/composer"
+            ],
+            "cwd": "/app",
+            "user": "1000"
+          },
+          "mounts": [
+            {
+              "input": 0,
+              "dest": "/",
+              "output": 0
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:a56fcca94dffcf6b3bdf0006f031a84ac48af2c28a55316f772e866fbe7fa244",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Run composer install"
+      },
+      "caps": {
+        "exec.meta.base": true,
+        "exec.mount.bind": true
+      }
+    }
+  },
+  {
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:f65451396c91b3c6a0d140fb9e6ab3b1adf02819883be1b22a2c4c0f02582897",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "File": {
+          "actions": [
+            {
+              "input": 0,
+              "secondaryInput": -1,
+              "output": 0,
+              "Action": {
+                "Mkdir": {
+                  "path": "/composer",
+                  "mode": 488,
+                  "makeParents": true,
+                  "owner": {
+                    "user": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    },
+                    "group": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    }
+                  },
+                  "timestamp": -1
+                }
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:b8c13787539fc8cdc941e0574d88d033cd4247096e90b2ae9b9eb5f78c1c6aa9",
+    "OpMetadata": {
+      "caps": {
+        "file.base": true
+      }
+    }
+  },
+  {
+    "Op": {
+      "inputs": [
+        {
           "digest": "sha256:0611baaf7a85568d40f38ceee8a36b430942fc21232dc18350b275e007b5ffe5",
           "index": 0
         }
@@ -460,10 +616,10 @@
               "PHP_CPPFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
               "PHP_LDFLAGS=-Wl,-O1 -Wl,--hash-style=both -pie",
               "GPG_KEYS=42670A7FE4D0441C8E4632349E4FDC074A4EF02D 5A52880781F755608BF815FC910DEB46F53EA312",
-              "PHP_VERSION=7.4.0",
-              "PHP_URL=https://www.php.net/get/php-7.4.0.tar.xz/from/this/mirror",
-              "PHP_ASC_URL=https://www.php.net/get/php-7.4.0.tar.xz.asc/from/this/mirror",
-              "PHP_SHA256=9bb751b20e5d6cc1ea9b1ebf23ef2d5f07f99b2d9cc417bf1d70c04f8b20ec42",
+              "PHP_VERSION=7.4.1",
+              "PHP_URL=https://www.php.net/get/php-7.4.1.tar.xz/from/this/mirror",
+              "PHP_ASC_URL=https://www.php.net/get/php-7.4.1.tar.xz.asc/from/this/mirror",
+              "PHP_SHA256=561bb866bdd509094be00f4ece7c3543ec971c4d878645ee81437e291cffc762",
               "PHP_MD5="
             ],
             "cwd": "/var/www/html"
@@ -483,92 +639,10 @@
       },
       "constraints": {}
     },
-    "Digest": "sha256:b9037bdebc05bd3971511cfbed74c2738dd9c951ed1addfaf0ae55ade710d5f4",
+    "Digest": "sha256:bb8eef094bea6399f4c0e25e32fc988732622365a34f9b0faa369155e806dbe1",
     "OpMetadata": {
       "description": {
         "llb.customname": "Install system packages (git=1:2.20.1-2+deb10u1, libpcre3-dev=2:8.39-12, libzip-dev=1.5.1-4, unzip=6.0-23+deb10u1, zlib1g-dev=1:1.2.11.dfsg-1)"
-      },
-      "caps": {
-        "exec.meta.base": true,
-        "exec.mount.bind": true
-      }
-    }
-  },
-  {
-    "Op": {
-      "inputs": [
-        {
-          "digest": "sha256:ff591ab3a98d81a1e98d9827d79d2ae5e431c165475e98a7abb66ae86b71ae4d",
-          "index": 0
-        }
-      ],
-      "Op": null
-    },
-    "Digest": "sha256:d39d310f6ef76cb8beac4ea63dcd8f299e46e39b993b203dda9bf3523a524fff",
-    "OpMetadata": {
-      "caps": {
-        "constraints": true,
-        "meta.description": true,
-        "platform": true
-      }
-    }
-  },
-  {
-    "Op": {
-      "inputs": [
-        {
-          "digest": "sha256:29cb8b15aef6492ae09930f39f942781b400683c92bc33388f2104cabf63976c",
-          "index": 0
-        }
-      ],
-      "Op": {
-        "Exec": {
-          "meta": {
-            "args": [
-              "/bin/sh",
-              "-o",
-              "errexit",
-              "-c",
-              "composer dump-autoload --no-dev --optimize --classmap-authoritative"
-            ],
-            "env": [
-              "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
-              "PHPIZE_DEPS=autoconf \t\tdpkg-dev \t\tfile \t\tg++ \t\tgcc \t\tlibc-dev \t\tmake \t\tpkg-config \t\tre2c",
-              "PHP_INI_DIR=/usr/local/etc/php",
-              "PHP_EXTRA_CONFIGURE_ARGS=--enable-fpm --with-fpm-user=www-data --with-fpm-group=www-data --disable-cgi",
-              "PHP_CFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
-              "PHP_CPPFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
-              "PHP_LDFLAGS=-Wl,-O1 -Wl,--hash-style=both -pie",
-              "GPG_KEYS=42670A7FE4D0441C8E4632349E4FDC074A4EF02D 5A52880781F755608BF815FC910DEB46F53EA312",
-              "PHP_VERSION=7.4.0",
-              "PHP_URL=https://www.php.net/get/php-7.4.0.tar.xz/from/this/mirror",
-              "PHP_ASC_URL=https://www.php.net/get/php-7.4.0.tar.xz.asc/from/this/mirror",
-              "PHP_SHA256=9bb751b20e5d6cc1ea9b1ebf23ef2d5f07f99b2d9cc417bf1d70c04f8b20ec42",
-              "PHP_MD5=",
-              "COMPOSER_HOME=/composer"
-            ],
-            "cwd": "/app",
-            "user": "1000"
-          },
-          "mounts": [
-            {
-              "input": 0,
-              "dest": "/",
-              "output": 0
-            }
-          ]
-        }
-      },
-      "platform": {
-        "Architecture": "amd64",
-        "OS": "linux"
-      },
-      "constraints": {}
-    },
-    "Digest": "sha256:d42e317e5b8862bb1a9604ade2945bc0d96de82539b01105138388bb781bda46",
-    "OpMetadata": {
-      "description": {
-        "llb.customname": "Dump autoloader and execute custom post-install steps"
       },
       "caps": {
         "exec.meta.base": true,
@@ -652,11 +726,7 @@
     "Op": {
       "inputs": [
         {
-          "digest": "sha256:3b841ceb80658c16116c2b5395562019b28c86b7e544ac0127508de8dedafb4f",
-          "index": 0
-        },
-        {
-          "digest": "sha256:6c2ebeb5c8483c2d0cef692223fb140cc054ddaf43068f3d9915039ce221f180",
+          "digest": "sha256:9863868aa4681bc48fabed72aafecab30835895ff640f3eeec9a19a85889df36",
           "index": 0
         }
       ],
@@ -665,12 +735,13 @@
           "actions": [
             {
               "input": 0,
-              "secondaryInput": 1,
+              "secondaryInput": -1,
               "output": 0,
               "Action": {
-                "Copy": {
-                  "src": "/composer.*",
-                  "dest": "/app/",
+                "Mkdir": {
+                  "path": "/app",
+                  "mode": 488,
+                  "makeParents": true,
                   "owner": {
                     "user": {
                       "User": {
@@ -683,11 +754,6 @@
                       }
                     }
                   },
-                  "mode": -1,
-                  "followSymlink": true,
-                  "dirCopyContents": true,
-                  "createDestPath": true,
-                  "allowWildcard": true,
                   "timestamp": -1
                 }
               }
@@ -701,74 +767,8 @@
       },
       "constraints": {}
     },
-    "Digest": "sha256:fa829a35e3735315ac62ca1d3916f86756a5bfbd7cd7b36e7890fe0f7a7338ae",
+    "Digest": "sha256:f65451396c91b3c6a0d140fb9e6ab3b1adf02819883be1b22a2c4c0f02582897",
     "OpMetadata": {
-      "description": {
-        "llb.customname": "Copy composer.*"
-      },
-      "caps": {
-        "file.base": true
-      }
-    }
-  },
-  {
-    "Op": {
-      "inputs": [
-        {
-          "digest": "sha256:e375eec25ea2b2e21cd3ebb2547038adddaee7c52c64bc7fdfa98cfcf1b61b20",
-          "index": 0
-        },
-        {
-          "digest": "sha256:d42e317e5b8862bb1a9604ade2945bc0d96de82539b01105138388bb781bda46",
-          "index": 0
-        }
-      ],
-      "Op": {
-        "File": {
-          "actions": [
-            {
-              "input": 0,
-              "secondaryInput": 1,
-              "output": 0,
-              "Action": {
-                "Copy": {
-                  "src": "/app/public",
-                  "dest": "/app/public",
-                  "owner": {
-                    "user": {
-                      "User": {
-                        "ByID": 1000
-                      }
-                    },
-                    "group": {
-                      "User": {
-                        "ByID": 1000
-                      }
-                    }
-                  },
-                  "mode": -1,
-                  "followSymlink": true,
-                  "dirCopyContents": true,
-                  "createDestPath": true,
-                  "allowWildcard": true,
-                  "timestamp": -1
-                }
-              }
-            }
-          ]
-        }
-      },
-      "platform": {
-        "Architecture": "amd64",
-        "OS": "linux"
-      },
-      "constraints": {}
-    },
-    "Digest": "sha256:ff591ab3a98d81a1e98d9827d79d2ae5e431c165475e98a7abb66ae86b71ae4d",
-    "OpMetadata": {
-      "description": {
-        "llb.customname": "Copy /app/public"
-      },
       "caps": {
         "file.base": true
       }
