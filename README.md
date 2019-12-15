@@ -1,9 +1,11 @@
-# zbuild: Building container images without the hassle of writing Dockerfiles
+# zbuild
 
-zbuild is a high-level Buildkit syntax provider. That means, it provides
-a syntax for defining and building container images with higher-level concepts,
-such that you don't have to write system commands anymore and you can instead
-focus on what matters.
+Building container images without the hassle of writing Dockerfiles.
+
+zbuild is a high-level container image builder providing an alternative to 
+Dockerfiles but still fully compatible with Docker CLI. You don't have to write
+system commands to build images anymore and you can instead focus on what
+matters.
 
 [![asciicast](https://asciinema.org/a/287488.svg)](https://asciinema.org/a/287488)
 
@@ -26,6 +28,7 @@ As zbuild implements builder backends for multiple kinds of images, you have to
 refer to their specific parameters.
 
 * [php](docs/php-parameters.md)
+* [webserver](docs/kind-webserver.md)
 * More to come soon...
 
 Moreover, note that all zbuild files have to start with following header in order
@@ -41,7 +44,7 @@ zbuild uses a lock file to ensure that dependencies installed during the build
 process don't change randomly from one build to another. This is in line with
 the Dockerfile best-practice that consist of pinning the version of each and
 every dependency installed. As such, you can update your system dependencies
-like you do with most modern package managers: `zbuild update`.
+like you do with most modern library/package managers: `zbuild update`.
 
 #### 3. Build images
 
