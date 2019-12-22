@@ -1,0 +1,10 @@
+base: docker.io/library/node:12-buster-slim
+stages:
+  dev:
+    system_packages: {}
+  prod:
+    system_packages: {}
+webserver:
+  base_image: docker.io/library/nginx:latest
+  system_packages:
+    curl: curl-version

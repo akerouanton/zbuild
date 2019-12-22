@@ -1,0 +1,22 @@
+kind: nodejs
+version: 12
+frontend: true
+
+config_files:
+  .babelrc: .babelrc
+
+system_packages:
+  ca-certificates: "*"
+
+external_files:
+  - url: https://github.com/some/tool
+    compressed: true
+    Destination: /usr/sbin/tool1
+    Checksum: some-checksum
+    Mode: 0640
+    Owner: 1000:1000
+
+source_dirs:
+  - src/
+stateful_dirs:
+  - uploads/

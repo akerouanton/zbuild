@@ -32,6 +32,7 @@ gen-mocks:
 gen-testdata:
 	@$(GOTEST) -v ./pkg/llbutils -testdata
 	@$(GOTEST) -v ./pkg/llbgraph -testdata
+	@$(GOTEST) -v ./pkg/defkinds/nodejs -testdata
 	@$(GOTEST) -v ./pkg/defkinds/php -testdata
 	@$(GOTEST) -v ./pkg/defkinds/webserver -testdata
 	@echo "WARNING: Be sure to review generated testdata files before committing them."

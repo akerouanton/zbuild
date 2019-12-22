@@ -1,0 +1,19 @@
+kind: nodejs
+version: 12
+frontend: true
+
+source_dirs:
+  - src/
+
+stages:
+  dev:
+    config_files:
+      .env.dev: .env
+  prod:
+    config_files:
+      .env.prod: .env
+
+webserver:
+  webserver: nginx
+  config_file: nginx.conf
+  healthcheck: true

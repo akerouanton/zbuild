@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 
+	_ "github.com/NiR-/zbuild/pkg/defkinds/nodejs"
 	_ "github.com/NiR-/zbuild/pkg/defkinds/php"
 	_ "github.com/NiR-/zbuild/pkg/defkinds/webserver"
 	"github.com/NiR-/zbuild/pkg/statesolver"
