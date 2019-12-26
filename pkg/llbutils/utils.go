@@ -123,6 +123,10 @@ func InstallSystemPackages(
 	pkgMgr string,
 	locks map[string]string,
 ) (llb.State, error) {
+	if len(locks) == 0 {
+		return state, nil
+	}
+
 	var cmds []string
 	var pkgNames []string
 
