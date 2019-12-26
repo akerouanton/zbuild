@@ -1,0 +1,9 @@
+digraph llbgraph {
+"layer_sha256:5cbe67efba158931418f35afdf83bf734b5e9d83782c5713b34e8fb5b08e7356" [label="sha256:5cbe67efba158931418f35afdf83bf734b5e9d83782c5713b34e8fb5b08e7356",shape="box",style="",fillcolor=""]
+"layer_sha256:9b2a09fad6399aa094bf5780e509329905218c1187863280efc3a7c395844989" [label="sha256:9b2a09fad6399aa094bf5780e509329905218c1187863280efc3a7c395844989",shape="box",style="",fillcolor=""]
+"layer_sha256:b44dab810e3c702acb9ff98b1efc4b301cfc4c0b5244b04d523b8b6be8655088" [label="sha256:b44dab810e3c702acb9ff98b1efc4b301cfc4c0b5244b04d523b8b6be8655088",shape="box",style="",fillcolor=""]
+"op_sha256:5cbe67efba158931418f35afdf83bf734b5e9d83782c5713b34e8fb5b08e7356_op0" [label=<<I>Op_File:</I><BR/><B>Copy package.json</B>>,shape="diamond",style="",fillcolor=""]
+"op_sha256:5cbe67efba158931418f35afdf83bf734b5e9d83782c5713b34e8fb5b08e7356_op0" -> "layer_sha256:5cbe67efba158931418f35afdf83bf734b5e9d83782c5713b34e8fb5b08e7356" [label=""]
+"layer_sha256:b44dab810e3c702acb9ff98b1efc4b301cfc4c0b5244b04d523b8b6be8655088" -> "op_sha256:5cbe67efba158931418f35afdf83bf734b5e9d83782c5713b34e8fb5b08e7356_op0" [label=""]
+"layer_sha256:9b2a09fad6399aa094bf5780e509329905218c1187863280efc3a7c395844989" -> "op_sha256:5cbe67efba158931418f35afdf83bf734b5e9d83782c5713b34e8fb5b08e7356_op0" [label=""]
+}

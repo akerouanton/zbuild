@@ -1,0 +1,55 @@
+[
+  {
+    "RawOp": "CkkKR3NoYTI1NjpmNGYyY2VmYTdlNjJiZDczMjk5NjlmODAzNzI1YjFmZTYxZTQwZDcwZTkxZDI0M2I2NjcxN2IyYzM3NTgzZjc1ErwBCrQBCgcvYmluL3NoCgItbwoHZXJyZXhpdAoCLWMKHnlhcm4gaW5zdGFsbCAtLWZyb3plbi1sb2NrZmlsZRJBUEFUSD0vdXNyL2xvY2FsL3NiaW46L3Vzci9sb2NhbC9iaW46L3Vzci9zYmluOi91c3IvYmluOi9zYmluOi9iaW4SFE5PREVfVkVSU0lPTj0xMi4xNC4wEhNZQVJOX1ZFUlNJT049MS4yMS4xGgQvYXBwIgQxMDAwEgMaAS9SDgoFYW1kNjQSBWxpbnV4WgA=",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:f4f2cefa7e62bd7329969f803725b1fe61e40d70e91d243b66717b2c37583f75",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "Exec": {
+          "meta": {
+            "args": [
+              "/bin/sh",
+              "-o",
+              "errexit",
+              "-c",
+              "yarn install --frozen-lockfile"
+            ],
+            "env": [
+              "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+              "NODE_VERSION=12.14.0",
+              "YARN_VERSION=1.21.1"
+            ],
+            "cwd": "/app",
+            "user": "1000"
+          },
+          "mounts": [
+            {
+              "input": 0,
+              "dest": "/",
+              "output": 0
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:f435df575f3469dc4766e27b3bf4550145637288cdfe584d8c83ff1675f07f78",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Run yarn install"
+      },
+      "caps": {
+        "exec.meta.base": true,
+        "exec.mount.bind": true
+      }
+    }
+  }
+]

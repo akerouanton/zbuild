@@ -1,0 +1,14 @@
+digraph llbgraph {
+"layer_sha256:0057b79fe77376a86d1c78fec5c2ba56dd79c7a43999708faa926e59b8076528" [label="sha256:0057b79fe77376a86d1c78fec5c2ba56dd79c7a43999708faa926e59b8076528",shape="box",style="",fillcolor=""]
+"layer_sha256:9b2a09fad6399aa094bf5780e509329905218c1187863280efc3a7c395844989" [label="sha256:9b2a09fad6399aa094bf5780e509329905218c1187863280efc3a7c395844989",shape="box",style="",fillcolor=""]
+"layer_sha256:9b51e3ad866a51fc1fb76e2ada24d3ae8074199279e26556dd3ac7dfbe17d9e6" [label="sha256:9b51e3ad866a51fc1fb76e2ada24d3ae8074199279e26556dd3ac7dfbe17d9e6",shape="box",style="",fillcolor=""]
+"op_sha256:9b2a09fad6399aa094bf5780e509329905218c1187863280efc3a7c395844989" [label=<<I>Op_Source:</I><BR/><B>load package.json and yarn.lock from build context</B>>,shape="diamond",style="",fillcolor=""]
+"op_sha256:9b51e3ad866a51fc1fb76e2ada24d3ae8074199279e26556dd3ac7dfbe17d9e6" [label=<<I>Op_Source:</I><BR/><B>load build context</B>>,shape="diamond",style="",fillcolor=""]
+"source_docker-image://docker.io/library/node:12-buster-slim" [label=<<B>docker-image://docker.io/library/node:12-buster-slim</B>>,shape="doublecircle",style="",fillcolor=""]
+"source_local://context" [label=<<B>local://context</B>>,shape="doublecircle",style="",fillcolor=""]
+"source_docker-image://docker.io/library/node:12-buster-slim" -> "layer_sha256:0057b79fe77376a86d1c78fec5c2ba56dd79c7a43999708faa926e59b8076528" [label=""]
+"source_local://context" -> "op_sha256:9b2a09fad6399aa094bf5780e509329905218c1187863280efc3a7c395844989" [label=""]
+"op_sha256:9b2a09fad6399aa094bf5780e509329905218c1187863280efc3a7c395844989" -> "layer_sha256:9b2a09fad6399aa094bf5780e509329905218c1187863280efc3a7c395844989" [label=""]
+"source_local://context" -> "op_sha256:9b51e3ad866a51fc1fb76e2ada24d3ae8074199279e26556dd3ac7dfbe17d9e6" [label=""]
+"op_sha256:9b51e3ad866a51fc1fb76e2ada24d3ae8074199279e26556dd3ac7dfbe17d9e6" -> "layer_sha256:9b51e3ad866a51fc1fb76e2ada24d3ae8074199279e26556dd3ac7dfbe17d9e6" [label=""]
+}
