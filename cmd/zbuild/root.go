@@ -25,6 +25,7 @@ func main() {
 
 	zbuildCmd.AddCommand(newUpdateCmd())
 	zbuildCmd.AddCommand(newDebugLLBCmd())
+	zbuildCmd.AddCommand(newLLBGraphCmd())
 
 	if err := zbuildCmd.Execute(); err != nil {
 		logrus.Fatalf("%+v", err)
