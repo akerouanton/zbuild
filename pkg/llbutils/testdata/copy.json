@@ -1,5 +1,6 @@
 [
   {
+    "RawOp": "CkkKR3NoYTI1NjpjMWFhZWU4YTM4YmE2ZGVjNjRkNWI4YzkxOWM3Y2Y2YmRkYzA0ZjBiZDE4NzYzNjc4MzQyZDMzYTI1YzA2ODQ0IlQSUgj///////////8BIkUKCy9ldGMvcGFzc3dkEgwvZXRjL3Bhc3N3ZDIaCgoDEOgHEgMQ6Acg////////////ASgBMAFAAUgBWP///////////wFSDgoFYW1kNjQSBWxpbnV4WgA=",
     "Op": {
       "inputs": [
         {
@@ -59,6 +60,7 @@
     }
   },
   {
+    "RawOp": "CkkKR3NoYTI1NjoyOWVkNWIzYzYwOTJhOTE4ZDdlNDFmYTlmZjEzNzJkZjFjNTI1Mjk5ODFkZDg1MTBhNTkyOTRjMGFiZmQ5MDNi",
     "Op": {
       "inputs": [
         {
@@ -78,6 +80,7 @@
     }
   },
   {
+    "RawOp": "GioKKGRvY2tlci1pbWFnZTovL2RvY2tlci5pby9saWJyYXJ5L3BocDo3LjJSDgoFYW1kNjQSBWxpbnV4WgA=",
     "Op": {
       "Op": {
         "Source": {
