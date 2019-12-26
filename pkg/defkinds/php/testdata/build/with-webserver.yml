@@ -1,0 +1,11 @@
+# syntax=akerouanton/zbuilder:66c4004
+kind: php
+version: 7.4
+fpm: true
+
+webserver:
+  webserver: nginx
+  healthcheck: true
+  assets:
+    - from: /app/public
+      to: /app/public

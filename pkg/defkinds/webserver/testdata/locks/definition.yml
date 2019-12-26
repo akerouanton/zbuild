@@ -1,0 +1,12 @@
+kind: webserver
+webserver: nginx
+
+healthcheck: true
+system_packages:
+  curl: '*'
+
+config_file: ./docker/nginx.conf
+
+assets:
+  - from: /app/public
+    to: /app/public

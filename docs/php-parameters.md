@@ -1,4 +1,4 @@
-# PHP Backend
+# PHP definitions
 
 * [Multi-stages and dev builds](#multi-stages-and-dev-builds)
 * [Config Inference](#config-inference)
@@ -67,7 +67,7 @@ parameters that can be both in the base definition (the `base` stage) and in sub
 ```yaml
 fpm: <bool>
 command: <string>
-healthcheck: <healthcheck> # False by default
+healthcheck: <bool> # False by default
 external_files: <external_files>
 system_packages: <system_packages>
 extensions: <extensions>

@@ -19,8 +19,6 @@ import (
 
 const (
 	defaultComposerImageTag = "docker.io/library/composer:1.9.0"
-
-	zbuildLabel = "io.zbuild"
 )
 
 var SharedKeys = struct {
@@ -94,7 +92,7 @@ func (h *PHPHandler) Build(
 	}
 
 	img = image.CloneMeta(baseImg)
-	img.Config.Labels[zbuildLabel] = "true"
+	img.Config.Labels[builddef.ZbuildLabel] = "true"
 
 	composer := llbutils.ImageSource(defaultComposerImageTag, false)
 	state = llbutils.Copy(composer, "/usr/bin/composer", state, "/usr/bin/composer", "")

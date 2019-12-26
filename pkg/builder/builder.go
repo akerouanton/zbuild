@@ -19,9 +19,9 @@ import (
 
 // These consts come from: https://github.com/moby/buildkit/blob/master/frontend/dockerfile/builder/build.go
 const (
-	keyTarget         = "target"
-	keyNameContext    = "contextkey"
-	keyNameDockerfile = "dockerfilekey"
+	keyTarget      = "target"
+	keyNameContext = "contextkey"
+	keyFilename    = "filename"
 )
 
 type Builder struct {
@@ -39,7 +39,7 @@ func buildOptsFromBuildkitOpts(c client.Client) builddef.BuildOpts {
 	opts := c.BuildOpts().Opts
 
 	file := "zbuild.yml"
-	if v, ok := opts[keyNameDockerfile]; ok {
+	if v, ok := opts[keyFilename]; ok {
 		file = v
 	}
 

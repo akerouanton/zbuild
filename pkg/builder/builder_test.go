@@ -158,8 +158,8 @@ func successfullyBuildCustomStageAndFileTC(mockCtrl *gomock.Controller) testCase
 	c.EXPECT().BuildOpts().AnyTimes().Return(client.BuildOpts{
 		SessionID: "<SESSION-ID>",
 		Opts: map[string]string{
-			"dockerfilekey": "api.zbuild.yml",
-			"target":        "prod",
+			"filename": "api.zbuild.yml",
+			"target":   "prod",
 		},
 	})
 
