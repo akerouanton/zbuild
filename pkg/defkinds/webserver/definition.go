@@ -101,7 +101,7 @@ func (t WebserverType) ConfigPath() string {
 func (t WebserverType) BaseImage() string {
 	switch string(t) {
 	case "nginx":
-		return "nginx:latest"
+		return "docker.io/library/nginx:latest"
 	}
 
 	panic(fmt.Sprintf("Webserver type %q is not supported.", string(t)))

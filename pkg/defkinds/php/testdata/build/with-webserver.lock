@@ -1,0 +1,26 @@
+base_image: docker.io/library/php:7.4-fpm-buster
+stages:
+  dev:
+    system_packages:
+      git: 1:2.20.1-2+deb10u1
+      libpcre3-dev: 2:8.39-12
+      libzip-dev: 1.5.1-4
+      unzip: 6.0-23+deb10u1
+      zlib1g-dev: 1:1.2.11.dfsg-1
+    extensions:
+      zip: '*'
+  prod:
+    system_packages:
+      git: 1:2.20.1-2+deb10u1
+      libpcre3-dev: 2:8.39-12
+      libzip-dev: 1.5.1-4
+      unzip: 6.0-23+deb10u1
+      zlib1g-dev: 1:1.2.11.dfsg-1
+    extensions:
+      apcu: 5.1.18
+      opcache: '*'
+      zip: '*'
+webserver:
+  base_image: docker.io/library/nginx:latest
+  system_packages:
+    curl: 7.64.0-4

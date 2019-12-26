@@ -69,19 +69,25 @@ func (h *PHPHandler) Build(
 	}
 
 	stageName := buildOpts.Stage
+	isWebserverBuild := false
+	if strings.HasPrefix(stageName, "webserver-") {
+		isWebserverBuild = true
+		stageName = strings.TrimPrefix(stageName, "webserver-")
+	}
+
 	composerLockLoader := func(stageDef *StageDefinition) error {
 		return LoadComposerLock(ctx, h.solver, stageDef)
 	}
 	stage, err := def.ResolveStageDefinition(stageName, composerLockLoader)
 	if err != nil {
-		return state, img, xerrors.Errorf("could not resolve stage %q: %w", buildOpts.Stage, err)
+		return state, img, xerrors.Errorf("could not resolve stage %q: %w", stageName, err)
 	}
 
-	locks, ok := def.Locks.Stages[buildOpts.Stage]
+	locks, ok := def.Locks.Stages[stageName]
 	if !ok {
 		return state, img, xerrors.Errorf(
 			"could not build stage %q: no locks available. Please update your lockfile",
-			buildOpts.Stage,
+			stageName,
 		)
 	}
 
@@ -198,6 +204,29 @@ func (h *PHPHandler) Build(
 
 	if *stage.FPM == false && stage.Command != nil {
 		img.Config.Cmd = *stage.Command
+	}
+
+	if isWebserverBuild {
+		webserverHandler, err := registry.FindHandler("webserver")
+		if err != nil {
+			return state, img, err
+		}
+		webserverHandler.WithSolver(h.solver)
+
+		webserverLocks, err := def.Locks.Webserver.RawLocks()
+		if err != nil {
+			return state, img, err
+		}
+
+		newOpts := buildOpts
+		newOpts.Def = &builddef.BuildDef{
+			Kind:      "webserver",
+			RawConfig: def.Webserver.RawConfig(),
+			RawLocks:  webserverLocks,
+		}
+		newOpts.Source = &state
+
+		return webserverHandler.Build(ctx, newOpts)
 	}
 
 	return state, img, nil

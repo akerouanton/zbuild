@@ -9,6 +9,7 @@ import (
 	"github.com/NiR-/zbuild/pkg/defkinds/php"
 	"github.com/NiR-/zbuild/pkg/llbtest"
 	"github.com/NiR-/zbuild/pkg/mocks"
+	"github.com/NiR-/zbuild/pkg/statesolver"
 	"github.com/golang/mock/gomock"
 	"github.com/moby/buildkit/frontend/gateway/client"
 )
@@ -18,6 +19,7 @@ type buildTC struct {
 	client        client.Client
 	buildOpts     builddef.BuildOpts
 	expectedState string
+	// @TODO: test image metadata
 	// expectedImage *image.Image
 	expectedErr error
 }
@@ -78,10 +80,38 @@ func initBuildLLBForProdStageTC(t *testing.T, mockCtrl *gomock.Controller) build
 	}
 }
 
+func initBuildLLBForWebserverProdStageTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
+	genericDef := loadGenericDef(t, "testdata/build/with-webserver.yml", "testdata/build/with-webserver.lock")
+
+	solver := mocks.NewMockStateSolver(mockCtrl)
+	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
+	solver.EXPECT().ReadFile(
+		gomock.Any(), "composer.lock", gomock.Any(),
+	).Return([]byte{}, statesolver.FileNotFound)
+
+	kindHandler := php.NewPHPHandler()
+	kindHandler.WithSolver(solver)
+
+	// @TODO: disallow building webserver when fpm mode is disabled?
+	return buildTC{
+		handler: kindHandler,
+		client:  llbtest.NewMockClient(mockCtrl),
+		buildOpts: builddef.BuildOpts{
+			Def:           &genericDef,
+			Stage:         "webserver-prod",
+			SessionID:     "<SESSION-ID>",
+			LocalUniqueID: "x1htr02606a9rk8b0daewh9es",
+			ContextName:   "context",
+		},
+		expectedState: "testdata/build/with-webserver-prod.json",
+	}
+}
+
 func TestBuild(t *testing.T) {
 	testcases := map[string]func(*testing.T, *gomock.Controller) buildTC{
-		"build LLB DAG for dev stage":  initBuildLLBForDevStageTC,
-		"build LLB DAG for prod stage": initBuildLLBForProdStageTC,
+		"build LLB DAG for dev stage":            initBuildLLBForDevStageTC,
+		"build LLB DAG for prod stage":           initBuildLLBForProdStageTC,
+		"build LLB DAG for webserver-prod stage": initBuildLLBForWebserverProdStageTC,
 	}
 
 	for tcname := range testcases {
