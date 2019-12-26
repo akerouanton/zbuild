@@ -8,6 +8,7 @@ require (
 	github.com/bbuck/go-lexer v0.0.0-20150530081543-8752f4c00663 // indirect
 	github.com/docker/docker v1.14.0-0.20190319215453-e7b5f7dbe98c
 	github.com/go-test/deep v1.0.4
+	github.com/gogo/protobuf v1.2.0
 	github.com/golang/mock v1.1.1
 	github.com/gorilla/mux v1.7.3 // indirect
 	github.com/mcuadros/go-version v0.0.0-20190830083331-035f6764e8d2
