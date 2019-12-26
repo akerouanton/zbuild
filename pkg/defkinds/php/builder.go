@@ -326,7 +326,7 @@ func composerInstall(
 		"composer clear-cache",
 	}
 	run := state.Run(
-		llbutils.Shellf(strings.Join(cmds, " && ")),
+		llbutils.Shellf(strings.Join(cmds, "; ")),
 		llb.Dir(state.GetDir()),
 		llb.User("1000"),
 		llb.WithCustomName("Run composer install"),

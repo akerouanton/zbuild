@@ -174,6 +174,7 @@ func TestBuild(t *testing.T) {
 				t.Fatalf("Unexpected error: %v", err)
 			}
 
+			// @TODO: uncomment
 			/* img.Created = nil
 			if diff := deep.Equal(img, tc.expectedImage); diff != nil {
 				t.Fatal(diff)
