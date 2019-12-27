@@ -144,7 +144,6 @@ func (h *PHPHandler) buildPHP(
 
 	state = copyConfigFiles(stage, state, buildOpts)
 
-	// @TODO: copy files from git context instead of local source
 	if *stage.Dev == false {
 		state = composerInstall(state, buildOpts)
 		state = copySourceFiles(stage, state, buildOpts)
@@ -172,7 +171,7 @@ func copyConfigFiles(
 		configFiles = append(configFiles, *stage.ConfigFiles.FPMConfigFile)
 	}
 
-	configFilesSrc := llb.Local(buildOpts.ContextName,
+	configFilesSrc := llbutils.BuildContext(buildOpts.ContextName,
 		llb.IncludePatterns(configFiles),
 		llb.LocalUniqueID(buildOpts.LocalUniqueID),
 		llb.SessionID(buildOpts.SessionID),
@@ -204,7 +203,7 @@ func copySourceFiles(
 	state llb.State,
 	buildOpts builddef.BuildOpts,
 ) llb.State {
-	buildContextSrc := llb.Local(buildOpts.ContextName,
+	buildContextSrc := llbutils.BuildContext(buildOpts.ContextName,
 		llb.IncludePatterns(includePatterns(&stage)),
 		llb.ExcludePatterns(excludePatterns(&stage)),
 		llb.LocalUniqueID(buildOpts.LocalUniqueID),
@@ -309,8 +308,11 @@ func getEnv(src llb.State, name string) string {
 	return val
 }
 
-func composerInstall(state llb.State, buildOpts builddef.BuildOpts) llb.State {
-	composerSrc := llb.Local(buildOpts.ContextName,
+func composerInstall(
+	state llb.State,
+	buildOpts builddef.BuildOpts,
+) llb.State {
+	composerSrc := llbutils.BuildContext(buildOpts.ContextName,
 		llb.IncludePatterns([]string{"composer.json", "composer.lock"}),
 		llb.LocalUniqueID(buildOpts.LocalUniqueID),
 		llb.SessionID(buildOpts.SessionID),

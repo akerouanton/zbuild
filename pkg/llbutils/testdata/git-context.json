@@ -1,0 +1,40 @@
+[
+  {
+    "Op": {
+      "Op": {
+        "Source": {
+          "identifier": "git://github.com/NiR-/zbuild",
+          "attrs": {
+            "git.fullurl": "git://github.com/NiR-/zbuild"
+          }
+        }
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:6e7d3a618df6428463a1571911ed2f77f7501d0ba4a575a033562d4eb944238a",
+    "OpMetadata": {
+      "caps": {
+        "source.git": true,
+        "source.git.fullurl": true
+      }
+    }
+  },
+  {
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:6e7d3a618df6428463a1571911ed2f77f7501d0ba4a575a033562d4eb944238a",
+          "index": 0
+        }
+      ],
+      "Op": null
+    },
+    "Digest": "sha256:ac9fe8a29086fbd3b782e635628533fe5483b452e5bf545c5a36c995b8a92b72",
+    "OpMetadata": {
+      "caps": {
+        "constraints": true,
+        "platform": true
+      }
+    }
+  }
+]

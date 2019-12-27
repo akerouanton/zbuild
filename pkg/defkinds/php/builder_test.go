@@ -107,11 +107,40 @@ func initBuildLLBForWebserverProdStageTC(t *testing.T, mockCtrl *gomock.Controll
 	}
 }
 
+func initBuildProdStageFromGitBasedBuildContextTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
+	genericDef := loadGenericDef(t, "testdata/build/zbuild.yml", "testdata/build/zbuild.lock")
+
+	solver := mocks.NewMockStateSolver(mockCtrl)
+
+	raw := loadRawTestdata(t, "testdata/composer/composer-symfony4.4.lock")
+	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
+	solver.EXPECT().ReadFile(
+		gomock.Any(), "composer.lock", gomock.Any(),
+	).Return(raw, nil)
+
+	kindHandler := php.NewPHPHandler()
+	kindHandler.WithSolver(solver)
+
+	return buildTC{
+		handler: kindHandler,
+		client:  llbtest.NewMockClient(mockCtrl),
+		buildOpts: builddef.BuildOpts{
+			Def:           &genericDef,
+			Stage:         "prod",
+			SessionID:     "<SESSION-ID>",
+			LocalUniqueID: "x1htr02606a9rk8b0daewh9es",
+			ContextName:   "git://github.com/some/repo",
+		},
+		expectedState: "testdata/build/from-git-context.json",
+	}
+}
+
 func TestBuild(t *testing.T) {
 	testcases := map[string]func(*testing.T, *gomock.Controller) buildTC{
-		"build LLB DAG for dev stage":            initBuildLLBForDevStageTC,
-		"build LLB DAG for prod stage":           initBuildLLBForProdStageTC,
-		"build LLB DAG for webserver-prod stage": initBuildLLBForWebserverProdStageTC,
+		"build LLB DAG for dev stage":                   initBuildLLBForDevStageTC,
+		"build LLB DAG for prod stage":                  initBuildLLBForProdStageTC,
+		"build LLB DAG for webserver-prod stage":        initBuildLLBForWebserverProdStageTC,
+		"build prod stage from git-based build context": initBuildProdStageFromGitBasedBuildContextTC,
 	}
 
 	for tcname := range testcases {

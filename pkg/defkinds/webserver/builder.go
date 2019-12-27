@@ -43,10 +43,6 @@ func (h *WebserverHandler) Build(
 		return state, img, err
 	}
 
-	if def.Healthcheck {
-		def.SystemPackages["curl"] = "*"
-	}
-
 	state = llbutils.ImageSource(def.Locks.BaseImage, true)
 	baseImg, err := image.LoadMeta(ctx, def.Locks.BaseImage)
 	if err != nil {
@@ -63,21 +59,38 @@ func (h *WebserverHandler) Build(
 	state, err = llbutils.InstallSystemPackages(state, llbutils.APT, def.Locks.SystemPackages)
 
 	if def.ConfigFile != "" {
-		configFileSrc := llb.Local(buildOpts.ContextName,
-			llb.IncludePatterns([]string{def.ConfigFile}),
-			llb.LocalUniqueID(buildOpts.LocalUniqueID),
-			llb.SessionID(buildOpts.SessionID),
-			llb.SharedKeyHint(SharedKeys.ConfigFile),
-			llb.WithCustomName("load config file from build context"))
-
-		state = llbutils.Copy(configFileSrc, def.ConfigFile, state, def.Type.ConfigPath(), fileOwner)
+		state = h.copyConfigFile(state, def, buildOpts)
 	}
 
 	for _, asset := range def.Assets {
 		state = llbutils.Copy(*buildOpts.Source, asset.From, state, asset.To, fileOwner)
 	}
 
+	// Use SIGSTOP to gracefully stop nginx
+	img.Config.StopSignal = "SIGSTOP"
+
 	return state, img, nil
+}
+
+func (h *WebserverHandler) copyConfigFile(
+	state llb.State,
+	def Definition,
+	buildOpts builddef.BuildOpts,
+) llb.State {
+	configFileSrc := llbutils.BuildContext(buildOpts.ContextName,
+		llb.IncludePatterns([]string{def.ConfigFile}),
+		llb.LocalUniqueID(buildOpts.LocalUniqueID),
+		llb.SessionID(buildOpts.SessionID),
+		llb.SharedKeyHint(SharedKeys.ConfigFile),
+		llb.WithCustomName("load config file from build context"))
+
+	return llbutils.Copy(
+		configFileSrc,
+		def.ConfigFile,
+		state,
+		def.Type.ConfigPath(),
+		fileOwner,
+	)
 }
 
 func (h *WebserverHandler) WithSolver(solver statesolver.StateSolver) {

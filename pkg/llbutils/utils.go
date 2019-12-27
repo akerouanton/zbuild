@@ -232,3 +232,19 @@ func CopyExternalFiles(state llb.State, externalFiles []ExternalFile) llb.State 
 
 	return state
 }
+
+func BuildContext(contextRef string, opts ...llb.LocalOption) llb.State {
+	if strings.HasPrefix(contextRef, "git://") {
+		return gitContext(contextRef)
+	}
+	return llb.Local(contextRef, opts...)
+}
+
+func gitContext(url string) llb.State {
+	parts := strings.SplitN(url, "#", 2)
+	ref := ""
+	if len(parts) == 2 {
+		ref = parts[1]
+	}
+	return llb.Git(parts[0], ref)
+}

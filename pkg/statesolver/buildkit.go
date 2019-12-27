@@ -10,7 +10,8 @@ import (
 )
 
 const (
-	keyNameContext = "contextkey"
+	keyDockerContext = "contextkey"
+	keyContext       = "context"
 )
 
 func NewBuildkitSolver(c client.Client) BuildkitSolver {
@@ -18,7 +19,9 @@ func NewBuildkitSolver(c client.Client) BuildkitSolver {
 	opts := c.BuildOpts().Opts
 
 	contextName := "context"
-	if v, ok := opts[keyNameContext]; ok {
+	if v, ok := opts[keyDockerContext]; ok {
+		contextName = v
+	} else if v, ok := opts[keyContext]; ok {
 		contextName = v
 	}
 
@@ -37,7 +40,7 @@ type BuildkitSolver struct {
 
 func (s BuildkitSolver) FromBuildContext(opts ...llb.LocalOption) ReadFileOpt {
 	opts = append(opts, llb.SessionID(s.sessionID))
-	src := llb.Local(s.contextName, opts...)
+	src := llbutils.BuildContext(s.contextName, opts...)
 
 	return func(ctx context.Context, filepath string) ([]byte, error) {
 		raw, err := s.readFromLLB(ctx, src, filepath)

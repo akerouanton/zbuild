@@ -261,6 +261,30 @@ func TestStateHelpers(t *testing.T) {
 				return llbutils.CopyExternalFiles(dest, externalFiles)
 			},
 		},
+		"BuildContext_from_git_context_ref": {
+			testdata: "testdata/git-context.json",
+			init: func(_ *testing.T) llb.State {
+				return llbutils.BuildContext(
+					"git://github.com/NiR-/zbuild",
+					llb.IncludePatterns([]string{"some", "file"}),
+					llb.LocalUniqueID("hyewwv7qqidqfhx943284s4mr"),
+					llb.SessionID("<SESSION-ID>"),
+					llb.SharedKeyHint("some-shared-key-hint"),
+					llb.WithCustomName("load some file"))
+			},
+		},
+		"BuildContext_from_local_context": {
+			testdata: "testdata/local-context.json",
+			init: func(_ *testing.T) llb.State {
+				return llbutils.BuildContext(
+					"context",
+					llb.IncludePatterns([]string{"some", "file"}),
+					llb.LocalUniqueID("hyewwv7qqidqfhx943284s4mr"),
+					llb.SessionID("<SESSION-ID>"),
+					llb.SharedKeyHint("some-shared-key-hint"),
+					llb.WithCustomName("load some file"))
+			},
+		},
 	}
 
 	for tcname := range testcases {

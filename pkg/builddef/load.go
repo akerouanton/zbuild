@@ -15,7 +15,6 @@ var ZbuildfileNotFound = xerrors.New("zbuildfile not found")
 
 const SharedKeyZbuildfiles = "zbuildfiles"
 
-// @TODO: read files from git context instead of local source?
 func Load(
 	ctx context.Context,
 	solver statesolver.StateSolver,

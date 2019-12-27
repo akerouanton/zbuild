@@ -47,6 +47,27 @@ func initBuildLLBTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
 	}
 }
 
+func initBuildLLBFromGitContextTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
+	genericDef := loadGenericDef(t, "testdata/build/zbuild.yml", "testdata/build/zbuild.lock")
+
+	solver := mocks.NewMockStateSolver(mockCtrl)
+	kindHandler := webserver.WebserverHandler{}
+	kindHandler.WithSolver(solver)
+
+	return buildTC{
+		handler: &kindHandler,
+		client:  llbtest.NewMockClient(mockCtrl),
+		buildOpts: builddef.BuildOpts{
+			Def:           &genericDef,
+			Stage:         "",
+			SessionID:     "<SESSION-ID>",
+			LocalUniqueID: "x1htr02606a9rk8b0daewh9es",
+			ContextName:   "git://github.com/some/repo",
+		},
+		expectedState: "testdata/build/from-git-context.json",
+	}
+}
+
 func initFailToBuildWithAssetsWhenNoSourceInTheBuildOptsTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
 	genericDef := loadGenericDef(t, "testdata/build/with-assets.yml", "testdata/build/with-assets.lock")
 
@@ -71,7 +92,8 @@ func initFailToBuildWithAssetsWhenNoSourceInTheBuildOptsTC(t *testing.T, mockCtr
 
 func TestBuild(t *testing.T) {
 	testcases := map[string]func(*testing.T, *gomock.Controller) buildTC{
-		"build LLB": initBuildLLBTC,
+		"build LLB":                              initBuildLLBTC,
+		"build LLB from git-based build context": initBuildLLBFromGitContextTC,
 		"fail to build with assets but without source in build opts": initFailToBuildWithAssetsWhenNoSourceInTheBuildOptsTC,
 	}
 
