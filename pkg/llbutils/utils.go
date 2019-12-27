@@ -106,7 +106,8 @@ func Mkdir(state llb.State, owner string, dirs ...string) llb.State {
 		action := llb.Mkdir(dir, 0750,
 			llb.WithParents(true),
 			llb.WithUser(owner))
-		state = state.File(action)
+		state = state.File(action,
+			llb.WithCustomNamef("Mkdir %s", strings.Join(dirs, " ")))
 	}
 
 	return state
