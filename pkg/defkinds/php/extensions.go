@@ -197,7 +197,21 @@ func getPeclExtensionSpecs(extensions map[string]string) []string {
 	return specs
 }
 
-func InstallExtensions(state llb.State, def Definition, extensions map[string]string) llb.State {
+// InstallExtensions takes a PHP version (with only major and minor components)
+// and a map of extensions to install as keys and version constraints as
+// values.
+// It splits the set of extensions into core extensions and community
+// extensions. The former are installed using docker-php-ext-install whereas
+// ther latter are installed using notpecl (a replacement for pecl). It takes
+// care of deleting downloaded/unpacked files after installing extensions.
+//
+// This function returns a new llb.State with an llb.ExecState added to the LLB
+// DAG. The same state is returned if no extensions were provided.
+func InstallExtensions(state llb.State, majMinVersion string, extensions map[string]string) llb.State {
+	if len(extensions) == 0 {
+		return state
+	}
+
 	coreExtensions := filterExtensions(extensions, isCoreExtension)
 	peclExtensions := filterExtensions(extensions, isNotCoreExtension)
 
@@ -208,7 +222,7 @@ func InstallExtensions(state llb.State, def Definition, extensions map[string]st
 		cmds = append(cmds, configureExtensionBuilds(coreExtensionNames)...)
 		cmds = append(cmds,
 			"docker-php-ext-install -j\"$(nproc)\" "+strings.Join(coreExtensionSpecs, " "))
-		if version.Compare(def.MajMinVersion, "7.3", ">=") {
+		if version.Compare(majMinVersion, "7.3", ">=") {
 			cmds = append(cmds, "docker-php-source delete")
 		}
 	}

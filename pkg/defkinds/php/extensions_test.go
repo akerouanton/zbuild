@@ -12,14 +12,14 @@ import (
 )
 
 type installExtensionsTC struct {
-	def        php.Definition
-	extensions map[string]string
-	testdata   string
+	majMinVersion string
+	extensions    map[string]string
+	testdata      string
 }
 
 func initInstallGDWithAllFormatsTC(t *testing.T) installExtensionsTC {
 	return installExtensionsTC{
-		def: php.Definition{},
+		majMinVersion: "7.2",
 		extensions: map[string]string{
 			"gd":          "*",
 			"gd.freetype": "*",
@@ -32,11 +32,19 @@ func initInstallGDWithAllFormatsTC(t *testing.T) installExtensionsTC {
 
 func initInstallPeclExtensionsTC(t *testing.T) installExtensionsTC {
 	return installExtensionsTC{
-		def: php.Definition{},
+		majMinVersion: "7.3",
 		extensions: map[string]string{
 			"redis": "*",
 		},
 		testdata: "testdata/extensions/pecl-extensions.json",
+	}
+}
+
+func initStateDontChangeWhenNoExtToInstallTC(t *testing.T) installExtensionsTC {
+	return installExtensionsTC{
+		majMinVersion: "7.3",
+		extensions:    map[string]string{},
+		testdata:      "testdata/extensions/skip-install.json",
 	}
 }
 
@@ -46,6 +54,7 @@ func TestInstallExtensions(t *testing.T) {
 	testcases := map[string]func(t *testing.T) installExtensionsTC{
 		"successfully install gd extension with all supported formats": initInstallGDWithAllFormatsTC,
 		"successfully install pecl extensions":                         initInstallPeclExtensionsTC,
+		"llb.State don't change when there's no ext to install":        initStateDontChangeWhenNoExtToInstallTC,
 	}
 
 	for tcname := range testcases {
@@ -57,7 +66,7 @@ func TestInstallExtensions(t *testing.T) {
 			tc := tcinit(t)
 
 			state := llb.Scratch()
-			res := php.InstallExtensions(state, tc.def, tc.extensions)
+			res := php.InstallExtensions(state, tc.majMinVersion, tc.extensions)
 			jsonState := llbtest.StateToJSON(t, res)
 
 			if *flagTestdata {
