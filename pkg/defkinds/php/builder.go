@@ -91,13 +91,40 @@ func (h *PHPHandler) Build(
 		)
 	}
 
-	state = llbutils.ImageSource(def.Locks.BaseImage, true)
-	baseImg, err := image.LoadMeta(ctx, def.Locks.BaseImage)
+	state, img, err = h.buildPHP(ctx, def, stage, locks, buildOpts)
 	if err != nil {
-		return state, img, xerrors.Errorf("loading %q metadata: %w", def.Locks.BaseImage, err)
+		err = xerrors.Errorf("could not build php stage: %w", err)
+		return state, img, err
 	}
 
-	img = image.CloneMeta(baseImg)
+	if !isWebserverBuild {
+		return state, img, nil
+	}
+
+	state, img, err = h.buildWebserver(ctx, def, state, img, buildOpts)
+	if err != nil {
+		err = xerrors.Errorf("could not build webserver stage: %w", err)
+		return state, img, err
+	}
+
+	return state, img, nil
+}
+
+// @TODO: move BaseImage from DefinitionLocks to StageLocks and remove Definition arg.
+func (h *PHPHandler) buildPHP(
+	ctx context.Context,
+	def Definition,
+	stage StageDefinition,
+	locks StageLocks,
+	buildOpts builddef.BuildOpts,
+) (llb.State, *image.Image, error) {
+	state := llbutils.ImageSource(def.Locks.BaseImage, true)
+	baseImg, err := image.LoadMeta(ctx, def.Locks.BaseImage)
+	if err != nil {
+		return state, nil, xerrors.Errorf("failed to load %q metadata: %w", def.Locks.BaseImage, err)
+	}
+
+	img := image.CloneMeta(baseImg)
 	img.Config.Labels[builddef.ZbuildLabel] = "true"
 
 	composer := llbutils.ImageSource(defaultComposerImageTag, false)
@@ -115,6 +142,28 @@ func (h *PHPHandler) Build(
 	state = state.Dir("/app")
 	state = state.AddEnv("COMPOSER_HOME", "/composer")
 
+	state = copyConfigFiles(stage, state, buildOpts)
+
+	// @TODO: copy files from git context instead of local source
+	if *stage.Dev == false {
+		state = composerInstall(state, buildOpts)
+		state = copySourceFiles(stage, state, buildOpts)
+		state, err = postInstall(state, &stage)
+		if err != nil {
+			return state, img, err
+		}
+	}
+
+	setImageMetadata(stage, state, img)
+
+	return state, img, nil
+}
+
+func copyConfigFiles(
+	stage StageDefinition,
+	state llb.State,
+	buildOpts builddef.BuildOpts,
+) llb.State {
 	configFiles := []string{}
 	if stage.ConfigFiles.IniFile != nil {
 		configFiles = append(configFiles, *stage.ConfigFiles.IniFile)
@@ -147,32 +196,30 @@ func (h *PHPHandler) Build(
 			"1000:1000")
 	}
 
-	// @TODO: copy files from git context instead of local source
-	if *stage.Dev == false {
-		composerSrc := llb.Local(buildOpts.ContextName,
-			llb.IncludePatterns([]string{"composer.json", "composer.lock"}),
-			llb.LocalUniqueID(buildOpts.LocalUniqueID),
-			llb.SessionID(buildOpts.SessionID),
-			llb.SharedKeyHint(SharedKeys.ComposerFiles),
-			llb.WithCustomName("load composer files from build context"))
-		state = llbutils.Copy(composerSrc, "composer.*", state, "/app/", "1000:1000")
-		state = composerInstall(state)
+	return state
+}
 
-		buildContextSrc := llb.Local(buildOpts.ContextName,
-			llb.IncludePatterns(includePatterns(&stage)),
-			llb.ExcludePatterns(excludePatterns(&stage)),
-			llb.LocalUniqueID(buildOpts.LocalUniqueID),
-			llb.SessionID(buildOpts.SessionID),
-			llb.SharedKeyHint(SharedKeys.BuildContext),
-			llb.WithCustomName("load build context"))
-		state = llbutils.Copy(buildContextSrc, "/", state, "/app/", "1000:1000")
+func copySourceFiles(
+	stage StageDefinition,
+	state llb.State,
+	buildOpts builddef.BuildOpts,
+) llb.State {
+	buildContextSrc := llb.Local(buildOpts.ContextName,
+		llb.IncludePatterns(includePatterns(&stage)),
+		llb.ExcludePatterns(excludePatterns(&stage)),
+		llb.LocalUniqueID(buildOpts.LocalUniqueID),
+		llb.SessionID(buildOpts.SessionID),
+		llb.SharedKeyHint(SharedKeys.BuildContext),
+		llb.WithCustomName("load build context"))
 
-		state, err = postInstall(state, &stage)
-		if err != nil {
-			return state, img, err
-		}
-	}
+	return llbutils.Copy(buildContextSrc, "/", state, "/app/", "1000:1000")
+}
 
+func setImageMetadata(
+	stage StageDefinition,
+	state llb.State,
+	img *image.Image,
+) {
 	for _, dir := range stage.StatefulDirs {
 		fullpath := dir
 		if !path.IsAbs(fullpath) {
@@ -205,31 +252,35 @@ func (h *PHPHandler) Build(
 	if *stage.FPM == false && stage.Command != nil {
 		img.Config.Cmd = *stage.Command
 	}
+}
 
-	if isWebserverBuild {
-		webserverHandler, err := registry.FindHandler("webserver")
-		if err != nil {
-			return state, img, err
-		}
-		webserverHandler.WithSolver(h.solver)
+func (h *PHPHandler) buildWebserver(
+	ctx context.Context,
+	def Definition,
+	state llb.State,
+	img *image.Image,
+	buildOpts builddef.BuildOpts,
+) (llb.State, *image.Image, error) {
+	webserverHandler, err := registry.FindHandler("webserver")
+	if err != nil {
+		return state, img, err
+	}
+	webserverHandler.WithSolver(h.solver)
 
-		webserverLocks, err := def.Locks.Webserver.RawLocks()
-		if err != nil {
-			return state, img, err
-		}
-
-		newOpts := buildOpts
-		newOpts.Def = &builddef.BuildDef{
-			Kind:      "webserver",
-			RawConfig: def.Webserver.RawConfig(),
-			RawLocks:  webserverLocks,
-		}
-		newOpts.Source = &state
-
-		return webserverHandler.Build(ctx, newOpts)
+	webserverLocks, err := def.Locks.Webserver.RawLocks()
+	if err != nil {
+		return state, img, err
 	}
 
-	return state, img, nil
+	newOpts := buildOpts
+	newOpts.Def = &builddef.BuildDef{
+		Kind:      "webserver",
+		RawConfig: def.Webserver.RawConfig(),
+		RawLocks:  webserverLocks,
+	}
+	newOpts.Source = &state
+
+	return webserverHandler.Build(ctx, newOpts)
 }
 
 func excludePatterns(stage *StageDefinition) []string {
@@ -258,7 +309,15 @@ func getEnv(src llb.State, name string) string {
 	return val
 }
 
-func composerInstall(state llb.State) llb.State {
+func composerInstall(state llb.State, buildOpts builddef.BuildOpts) llb.State {
+	composerSrc := llb.Local(buildOpts.ContextName,
+		llb.IncludePatterns([]string{"composer.json", "composer.lock"}),
+		llb.LocalUniqueID(buildOpts.LocalUniqueID),
+		llb.SessionID(buildOpts.SessionID),
+		llb.SharedKeyHint(SharedKeys.ComposerFiles),
+		llb.WithCustomName("load composer files from build context"))
+	state = llbutils.Copy(composerSrc, "composer.*", state, "/app/", "1000:1000")
+
 	cmds := []string{
 		"composer global require --prefer-dist hirak/prestissimo",
 		"composer install --no-dev --prefer-dist --no-scripts",
