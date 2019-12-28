@@ -379,69 +379,6 @@ func initFailToResolveStageWithCyclicDepsTC(t *testing.T, mockCtrl *gomock.Contr
 	}
 }
 
-func initSuccessfullyAddSymfonyIntegrationTC(t *testing.T, mockCtrl *gomock.Controller) resolveStageTC {
-	fpm := true
-	healthcheck := false
-
-	return resolveStageTC{
-		file:     "testdata/def/symfony-integration.yml",
-		lockFile: "",
-		stage:    "dev",
-		composerLockLoader: mockComposerLockLoader(
-			map[string]string{
-				"symfony/framework-bundle": "v4.4.1",
-			},
-			map[string]string{
-				"ctype": "*",
-				"iconv": "*",
-			},
-		),
-		expected: php.StageDefinition{
-			Name:          "dev",
-			BaseImage:     "docker.io/library/php:7.2-fpm-buster",
-			Version:       "7.2",
-			MajMinVersion: "7.2",
-			Infer:         true,
-			Dev:           true,
-			LockedPackages: map[string]string{
-				"symfony/framework-bundle": "v4.4.1",
-			},
-			PlatformReqs: map[string]string{
-				"ctype": "*",
-				"iconv": "*",
-			},
-			Stage: php.Stage{
-				ExternalFiles: []llbutils.ExternalFile{},
-				SystemPackages: map[string]string{
-					"git":          "*",
-					"libpcre3-dev": "*",
-					"libzip-dev":   "*",
-					"unzip":        "*",
-					"zlib1g-dev":   "*",
-				},
-				FPM: &fpm,
-				Extensions: map[string]string{
-					"ctype": "*",
-					"iconv": "*",
-					"zip":   "*",
-				},
-				ConfigFiles: php.PHPConfigFiles{},
-				ComposerDumpFlags: &php.ComposerDumpFlags{
-					ClassmapAuthoritative: true,
-				},
-				SourceDirs:   []string{"config/", "src/", "templates/", "translations/"},
-				ExtraScripts: []string{"bin/console", "public/index.php"},
-				Integrations: []string{"symfony"},
-				StatefulDirs: []string{},
-				Healthcheck:  &healthcheck,
-				PostInstall: []string{
-					"php -d display_errors=on bin/console cache:warmup --env=prod",
-				},
-			},
-		},
-	}
-}
-
 func initRemoveDefaultExtensionsTC(t *testing.T, mockCtrl *gomock.Controller) resolveStageTC {
 	fpm := true
 	healthcheck := false
@@ -563,7 +500,6 @@ func TestResolveStageDefinition(t *testing.T) {
 	testcases := map[string]func(*testing.T, *gomock.Controller) resolveStageTC{
 		"successfully resolve default dev stage":    initSuccessfullyResolveDefaultDevStageTC,
 		"successfully resolve worker stage":         initSuccessfullyResolveWorkerStageTC,
-		"successfully add symfony integration":      initSuccessfullyAddSymfonyIntegrationTC,
 		"fail to resolve unknown stage":             initFailToResolveUnknownStageTC,
 		"fail to resolve stage with cyclic deps":    initFailToResolveStageWithCyclicDepsTC,
 		"remove default extensions":                 initRemoveDefaultExtensionsTC,
