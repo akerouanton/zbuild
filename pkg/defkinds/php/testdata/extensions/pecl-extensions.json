@@ -1,6 +1,6 @@
 [
   {
-    "RawOp": "EoICCu8BCgcvYmluL3NoCgItbwoHZXJyZXhpdAoCLWMKzwFjdXJsIC1mIC1vIC91c3IvbG9jYWwvc2Jpbi9ub3RwZWNsIGh0dHBzOi8vc3RvcmFnZS5nb29nbGVhcGlzLmNvbS9ub3RwZWNsL25vdHBlY2wgJiYgY2htb2QgK3ggL3Vzci9sb2NhbC9zYmluL25vdHBlY2wgJiYgbm90cGVjbCBpbnN0YWxsIHJlZGlzICYmIGRvY2tlci1waHAtZXh0LWVuYWJsZSByZWRpcyAmJiBybSAtcmYgL3Vzci9sb2NhbC9zYmluL25vdHBlY2waAS8SDgj///////////8BGgEvUg4KBWFtZDY0EgVsaW51eFoA",
+    "RawOp": "EvoBCucBCgcvYmluL3NoCgItbwoHZXJyZXhpdAoCLWMKxwFjdXJsIC1mIC1vIC91c3IvbG9jYWwvc2Jpbi9ub3RwZWNsIGh0dHBzOi8vc3RvcmFnZS5nb29nbGVhcGlzLmNvbS9ub3RwZWNsL25vdHBlY2w7IGNobW9kICt4IC91c3IvbG9jYWwvc2Jpbi9ub3RwZWNsOyBub3RwZWNsIGluc3RhbGwgcmVkaXM7IGRvY2tlci1waHAtZXh0LWVuYWJsZSByZWRpczsgcm0gLXJmIC91c3IvbG9jYWwvc2Jpbi9ub3RwZWNsGgEvEg4I////////////ARoBL1IOCgVhbWQ2NBIFbGludXhaAA==",
     "Op": {
       "Op": {
         "Exec": {
@@ -10,7 +10,7 @@
               "-o",
               "errexit",
               "-c",
-              "curl -f -o /usr/local/sbin/notpecl https://storage.googleapis.com/notpecl/notpecl \u0026\u0026 chmod +x /usr/local/sbin/notpecl \u0026\u0026 notpecl install redis \u0026\u0026 docker-php-ext-enable redis \u0026\u0026 rm -rf /usr/local/sbin/notpecl"
+              "curl -f -o /usr/local/sbin/notpecl https://storage.googleapis.com/notpecl/notpecl; chmod +x /usr/local/sbin/notpecl; notpecl install redis; docker-php-ext-enable redis; rm -rf /usr/local/sbin/notpecl"
             ],
             "cwd": "/"
           },
@@ -29,7 +29,7 @@
       },
       "constraints": {}
     },
-    "Digest": "sha256:5f3c1a70708c8c4894df5ca87e8524e61de2a9c9bf86b09c18985f77af65ee3b",
+    "Digest": "sha256:0b6782ec32d5050392b3b92cc89cd7598741e8acc6334ad2365f24d7736e646d",
     "OpMetadata": {
       "description": {
         "llb.customname": "Install PHP extensions (redis)"
@@ -40,17 +40,17 @@
     }
   },
   {
-    "RawOp": "CkkKR3NoYTI1Njo1ZjNjMWE3MDcwOGM4YzQ4OTRkZjVjYTg3ZTg1MjRlNjFkZTJhOWM5YmY4NmIwOWMxODk4NWY3N2FmNjVlZTNi",
+    "RawOp": "CkkKR3NoYTI1NjowYjY3ODJlYzMyZDUwNTAzOTJiM2I5MmNjODljZDc1OTg3NDFlOGFjYzYzMzRhZDIzNjVmMjRkNzczNmU2NDZk",
     "Op": {
       "inputs": [
         {
-          "digest": "sha256:5f3c1a70708c8c4894df5ca87e8524e61de2a9c9bf86b09c18985f77af65ee3b",
+          "digest": "sha256:0b6782ec32d5050392b3b92cc89cd7598741e8acc6334ad2365f24d7736e646d",
           "index": 0
         }
       ],
       "Op": null
     },
-    "Digest": "sha256:c1a6243dc48fd89bfec35e8e73392dfb57cf8af83fc9885af59ff098f072fa60",
+    "Digest": "sha256:b30799ea66e73df50852de5752a58a02cad6641968c7a74b1b98fc7882db9aba",
     "OpMetadata": {
       "caps": {
         "constraints": true,

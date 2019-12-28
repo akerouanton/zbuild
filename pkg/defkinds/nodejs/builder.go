@@ -217,7 +217,7 @@ func (h *NodeJSHandler) globalPackagesInstall(
 
 	cmd := fmt.Sprintf("yarn add -g %s", strings.Join(pkgs, " "))
 	run := state.Run(
-		llbutils.Shellf(cmd),
+		llbutils.Shell(cmd),
 		llb.User("1000"),
 		llb.WithCustomNamef("Run %s", cmd))
 
@@ -240,7 +240,7 @@ func (h *NodeJSHandler) yarnInstall(
 	state = llbutils.Copy(packageSrc, "yarn.lock", state, "/app/", "1000:1000")
 
 	run := state.Run(
-		llbutils.Shellf("yarn install --frozen-lockfile"),
+		llbutils.Shell("yarn install --frozen-lockfile"),
 		llb.Dir(state.GetDir()),
 		llb.User("1000"),
 		llb.WithCustomName("Run yarn install"))
@@ -291,7 +291,7 @@ func (h *NodeJSHandler) build(
 	}
 
 	run := state.Run(
-		llbutils.Shellf(*stageDef.BuildCommand),
+		llbutils.Shell(*stageDef.BuildCommand),
 		llb.Dir(state.GetDir()),
 		llb.AddEnv("NODE_ENV", "production"),
 		llb.WithCustomName("Build"))
