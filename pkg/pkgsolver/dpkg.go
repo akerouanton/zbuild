@@ -1,6 +1,7 @@
 package pkgsolver
 
 import (
+	"github.com/NiR-/zbuild/pkg/builddef"
 	"github.com/snyh/go-dpkg-parser"
 	"golang.org/x/xerrors"
 )
@@ -17,7 +18,12 @@ func NewDpkgSolver(dpkgRepo *dpkg.Repository) *DpkgSolver {
 	}
 }
 
-func (s *DpkgSolver) Configure(config SolverConfig) error {
+func (s *DpkgSolver) Configure(osrelease builddef.OSRelease, arch string) error {
+	config, err := GuessSolverConfig(osrelease, arch)
+	if err != nil {
+		return err
+	}
+
 	for _, suite := range config.DpkgSuites {
 		if err := s.dpkgRepo.AddSuite(suite[0], suite[1], ""); err != nil {
 			return xerrors.Errorf("could not add suite %s: %w", suite[1], err)

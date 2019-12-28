@@ -6,6 +6,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/NiR-/zbuild/pkg/builddef"
 	"github.com/NiR-/zbuild/pkg/pkgsolver"
 	"github.com/snyh/go-dpkg-parser"
 )
@@ -57,10 +58,10 @@ func TestDpkgResolveVersions(t *testing.T) {
 			}
 
 			pkgSolver := pkgsolver.NewDpkgSolver(dpkgRepo)
-			pkgSolver.Configure(pkgsolver.SolverConfig{
-				Arch:       tc.arch,
-				DpkgSuites: [][]string{},
-			})
+			osrelease := builddef.OSRelease{
+				Name: "debian",
+			}
+			pkgSolver.Configure(osrelease, "amd64")
 			_, err = pkgSolver.ResolveVersions(tc.toResolve)
 
 			if tc.expectedErr != nil {

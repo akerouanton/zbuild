@@ -77,12 +77,7 @@ func TestConfigureSolver(t *testing.T) {
 			tc := tcinit(t)
 			defer tc.cleanup()
 
-			config, err := pkgsolver.GuessSolverConfig(tc.osrelease, "amd64")
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			err = tc.solver.Configure(config)
+			err := tc.solver.Configure(tc.osrelease, "amd64")
 			if tc.expectedErr != nil {
 				if err == nil || err.Error() != tc.expectedErr.Error() {
 					t.Fatalf("Expected: %v\nGot: %v", tc.expectedErr, err)

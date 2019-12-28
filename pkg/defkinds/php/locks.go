@@ -84,12 +84,7 @@ func (h *PHPHandler) UpdateLocks(
 		return nil, xerrors.Errorf("unsupported OS %q: only debian-based base images are supported", osrelease.Name)
 	}
 
-	solverCfg, err := pkgsolver.GuessSolverConfig(osrelease, "amd64")
-	if err != nil {
-		return nil, xerrors.Errorf("could not update stage locks: %w", err)
-	}
-	err = pkgSolver.Configure(solverCfg)
-	if err != nil {
+	if err := pkgSolver.Configure(osrelease, "amd64"); err != nil {
 		return nil, xerrors.Errorf("could not update stage locks: %w", err)
 	}
 

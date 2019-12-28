@@ -46,7 +46,7 @@ func initSuccessfullyUpdateLocksTC(t *testing.T, mockCtrl *gomock.Controller) up
 	).Return(rawDebianOSRelease, nil)
 
 	pkgSolver := mocks.NewMockPackageSolver(mockCtrl)
-	pkgSolver.EXPECT().Configure(gomock.Any()).Times(1)
+	pkgSolver.EXPECT().Configure(gomock.Any(), "amd64").Times(1)
 	pkgSolver.EXPECT().ResolveVersions(map[string]string{
 		"curl": "*",
 	}).AnyTimes().Return(map[string]string{
@@ -108,7 +108,7 @@ func initSuccessfullyUpdateWebserverLocksTC(t *testing.T, mockCtrl *gomock.Contr
 	).Return(rawDebianOSRelease, nil)
 
 	pkgSolver := mocks.NewMockPackageSolver(mockCtrl)
-	pkgSolver.EXPECT().Configure(gomock.Any()).Times(2)
+	pkgSolver.EXPECT().Configure(gomock.Any(), "amd64").Times(2)
 	pkgSolver.EXPECT().ResolveVersions(map[string]string{}).Return(map[string]string{}, nil).Times(2)
 	pkgSolver.EXPECT().ResolveVersions(map[string]string{
 		"curl": "*",
