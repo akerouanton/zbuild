@@ -244,7 +244,6 @@ func initSuccessfullyResolveDefaultDevStageTC(t *testing.T, mockCtrl *gomock.Con
 	lockFile := "testdata/def/without-stages.lock"
 
 	isFPM := true
-	isDev := true
 	healthckeck := false
 	phpIni := "docker/app/php.ini"
 	fpmConfigFile := "docker/app/fpm.conf"
@@ -262,7 +261,7 @@ func initSuccessfullyResolveDefaultDevStageTC(t *testing.T, mockCtrl *gomock.Con
 			Version:        "7.4.0",
 			MajMinVersion:  "7.4",
 			Infer:          false,
-			Dev:            &isDev,
+			Dev:            true,
 			LockedPackages: map[string]string{},
 			PlatformReqs:   map[string]string{},
 			Stage: php.Stage{
@@ -295,7 +294,6 @@ func initSuccessfullyResolveDefaultDevStageTC(t *testing.T, mockCtrl *gomock.Con
 
 func initSuccessfullyResolveWorkerStageTC(t *testing.T, mockCtrl *gomock.Controller) resolveStageTC {
 	isNotFPM := false
-	isNotDev := false
 	healthcheckDisabled := false
 	workerCmd := []string{"bin/worker"}
 
@@ -317,7 +315,7 @@ func initSuccessfullyResolveWorkerStageTC(t *testing.T, mockCtrl *gomock.Control
 			Version:       "7.4.0",
 			MajMinVersion: "7.4",
 			Infer:         true,
-			Dev:           &isNotDev,
+			Dev:           false,
 			LockedPackages: map[string]string{
 				"clue/stream-filter": "v1.4.0",
 			},
@@ -382,7 +380,6 @@ func initFailToResolveStageWithCyclicDepsTC(t *testing.T, mockCtrl *gomock.Contr
 }
 
 func initSuccessfullyAddSymfonyIntegrationTC(t *testing.T, mockCtrl *gomock.Controller) resolveStageTC {
-	dev := true
 	fpm := true
 	healthcheck := false
 
@@ -405,7 +402,7 @@ func initSuccessfullyAddSymfonyIntegrationTC(t *testing.T, mockCtrl *gomock.Cont
 			Version:       "7.2",
 			MajMinVersion: "7.2",
 			Infer:         true,
-			Dev:           &dev,
+			Dev:           true,
 			LockedPackages: map[string]string{
 				"symfony/framework-bundle": "v4.4.1",
 			},
@@ -446,7 +443,6 @@ func initSuccessfullyAddSymfonyIntegrationTC(t *testing.T, mockCtrl *gomock.Cont
 }
 
 func initRemoveDefaultExtensionsTC(t *testing.T, mockCtrl *gomock.Controller) resolveStageTC {
-	dev := true
 	fpm := true
 	healthcheck := false
 
@@ -463,7 +459,7 @@ func initRemoveDefaultExtensionsTC(t *testing.T, mockCtrl *gomock.Controller) re
 			Version:        "7.4",
 			MajMinVersion:  "7.4",
 			Infer:          true,
-			Dev:            &dev,
+			Dev:            true,
 			LockedPackages: map[string]string{},
 			PlatformReqs:   map[string]string{},
 			Stage: php.Stage{
@@ -506,7 +502,6 @@ func initRemoveDefaultExtensionsTC(t *testing.T, mockCtrl *gomock.Controller) re
 // This TC ensures that the extensions infered from composer.lock aren't
 // erasing version constraints defined in the zbuildfile.
 func initPreservePredefinedExtensionConstraintsTC(t *testing.T, mockCtrl *gomock.Controller) resolveStageTC {
-	dev := true
 	fpm := true
 	healthcheck := false
 
@@ -526,7 +521,7 @@ func initPreservePredefinedExtensionConstraintsTC(t *testing.T, mockCtrl *gomock
 			Version:        "7.4",
 			MajMinVersion:  "7.4",
 			Infer:          true,
-			Dev:            &dev,
+			Dev:            true,
 			LockedPackages: map[string]string{},
 			PlatformReqs: map[string]string{
 				"redis": "*",

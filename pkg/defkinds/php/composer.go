@@ -36,7 +36,7 @@ func LoadComposerLock(
 		return xerrors.Errorf("could not load composer.lock: %v", err)
 	}
 
-	parsed, err := parseComposerLock(lockdata, *stageDef.Dev)
+	parsed, err := parseComposerLock(lockdata, stageDef.Dev)
 	if err != nil {
 		return err
 	}

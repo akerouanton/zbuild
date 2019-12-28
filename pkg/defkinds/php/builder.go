@@ -144,7 +144,7 @@ func (h *PHPHandler) buildPHP(
 
 	state = copyConfigFiles(stage, state, buildOpts)
 
-	if *stage.Dev == false {
+	if !stage.Dev {
 		state = composerInstall(state, buildOpts)
 		state = copySourceFiles(stage, state, buildOpts)
 		state, err = postInstall(state, &stage)

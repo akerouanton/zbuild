@@ -32,15 +32,13 @@ func initSuccessfullyLoadAndParseComposerLockTC(
 		gomock.Any(), "composer.lock", gomock.Any(),
 	).Return(raw, nil)
 
-	isDev := true
-
 	return loadComposerLockTC{
 		initial: php.StageDefinition{
-			Dev: &isDev,
+			Dev: true,
 		},
 		solver: solver,
 		expected: php.StageDefinition{
-			Dev: &isDev,
+			Dev: true,
 			LockedPackages: map[string]string{
 				"clue/stream-filter":    "v1.4.0",
 				"webmozart/assert":      "1.4.0",
@@ -65,17 +63,13 @@ func initSilentlyFailWhenComposerLockFileDoesNotExistTC(
 		gomock.Any(), "composer.lock", gomock.Any(),
 	).Return([]byte{}, statesolver.FileNotFound)
 
-	isDev := false
-
 	return loadComposerLockTC{
 		initial: php.StageDefinition{
-			Dev:            &isDev,
 			LockedPackages: map[string]string{},
 			PlatformReqs:   map[string]string{},
 		},
 		solver: solver,
 		expected: php.StageDefinition{
-			Dev:            &isDev,
 			LockedPackages: map[string]string{},
 			PlatformReqs:   map[string]string{},
 		},
@@ -94,12 +88,8 @@ func initFailToLoadBrokenComposerLockFileTC(
 		gomock.Any(), "composer.lock", gomock.Any(),
 	).Return(raw, nil)
 
-	isDev := false
-
 	return loadComposerLockTC{
-		initial: php.StageDefinition{
-			Dev: &isDev,
-		},
+		initial:     php.StageDefinition{},
 		solver:      solver,
 		expectedErr: xerrors.New("could not unmarshal composer.lock: unexpected end of JSON input"),
 	}

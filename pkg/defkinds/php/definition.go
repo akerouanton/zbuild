@@ -129,16 +129,75 @@ type Stage struct {
 	PostInstall       []string                `mapstructure:"post_install"`
 }
 
+func (s Stage) copy() Stage {
+	new := Stage{
+		ExternalFiles:  []llbutils.ExternalFile{},
+		SystemPackages: map[string]string{},
+		ConfigFiles:    s.ConfigFiles.copy(),
+		Extensions:     map[string]string{},
+		SourceDirs:     s.SourceDirs,
+		ExtraScripts:   s.ExtraScripts,
+		Integrations:   s.Integrations,
+		StatefulDirs:   s.StatefulDirs,
+		PostInstall:    s.PostInstall,
+	}
+
+	for k, v := range s.SystemPackages {
+		new.SystemPackages[k] = v
+	}
+
+	for k, v := range s.Extensions {
+		new.Extensions[k] = v
+	}
+
+	if s.FPM != nil {
+		fpm := *s.FPM
+		new.FPM = &fpm
+	}
+	if s.Command != nil {
+		command := *s.Command
+		new.Command = &command
+	}
+	if s.ComposerDumpFlags != nil {
+		composerFlags := *s.ComposerDumpFlags
+		new.ComposerDumpFlags = &composerFlags
+	}
+	if s.Healthcheck != nil {
+		healthcheck := *s.Healthcheck
+		new.Healthcheck = &healthcheck
+	}
+
+	return new
+}
+
 type DerivedStage struct {
 	Stage `mapstructure:",squash"`
 
 	DeriveFrom string `mapstructure:"derive_from"`
-	Dev        *bool  `mapstructure:"dev"`
+	// Dev marks if this is a dev stage (with lighter build process). It's used
+	// as a pointer to distinguish when the value is nil or when it's false. In
+	// the former case, the value from the parent stage is used.
+	Dev *bool `mapstructure:"dev"`
 }
 
 type PHPConfigFiles struct {
 	IniFile       *string `mapstructure:"php.ini"`
 	FPMConfigFile *string `mapstructure:"fpm.conf"`
+}
+
+func (cfg PHPConfigFiles) copy() PHPConfigFiles {
+	new := PHPConfigFiles{}
+
+	if cfg.IniFile != nil {
+		iniFile := *cfg.IniFile
+		new.IniFile = &iniFile
+	}
+	if cfg.FPMConfigFile != nil {
+		fpmConfigFile := *cfg.FPMConfigFile
+		new.FPMConfigFile = &fpmConfigFile
+	}
+
+	return new
 }
 
 // ComposerDumpFlags represents the optimization flags taken by Composer for
@@ -176,7 +235,7 @@ type StageDefinition struct {
 	Version        string
 	MajMinVersion  string
 	Infer          bool
-	Dev            *bool
+	Dev            bool
 	LockedPackages map[string]string
 	PlatformReqs   map[string]string
 	Webserver      *webserver.Definition
@@ -233,7 +292,7 @@ func (def *Definition) ResolveStageDefinition(
 		return stageDef, nil
 	}
 
-	if *stageDef.Dev == false && *stageDef.FPM == true {
+	if stageDef.Dev == false && *stageDef.FPM == true {
 		stageDef.Extensions["apcu"] = "*"
 		stageDef.Extensions["opcache"] = "*"
 	}
@@ -255,14 +314,12 @@ func extractMajMinVersion(versionString string) string {
 }
 
 func mergeStages(base *Definition, stages ...DerivedStage) StageDefinition {
-	dev := false
 	stageDef := StageDefinition{
 		BaseImage:      base.BaseImage,
 		Version:        base.Version,
 		MajMinVersion:  base.MajMinVersion,
 		Infer:          base.Infer,
-		Stage:          base.BaseStage,
-		Dev:            &dev,
+		Stage:          base.BaseStage.copy(),
 		PlatformReqs:   map[string]string{},
 		LockedPackages: map[string]string{},
 		Webserver:      base.Webserver,
@@ -314,7 +371,7 @@ func mergeStages(base *Definition, stages ...DerivedStage) StageDefinition {
 			stageDef.PostInstall = append(stageDef.PostInstall, stage.PostInstall...)
 		}
 		if stage.Dev != nil {
-			stageDef.Dev = stage.Dev
+			stageDef.Dev = *stage.Dev
 		}
 		if stage.Command != nil {
 			stageDef.Command = stage.Command
@@ -324,7 +381,7 @@ func mergeStages(base *Definition, stages ...DerivedStage) StageDefinition {
 	if *stageDef.FPM == false {
 		stageDef.ConfigFiles.FPMConfigFile = nil
 	}
-	if *stageDef.Dev == true || *stageDef.FPM == false {
+	if stageDef.Dev == true || *stageDef.FPM == false {
 		disabled := false
 		stageDef.Healthcheck = &disabled
 		removeIntegration(&stageDef, "blackfire")
