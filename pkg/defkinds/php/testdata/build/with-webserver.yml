@@ -4,7 +4,7 @@ version: 7.4
 fpm: true
 
 webserver:
-  webserver: nginx
+  type: nginx
   healthcheck: true
   assets:
     - from: /app/public

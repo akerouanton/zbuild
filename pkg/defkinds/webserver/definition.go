@@ -50,7 +50,7 @@ func NewKind(genericDef *builddef.BuildDef) (Definition, error) {
 }
 
 type Definition struct {
-	Type           WebserverType     `mapstructure:"webserver"`
+	Type           WebserverType     `mapstructure:"type"`
 	SystemPackages map[string]string `mapstructure:"system_packages"`
 	ConfigFile     string            `mapstructure:"config_file"`
 	Healthcheck    bool              `mapstructure:"healthcheck"`
@@ -68,7 +68,7 @@ func (def Definition) Validate() error {
 
 func (def Definition) RawConfig() map[string]interface{} {
 	return map[string]interface{}{
-		"webserver":       def.Type,
+		"type":            def.Type,
 		"system_packages": def.SystemPackages,
 		"config_file":     def.ConfigFile,
 		"healthcheck":     def.Healthcheck,

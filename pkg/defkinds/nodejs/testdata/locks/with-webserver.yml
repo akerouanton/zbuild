@@ -3,6 +3,6 @@ version: 12
 frontend: true
 
 webserver:
-  webserver: nginx
+  type: nginx
   config_file: nginx.conf
   healthcheck: true
