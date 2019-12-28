@@ -246,29 +246,9 @@ func (def *Definition) ResolveStageDefinition(
 	composerLockLoader func(*StageDefinition) error,
 ) (StageDefinition, error) {
 	var stageDef StageDefinition
-
-	stages := make([]DerivedStage, 0, len(def.Stages)+1)
-	resolvedStages := make([]string, 0, len(def.Stages)+1)
-	nextStage := name
-
-	for nextStage != "" && nextStage != "base" {
-		for _, stageName := range resolvedStages {
-			if nextStage == stageName {
-				return stageDef, xerrors.Errorf(
-					"there's a cyclic dependency between %q and itself",
-					stageName,
-				)
-			}
-		}
-
-		stage, ok := def.Stages[nextStage]
-		if !ok {
-			return StageDefinition{}, xerrors.Errorf("stage %q not found", nextStage)
-		}
-
-		stages = append(stages, stage)
-		resolvedStages = append(resolvedStages, nextStage)
-		nextStage = stage.DeriveFrom
+	stages, err := def.resolveStageChain(name)
+	if err != nil {
+		return stageDef, err
 	}
 
 	stageDef = mergeStages(def, stages...)
@@ -306,6 +286,30 @@ func (def *Definition) ResolveStageDefinition(
 	inferSystemPackages(&stageDef)
 
 	return stageDef, nil
+}
+
+func (def *Definition) resolveStageChain(name string) ([]DerivedStage, error) {
+	stages := make([]DerivedStage, 0, len(def.Stages))
+	resolvedStages := map[string]struct{}{}
+	current := name
+
+	for current != "" && current != "base" {
+		if _, ok := resolvedStages[current]; ok {
+			return stages, xerrors.Errorf(
+				"there's a cyclic dependency between %q and itself", current)
+		}
+
+		stage, ok := def.Stages[current]
+		if !ok {
+			return stages, xerrors.Errorf("stage %q not found", current)
+		}
+
+		stages = append(stages, stage)
+		resolvedStages[current] = struct{}{}
+		current = stage.DeriveFrom
+	}
+
+	return stages, nil
 }
 
 func extractMajMinVersion(versionString string) string {
