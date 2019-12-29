@@ -119,7 +119,66 @@ type Stage struct {
 	SourceDirs   []string `mapstructure:"source_dirs"`
 	StatefulDirs []string `mapstructure:"stateful_dirs"`
 	Healthcheck  *bool    `mapstructur:"healthcheck"`
-	PostInstall  []string `mapstructure:"post_install"`
+	// @TODO: remove? (not different from build_command?)
+	PostInstall []string `mapstructure:"post_install"`
+}
+
+func (s Stage) Copy() Stage {
+	new := Stage{
+		ExternalFiles:  make([]llbutils.ExternalFile, len(s.ExternalFiles)),
+		SystemPackages: map[string]string{},
+		GlobalPackages: map[string]string{},
+		BuildCommand:   s.BuildCommand,
+		Command:        s.Command,
+		ConfigFiles:    map[string]string{},
+		SourceDirs:     make([]string, len(s.SourceDirs)),
+		StatefulDirs:   make([]string, len(s.StatefulDirs)),
+		Healthcheck:    s.Healthcheck,
+		PostInstall:    make([]string, len(s.PostInstall)),
+	}
+
+	copy(new.ExternalFiles, s.ExternalFiles)
+	copy(new.SourceDirs, s.SourceDirs)
+	copy(new.StatefulDirs, s.StatefulDirs)
+	copy(new.PostInstall, s.PostInstall)
+
+	for name, constraint := range s.SystemPackages {
+		new.SystemPackages[name] = constraint
+	}
+	for name, constraint := range s.GlobalPackages {
+		new.GlobalPackages[name] = constraint
+	}
+	for src, dst := range s.ConfigFiles {
+		new.ConfigFiles[src] = dst
+	}
+
+	return new
+}
+
+func (s Stage) Merge(overriding Stage) Stage {
+	new := s.Copy()
+	new.ExternalFiles = append(new.ExternalFiles, overriding.ExternalFiles...)
+	new.SourceDirs = append(new.SourceDirs, overriding.SourceDirs...)
+	new.StatefulDirs = append(new.StatefulDirs, overriding.StatefulDirs...)
+	new.PostInstall = append(new.PostInstall, overriding.PostInstall...)
+
+	for name, constraint := range overriding.SystemPackages {
+		new.SystemPackages[name] = constraint
+	}
+	for from, to := range overriding.ConfigFiles {
+		new.ConfigFiles[from] = to
+	}
+
+	if overriding.Command != nil {
+		cmd := *overriding.Command
+		new.Command = &cmd
+	}
+	if overriding.Healthcheck != nil {
+		healthcheck := *overriding.Healthcheck
+		new.Healthcheck = &healthcheck
+	}
+
+	return new
 }
 
 type DerivedStage struct {
@@ -145,29 +204,9 @@ func (def *Definition) ResolveStageDefinition(
 	withLocks bool,
 ) (StageDefinition, error) {
 	var stageDef StageDefinition
-
-	stages := make([]DerivedStage, 0, len(def.Stages)+1)
-	resolvedStages := make([]string, 0, len(def.Stages)+1)
-	nextStage := name
-
-	for nextStage != "" && nextStage != "base" {
-		for _, stageName := range resolvedStages {
-			if nextStage == stageName {
-				return stageDef, xerrors.Errorf(
-					"there's a cyclic dependency between %q and itself",
-					stageName,
-				)
-			}
-		}
-
-		stage, ok := def.Stages[nextStage]
-		if !ok {
-			return StageDefinition{}, xerrors.Errorf("stage %q not found", nextStage)
-		}
-
-		stages = append(stages, stage)
-		resolvedStages = append(resolvedStages, nextStage)
-		nextStage = stage.DeriveFrom
+	stages, err := def.resolveStageChain(name)
+	if err != nil {
+		return stageDef, err
 	}
 
 	stageDef = mergeStages(def, stages...)
@@ -188,47 +227,44 @@ func (def *Definition) ResolveStageDefinition(
 	return stageDef, nil
 }
 
+func (def *Definition) resolveStageChain(name string) ([]DerivedStage, error) {
+	stages := make([]DerivedStage, 0, len(def.Stages))
+	resolvedStages := map[string]struct{}{}
+	current := name
+
+	for current != "" && current != "base" {
+		if _, ok := resolvedStages[current]; ok {
+			return stages, xerrors.Errorf(
+				"there's a cyclic dependency between %q and itself", current)
+		}
+
+		stage, ok := def.Stages[current]
+		if !ok {
+			return stages, xerrors.Errorf("stage %q not found", current)
+		}
+
+		stages = append(stages, stage)
+		resolvedStages[current] = struct{}{}
+		current = stage.DeriveFrom
+	}
+
+	return stages, nil
+}
+
 func mergeStages(base *Definition, stages ...DerivedStage) StageDefinition {
 	devMode := false
 	stageDef := StageDefinition{
 		BaseImage:  base.BaseImage,
 		Version:    base.Version,
-		Stage:      base.BaseStage,
+		Stage:      base.BaseStage.Copy(),
 		IsFrontend: base.IsFrontend,
 		Dev:        &devMode,
 	}
 
 	for i := len(stages) - 1; i >= 0; i-- {
 		derived := stages[i]
+		stageDef.Stage = stageDef.Stage.Merge(derived.Stage)
 
-		if len(derived.ExternalFiles) > 0 {
-			stageDef.ExternalFiles = append(stageDef.ExternalFiles, derived.ExternalFiles...)
-		}
-		if len(derived.SystemPackages) > 0 {
-			for name, constraint := range derived.SystemPackages {
-				stageDef.SystemPackages[name] = constraint
-			}
-		}
-		if derived.Command != nil {
-			stageDef.Command = derived.Command
-		}
-		if len(derived.ConfigFiles) > 0 {
-			for from, to := range derived.ConfigFiles {
-				stageDef.ConfigFiles[from] = to
-			}
-		}
-		if len(derived.SourceDirs) > 0 {
-			stageDef.SourceDirs = append(stageDef.SourceDirs, derived.SourceDirs...)
-		}
-		if derived.StatefulDirs != nil {
-			stageDef.StatefulDirs = append(stageDef.StatefulDirs, derived.StatefulDirs...)
-		}
-		if derived.Healthcheck != nil {
-			stageDef.Healthcheck = derived.Healthcheck
-		}
-		if len(derived.PostInstall) > 0 {
-			stageDef.PostInstall = append(stageDef.PostInstall, derived.PostInstall...)
-		}
 		if derived.Dev != nil {
 			stageDef.Dev = derived.Dev
 		}

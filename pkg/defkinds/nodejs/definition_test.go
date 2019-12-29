@@ -231,6 +231,8 @@ func initSuccessfullyResolveWorkerStageTC() resolveStageTC {
 				ExternalFiles:  []llbutils.ExternalFile{},
 				SystemPackages: map[string]string{},
 				ConfigFiles:    map[string]string{},
+				SourceDirs:     []string{},
+				StatefulDirs:   []string{},
 				Healthcheck:    &healthckeckDisabled,
 				PostInstall:    []string{},
 				Command:        &cmd,
@@ -323,4 +325,494 @@ func loadBuildDef(t *testing.T, filepath string) *builddef.BuildDef {
 	}
 
 	return &def
+}
+
+type mergeStageTC struct {
+	base       func() nodejs.Stage
+	overriding nodejs.Stage
+	expected   func() nodejs.Stage
+}
+
+func emptyStage() nodejs.Stage {
+	return nodejs.Stage{
+		ExternalFiles:  []llbutils.ExternalFile{},
+		SystemPackages: map[string]string{},
+		GlobalPackages: map[string]string{},
+		ConfigFiles:    map[string]string{},
+		SourceDirs:     []string{},
+		StatefulDirs:   []string{},
+		PostInstall:    []string{},
+	}
+}
+
+func initMergeExternalFilesWithBaseTC() mergeStageTC {
+	return mergeStageTC{
+		base: func() nodejs.Stage {
+			return nodejs.Stage{
+				ExternalFiles: []llbutils.ExternalFile{
+					{
+						URL:         "https://github.com/some/tool",
+						Destination: "/usr/local/bin/some-tool",
+						Mode:        0750,
+					},
+				},
+			}
+		},
+		overriding: nodejs.Stage{
+			ExternalFiles: []llbutils.ExternalFile{
+				{
+					URL:         "https://github.com/some/other/tool",
+					Destination: "/usr/local/bin/some-other-tool",
+					Mode:        0750,
+				},
+			},
+		},
+		expected: func() nodejs.Stage {
+			s := emptyStage()
+			s.ExternalFiles = []llbutils.ExternalFile{
+				{
+					URL:         "https://github.com/some/tool",
+					Destination: "/usr/local/bin/some-tool",
+					Mode:        0750,
+				},
+				{
+					URL:         "https://github.com/some/other/tool",
+					Destination: "/usr/local/bin/some-other-tool",
+					Mode:        0750,
+				},
+			}
+			return s
+		},
+	}
+}
+
+func initMergeExternalFilesWithoutBaseTC() mergeStageTC {
+	return mergeStageTC{
+		base: func() nodejs.Stage {
+			return nodejs.Stage{}
+		},
+		overriding: nodejs.Stage{
+			ExternalFiles: []llbutils.ExternalFile{
+				{
+					URL:         "https://github.com/some/other/tool",
+					Destination: "/usr/local/bin/some-other-tool",
+					Mode:        0750,
+				},
+			},
+		},
+		expected: func() nodejs.Stage {
+			s := emptyStage()
+			s.ExternalFiles = []llbutils.ExternalFile{
+				{
+					URL:         "https://github.com/some/other/tool",
+					Destination: "/usr/local/bin/some-other-tool",
+					Mode:        0750,
+				},
+			}
+			return s
+		},
+	}
+}
+
+func initMergeSystemPackagesWithBaseTC() mergeStageTC {
+	return mergeStageTC{
+		base: func() nodejs.Stage {
+			return nodejs.Stage{
+				SystemPackages: map[string]string{
+					"curl": "*",
+				},
+			}
+		},
+		overriding: nodejs.Stage{
+			SystemPackages: map[string]string{
+				"chromium": "*",
+			},
+		},
+		expected: func() nodejs.Stage {
+			s := emptyStage()
+			s.SystemPackages = map[string]string{
+				"curl":     "*",
+				"chromium": "*",
+			}
+			return s
+		},
+	}
+}
+
+func initMergeSystemPackagesWithoutBaseTC() mergeStageTC {
+	return mergeStageTC{
+		base: func() nodejs.Stage {
+			return nodejs.Stage{}
+		},
+		overriding: nodejs.Stage{
+			SystemPackages: map[string]string{
+				"chromium": "*",
+			},
+		},
+		expected: func() nodejs.Stage {
+			s := emptyStage()
+			s.SystemPackages = map[string]string{
+				"chromium": "*",
+			}
+			return s
+		},
+	}
+}
+
+func initMergeGlobalPackagesWithBaseTC() mergeStageTC {
+	return mergeStageTC{
+		base: func() nodejs.Stage {
+			return nodejs.Stage{
+				GlobalPackages: map[string]string{
+					"puppeteer": "*",
+				},
+			}
+		},
+		overriding: nodejs.Stage{
+			GlobalPackages: map[string]string{
+				"api-platform/client-generator": "*",
+			},
+		},
+		expected: func() nodejs.Stage {
+			s := emptyStage()
+			s.GlobalPackages = map[string]string{
+				"puppeteer":                     "*",
+				"api-platform/client-generator": "*",
+			}
+			return s
+		},
+	}
+}
+
+func initMergeGlobalPackagesWithoutBaseTC() mergeStageTC {
+	return mergeStageTC{
+		base: func() nodejs.Stage {
+			return nodejs.Stage{}
+		},
+		overriding: nodejs.Stage{
+			GlobalPackages: map[string]string{
+				"puppeteer": "*",
+			},
+		},
+		expected: func() nodejs.Stage {
+			s := emptyStage()
+			s.GlobalPackages = map[string]string{
+				"puppeteer": "*",
+			}
+			return s
+		},
+	}
+}
+
+func initMergeBuildCommandWithBaseTC() mergeStageTC {
+	baseBuildCmd := "yarn run build"
+	overridingCmd := "yarn run build:production"
+	expectedCmd := "yarn run build:production"
+
+	return mergeStageTC{
+		base: func() nodejs.Stage {
+			return nodejs.Stage{
+				BuildCommand: &baseBuildCmd,
+			}
+		},
+		overriding: nodejs.Stage{
+			BuildCommand: &overridingCmd,
+		},
+		expected: func() nodejs.Stage {
+			s := emptyStage()
+			s.BuildCommand = &expectedCmd
+			return s
+		},
+	}
+}
+
+func initMergeBuildCommandWithoutBaseTC() mergeStageTC {
+	overridingCmd := "yarn run build:production"
+	expectedCmd := "yarn run build:production"
+
+	return mergeStageTC{
+		base: func() nodejs.Stage {
+			return nodejs.Stage{}
+		},
+		overriding: nodejs.Stage{
+			BuildCommand: &overridingCmd,
+		},
+		expected: func() nodejs.Stage {
+			s := emptyStage()
+			s.BuildCommand = &expectedCmd
+			return s
+		},
+	}
+}
+
+func initMergeCommandWithBaseTC() mergeStageTC {
+	baseCmd := []string{"yarn start"}
+	overridingCmd := []string{"yarn run start:production"}
+	expectedCmd := []string{"yarn run start:production"}
+
+	return mergeStageTC{
+		base: func() nodejs.Stage {
+			return nodejs.Stage{
+				Command: &baseCmd,
+			}
+		},
+		overriding: nodejs.Stage{
+			Command: &overridingCmd,
+		},
+		expected: func() nodejs.Stage {
+			s := emptyStage()
+			s.Command = &expectedCmd
+			return s
+		},
+	}
+}
+
+func initMergeCommandWithoutBaseTC() mergeStageTC {
+	overridingCmd := []string{"yarn run start:production"}
+	expectedCmd := []string{"yarn run start:production"}
+
+	return mergeStageTC{
+		base: func() nodejs.Stage {
+			return nodejs.Stage{}
+		},
+		overriding: nodejs.Stage{
+			Command: &overridingCmd,
+		},
+		expected: func() nodejs.Stage {
+			s := emptyStage()
+			s.Command = &expectedCmd
+			return s
+		},
+	}
+}
+
+func initMergeConfigFilesWithBaseTC() mergeStageTC {
+	return mergeStageTC{
+		base: func() nodejs.Stage {
+			return nodejs.Stage{
+				ConfigFiles: map[string]string{
+					".env": ".env",
+				},
+			}
+		},
+		overriding: nodejs.Stage{
+			ConfigFiles: map[string]string{
+				".env.production": ".env.production",
+			},
+		},
+		expected: func() nodejs.Stage {
+			s := emptyStage()
+			s.ConfigFiles = map[string]string{
+				".env":            ".env",
+				".env.production": ".env.production",
+			}
+			return s
+		},
+	}
+}
+
+func initMergeConfigFilesWithoutBaseTC() mergeStageTC {
+	return mergeStageTC{
+		base: func() nodejs.Stage {
+			return nodejs.Stage{}
+		},
+		overriding: nodejs.Stage{
+			ConfigFiles: map[string]string{
+				".env.production": ".env.production",
+			},
+		},
+		expected: func() nodejs.Stage {
+			s := emptyStage()
+			s.ConfigFiles = map[string]string{
+				".env.production": ".env.production",
+			}
+			return s
+		},
+	}
+}
+
+func initMergeSourceDirsWithBaseTC() mergeStageTC {
+	return mergeStageTC{
+		base: func() nodejs.Stage {
+			return nodejs.Stage{
+				SourceDirs: []string{"lib/"},
+			}
+		},
+		overriding: nodejs.Stage{
+			SourceDirs: []string{"src/"},
+		},
+		expected: func() nodejs.Stage {
+			s := emptyStage()
+			s.SourceDirs = []string{"lib/", "src/"}
+			return s
+		},
+	}
+}
+
+func initMergeSourceDirsWithoutBaseTC() mergeStageTC {
+	return mergeStageTC{
+		base: func() nodejs.Stage {
+			return nodejs.Stage{}
+		},
+		overriding: nodejs.Stage{
+			SourceDirs: []string{"src/"},
+		},
+		expected: func() nodejs.Stage {
+			s := emptyStage()
+			s.SourceDirs = []string{"src/"}
+			return s
+		},
+	}
+}
+
+func initMergeStatefulDirsWithBaseTC() mergeStageTC {
+	return mergeStageTC{
+		base: func() nodejs.Stage {
+			return nodejs.Stage{
+				StatefulDirs: []string{"sessions/"},
+			}
+		},
+		overriding: nodejs.Stage{
+			StatefulDirs: []string{"uploads/"},
+		},
+		expected: func() nodejs.Stage {
+			s := emptyStage()
+			s.StatefulDirs = []string{"sessions/", "uploads/"}
+			return s
+		},
+	}
+}
+
+func initMergeStatefulDirsWithoutBaseTC() mergeStageTC {
+	return mergeStageTC{
+		base: func() nodejs.Stage {
+			return nodejs.Stage{}
+		},
+		overriding: nodejs.Stage{
+			StatefulDirs: []string{"uploads/"},
+		},
+		expected: func() nodejs.Stage {
+			s := emptyStage()
+			s.StatefulDirs = []string{"uploads/"}
+			return s
+		},
+	}
+}
+
+func initMergeHealthcheckWithBaseTC() mergeStageTC {
+	baseHealthcheck := true
+	overridingHealthcheck := false
+	expectedHealthcheck := false
+
+	return mergeStageTC{
+		base: func() nodejs.Stage {
+			return nodejs.Stage{
+				Healthcheck: &baseHealthcheck,
+			}
+		},
+		overriding: nodejs.Stage{
+			Healthcheck: &overridingHealthcheck,
+		},
+		expected: func() nodejs.Stage {
+			s := emptyStage()
+			s.Healthcheck = &expectedHealthcheck
+			return s
+		},
+	}
+}
+
+func initMergeHealthcheckWithoutBaseTC() mergeStageTC {
+	overridingHealthcheck := true
+	expectedHealthcheck := true
+
+	return mergeStageTC{
+		base: func() nodejs.Stage {
+			return nodejs.Stage{}
+		},
+		overriding: nodejs.Stage{
+			Healthcheck: &overridingHealthcheck,
+		},
+		expected: func() nodejs.Stage {
+			s := emptyStage()
+			s.Healthcheck = &expectedHealthcheck
+			return s
+		},
+	}
+}
+
+func initMergePostInstallWithBaseTC() mergeStageTC {
+	return mergeStageTC{
+		base: func() nodejs.Stage {
+			return nodejs.Stage{
+				PostInstall: []string{"yarn run build"},
+			}
+		},
+		overriding: nodejs.Stage{
+			PostInstall: []string{"yarn run warmup"},
+		},
+		expected: func() nodejs.Stage {
+			s := emptyStage()
+			s.PostInstall = []string{"yarn run build", "yarn run warmup"}
+			return s
+		},
+	}
+}
+
+func initMergePostInstallWithoutBaseTC() mergeStageTC {
+	return mergeStageTC{
+		base: func() nodejs.Stage {
+			return nodejs.Stage{}
+		},
+		overriding: nodejs.Stage{
+			PostInstall: []string{"yarn run warmup"},
+		},
+		expected: func() nodejs.Stage {
+			s := emptyStage()
+			s.PostInstall = []string{"yarn run warmup"}
+			return s
+		},
+	}
+}
+
+func TestStageMerge(t *testing.T) {
+	testcases := map[string]func() mergeStageTC{
+		"merge external files with base":     initMergeExternalFilesWithBaseTC,
+		"merge external files without base":  initMergeExternalFilesWithoutBaseTC,
+		"merge system packages with base":    initMergeSystemPackagesWithBaseTC,
+		"merge system packages without base": initMergeSystemPackagesWithoutBaseTC,
+		"merge global packages with base":    initMergeGlobalPackagesWithBaseTC,
+		"merge global packages without base": initMergeGlobalPackagesWithoutBaseTC,
+		"merge build command with base":      initMergeBuildCommandWithBaseTC,
+		"merge build command without base":   initMergeBuildCommandWithoutBaseTC,
+		"merge command with base":            initMergeCommandWithBaseTC,
+		"merge command without base":         initMergeCommandWithoutBaseTC,
+		"merge config files with base":       initMergeConfigFilesWithBaseTC,
+		"merge config files without base":    initMergeConfigFilesWithoutBaseTC,
+		"merge source dirs with base":        initMergeSourceDirsWithBaseTC,
+		"merge source dirs without base":     initMergeSourceDirsWithoutBaseTC,
+		"merge stateful dirs with base":      initMergeStatefulDirsWithBaseTC,
+		"merge stateful dirs without base":   initMergeStatefulDirsWithoutBaseTC,
+		"merge healthcheck with base":        initMergeHealthcheckWithBaseTC,
+		"merge healthcheck without base":     initMergeHealthcheckWithoutBaseTC,
+		"merge post install with base":       initMergePostInstallWithBaseTC,
+		"merge post install without base":    initMergePostInstallWithoutBaseTC,
+	}
+
+	for tcname := range testcases {
+		tcinit := testcases[tcname]
+
+		t.Run(tcname, func(t *testing.T) {
+			tc := tcinit()
+			base := tc.base()
+			new := base.Merge(tc.overriding)
+
+			if diff := deep.Equal(new, tc.expected()); diff != nil {
+				t.Fatal(diff)
+			}
+
+			if diff := deep.Equal(base, tc.base()); diff != nil {
+				t.Fatalf("Base stages don't match: %v", diff)
+			}
+		})
+	}
 }
