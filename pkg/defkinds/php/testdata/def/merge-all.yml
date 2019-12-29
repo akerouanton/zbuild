@@ -19,9 +19,6 @@ stateful_dirs:
 config_files:
   fpm.conf: 'docker/app/fpm.conf'
 
-integrations:
-  - symfony
-
 post_install:
   - echo some command
 

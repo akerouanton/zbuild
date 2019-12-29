@@ -8,7 +8,6 @@ import (
 	"github.com/NiR-/zbuild/pkg/builddef"
 	"github.com/NiR-/zbuild/pkg/defkinds/webserver"
 	"github.com/NiR-/zbuild/pkg/llbutils"
-	"github.com/mcuadros/go-version"
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/xerrors"
 	"gopkg.in/yaml.v2"
@@ -414,71 +413,23 @@ var phpExtDirs = map[string]string{
 	"7.4": "/usr/local/lib/php/extensions/no-debug-non-zts-20190902/",
 }
 
-var symfonySourceDirs = map[string][]string{
-	"~3.0": []string{"app/", "src/"},
-	"~4.0": []string{"config/", "src/", "templates/", "translations/"},
-	"~5.0": []string{"config/", "src/", "templates/", "translations/"},
-}
-
-var symfonyExtraScripts = map[string][]string{
-	"~3.0": []string{"bin/console", "web/app.php"},
-	"~4.0": []string{"bin/console", "public/index.php"},
-	"~5.0": []string{"bin/console", "public/index.php"},
-}
-
-func findSymfonySourceDirs(symfonyVer string) []string {
-	for constraint, sourceDirs := range symfonySourceDirs {
-		c := version.NewConstrainGroupFromString(constraint)
-		if c.Match(symfonyVer) {
-			return sourceDirs
-		}
-	}
-	return []string{}
-}
-
-func findSymfonyExtraScripts(symfonyVer string) []string {
-	for constraint, extraScripts := range symfonyExtraScripts {
-		c := version.NewConstrainGroupFromString(constraint)
-		if c.Match(symfonyVer) {
-			return extraScripts
-		}
-	}
-	return []string{}
-}
-
-func addIntegrations(def *StageDefinition) error {
-	for _, integration := range def.Integrations {
+func addIntegrations(stageDef *StageDefinition) error {
+	for _, integration := range stageDef.Integrations {
 		switch integration {
 		case "blackfire":
-			dest := path.Join(phpExtDirs[def.MajMinVersion], "blackfire.so")
-			def.ExternalFiles = append(def.ExternalFiles, llbutils.ExternalFile{
+			dest := path.Join(phpExtDirs[stageDef.MajMinVersion], "blackfire.so")
+			stageDef.ExternalFiles = append(stageDef.ExternalFiles, llbutils.ExternalFile{
 				URL:         "https://blackfire.io/api/v1/releases/probe/php/linux/amd64/72",
 				Compressed:  true,
 				Pattern:     "blackfire-*.so",
 				Destination: dest,
 				Mode:        0644,
 			})
-		case "symfony":
-			symfonyVer, ok := def.LockedPackages["symfony/framework-bundle"]
-			if !ok {
-				return xerrors.New("Symfony integration is enabled but symfony/framework-bundle was not found in composer.lock")
-			}
-			symfonyVer = strings.TrimLeft(symfonyVer, "v")
-
-			postInstall := []string{
-				"php -d display_errors=on bin/console cache:warmup --env=prod",
-			}
-			def.PostInstall = append(postInstall, def.PostInstall...)
-
-			def.SourceDirs = append(def.SourceDirs,
-				findSymfonySourceDirs(symfonyVer)...)
-			def.ExtraScripts = append(def.ExtraScripts,
-				findSymfonyExtraScripts(symfonyVer)...)
 		}
 	}
 
-	if *def.Healthcheck {
-		def.ExternalFiles = append(def.ExternalFiles, llbutils.ExternalFile{
+	if *stageDef.Healthcheck {
+		stageDef.ExternalFiles = append(stageDef.ExternalFiles, llbutils.ExternalFile{
 			URL:         "https://github.com/NiR-/fcgi-client/releases/download/v0.1.0/fcgi-client.phar",
 			Destination: "/usr/local/bin/fcgi-client",
 			Mode:        0750,

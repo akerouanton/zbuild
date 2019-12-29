@@ -130,7 +130,7 @@ func initSuccessfullyParseRawDefinitionWithStagesTC() newDefinitionTC {
 				ExtraScripts: []string{
 					"gencode.php",
 				},
-				Integrations: []string{"symfony"},
+				Integrations: []string{},
 				StatefulDirs: []string{"public/uploads"},
 				Healthcheck:  &healthcheckDisabled,
 				PostInstall:  []string{"echo some command"},
