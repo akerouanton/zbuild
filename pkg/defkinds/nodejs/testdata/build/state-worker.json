@@ -181,7 +181,7 @@
     "Digest": "sha256:92ea9cb66d58dc61169a08f28b291d09d42975cb2fe5ddb5f3fb615c69d43c0b",
     "OpMetadata": {
       "description": {
-        "llb.customname": "Run composer install"
+        "llb.customname": "Run yarn install"
       },
       "caps": {
         "exec.meta.base": true,

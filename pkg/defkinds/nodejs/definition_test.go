@@ -46,10 +46,10 @@ func initSuccessfullyParseRawDefinitionWithoutStagesTC() newDefinitionTC {
 				ConfigFiles: map[string]string{
 					".babelrc": ".babelrc",
 				},
-				SourceDirs:   []string{"src/"},
-				StatefulDirs: []string{"uploads/"},
-				Healthcheck:  &healthcheckDisabled,
-				PostInstall:  []string{},
+				GlobalPackages: map[string]string{},
+				SourceDirs:     []string{"src/"},
+				StatefulDirs:   []string{"uploads/"},
+				Healthcheck:    &healthcheckDisabled,
 			},
 			Version:    "12",
 			BaseImage:  "docker.io/library/node:12-buster-slim",
@@ -86,8 +86,8 @@ func initSuccessfullyParseRawDefinitionWithStagesTC() newDefinitionTC {
 				ExternalFiles:  []llbutils.ExternalFile{},
 				SystemPackages: map[string]string{},
 				ConfigFiles:    map[string]string{},
+				GlobalPackages: map[string]string{},
 				Healthcheck:    &baseStageHealthcheck,
-				PostInstall:    []string{},
 			},
 			Version:   "12",
 			BaseImage: "docker.io/library/node:12-buster-slim",
@@ -181,8 +181,7 @@ func initSuccessfullyResolveDefaultDevStageTC() resolveStageTC {
 	healthckeck := false
 
 	return resolveStageTC{
-		file: "testdata/def/without-stages.yml",
-		// lockFile: "testdata/def/without-stages.lock",
+		file:  "testdata/def/without-stages.yml",
 		stage: "dev",
 		expected: nodejs.StageDefinition{
 			Name:       "dev",
@@ -204,11 +203,11 @@ func initSuccessfullyResolveDefaultDevStageTC() resolveStageTC {
 				SystemPackages: map[string]string{
 					"ca-certificates": "*",
 				},
-				SourceDirs:   []string{"src/"},
-				StatefulDirs: []string{"uploads/"},
-				ConfigFiles:  map[string]string{".babelrc": ".babelrc"},
-				Healthcheck:  &healthckeck,
-				PostInstall:  []string{},
+				GlobalPackages: map[string]string{},
+				SourceDirs:     []string{"src/"},
+				StatefulDirs:   []string{"uploads/"},
+				ConfigFiles:    map[string]string{".babelrc": ".babelrc"},
+				Healthcheck:    &healthckeck,
 			},
 		},
 	}
@@ -231,10 +230,10 @@ func initSuccessfullyResolveWorkerStageTC() resolveStageTC {
 				ExternalFiles:  []llbutils.ExternalFile{},
 				SystemPackages: map[string]string{},
 				ConfigFiles:    map[string]string{},
+				GlobalPackages: map[string]string{},
 				SourceDirs:     []string{},
 				StatefulDirs:   []string{},
 				Healthcheck:    &healthckeckDisabled,
-				PostInstall:    []string{},
 				Command:        &cmd,
 			},
 		},
@@ -341,7 +340,6 @@ func emptyStage() nodejs.Stage {
 		ConfigFiles:    map[string]string{},
 		SourceDirs:     []string{},
 		StatefulDirs:   []string{},
-		PostInstall:    []string{},
 	}
 }
 
@@ -740,40 +738,6 @@ func initMergeHealthcheckWithoutBaseTC() mergeStageTC {
 	}
 }
 
-func initMergePostInstallWithBaseTC() mergeStageTC {
-	return mergeStageTC{
-		base: func() nodejs.Stage {
-			return nodejs.Stage{
-				PostInstall: []string{"yarn run build"},
-			}
-		},
-		overriding: nodejs.Stage{
-			PostInstall: []string{"yarn run warmup"},
-		},
-		expected: func() nodejs.Stage {
-			s := emptyStage()
-			s.PostInstall = []string{"yarn run build", "yarn run warmup"}
-			return s
-		},
-	}
-}
-
-func initMergePostInstallWithoutBaseTC() mergeStageTC {
-	return mergeStageTC{
-		base: func() nodejs.Stage {
-			return nodejs.Stage{}
-		},
-		overriding: nodejs.Stage{
-			PostInstall: []string{"yarn run warmup"},
-		},
-		expected: func() nodejs.Stage {
-			s := emptyStage()
-			s.PostInstall = []string{"yarn run warmup"}
-			return s
-		},
-	}
-}
-
 func TestStageMerge(t *testing.T) {
 	testcases := map[string]func() mergeStageTC{
 		"merge external files with base":     initMergeExternalFilesWithBaseTC,
@@ -794,8 +758,6 @@ func TestStageMerge(t *testing.T) {
 		"merge stateful dirs without base":   initMergeStatefulDirsWithoutBaseTC,
 		"merge healthcheck with base":        initMergeHealthcheckWithBaseTC,
 		"merge healthcheck without base":     initMergeHealthcheckWithoutBaseTC,
-		"merge post install with base":       initMergePostInstallWithBaseTC,
-		"merge post install without base":    initMergePostInstallWithoutBaseTC,
 	}
 
 	for tcname := range testcases {

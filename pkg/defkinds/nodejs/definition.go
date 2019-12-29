@@ -25,9 +25,9 @@ func defaultDefinition() Definition {
 		BaseStage: Stage{
 			ExternalFiles:  []llbutils.ExternalFile{},
 			SystemPackages: map[string]string{},
+			GlobalPackages: map[string]string{},
 			ConfigFiles:    map[string]string{},
 			Healthcheck:    &healthcheckEnabled,
-			PostInstall:    []string{},
 		},
 		BaseImage: "",
 		Stages: map[string]DerivedStage{
@@ -79,6 +79,7 @@ func NewKind(genericDef *builddef.BuildDef) (Definition, error) {
 		def.BaseImage = baseImage
 	}
 
+	// @TODO
 	if devStage, ok := def.Stages["dev"]; ok {
 		if devStage.Dev == nil {
 			isDev := true
@@ -113,14 +114,14 @@ type Definition struct {
 type Stage struct {
 	ExternalFiles  []llbutils.ExternalFile `mapstructure:"external_files"`
 	SystemPackages map[string]string       `mapstructure:"system_packages"`
+	GlobalPackages map[string]string       `mapstructure:"global_packages"`
+	BuildCommand   *string                 `mapstructure:"build_command"`
 	Command        *[]string               `mapstructure:"command"`
 	ConfigFiles    map[string]string       `mapstructure:"config_files"`
 	// @TODO: rename into sourcecode and accept both dirs and files
 	SourceDirs   []string `mapstructure:"source_dirs"`
 	StatefulDirs []string `mapstructure:"stateful_dirs"`
 	Healthcheck  *bool    `mapstructur:"healthcheck"`
-	// @TODO: remove? (not different from build_command?)
-	PostInstall []string `mapstructure:"post_install"`
 }
 
 func (s Stage) Copy() Stage {
@@ -134,13 +135,11 @@ func (s Stage) Copy() Stage {
 		SourceDirs:     make([]string, len(s.SourceDirs)),
 		StatefulDirs:   make([]string, len(s.StatefulDirs)),
 		Healthcheck:    s.Healthcheck,
-		PostInstall:    make([]string, len(s.PostInstall)),
 	}
 
 	copy(new.ExternalFiles, s.ExternalFiles)
 	copy(new.SourceDirs, s.SourceDirs)
 	copy(new.StatefulDirs, s.StatefulDirs)
-	copy(new.PostInstall, s.PostInstall)
 
 	for name, constraint := range s.SystemPackages {
 		new.SystemPackages[name] = constraint
@@ -160,15 +159,21 @@ func (s Stage) Merge(overriding Stage) Stage {
 	new.ExternalFiles = append(new.ExternalFiles, overriding.ExternalFiles...)
 	new.SourceDirs = append(new.SourceDirs, overriding.SourceDirs...)
 	new.StatefulDirs = append(new.StatefulDirs, overriding.StatefulDirs...)
-	new.PostInstall = append(new.PostInstall, overriding.PostInstall...)
 
 	for name, constraint := range overriding.SystemPackages {
 		new.SystemPackages[name] = constraint
+	}
+	for name, constraint := range overriding.GlobalPackages {
+		new.GlobalPackages[name] = constraint
 	}
 	for from, to := range overriding.ConfigFiles {
 		new.ConfigFiles[from] = to
 	}
 
+	if overriding.BuildCommand != nil {
+		buildCmd := *overriding.BuildCommand
+		new.BuildCommand = &buildCmd
+	}
 	if overriding.Command != nil {
 		cmd := *overriding.Command
 		new.Command = &cmd

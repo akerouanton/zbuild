@@ -2,6 +2,7 @@ package nodejs
 
 import (
 	"context"
+	"fmt"
 	"path"
 	"strings"
 	"time"
@@ -113,10 +114,12 @@ func (h *NodeJSHandler) buildNodeJS(
 	state = state.User("1000")
 	state = state.Dir("/app")
 
+	state = h.globalPackagesInstall(stageDef, state, buildOpts)
+
 	if *stageDef.Dev == false {
 		state = h.yarnInstall(stageDef, state, buildOpts)
 		state = h.copySourceDirs(stageDef, state, buildOpts)
-		state = h.postInstall(stageDef, state)
+		state = h.build(stageDef, state)
 	}
 
 	setImageMetadata(stageDef, state, img)
@@ -195,6 +198,32 @@ func getEnv(src llb.State, name string) string {
 	return val
 }
 
+func (h *NodeJSHandler) globalPackagesInstall(
+	stageDef StageDefinition,
+	state llb.State,
+	buildOpts builddef.BuildOpts,
+) llb.State {
+	if len(stageDef.GlobalPackages) == 0 {
+		return state
+	}
+
+	pkgs := make([]string, 0, len(stageDef.GlobalPackages))
+	for pkg, constraint := range stageDef.GlobalPackages {
+		if constraint != "" && constraint != "*" {
+			pkg += "@" + constraint
+		}
+		pkgs = append(pkgs, pkg)
+	}
+
+	cmd := fmt.Sprintf("yarn add -g %s", strings.Join(pkgs, " "))
+	run := state.Run(
+		llbutils.Shellf(cmd),
+		llb.User("1000"),
+		llb.WithCustomNamef("Run %s", cmd))
+
+	return run.Root()
+}
+
 // @TODO: add npm support
 func (h *NodeJSHandler) yarnInstall(
 	stageDef StageDefinition,
@@ -214,7 +243,7 @@ func (h *NodeJSHandler) yarnInstall(
 		llbutils.Shellf("yarn install --frozen-lockfile"),
 		llb.Dir(state.GetDir()),
 		llb.User("1000"),
-		llb.WithCustomName("Run composer install"))
+		llb.WithCustomName("Run yarn install"))
 
 	return run.Root()
 }
@@ -253,19 +282,18 @@ func includePatterns(stageDef StageDefinition) []string {
 	return includes
 }
 
-func (h *NodeJSHandler) postInstall(
+func (h *NodeJSHandler) build(
 	stageDef StageDefinition,
 	state llb.State,
 ) llb.State {
-	if len(stageDef.PostInstall) == 0 {
+	if stageDef.BuildCommand == nil {
 		return state
 	}
 
-	cmd := strings.Join(stageDef.PostInstall, "; ")
 	run := state.Run(
-		llbutils.Shellf(cmd),
+		llbutils.Shellf(*stageDef.BuildCommand),
 		llb.Dir(state.GetDir()),
 		llb.AddEnv("NODE_ENV", "production"),
-		llb.WithCustomName("Execute custom post-install steps"))
+		llb.WithCustomName("Build"))
 	return run.Root()
 }
