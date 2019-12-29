@@ -262,7 +262,15 @@ func initSuccessfullyResolveDefaultDevStageTC(t *testing.T, mockCtrl *gomock.Con
 			LockedPackages: map[string]string{},
 			PlatformReqs:   map[string]string{},
 			Stage: php.Stage{
-				ExternalFiles:  []llbutils.ExternalFile{},
+				ExternalFiles: []llbutils.ExternalFile{
+					{
+						URL:         "https://blackfire.io/api/v1/releases/probe/php/linux/amd64/72",
+						Compressed:  true,
+						Pattern:     "blackfire-*.so",
+						Destination: "/usr/local/lib/php/extensions/no-debug-non-zts-20190902/blackfire.so",
+						Mode:        0644,
+					},
+				},
 				SystemPackages: map[string]string{},
 				FPM:            &isFPM,
 				Extensions: map[string]string{
@@ -281,7 +289,7 @@ func initSuccessfullyResolveDefaultDevStageTC(t *testing.T, mockCtrl *gomock.Con
 					APCU:                  false,
 					ClassmapAuthoritative: true,
 				},
-				Integrations: []string{},
+				Integrations: []string{"blackfire"},
 				Healthcheck:  &healthckeck,
 				PostInstall:  []string{"some more commands", "another one"},
 			},

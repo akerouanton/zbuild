@@ -389,10 +389,9 @@ func mergeStages(base *Definition, stages ...DerivedStage) StageDefinition {
 	if *stageDef.FPM == false {
 		stageDef.ConfigFiles.FPMConfigFile = nil
 	}
-	if stageDef.Dev == true || *stageDef.FPM == false {
-		disabled := false
-		stageDef.Healthcheck = &disabled
-		removeIntegration(&stageDef, "blackfire")
+	if stageDef.Dev || *stageDef.FPM {
+		healthcheck := false
+		stageDef.Healthcheck = &healthcheck
 	}
 
 	return stageDef
@@ -443,20 +442,6 @@ func addIntegrations(stageDef *StageDefinition) error {
 	}
 
 	return nil
-}
-
-func removeIntegration(stageDef *StageDefinition, toRemove string) {
-	integrations := make([]string, len(stageDef.Integrations))
-	cur := 0
-	for i := 0; i < len(stageDef.Integrations); i++ {
-		if stageDef.Integrations[i] == toRemove {
-			continue
-		}
-		integrations[cur] = stageDef.Integrations[i]
-		cur++
-	}
-
-	stageDef.Integrations = integrations[:cur]
 }
 
 // List of extensions preinstalled in official PHP images. Fortunately enough,

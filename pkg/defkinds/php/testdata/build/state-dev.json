@@ -90,22 +90,77 @@
     }
   },
   {
-    "RawOp": "CkkKR3NoYTI1Njo2NDM5ZjQ0YWExMTE2YjE0YjlhYWNlOTQ1OTI5MDYxMjgzYWZmNDNiMWU3NDFhOTgzMTRlZWI5NzMzMTNhZDE0",
+    "RawOp": "CkkKR3NoYTI1Njo2MGM4ZDI0NjRjYTFlMzk0ZDYzYTBjOGQ4MGEzNWFkODhiNjg3ZTIwMGEwYTJiM2RiMTNiMWYwNTFjMGUyMjhhCkkKR3NoYTI1Njo4MDZkMjY1OThmNmE2ZWYzOGM4OGZhYTFhMmYxOGZmYjM0YmFjMGUzZWJhNzkxMWQyODNkYmM2ZTdjZDZiZDhhIm0SaxABImcKCS91bnBhY2tlZBJEL3Vzci9sb2NhbC9saWIvcGhwL2V4dGVuc2lvbnMvbm8tZGVidWctbm9uLXp0cy0yMDE4MDczMS9ibGFja2ZpcmUuc28gpAMoATABQAFIAVj///////////8BUg4KBWFtZDY0EgVsaW51eFoA",
     "Op": {
       "inputs": [
         {
-          "digest": "sha256:6439f44aa1116b14b9aace945929061283aff43b1e741a98314eeb973313ad14",
+          "digest": "sha256:60c8d2464ca1e394d63a0c8d80a35ad88b687e200a0a2b3db13b1f051c0e228a",
+          "index": 0
+        },
+        {
+          "digest": "sha256:806d26598f6a6ef38c88faa1a2f18ffb34bac0e3eba7911d283dbc6e7cd6bd8a",
           "index": 0
         }
       ],
-      "Op": null
+      "Op": {
+        "File": {
+          "actions": [
+            {
+              "input": 0,
+              "secondaryInput": 1,
+              "output": 0,
+              "Action": {
+                "Copy": {
+                  "src": "/unpacked",
+                  "dest": "/usr/local/lib/php/extensions/no-debug-non-zts-20180731/blackfire.so",
+                  "mode": 420,
+                  "followSymlink": true,
+                  "dirCopyContents": true,
+                  "createDestPath": true,
+                  "allowWildcard": true,
+                  "timestamp": -1
+                }
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
     },
-    "Digest": "sha256:4e8970fe6f58bf153e2b5875563d31e1520573310371a28c41b3b3d5b2a12cc6",
+    "Digest": "sha256:11cbfe3bcdc26f6a32c9b93e039ece345323657517da60091035121e5805e9aa",
     "OpMetadata": {
+      "description": {
+        "llb.customname": "Copy unpacked https://blackfire.io/api/v1/releases/probe/php/linux/amd64/72 to /usr/local/lib/php/extensions/no-debug-non-zts-20180731/blackfire.so"
+      },
       "caps": {
-        "constraints": true,
-        "meta.description": true,
-        "platform": true
+        "file.base": true
+      }
+    }
+  },
+  {
+    "RawOp": "GlYKPWh0dHBzOi8vYmxhY2tmaXJlLmlvL2FwaS92MS9yZWxlYXNlcy9wcm9iZS9waHAvbGludXgvYW1kNjQvNzISFQoNaHR0cC5maWxlbmFtZRIEL291dFoA",
+    "Op": {
+      "Op": {
+        "Source": {
+          "identifier": "https://blackfire.io/api/v1/releases/probe/php/linux/amd64/72",
+          "attrs": {
+            "http.filename": "/out"
+          }
+        }
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:1819ffb4e62e0725de26761fa5a3bceae25d49297ffe8c1da78ac107920e7fd1",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Download https://blackfire.io/api/v1/releases/probe/php/linux/amd64/72"
+      },
+      "caps": {
+        "source.http": true
       }
     }
   },
@@ -127,70 +182,6 @@
     "OpMetadata": {
       "caps": {
         "source.image": true
-      }
-    }
-  },
-  {
-    "RawOp": "CkkKR3NoYTI1NjpmMWQ1MTI4YTNlMTBiNmE4YTQxN2JmN2U2Y2ExYTAxYWFmNTk5NTA0NDViNDBlMmQ1YjI2YWNkMzA1NWE1YWY2CkkKR3NoYTI1NjowZTE2YzI0YjE4ZWFlMmYyYmNjNDA4NTk0ODRkOGEwY2ZiYzZmZjRmZTg1ZDZhNDg3ZmIxYjNkYzM3YWM4OGQyImESXxABIlsKEy9kb2NrZXIvYXBwL3BocC5pbmkSGi91c3IvbG9jYWwvZXRjL3BocC9waHAuaW5pGgoKAxDoBxIDEOgHIP///////////wEoATABQAFIAVj///////////8BUg4KBWFtZDY0EgVsaW51eFoA",
-    "Op": {
-      "inputs": [
-        {
-          "digest": "sha256:f1d5128a3e10b6a8a417bf7e6ca1a01aaf59950445b40e2d5b26acd3055a5af6",
-          "index": 0
-        },
-        {
-          "digest": "sha256:0e16c24b18eae2f2bcc40859484d8a0cfbc6ff4fe85d6a487fb1b3dc37ac88d2",
-          "index": 0
-        }
-      ],
-      "Op": {
-        "File": {
-          "actions": [
-            {
-              "input": 0,
-              "secondaryInput": 1,
-              "output": 0,
-              "Action": {
-                "Copy": {
-                  "src": "/docker/app/php.ini",
-                  "dest": "/usr/local/etc/php/php.ini",
-                  "owner": {
-                    "user": {
-                      "User": {
-                        "ByID": 1000
-                      }
-                    },
-                    "group": {
-                      "User": {
-                        "ByID": 1000
-                      }
-                    }
-                  },
-                  "mode": -1,
-                  "followSymlink": true,
-                  "dirCopyContents": true,
-                  "createDestPath": true,
-                  "allowWildcard": true,
-                  "timestamp": -1
-                }
-              }
-            }
-          ]
-        }
-      },
-      "platform": {
-        "Architecture": "amd64",
-        "OS": "linux"
-      },
-      "constraints": {}
-    },
-    "Digest": "sha256:58e902e2fc7146d9284623d84aa039bfd6fe0d373334ea4efe3710a5817f9fce",
-    "OpMetadata": {
-      "description": {
-        "llb.customname": "Copy docker/app/php.ini"
-      },
-      "caps": {
-        "file.base": true
       }
     }
   },
@@ -257,11 +248,11 @@
     }
   },
   {
-    "RawOp": "CkkKR3NoYTI1Njo1OGU5MDJlMmZjNzE0NmQ5Mjg0NjIzZDg0YWEwMzliZmQ2ZmUwZDM3MzMzNGVhNGVmZTM3MTBhNTgxN2Y5ZmNlCkkKR3NoYTI1NjowZTE2YzI0YjE4ZWFlMmYyYmNjNDA4NTk0ODRkOGEwY2ZiYzZmZjRmZTg1ZDZhNDg3ZmIxYjNkYzM3YWM4OGQyImMSYRABIl0KFC9kb2NrZXIvYXBwL2ZwbS5jb25mEhsvdXNyL2xvY2FsL2V0Yy9waHAtZnBtLmNvbmYaCgoDEOgHEgMQ6Acg////////////ASgBMAFAAUgBWP///////////wFSDgoFYW1kNjQSBWxpbnV4WgA=",
+    "RawOp": "CkkKR3NoYTI1NjplYjc0Y2Q2ZWE0YTY2NmYzMTIzN2M1MTcyNDMzM2ExZTAyYmNiNDVjOTBjNzExYzg4OGM1NjE1ZDBlYmZmODNlCkkKR3NoYTI1NjowZTE2YzI0YjE4ZWFlMmYyYmNjNDA4NTk0ODRkOGEwY2ZiYzZmZjRmZTg1ZDZhNDg3ZmIxYjNkYzM3YWM4OGQyImMSYRABIl0KFC9kb2NrZXIvYXBwL2ZwbS5jb25mEhsvdXNyL2xvY2FsL2V0Yy9waHAtZnBtLmNvbmYaCgoDEOgHEgMQ6Acg////////////ASgBMAFAAUgBWP///////////wFSDgoFYW1kNjQSBWxpbnV4WgA=",
     "Op": {
       "inputs": [
         {
-          "digest": "sha256:58e902e2fc7146d9284623d84aa039bfd6fe0d373334ea4efe3710a5817f9fce",
+          "digest": "sha256:eb74cd6ea4a666f31237c51724333a1e02bcb45c90c711c888c5615d0ebff83e",
           "index": 0
         },
         {
@@ -310,10 +301,168 @@
       },
       "constraints": {}
     },
-    "Digest": "sha256:6439f44aa1116b14b9aace945929061283aff43b1e741a98314eeb973313ad14",
+    "Digest": "sha256:6e41fad020050d35dc21524fd4013843a26b0d9de08ffdd7737c609d1ce1cd11",
     "OpMetadata": {
       "description": {
         "llb.customname": "Copy docker/app/fpm.conf"
+      },
+      "caps": {
+        "file.base": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1Njo5YmIwYjA0YzlhN2EwOGRjODU4MTM4ZjdiMjFhYmRjMmU1OTIzMWUyNGJkYjExZWM4YzRiZmNjNmE4ZjQyOTFjIjYSNBD///////////8BMicKCS9jb21wb3NlchDoAxgBIgoKAxDoBxIDEOgHKP///////////wFSDgoFYW1kNjQSBWxpbnV4WgA=",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:9bb0b04c9a7a08dc858138f7b21abdc2e59231e24bdb11ec8c4bfcc6a8f4291c",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "File": {
+          "actions": [
+            {
+              "input": 0,
+              "secondaryInput": -1,
+              "output": 0,
+              "Action": {
+                "Mkdir": {
+                  "path": "/composer",
+                  "mode": 488,
+                  "makeParents": true,
+                  "owner": {
+                    "user": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    },
+                    "group": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    }
+                  },
+                  "timestamp": -1
+                }
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:6fc63953ff5c68078426a02700200c42d3ffcd5d3de333d22ca622d20589e4d7",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Mkdir /app /composer"
+      },
+      "caps": {
+        "file.base": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1NjpjYmQ5MjUyNmNlNzdiMmEzMDc0OGY1OTY4YzBiYzA4MGFhZTUxNTY5ZGFiNWM4ZmEwMWJmNzkzZDQwZDYxNDlhIlISUAj///////////8BIkMKHC9kZWNvbXByZXNzZWQvYmxhY2tmaXJlLSouc28SCS91bnBhY2tlZCD///////////8BOAFIAVj///////////8BUg4KBWFtZDY0EgVsaW51eFoA",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:cbd92526ce77b2a30748f5968c0bc080aae51569dab5c8fa01bf793d40d6149a",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "File": {
+          "actions": [
+            {
+              "input": -1,
+              "secondaryInput": 0,
+              "output": 0,
+              "Action": {
+                "Copy": {
+                  "src": "/decompressed/blackfire-*.so",
+                  "dest": "/unpacked",
+                  "mode": -1,
+                  "attemptUnpackDockerCompatibility": true,
+                  "allowWildcard": true,
+                  "timestamp": -1
+                }
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:806d26598f6a6ef38c88faa1a2f18ffb34bac0e3eba7911d283dbc6e7cd6bd8a",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Unpack https://blackfire.io/api/v1/releases/probe/php/linux/amd64/72"
+      },
+      "caps": {
+        "file.base": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1NjoxMWNiZmUzYmNkYzI2ZjZhMzJjOWI5M2UwMzllY2UzNDUzMjM2NTc1MTdkYTYwMDkxMDM1MTIxZTU4MDVlOWFhIjESLxD///////////8BMiIKBC9hcHAQ6AMYASIKCgMQ6AcSAxDoByj///////////8BUg4KBWFtZDY0EgVsaW51eFoA",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:11cbfe3bcdc26f6a32c9b93e039ece345323657517da60091035121e5805e9aa",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "File": {
+          "actions": [
+            {
+              "input": 0,
+              "secondaryInput": -1,
+              "output": 0,
+              "Action": {
+                "Mkdir": {
+                  "path": "/app",
+                  "mode": 488,
+                  "makeParents": true,
+                  "owner": {
+                    "user": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    },
+                    "group": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    }
+                  },
+                  "timestamp": -1
+                }
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:9bb0b04c9a7a08dc858138f7b21abdc2e59231e24bdb11ec8c4bfcc6a8f4291c",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Mkdir /app /composer"
       },
       "caps": {
         "file.base": true
@@ -394,11 +543,11 @@
     }
   },
   {
-    "RawOp": "CkkKR3NoYTI1Njo2MGM4ZDI0NjRjYTFlMzk0ZDYzYTBjOGQ4MGEzNWFkODhiNjg3ZTIwMGEwYTJiM2RiMTNiMWYwNTFjMGUyMjhhIjESLxD///////////8BMiIKBC9hcHAQ6AMYASIKCgMQ6AcSAxDoByj///////////8BUg4KBWFtZDY0EgVsaW51eFoA",
+    "RawOp": "CkkKR3NoYTI1NjoxODE5ZmZiNGU2MmUwNzI1ZGUyNjc2MWZhNWEzYmNlYWUyNWQ0OTI5N2ZmZThjMWRhNzhhYzEwNzkyMGU3ZmQxIjwSOgj///////////8BIi0KBC9vdXQSDS9kZWNvbXByZXNzZWQg////////////ATgBWP///////////wFSDgoFYW1kNjQSBWxpbnV4WgA=",
     "Op": {
       "inputs": [
         {
-          "digest": "sha256:60c8d2464ca1e394d63a0c8d80a35ad88b687e200a0a2b3db13b1f051c0e228a",
+          "digest": "sha256:1819ffb4e62e0725de26761fa5a3bceae25d49297ffe8c1da78ac107920e7fd1",
           "index": 0
         }
       ],
@@ -406,26 +555,15 @@
         "File": {
           "actions": [
             {
-              "input": 0,
-              "secondaryInput": -1,
+              "input": -1,
+              "secondaryInput": 0,
               "output": 0,
               "Action": {
-                "Mkdir": {
-                  "path": "/app",
-                  "mode": 488,
-                  "makeParents": true,
-                  "owner": {
-                    "user": {
-                      "User": {
-                        "ByID": 1000
-                      }
-                    },
-                    "group": {
-                      "User": {
-                        "ByID": 1000
-                      }
-                    }
-                  },
+                "Copy": {
+                  "src": "/out",
+                  "dest": "/decompressed",
+                  "mode": -1,
+                  "attemptUnpackDockerCompatibility": true,
                   "timestamp": -1
                 }
               }
@@ -439,10 +577,10 @@
       },
       "constraints": {}
     },
-    "Digest": "sha256:cbc9ca3bc05972f94b6f01aa046f66a68d94a1d346eb3767cb3578b74cbb011f",
+    "Digest": "sha256:cbd92526ce77b2a30748f5968c0bc080aae51569dab5c8fa01bf793d40d6149a",
     "OpMetadata": {
       "description": {
-        "llb.customname": "Mkdir /app /composer"
+        "llb.customname": "Decompress https://blackfire.io/api/v1/releases/probe/php/linux/amd64/72"
       },
       "caps": {
         "file.base": true
@@ -450,11 +588,35 @@
     }
   },
   {
-    "RawOp": "CkkKR3NoYTI1NjpjYmM5Y2EzYmMwNTk3MmY5NGI2ZjAxYWEwNDZmNjZhNjhkOTRhMWQzNDZlYjM3NjdjYjM1NzhiNzRjYmIwMTFmIjYSNBD///////////8BMicKCS9jb21wb3NlchDoAxgBIgoKAxDoBxIDEOgHKP///////////wFSDgoFYW1kNjQSBWxpbnV4WgA=",
+    "RawOp": "CkkKR3NoYTI1Njo2ZTQxZmFkMDIwMDUwZDM1ZGMyMTUyNGZkNDAxMzg0M2EyNmIwZDlkZTA4ZmZkZDc3MzdjNjA5ZDFjZTFjZDEx",
     "Op": {
       "inputs": [
         {
-          "digest": "sha256:cbc9ca3bc05972f94b6f01aa046f66a68d94a1d346eb3767cb3578b74cbb011f",
+          "digest": "sha256:6e41fad020050d35dc21524fd4013843a26b0d9de08ffdd7737c609d1ce1cd11",
+          "index": 0
+        }
+      ],
+      "Op": null
+    },
+    "Digest": "sha256:de6361a92dc638d9dafada0b5b2a71a2a36e5ebf7dcefde3e6547e16e299384a",
+    "OpMetadata": {
+      "caps": {
+        "constraints": true,
+        "meta.description": true,
+        "platform": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1Njo2ZmM2Mzk1M2ZmNWM2ODA3ODQyNmEwMjcwMDIwMGM0MmQzZmZjZDVkM2RlMzMzZDIyY2E2MjJkMjA1ODllNGQ3CkkKR3NoYTI1NjowZTE2YzI0YjE4ZWFlMmYyYmNjNDA4NTk0ODRkOGEwY2ZiYzZmZjRmZTg1ZDZhNDg3ZmIxYjNkYzM3YWM4OGQyImESXxABIlsKEy9kb2NrZXIvYXBwL3BocC5pbmkSGi91c3IvbG9jYWwvZXRjL3BocC9waHAuaW5pGgoKAxDoBxIDEOgHIP///////////wEoATABQAFIAVj///////////8BUg4KBWFtZDY0EgVsaW51eFoA",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:6fc63953ff5c68078426a02700200c42d3ffcd5d3de333d22ca622d20589e4d7",
+          "index": 0
+        },
+        {
+          "digest": "sha256:0e16c24b18eae2f2bcc40859484d8a0cfbc6ff4fe85d6a487fb1b3dc37ac88d2",
           "index": 0
         }
       ],
@@ -463,13 +625,12 @@
           "actions": [
             {
               "input": 0,
-              "secondaryInput": -1,
+              "secondaryInput": 1,
               "output": 0,
               "Action": {
-                "Mkdir": {
-                  "path": "/composer",
-                  "mode": 488,
-                  "makeParents": true,
+                "Copy": {
+                  "src": "/docker/app/php.ini",
+                  "dest": "/usr/local/etc/php/php.ini",
                   "owner": {
                     "user": {
                       "User": {
@@ -482,6 +643,11 @@
                       }
                     }
                   },
+                  "mode": -1,
+                  "followSymlink": true,
+                  "dirCopyContents": true,
+                  "createDestPath": true,
+                  "allowWildcard": true,
                   "timestamp": -1
                 }
               }
@@ -495,10 +661,10 @@
       },
       "constraints": {}
     },
-    "Digest": "sha256:f1d5128a3e10b6a8a417bf7e6ca1a01aaf59950445b40e2d5b26acd3055a5af6",
+    "Digest": "sha256:eb74cd6ea4a666f31237c51724333a1e02bcb45c90c711c888c5615d0ebff83e",
     "OpMetadata": {
       "description": {
-        "llb.customname": "Mkdir /app /composer"
+        "llb.customname": "Copy docker/app/php.ini"
       },
       "caps": {
         "file.base": true
