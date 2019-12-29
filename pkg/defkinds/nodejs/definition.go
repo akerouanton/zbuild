@@ -67,6 +67,10 @@ func NewKind(genericDef *builddef.BuildDef) (Definition, error) {
 		return def, err
 	}
 
+	if def.Webserver != nil {
+		*def.Webserver = webserver.DefaultDefinition().Merge(*def.Webserver)
+	}
+
 	if def.Version != "" && def.BaseImage != "" {
 		return def, xerrors.Errorf("you can't provide both version and base image parameters at the same time")
 	}

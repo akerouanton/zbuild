@@ -77,6 +77,10 @@ func NewKind(genericDef *builddef.BuildDef) (Definition, error) {
 		return def, err
 	}
 
+	if def.Webserver != nil {
+		*def.Webserver = webserver.DefaultDefinition().Merge(*def.Webserver)
+	}
+
 	def.MajMinVersion = extractMajMinVersion(def.Version)
 
 	if def.BaseImage == "" {
@@ -112,6 +116,8 @@ type Definition struct {
 
 // Stage holds all the properties from the base stage that could also be
 // overriden by derived stages.
+// @TODO: add global deps
+// @TODO: merge source dirs and extra scripts
 type Stage struct {
 	ExternalFiles     []llbutils.ExternalFile `mapstructure:"external_files"`
 	SystemPackages    map[string]string       `mapstructure:"system_packages"`
