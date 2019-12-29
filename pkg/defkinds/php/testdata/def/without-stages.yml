@@ -7,11 +7,8 @@ extensions:
   pdo_mysql: "*"
   soap: "*"
 
-source_dirs:
+sources:
   - './src'
-
-extra_scripts:
-  - './public/index.php'
 
 stateful_dirs:
   - './public/uploads'

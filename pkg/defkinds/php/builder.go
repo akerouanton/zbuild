@@ -294,11 +294,8 @@ func excludePatterns(stage *StageDefinition) []string {
 
 func includePatterns(stage *StageDefinition) []string {
 	includes := []string{}
-	for _, dir := range stage.SourceDirs {
+	for _, dir := range stage.Sources {
 		includes = append(includes, dir)
-	}
-	for _, script := range stage.ExtraScripts {
-		includes = append(includes, script)
 	}
 	return includes
 }

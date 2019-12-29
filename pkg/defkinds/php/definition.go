@@ -31,8 +31,7 @@ func defaultDefinition() Definition {
 			ComposerDumpFlags: &ComposerDumpFlags{
 				ClassmapAuthoritative: true,
 			},
-			SourceDirs:   []string{},
-			ExtraScripts: []string{},
+			Sources:      []string{},
 			Integrations: []string{},
 			StatefulDirs: []string{},
 			Healthcheck:  &healthcheck,
@@ -112,6 +111,7 @@ type Definition struct {
 
 // Stage holds all the properties from the base stage that could also be
 // overriden by derived stages.
+// @TODO: add global deps
 type Stage struct {
 	ExternalFiles     []llbutils.ExternalFile `mapstructure:"external_files"`
 	SystemPackages    map[string]string       `mapstructure:"system_packages"`
@@ -120,8 +120,7 @@ type Stage struct {
 	Extensions        map[string]string       `mapstructure:"extensions"`
 	ConfigFiles       PHPConfigFiles          `mapstructure:"config_files"`
 	ComposerDumpFlags *ComposerDumpFlags      `mapstructure:"composer_dump"`
-	SourceDirs        []string                `mapstructure:"source_dirs"`
-	ExtraScripts      []string                `mapstructure:"extra_scripts"`
+	Sources           []string                `mapstructure:"sources"`
 	Integrations      []string                `mapstructure:"integrations"`
 	StatefulDirs      []string                `mapstructure:"stateful_dirs"`
 	Healthcheck       *bool                   `mapstructure:"healthcheck"`
@@ -134,8 +133,7 @@ func (s Stage) copy() Stage {
 		SystemPackages: map[string]string{},
 		ConfigFiles:    s.ConfigFiles.copy(),
 		Extensions:     map[string]string{},
-		SourceDirs:     s.SourceDirs,
-		ExtraScripts:   s.ExtraScripts,
+		Sources:        s.Sources,
 		Integrations:   s.Integrations,
 		StatefulDirs:   s.StatefulDirs,
 		PostInstall:    s.PostInstall,
@@ -355,11 +353,8 @@ func mergeStages(base *Definition, stages ...DerivedStage) StageDefinition {
 		if stage.ComposerDumpFlags != nil {
 			stageDef.ComposerDumpFlags = stage.ComposerDumpFlags
 		}
-		if stage.SourceDirs != nil {
-			stageDef.SourceDirs = append(stageDef.SourceDirs, stage.SourceDirs...)
-		}
-		if stage.ExtraScripts != nil {
-			stageDef.ExtraScripts = append(stageDef.ExtraScripts, stage.ExtraScripts...)
+		if stage.Sources != nil {
+			stageDef.Sources = append(stageDef.Sources, stage.Sources...)
 		}
 		if stage.Integrations != nil {
 			stageDef.Integrations = append(stageDef.Integrations, stage.Integrations...)
