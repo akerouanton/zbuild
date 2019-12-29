@@ -24,6 +24,12 @@ type KindHandler interface {
 	// an error if something goes wrong during the build.
 	Build(context.Context, builddef.BuildOpts) (llb.State, *image.Image, error)
 	UpdateLocks(context.Context, pkgsolver.PackageSolver, *builddef.BuildDef) (builddef.Locks, error)
+	// DebugConfig loads and parses its kind definition based on parameters in
+	// the BuildOpts, like Build() method does. It returns the end struct used
+	// to build a given stage, after all merge and inference operations
+	// happened. This is used by zbuild CLI tool to show to its users the
+	// complete config struct used to build a given stage.
+	DebugConfig(builddef.BuildOpts) (interface{}, error)
 }
 
 // KindRegistry associates kinds with their respective handler.

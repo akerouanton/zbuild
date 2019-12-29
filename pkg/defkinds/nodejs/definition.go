@@ -1,6 +1,8 @@
 package nodejs
 
 import (
+	"strings"
+
 	"github.com/NiR-/zbuild/pkg/builddef"
 	"github.com/NiR-/zbuild/pkg/defkinds/webserver"
 	"github.com/NiR-/zbuild/pkg/llbutils"
@@ -15,6 +17,30 @@ var defaultBaseImages = map[string]string{
 	"13": "docker.io/library/node:13-buster-slim",
 }
 var supportedVersions = "10, 12, 13"
+
+func (h *NodeJSHandler) loadDefs(
+	buildOpts builddef.BuildOpts,
+) (Definition, StageDefinition, error) {
+	var def Definition
+	var stageDef StageDefinition
+
+	def, err := NewKind(buildOpts.Def)
+	if err != nil {
+		return def, stageDef, err
+	}
+
+	stageName := buildOpts.Stage
+	if strings.HasPrefix(stageName, "webserver-") {
+		stageName = strings.TrimPrefix(stageName, "webserver-")
+	}
+
+	stageDef, err = def.ResolveStageDefinition(stageName, true)
+	if err != nil {
+		return def, stageDef, xerrors.Errorf("could not resolve stage %q: %w", stageName, err)
+	}
+
+	return def, stageDef, nil
+}
 
 func defaultDefinition() Definition {
 	devStageDevMode := true

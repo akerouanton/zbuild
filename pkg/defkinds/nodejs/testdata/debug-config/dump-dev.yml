@@ -1,0 +1,23 @@
+stage:
+  externalfiles: []
+  systempackages:
+    chromium: '*'
+  globalpackages:
+    api-platform/client-generator: '*'
+    puppeteer: 1.10.0
+  buildcommand: yarn build
+  command:
+  - yarn start
+  configfiles: {}
+  sourcedirs: []
+  statefuldirs: []
+  healthcheck: false
+name: dev
+baseimage: docker.io/library/node:12-buster-slim
+version: "12"
+dev: true
+isfrontend: true
+webserver: null
+locks:
+  system_packages:
+    chromium: 78.0.3904.108-1~deb10u1

@@ -27,6 +27,7 @@ func main() {
 	zbuildCmd.AddCommand(newUpdateCmd())
 	zbuildCmd.AddCommand(newDebugLLBCmd())
 	zbuildCmd.AddCommand(newLLBGraphCmd())
+	zbuildCmd.AddCommand(newDebugConfigCmd())
 
 	if err := zbuildCmd.Execute(); err != nil {
 		logrus.Fatalf("%+v", err)
@@ -62,4 +63,8 @@ func AddFileFlag(cmd *cobra.Command, val *string) {
 
 func AddContextFlag(cmd *cobra.Command, val *string) {
 	cmd.Flags().StringVarP(val, "context", "c", "", "Root dir of the build context")
+}
+
+func AddStageFlag(cmd *cobra.Command, val *string) {
+	cmd.Flags().StringVarP(val, "stage", "s", "dev", "Name of the stage to use")
 }

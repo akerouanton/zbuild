@@ -1,0 +1,12 @@
+base: docker.io/library/node:12-buster-slim
+stages:
+  dev:
+    system_packages:
+      chromium: 78.0.3904.108-1~deb10u1
+  prod:
+    system_packages:
+      chromium: 78.0.3904.108-1~deb10u1
+webserver:
+  base_image: docker.io/library/nginx:latest
+  system_packages:
+    curl: 7.64.0-4

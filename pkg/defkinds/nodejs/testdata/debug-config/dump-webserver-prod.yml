@@ -1,0 +1,12 @@
+type: nginx
+systempackages:
+  curl: '*'
+configfile: null
+healthcheck: true
+assets:
+- from: build/
+  to: build/
+locks:
+  base_image: docker.io/library/nginx:latest
+  system_packages:
+    curl: 7.64.0-4

@@ -47,8 +47,8 @@ func newDebugLLBCmd() *cobra.Command {
 
 	AddFileFlag(cmd, &debugFlags.file)
 	AddContextFlag(cmd, &debugFlags.context)
+	AddStageFlag(cmd, &debugFlags.stage)
 
-	cmd.Flags().StringVarP(&debugFlags.stage, "stage", "s", "dev", "Name of the stage to debug")
 	cmd.Flags().BoolVar(&debugFlags.asJSON, "json", false, "Output the LLB DAG in JSON format")
 
 	return cmd
