@@ -128,44 +128,75 @@ type Stage struct {
 	PostInstall       []string                `mapstructure:"post_install"`
 }
 
-func (s Stage) copy() Stage {
+func (s Stage) Copy() Stage {
 	new := Stage{
-		ExternalFiles:  []llbutils.ExternalFile{},
-		SystemPackages: map[string]string{},
-		ConfigFiles:    s.ConfigFiles.copy(),
-		Extensions:     map[string]string{},
-		GlobalDeps:     map[string]string{},
-		Sources:        s.Sources,
-		Integrations:   s.Integrations,
-		StatefulDirs:   s.StatefulDirs,
-		PostInstall:    s.PostInstall,
+		ExternalFiles:     make([]llbutils.ExternalFile, len(s.ExternalFiles)),
+		SystemPackages:    map[string]string{},
+		FPM:               s.FPM,
+		Command:           s.Command,
+		Extensions:        map[string]string{},
+		GlobalDeps:        map[string]string{},
+		ConfigFiles:       s.ConfigFiles.Copy(),
+		ComposerDumpFlags: s.ComposerDumpFlags,
+		Sources:           make([]string, len(s.Sources)),
+		Integrations:      make([]string, len(s.Integrations)),
+		StatefulDirs:      make([]string, len(s.StatefulDirs)),
+		Healthcheck:       s.Healthcheck,
+		PostInstall:       make([]string, len(s.PostInstall)),
 	}
 
-	for k, v := range s.SystemPackages {
-		new.SystemPackages[k] = v
+	copy(new.ExternalFiles, s.ExternalFiles)
+	copy(new.Sources, s.Sources)
+	copy(new.Integrations, s.Integrations)
+	copy(new.StatefulDirs, s.StatefulDirs)
+	copy(new.PostInstall, s.PostInstall)
+
+	for name, constraint := range s.SystemPackages {
+		new.SystemPackages[name] = constraint
+	}
+	for name, constraint := range s.Extensions {
+		new.Extensions[name] = constraint
 	}
 	for name, constraint := range s.GlobalDeps {
 		new.GlobalDeps[name] = constraint
 	}
 
-	for k, v := range s.Extensions {
-		new.Extensions[k] = v
-	}
+	return new
+}
 
-	if s.FPM != nil {
-		fpm := *s.FPM
+func (s Stage) Merge(overriding Stage) Stage {
+	new := s.Copy()
+	new.ExternalFiles = append(new.ExternalFiles,
+		overriding.ExternalFiles...)
+	new.ConfigFiles = new.ConfigFiles.Merge(overriding.ConfigFiles)
+	new.Sources = append(new.Sources, overriding.Sources...)
+	new.Integrations = append(new.Integrations, overriding.Integrations...)
+	new.StatefulDirs = append(new.StatefulDirs, overriding.StatefulDirs...)
+	new.PostInstall = append(new.PostInstall, overriding.PostInstall...)
+
+	for name, constraint := range overriding.SystemPackages {
+		new.SystemPackages[name] = constraint
+	}
+	if overriding.FPM != nil {
+		fpm := *overriding.FPM
 		new.FPM = &fpm
 	}
-	if s.Command != nil {
-		command := *s.Command
-		new.Command = &command
+	if overriding.Command != nil {
+		cmd := *overriding.Command
+		new.Command = &cmd
 	}
-	if s.ComposerDumpFlags != nil {
-		composerFlags := *s.ComposerDumpFlags
-		new.ComposerDumpFlags = &composerFlags
+	for name, constraint := range overriding.Extensions {
+		new.Extensions[name] = constraint
 	}
-	if s.Healthcheck != nil {
-		healthcheck := *s.Healthcheck
+	for name, constraint := range overriding.GlobalDeps {
+		new.GlobalDeps[name] = constraint
+	}
+	if overriding.ComposerDumpFlags != nil {
+		dumpFlags := *overriding.ComposerDumpFlags
+		new.ComposerDumpFlags = &dumpFlags
+	}
+	if overriding.Healthcheck != nil {
+		healthcheck := *overriding.Healthcheck
 		new.Healthcheck = &healthcheck
 	}
 
@@ -187,15 +218,30 @@ type PHPConfigFiles struct {
 	FPMConfigFile *string `mapstructure:"fpm.conf"`
 }
 
-func (cfg PHPConfigFiles) copy() PHPConfigFiles {
+func (base PHPConfigFiles) Copy() PHPConfigFiles {
 	new := PHPConfigFiles{}
 
-	if cfg.IniFile != nil {
-		iniFile := *cfg.IniFile
+	if base.IniFile != nil {
+		iniFile := *base.IniFile
 		new.IniFile = &iniFile
 	}
-	if cfg.FPMConfigFile != nil {
-		fpmConfigFile := *cfg.FPMConfigFile
+	if base.FPMConfigFile != nil {
+		fpmConfigFile := *base.FPMConfigFile
+		new.FPMConfigFile = &fpmConfigFile
+	}
+
+	return new
+}
+
+func (base PHPConfigFiles) Merge(overriding PHPConfigFiles) PHPConfigFiles {
+	new := base.Copy()
+
+	if overriding.IniFile != nil {
+		iniFile := *overriding.IniFile
+		new.IniFile = &iniFile
+	}
+	if overriding.FPMConfigFile != nil {
+		fpmConfigFile := *overriding.FPMConfigFile
 		new.FPMConfigFile = &fpmConfigFile
 	}
 
@@ -325,7 +371,7 @@ func mergeStages(base *Definition, stages ...DerivedStage) StageDefinition {
 		Version:        base.Version,
 		MajMinVersion:  base.MajMinVersion,
 		Infer:          base.Infer,
-		Stage:          base.BaseStage.copy(),
+		Stage:          base.BaseStage.Copy(),
 		PlatformReqs:   map[string]string{},
 		LockedPackages: map[string]string{},
 		Webserver:      base.Webserver,
@@ -333,56 +379,10 @@ func mergeStages(base *Definition, stages ...DerivedStage) StageDefinition {
 
 	stages = reverseStages(stages)
 	for _, stage := range stages {
-		if len(stage.ExternalFiles) > 0 {
-			stageDef.ExternalFiles = append(stageDef.ExternalFiles, stage.ExternalFiles...)
-		}
-		if len(stage.SystemPackages) > 0 {
-			for name, constraint := range stage.SystemPackages {
-				stageDef.SystemPackages[name] = constraint
-			}
-		}
-		if stage.FPM != nil {
-			stageDef.FPM = stage.FPM
-		}
-		if len(stage.Extensions) > 0 {
-			for name, conf := range stage.Extensions {
-				stageDef.Extensions[name] = conf
-			}
-		}
-		if len(stage.GlobalDeps) > 0 {
-			for name, constraint := range stage.GlobalDeps {
-				stageDef.GlobalDeps[name] = constraint
-			}
-		}
-		if stage.ConfigFiles.IniFile != nil {
-			stageDef.ConfigFiles.IniFile = stage.ConfigFiles.IniFile
-		}
-		if stage.ConfigFiles.FPMConfigFile != nil {
-			stageDef.ConfigFiles.FPMConfigFile = stage.ConfigFiles.FPMConfigFile
-		}
-		if stage.ComposerDumpFlags != nil {
-			stageDef.ComposerDumpFlags = stage.ComposerDumpFlags
-		}
-		if stage.Sources != nil {
-			stageDef.Sources = append(stageDef.Sources, stage.Sources...)
-		}
-		if stage.Integrations != nil {
-			stageDef.Integrations = append(stageDef.Integrations, stage.Integrations...)
-		}
-		if stage.StatefulDirs != nil {
-			stageDef.StatefulDirs = append(stageDef.StatefulDirs, stage.StatefulDirs...)
-		}
-		if stage.Healthcheck != nil {
-			stageDef.Healthcheck = stage.Healthcheck
-		}
-		if stage.PostInstall != nil {
-			stageDef.PostInstall = append(stageDef.PostInstall, stage.PostInstall...)
-		}
+		stageDef.Stage = stageDef.Stage.Merge(stage.Stage)
+
 		if stage.Dev != nil {
 			stageDef.Dev = *stage.Dev
-		}
-		if stage.Command != nil {
-			stageDef.Command = stage.Command
 		}
 	}
 

@@ -612,3 +612,654 @@ func mockComposerLockLoader(
 		return nil
 	}
 }
+
+type mergeStageTC struct {
+	base       func() php.Stage
+	overriding php.Stage
+	expected   func() php.Stage
+}
+
+func emptyStage() php.Stage {
+	return php.Stage{
+		ExternalFiles:  []llbutils.ExternalFile{},
+		SystemPackages: map[string]string{},
+		Extensions:     map[string]string{},
+		GlobalDeps:     map[string]string{},
+		ConfigFiles:    php.PHPConfigFiles{},
+		Sources:        []string{},
+		Integrations:   []string{},
+		StatefulDirs:   []string{},
+		PostInstall:    []string{},
+	}
+}
+
+func initMergeExternalFilesWithBaseTC() mergeStageTC {
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{
+				ExternalFiles: []llbutils.ExternalFile{
+					{
+						URL:         "https://github.com/some/tool",
+						Destination: "/usr/local/bin/some-tool",
+						Mode:        0750,
+					},
+				},
+			}
+		},
+		overriding: php.Stage{
+			ExternalFiles: []llbutils.ExternalFile{
+				{
+					URL:         "https://github.com/some/other/tool",
+					Destination: "/usr/local/bin/some-other-tool",
+					Mode:        0750,
+				},
+			},
+		},
+		expected: func() php.Stage {
+			s := emptyStage()
+			s.ExternalFiles = []llbutils.ExternalFile{
+				{
+					URL:         "https://github.com/some/tool",
+					Destination: "/usr/local/bin/some-tool",
+					Mode:        0750,
+				},
+				{
+					URL:         "https://github.com/some/other/tool",
+					Destination: "/usr/local/bin/some-other-tool",
+					Mode:        0750,
+				},
+			}
+			return s
+		},
+	}
+}
+
+func initMergeExternalFilesWithoutBaseTC() mergeStageTC {
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{}
+		},
+		overriding: php.Stage{
+			ExternalFiles: []llbutils.ExternalFile{
+				{
+					URL:         "https://github.com/some/other/tool",
+					Destination: "/usr/local/bin/some-other-tool",
+					Mode:        0750,
+				},
+			},
+		},
+		expected: func() php.Stage {
+			s := emptyStage()
+			s.ExternalFiles = []llbutils.ExternalFile{
+				{
+					URL:         "https://github.com/some/other/tool",
+					Destination: "/usr/local/bin/some-other-tool",
+					Mode:        0750,
+				},
+			}
+			return s
+		},
+	}
+}
+
+func initMergeSystemPackagesWithBaseTC() mergeStageTC {
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{
+				SystemPackages: map[string]string{
+					"curl": "*",
+				},
+			}
+		},
+		overriding: php.Stage{
+			SystemPackages: map[string]string{
+				"chromium": "*",
+			},
+		},
+		expected: func() php.Stage {
+			s := emptyStage()
+			s.SystemPackages = map[string]string{
+				"curl":     "*",
+				"chromium": "*",
+			}
+			return s
+		},
+	}
+}
+
+func initMergeSystemPackagesWithoutBaseTC() mergeStageTC {
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{}
+		},
+		overriding: php.Stage{
+			SystemPackages: map[string]string{
+				"chromium": "*",
+			},
+		},
+		expected: func() php.Stage {
+			s := emptyStage()
+			s.SystemPackages = map[string]string{
+				"chromium": "*",
+			}
+			return s
+		},
+	}
+}
+
+func initMergeFPMWithBaseTC() mergeStageTC {
+	baseFPM := true
+	overridingFPM := false
+	expectedFPM := false
+
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{
+				FPM: &baseFPM,
+			}
+		},
+		overriding: php.Stage{
+			FPM: &overridingFPM,
+		},
+		expected: func() php.Stage {
+			s := emptyStage()
+			s.FPM = &expectedFPM
+			return s
+		},
+	}
+}
+
+func initMergeFPMWithoutBaseTC() mergeStageTC {
+	overridingFPM := true
+	expectedFPM := true
+
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{}
+		},
+		overriding: php.Stage{
+			FPM: &overridingFPM,
+		},
+		expected: func() php.Stage {
+			s := emptyStage()
+			s.FPM = &expectedFPM
+			return s
+		},
+	}
+}
+
+func initMergeCommandWithBaseTC() mergeStageTC {
+	baseCmd := []string{"bin/some-worker"}
+	overridingCmd := []string{"bin/some-other-worker"}
+	expectedCmd := []string{"bin/some-other-worker"}
+
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{
+				Command: &baseCmd,
+			}
+		},
+		overriding: php.Stage{
+			Command: &overridingCmd,
+		},
+		expected: func() php.Stage {
+			s := emptyStage()
+			s.Command = &expectedCmd
+			return s
+		},
+	}
+}
+
+func initMergeCommandWithoutBaseTC() mergeStageTC {
+	overridingCmd := []string{"bin/some-other-worker"}
+	expectedCmd := []string{"bin/some-other-worker"}
+
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{}
+		},
+		overriding: php.Stage{
+			Command: &overridingCmd,
+		},
+		expected: func() php.Stage {
+			s := emptyStage()
+			s.Command = &expectedCmd
+			return s
+		},
+	}
+}
+
+func initMergeExtensionsWithBaseTC() mergeStageTC {
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{
+				Extensions: map[string]string{
+					"apcu": "*",
+				},
+			}
+		},
+		overriding: php.Stage{
+			Extensions: map[string]string{
+				"opcache": "*",
+			},
+		},
+		expected: func() php.Stage {
+			s := emptyStage()
+			s.Extensions = map[string]string{
+				"apcu":    "*",
+				"opcache": "*",
+			}
+			return s
+		},
+	}
+}
+
+func initMergeExtensionsWithoutBaseTC() mergeStageTC {
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{}
+		},
+		overriding: php.Stage{
+			Extensions: map[string]string{
+				"opcache": "*",
+			},
+		},
+		expected: func() php.Stage {
+			s := emptyStage()
+			s.Extensions = map[string]string{
+				"opcache": "*",
+			}
+			return s
+		},
+	}
+}
+
+func initMergeConfigFilesWithBaseTC() mergeStageTC {
+	baseIniFile := "php.dev.ini"
+	baseFpmConf := "fpm.dev.conf"
+	overridingIniFile := "php.prod.ini"
+	overridingFpmConf := "fpm.prod.conf"
+	expectedIniFile := "php.prod.ini"
+	expectedFpmConf := "fpm.prod.conf"
+
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{
+				ConfigFiles: php.PHPConfigFiles{
+					IniFile:       &baseIniFile,
+					FPMConfigFile: &baseFpmConf,
+				},
+			}
+		},
+		overriding: php.Stage{
+			ConfigFiles: php.PHPConfigFiles{
+				IniFile:       &overridingIniFile,
+				FPMConfigFile: &overridingFpmConf,
+			},
+		},
+		expected: func() php.Stage {
+			s := emptyStage()
+			s.ConfigFiles = php.PHPConfigFiles{
+				IniFile:       &expectedIniFile,
+				FPMConfigFile: &expectedFpmConf,
+			}
+			return s
+		},
+	}
+}
+
+func initMergeConfigFilesWithoutBaseTC() mergeStageTC {
+	overridingIniFile := "php.prod.ini"
+	overridingFpmConf := "fpm.prod.conf"
+	expectedIniFile := "php.prod.ini"
+	expectedFpmConf := "fpm.prod.conf"
+
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{}
+		},
+		overriding: php.Stage{
+			ConfigFiles: php.PHPConfigFiles{
+				IniFile:       &overridingIniFile,
+				FPMConfigFile: &overridingFpmConf,
+			},
+		},
+		expected: func() php.Stage {
+			s := emptyStage()
+			s.ConfigFiles = php.PHPConfigFiles{
+				IniFile:       &expectedIniFile,
+				FPMConfigFile: &expectedFpmConf,
+			}
+			return s
+		},
+	}
+}
+
+func initMergeComposerDumpFlagsWithBaseTC() mergeStageTC {
+	baseFlags := php.ComposerDumpFlags{
+		ClassmapAuthoritative: true,
+	}
+	overridingFlags := php.ComposerDumpFlags{
+		APCU: true,
+	}
+	expectedFlags := php.ComposerDumpFlags{
+		APCU: true,
+	}
+
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{
+				ComposerDumpFlags: &baseFlags,
+			}
+		},
+		overriding: php.Stage{
+			ComposerDumpFlags: &overridingFlags,
+		},
+		expected: func() php.Stage {
+			s := emptyStage()
+			s.ComposerDumpFlags = &expectedFlags
+			return s
+		},
+	}
+}
+
+func initMergeComposerDumpFlagsWithoutBaseTC() mergeStageTC {
+	overridingFlags := php.ComposerDumpFlags{
+		APCU: true,
+	}
+	expectedFlags := php.ComposerDumpFlags{
+		APCU: true,
+	}
+
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{}
+		},
+		overriding: php.Stage{
+			ComposerDumpFlags: &overridingFlags,
+		},
+		expected: func() php.Stage {
+			s := emptyStage()
+			s.ComposerDumpFlags = &expectedFlags
+			return s
+		},
+	}
+}
+
+func initMergeSourcesWithBaseTC() mergeStageTC {
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{
+				Sources: []string{"src/"},
+			}
+		},
+		overriding: php.Stage{
+			Sources: []string{"bin/worker"},
+		},
+		expected: func() php.Stage {
+			s := emptyStage()
+			s.Sources = []string{"src/", "bin/worker"}
+			return s
+		},
+	}
+}
+
+func initMergeSourcesWithoutBaseTC() mergeStageTC {
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{}
+		},
+		overriding: php.Stage{
+			Sources: []string{"bin/worker"},
+		},
+		expected: func() php.Stage {
+			s := emptyStage()
+			s.Sources = []string{"bin/worker"}
+			return s
+		},
+	}
+}
+
+func initMergeIntegrationsWithBaseTC() mergeStageTC {
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{
+				Integrations: []string{"blackfire"},
+			}
+		},
+		overriding: php.Stage{
+			Integrations: []string{"some-other"},
+		},
+		expected: func() php.Stage {
+			s := emptyStage()
+			s.Integrations = []string{"blackfire", "some-other"}
+			return s
+		},
+	}
+}
+
+func initMergeIntegrationsWithoutBaseTC() mergeStageTC {
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{}
+		},
+		overriding: php.Stage{
+			Integrations: []string{"some-other"},
+		},
+		expected: func() php.Stage {
+			s := emptyStage()
+			s.Integrations = []string{"some-other"}
+			return s
+		},
+	}
+}
+
+func initMergeStatefulDirsWithBaseTC() mergeStageTC {
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{
+				StatefulDirs: []string{"var/sessions/"},
+			}
+		},
+		overriding: php.Stage{
+			StatefulDirs: []string{"public/uploads/"},
+		},
+		expected: func() php.Stage {
+			s := emptyStage()
+			s.StatefulDirs = []string{"var/sessions/", "public/uploads/"}
+			return s
+		},
+	}
+}
+
+func initMergeStatefulDirsWithoutBaseTC() mergeStageTC {
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{}
+		},
+		overriding: php.Stage{
+			StatefulDirs: []string{"public/uploads/"},
+		},
+		expected: func() php.Stage {
+			s := emptyStage()
+			s.StatefulDirs = []string{"public/uploads/"}
+			return s
+		},
+	}
+}
+
+func initMergeHealthcheckWithBaseTC() mergeStageTC {
+	baseHealthcheck := true
+	overridingHealthcheck := false
+	expectedHealthcheck := false
+
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{
+				Healthcheck: &baseHealthcheck,
+			}
+		},
+		overriding: php.Stage{
+			Healthcheck: &overridingHealthcheck,
+		},
+		expected: func() php.Stage {
+			s := emptyStage()
+			s.Healthcheck = &expectedHealthcheck
+			return s
+		},
+	}
+}
+
+func initMergeHealthcheckWithoutBaseTC() mergeStageTC {
+	overridingHealthcheck := true
+	expectedHealthcheck := true
+
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{}
+		},
+		overriding: php.Stage{
+			Healthcheck: &overridingHealthcheck,
+		},
+		expected: func() php.Stage {
+			s := emptyStage()
+			s.Healthcheck = &expectedHealthcheck
+			return s
+		},
+	}
+}
+
+func initMergePostInstallWithBaseTC() mergeStageTC {
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{
+				PostInstall: []string{"some-step"},
+			}
+		},
+		overriding: php.Stage{
+			PostInstall: []string{"some-other-step"},
+		},
+		expected: func() php.Stage {
+			s := emptyStage()
+			s.PostInstall = []string{"some-step", "some-other-step"}
+			return s
+		},
+	}
+}
+
+func initMergePostInstallWithoutBaseTC() mergeStageTC {
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{}
+		},
+		overriding: php.Stage{
+			PostInstall: []string{"some-other"},
+		},
+		expected: func() php.Stage {
+			s := emptyStage()
+			s.PostInstall = []string{"some-other"}
+			return s
+		},
+	}
+}
+
+func initMergeGlobalDepsWithBaseTC() mergeStageTC {
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{
+				GlobalDeps: map[string]string{
+					"symfony/flex": "*",
+				},
+			}
+		},
+		overriding: php.Stage{
+			GlobalDeps: map[string]string{
+				"symfony/flex":      "1.6.0",
+				"hirak/prestissimo": "0.3.9",
+			},
+		},
+		expected: func() php.Stage {
+			stage := emptyStage()
+			stage.GlobalDeps = map[string]string{
+				"symfony/flex":      "1.6.0",
+				"hirak/prestissimo": "0.3.9",
+			}
+
+			return stage
+		},
+	}
+}
+
+func initMergeGlobalDepsWithoutBaseTC() mergeStageTC {
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{
+				GlobalDeps: map[string]string{},
+			}
+		},
+		overriding: php.Stage{
+			GlobalDeps: map[string]string{
+				"symfony/flex":      "1.6.0",
+				"hirak/prestissimo": "0.3.9",
+			},
+		},
+		expected: func() php.Stage {
+			stage := emptyStage()
+			stage.GlobalDeps = map[string]string{
+				"symfony/flex":      "1.6.0",
+				"hirak/prestissimo": "0.3.9",
+			}
+
+			return stage
+		},
+	}
+}
+
+func TestStageMerge(t *testing.T) {
+	testcases := map[string]func() mergeStageTC{
+		"merge external files with base":         initMergeExternalFilesWithBaseTC,
+		"merge external files without base":      initMergeExternalFilesWithoutBaseTC,
+		"merge system packages with base":        initMergeSystemPackagesWithBaseTC,
+		"merge system packages without base":     initMergeSystemPackagesWithoutBaseTC,
+		"merge fpm with base":                    initMergeFPMWithBaseTC,
+		"merge fpm without base":                 initMergeFPMWithoutBaseTC,
+		"merge command with base":                initMergeCommandWithBaseTC,
+		"merge command without base":             initMergeCommandWithoutBaseTC,
+		"merge extensions with base":             initMergeExtensionsWithBaseTC,
+		"merge extensions without base":          initMergeExtensionsWithoutBaseTC,
+		"merge global deps with base":            initMergeGlobalDepsWithBaseTC,
+		"merge global deps without base":         initMergeGlobalDepsWithoutBaseTC,
+		"merge config files with base":           initMergeConfigFilesWithBaseTC,
+		"merge config files without base":        initMergeConfigFilesWithoutBaseTC,
+		"merge composer dump flags with base":    initMergeComposerDumpFlagsWithBaseTC,
+		"merge composer dump flags without base": initMergeComposerDumpFlagsWithoutBaseTC,
+		"merge sources with base":                initMergeSourcesWithBaseTC,
+		"merge sources without base":             initMergeSourcesWithoutBaseTC,
+		"merge integrations with base":           initMergeIntegrationsWithBaseTC,
+		"merge integrations without base":        initMergeIntegrationsWithoutBaseTC,
+		"merge stateful dirs with base":          initMergeStatefulDirsWithBaseTC,
+		"merge stateful dirs without base":       initMergeStatefulDirsWithoutBaseTC,
+		"merge healthcheck with base":            initMergeHealthcheckWithBaseTC,
+		"merge healthcheck without base":         initMergeHealthcheckWithoutBaseTC,
+		"merge post install with base":           initMergePostInstallWithBaseTC,
+		"merge post install without base":        initMergePostInstallWithoutBaseTC,
+	}
+
+	for tcname := range testcases {
+		tcinit := testcases[tcname]
+
+		t.Run(tcname, func(t *testing.T) {
+			tc := tcinit()
+			base := tc.base()
+			new := base.Merge(tc.overriding)
+
+			if diff := deep.Equal(new, tc.expected()); diff != nil {
+				t.Fatal(diff)
+			}
+
+			if diff := deep.Equal(base, tc.base()); diff != nil {
+				t.Fatalf("Base stages don't match: %v", diff)
+			}
+		})
+	}
+}
