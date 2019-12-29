@@ -139,6 +139,8 @@ func (h *PHPHandler) updateStagesLocks(
 			return nil, xerrors.Errorf("could not resolve php extension versions: %w", err)
 		}
 
+		// @TODO: lock global extensions?
+
 		locks[name] = stageLocks
 	}
 
@@ -149,7 +151,8 @@ func (h *PHPHandler) lockExtensions(extensions map[string]string) (map[string]st
 	resolved := map[string]string{}
 	ctx := context.Background()
 
-	// Remove extensions installed by default
+	// Remove extensions installed by default as this would result in a build
+	// error otherwise.
 	for _, name := range preinstalledExtensions {
 		if _, ok := extensions[name]; ok {
 			delete(extensions, name)

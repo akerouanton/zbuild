@@ -44,6 +44,7 @@ func initSuccessfullyParseRawDefinitionWithoutStagesTC() newDefinitionTC {
 					"pdo_mysql": "*",
 					"soap":      "*",
 				},
+				GlobalDeps: map[string]string{},
 				ConfigFiles: php.PHPConfigFiles{
 					IniFile:       &iniFile,
 					FPMConfigFile: &fpmConfigFile,
@@ -118,6 +119,7 @@ func initSuccessfullyParseRawDefinitionWithStagesTC() newDefinitionTC {
 					"pdo_mysql": "*",
 					"soap":      "*",
 				},
+				GlobalDeps: map[string]string{},
 				ConfigFiles: php.PHPConfigFiles{
 					FPMConfigFile: &fpmConfigFile,
 				},
@@ -268,6 +270,7 @@ func initSuccessfullyResolveDefaultDevStageTC(t *testing.T, mockCtrl *gomock.Con
 					"pdo_mysql": "*",
 					"soap":      "*",
 				},
+				GlobalDeps:   map[string]string{},
 				Sources:      []string{"./src"},
 				StatefulDirs: []string{"./public/uploads"},
 				ConfigFiles: php.PHPConfigFiles{
@@ -331,6 +334,7 @@ func initSuccessfullyResolveWorkerStageTC(t *testing.T, mockCtrl *gomock.Control
 					"mbstring": "*",
 					"zip":      "*",
 				},
+				GlobalDeps: map[string]string{},
 				ComposerDumpFlags: &php.ComposerDumpFlags{
 					APCU:                  false,
 					ClassmapAuthoritative: true,
@@ -414,6 +418,7 @@ func initRemoveDefaultExtensionsTC(t *testing.T, mockCtrl *gomock.Controller) re
 					"json":       "*",
 					"session":    "*",
 				},
+				GlobalDeps:  map[string]string{},
 				ConfigFiles: php.PHPConfigFiles{},
 				ComposerDumpFlags: &php.ComposerDumpFlags{
 					ClassmapAuthoritative: true,
@@ -469,6 +474,7 @@ func initPreservePredefinedExtensionConstraintsTC(t *testing.T, mockCtrl *gomock
 					"zip":   "*",
 					"redis": "^5.1",
 				},
+				GlobalDeps:  map[string]string{},
 				ConfigFiles: php.PHPConfigFiles{},
 				ComposerDumpFlags: &php.ComposerDumpFlags{
 					ClassmapAuthoritative: true,

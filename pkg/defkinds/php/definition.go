@@ -28,6 +28,7 @@ func defaultDefinition() Definition {
 			SystemPackages: map[string]string{},
 			FPM:            &fpm,
 			Extensions:     map[string]string{},
+			GlobalDeps:     map[string]string{},
 			ComposerDumpFlags: &ComposerDumpFlags{
 				ClassmapAuthoritative: true,
 			},
@@ -111,13 +112,13 @@ type Definition struct {
 
 // Stage holds all the properties from the base stage that could also be
 // overriden by derived stages.
-// @TODO: add global deps
 type Stage struct {
 	ExternalFiles     []llbutils.ExternalFile `mapstructure:"external_files"`
 	SystemPackages    map[string]string       `mapstructure:"system_packages"`
 	FPM               *bool                   `mapstructure:",omitempty"`
 	Command           *[]string               `mapstructure:"command"`
 	Extensions        map[string]string       `mapstructure:"extensions"`
+	GlobalDeps        map[string]string       `mapstructure:"global_deps"`
 	ConfigFiles       PHPConfigFiles          `mapstructure:"config_files"`
 	ComposerDumpFlags *ComposerDumpFlags      `mapstructure:"composer_dump"`
 	Sources           []string                `mapstructure:"sources"`
@@ -133,6 +134,7 @@ func (s Stage) copy() Stage {
 		SystemPackages: map[string]string{},
 		ConfigFiles:    s.ConfigFiles.copy(),
 		Extensions:     map[string]string{},
+		GlobalDeps:     map[string]string{},
 		Sources:        s.Sources,
 		Integrations:   s.Integrations,
 		StatefulDirs:   s.StatefulDirs,
@@ -141,6 +143,9 @@ func (s Stage) copy() Stage {
 
 	for k, v := range s.SystemPackages {
 		new.SystemPackages[k] = v
+	}
+	for name, constraint := range s.GlobalDeps {
+		new.GlobalDeps[name] = constraint
 	}
 
 	for k, v := range s.Extensions {
@@ -342,6 +347,11 @@ func mergeStages(base *Definition, stages ...DerivedStage) StageDefinition {
 		if len(stage.Extensions) > 0 {
 			for name, conf := range stage.Extensions {
 				stageDef.Extensions[name] = conf
+			}
+		}
+		if len(stage.GlobalDeps) > 0 {
+			for name, constraint := range stage.GlobalDeps {
+				stageDef.GlobalDeps[name] = constraint
 			}
 		}
 		if stage.ConfigFiles.IniFile != nil {

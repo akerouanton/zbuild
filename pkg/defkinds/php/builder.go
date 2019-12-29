@@ -305,6 +305,31 @@ func getEnv(src llb.State, name string) string {
 	return val
 }
 
+func globalComposerInstall(stage StageDefinition, state llb.State) llb.State {
+	deps := make([]string, 0, len(stage.GlobalDeps))
+	deps = append(deps, "hirak/prestissimo")
+
+	for dep, constraint := range stage.GlobalDeps {
+		if constraint != "" && constraint != "*" {
+			dep += ":" + constraint
+		}
+		deps = append(deps, dep)
+	}
+
+	cmds := make([]string, 2, 2)
+	cmds[0] = fmt.Sprintf("composer global require --prefer-dist --classmap-authoritative %s",
+		strings.Join(deps, " "))
+	cmds[1] = "composer clear-cache"
+
+	run := state.Run(
+		llbutils.Shell(cmds...),
+		llb.Dir(state.GetDir()),
+		llb.User("1000"),
+		llb.WithCustomNamef("Run composer global require (%s)", strings.Join(deps, ", ")))
+
+	return run.Root()
+}
+
 func composerInstall(
 	state llb.State,
 	buildOpts builddef.BuildOpts,
