@@ -9,16 +9,17 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-func defaultDefinition() Definition {
+func DefaultDefinition() Definition {
+	healthcheck := true
 	return Definition{
 		Type:           "nginx",
 		SystemPackages: map[string]string{},
-		Healthcheck:    true,
+		Healthcheck:    &healthcheck,
 	}
 }
 
 func NewKind(genericDef *builddef.BuildDef) (Definition, error) {
-	def := defaultDefinition()
+	def := DefaultDefinition()
 	decoderConf := mapstructure.DecoderConfig{
 		ErrorUnused:      true,
 		WeaklyTypedInput: true,
@@ -42,7 +43,7 @@ func NewKind(genericDef *builddef.BuildDef) (Definition, error) {
 		def.SystemPackages = map[string]string{}
 	}
 
-	if def.Healthcheck {
+	if def.Healthcheck != nil && *def.Healthcheck {
 		def.SystemPackages["curl"] = "*"
 	}
 
@@ -52,8 +53,8 @@ func NewKind(genericDef *builddef.BuildDef) (Definition, error) {
 type Definition struct {
 	Type           WebserverType     `mapstructure:"type"`
 	SystemPackages map[string]string `mapstructure:"system_packages"`
-	ConfigFile     string            `mapstructure:"config_file"`
-	Healthcheck    bool              `mapstructure:"healthcheck"`
+	ConfigFile     *string           `mapstructure:"config_file"`
+	Healthcheck    *bool             `mapstructure:"healthcheck"`
 	Assets         []AssetToCopy     `mapstructure:"assets"`
 	Locks          DefinitionLocks   `mapstructure:"-"`
 }
@@ -66,14 +67,44 @@ func (def Definition) Validate() error {
 	return nil
 }
 
+func (base Definition) Merge(overriding Definition) Definition {
+	new := base
+	new.Assets = append(new.Assets, overriding.Assets...)
+	new.Locks = overriding.Locks
+
+	if !overriding.Type.IsEmpty() {
+		new.Type = overriding.Type
+	}
+	for k, v := range overriding.SystemPackages {
+		new.SystemPackages[k] = v
+	}
+	if overriding.ConfigFile != nil {
+		configFile := *overriding.ConfigFile
+		new.ConfigFile = &configFile
+	}
+	if overriding.Healthcheck != nil {
+		healthcheck := *overriding.Healthcheck
+		new.Healthcheck = &healthcheck
+	}
+
+	return new
+}
+
 func (def Definition) RawConfig() map[string]interface{} {
-	return map[string]interface{}{
+	raw := map[string]interface{}{
 		"type":            def.Type,
 		"system_packages": def.SystemPackages,
-		"config_file":     def.ConfigFile,
-		"healthcheck":     def.Healthcheck,
 		"assets":          def.Assets,
 	}
+
+	if def.ConfigFile != nil {
+		raw["config_file"] = def.ConfigFile
+	}
+	if def.Healthcheck != nil {
+		raw["healthcheck"] = def.Healthcheck
+	}
+
+	return raw
 }
 
 type WebserverType string

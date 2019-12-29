@@ -77,6 +77,10 @@ func NewKind(genericDef *builddef.BuildDef) (Definition, error) {
 		return def, err
 	}
 
+	if def.Webserver != nil {
+		*def.Webserver = webserver.DefaultDefinition().Merge(*def.Webserver)
+	}
+
 	def.MajMinVersion = extractMajMinVersion(def.Version)
 
 	if def.BaseImage == "" {
