@@ -287,20 +287,22 @@ type StageDefinition struct {
 	LockedPackages map[string]string
 	PlatformReqs   map[string]string
 	Webserver      *webserver.Definition
+	Locks          StageLocks
 }
 
 func (def *Definition) ResolveStageDefinition(
-	name string,
+	stageName string,
 	composerLockLoader func(*StageDefinition) error,
+	withLocks bool,
 ) (StageDefinition, error) {
 	var stageDef StageDefinition
-	stages, err := def.resolveStageChain(name)
+	stages, err := def.resolveStageChain(stageName)
 	if err != nil {
 		return stageDef, err
 	}
 
 	stageDef = mergeStages(def, stages...)
-	stageDef.Name = name
+	stageDef.Name = stageName
 
 	// @TODO: this should not be called here as composer.lock content
 	// won't change between stage resolution
@@ -332,6 +334,17 @@ func (def *Definition) ResolveStageDefinition(
 
 	inferExtensions(&stageDef)
 	inferSystemPackages(&stageDef)
+
+	if !withLocks {
+		return stageDef, nil
+	}
+
+	locks, ok := def.Locks.Stages[stageName]
+	if !ok {
+		return stageDef, xerrors.Errorf(
+			"no locks available for stage %q. Please update your lockfile", stageName)
+	}
+	stageDef.Locks = locks
 
 	return stageDef, nil
 }

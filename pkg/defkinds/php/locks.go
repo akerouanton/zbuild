@@ -123,7 +123,7 @@ func (h *PHPHandler) updateStagesLocks(
 	}
 
 	for name := range def.Stages {
-		stage, err := def.ResolveStageDefinition(name, composerLockLoader)
+		stage, err := def.ResolveStageDefinition(name, composerLockLoader, false)
 		if err != nil {
 			return nil, xerrors.Errorf("could not resolve stage %q: %w", name, err)
 		}

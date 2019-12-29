@@ -78,20 +78,12 @@ func (h *PHPHandler) Build(
 	composerLockLoader := func(stageDef *StageDefinition) error {
 		return LoadComposerLock(ctx, h.solver, stageDef)
 	}
-	stage, err := def.ResolveStageDefinition(stageName, composerLockLoader)
+	stage, err := def.ResolveStageDefinition(stageName, composerLockLoader, true)
 	if err != nil {
 		return state, img, xerrors.Errorf("could not resolve stage %q: %w", stageName, err)
 	}
 
-	locks, ok := def.Locks.Stages[stageName]
-	if !ok {
-		return state, img, xerrors.Errorf(
-			"could not build stage %q: no locks available. Please update your lockfile",
-			stageName,
-		)
-	}
-
-	state, img, err = h.buildPHP(ctx, def, stage, locks, buildOpts)
+	state, img, err = h.buildPHP(ctx, def, stage, buildOpts)
 	if err != nil {
 		err = xerrors.Errorf("could not build php stage: %w", err)
 		return state, img, err
@@ -115,7 +107,6 @@ func (h *PHPHandler) buildPHP(
 	ctx context.Context,
 	def Definition,
 	stage StageDefinition,
-	locks StageLocks,
 	buildOpts builddef.BuildOpts,
 ) (llb.State, *image.Image, error) {
 	state := llbutils.ImageSource(def.Locks.BaseImage, true)
@@ -129,12 +120,12 @@ func (h *PHPHandler) buildPHP(
 
 	composer := llbutils.ImageSource(defaultComposerImageTag, false)
 	state = llbutils.Copy(composer, "/usr/bin/composer", state, "/usr/bin/composer", "")
-	state, err = llbutils.InstallSystemPackages(state, llbutils.APT, locks.SystemPackages)
+	state, err = llbutils.InstallSystemPackages(state, llbutils.APT, stage.Locks.SystemPackages)
 	if err != nil {
 		return state, img, xerrors.Errorf("failed to add \"install system pacakges\" steps: %w", err)
 	}
 
-	state = InstallExtensions(state, stage.MajMinVersion, locks.Extensions)
+	state = InstallExtensions(state, stage.MajMinVersion, stage.Locks.Extensions)
 	state = llbutils.CopyExternalFiles(state, stage.ExternalFiles)
 
 	state = llbutils.Mkdir(state, "1000:1000", "/app", "/composer")

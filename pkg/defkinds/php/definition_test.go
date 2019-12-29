@@ -532,7 +532,7 @@ func TestResolveStageDefinition(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			stageDef, err := def.ResolveStageDefinition(tc.stage, tc.composerLockLoader)
+			stageDef, err := def.ResolveStageDefinition(tc.stage, tc.composerLockLoader, false)
 			if tc.expectedErr != nil {
 				if err == nil || err.Error() != tc.expectedErr.Error() {
 					t.Fatalf("Expected: %v\nGot: %v", tc.expectedErr, err)
