@@ -42,6 +42,69 @@ func (h *NodeJSHandler) WithSolver(solver statesolver.StateSolver) {
 	h.solver = solver
 }
 
+func (h *NodeJSHandler) DebugConfig(
+	buildOpts builddef.BuildOpts,
+) (interface{}, error) {
+	def, stageDef, err := h.loadDefs(buildOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	if !isWebserverStage(buildOpts.Stage) {
+		return stageDef, nil
+	}
+
+	// @TODO remove?
+	if *stageDef.Dev {
+		return nil, xerrors.Errorf("webserver cannot be built from dev stages")
+	}
+
+	webserverHandler, err := h.webserverHandler()
+	if err != nil {
+		return nil, err
+	}
+
+	newOpts, err := h.webserverBuildOpts(def, &llb.State{}, buildOpts)
+	return webserverHandler.DebugConfig(newOpts)
+}
+
+func isWebserverStage(stage string) bool {
+	return strings.HasPrefix(stage, "webserver-")
+}
+
+func (h *NodeJSHandler) webserverHandler() (registry.KindHandler, error) {
+	handler, err := registry.FindHandler("webserver")
+	if err != nil {
+		return nil, err
+	}
+	handler.WithSolver(h.solver)
+
+	return handler, nil
+}
+
+func (h *NodeJSHandler) webserverBuildOpts(
+	def Definition,
+	state *llb.State,
+	buildOpts builddef.BuildOpts,
+) (builddef.BuildOpts, error) {
+	var newOpts builddef.BuildOpts
+
+	locks, err := def.Locks.Webserver.RawLocks()
+	if err != nil {
+		return newOpts, err
+	}
+
+	newOpts = buildOpts
+	newOpts.Def = &builddef.BuildDef{
+		Kind:      "webserver",
+		RawConfig: def.Webserver.RawConfig(),
+		RawLocks:  locks,
+	}
+	newOpts.Source = state
+
+	return newOpts, nil
+}
+
 func (h *NodeJSHandler) Build(
 	ctx context.Context,
 	buildOpts builddef.BuildOpts,
@@ -49,23 +112,12 @@ func (h *NodeJSHandler) Build(
 	var state llb.State
 	var img *image.Image
 
-	def, err := NewKind(buildOpts.Def)
+	def, stageDef, err := h.loadDefs(buildOpts)
 	if err != nil {
 		return state, img, err
 	}
 
-	stageName := buildOpts.Stage
-	isWebserverBuild := false
-	if strings.HasPrefix(stageName, "webserver-") {
-		isWebserverBuild = true
-		stageName = strings.TrimPrefix(stageName, "webserver-")
-	}
-
-	stageDef, err := def.ResolveStageDefinition(stageName, true)
-	if err != nil {
-		return state, img, xerrors.Errorf("could not resolve stage %q: %w", stageName, err)
-	}
-
+	isWebserverBuild := isWebserverStage(buildOpts.Stage)
 	if isWebserverBuild && *stageDef.Dev {
 		return state, img, xerrors.Errorf("webserver cannot be built from dev stages")
 	}
@@ -171,24 +223,15 @@ func (h *NodeJSHandler) buildWebserver(
 	state llb.State,
 	buildOpts builddef.BuildOpts,
 ) (llb.State, *image.Image, error) {
-	webserverHandler, err := registry.FindHandler("webserver")
-	if err != nil {
-		return state, nil, err
-	}
-	webserverHandler.WithSolver(h.solver)
-
-	webserverLocks, err := def.Locks.Webserver.RawLocks()
+	webserverHandler, err := h.webserverHandler()
 	if err != nil {
 		return state, nil, err
 	}
 
-	newOpts := buildOpts
-	newOpts.Def = &builddef.BuildDef{
-		Kind:      "webserver",
-		RawConfig: def.Webserver.RawConfig(),
-		RawLocks:  webserverLocks,
+	newOpts, err := h.webserverBuildOpts(def, &state, buildOpts)
+	if err != nil {
+		return state, nil, err
 	}
-	newOpts.Source = &state
 
 	return webserverHandler.Build(ctx, newOpts)
 }

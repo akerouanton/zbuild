@@ -56,6 +56,65 @@ func (h *PHPHandler) WithSolver(solver statesolver.StateSolver) {
 	h.solver = solver
 }
 
+func (h *PHPHandler) DebugConfig(
+	buildOpts builddef.BuildOpts,
+) (interface{}, error) {
+	ctx := context.TODO()
+	def, stageDef, err := h.loadDefs(ctx, buildOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	if !isWebserverStage(buildOpts.Stage) {
+		return stageDef, nil
+	}
+
+	webserverHandler, err := h.webserverHandler()
+	if err != nil {
+		return nil, err
+	}
+
+	newOpts, err := h.webserverBuildOpts(def, &llb.State{}, buildOpts)
+	return webserverHandler.DebugConfig(newOpts)
+}
+
+func isWebserverStage(stage string) bool {
+	return strings.HasPrefix(stage, "webserver-")
+}
+
+func (h *PHPHandler) webserverHandler() (registry.KindHandler, error) {
+	handler, err := registry.FindHandler("webserver")
+	if err != nil {
+		return nil, err
+	}
+	handler.WithSolver(h.solver)
+
+	return handler, nil
+}
+
+func (h *PHPHandler) webserverBuildOpts(
+	def Definition,
+	state *llb.State,
+	buildOpts builddef.BuildOpts,
+) (builddef.BuildOpts, error) {
+	var newOpts builddef.BuildOpts
+
+	locks, err := def.Locks.Webserver.RawLocks()
+	if err != nil {
+		return newOpts, err
+	}
+
+	newOpts = buildOpts
+	newOpts.Def = &builddef.BuildDef{
+		Kind:      "webserver",
+		RawConfig: def.Webserver.RawConfig(),
+		RawLocks:  locks,
+	}
+	newOpts.Source = state
+
+	return newOpts, nil
+}
+
 func (h *PHPHandler) Build(
 	ctx context.Context,
 	buildOpts builddef.BuildOpts,
@@ -63,33 +122,18 @@ func (h *PHPHandler) Build(
 	var state llb.State
 	var img *image.Image
 
-	def, err := NewKind(buildOpts.Def)
+	def, stageDef, err := h.loadDefs(ctx, buildOpts)
 	if err != nil {
 		return state, img, err
 	}
 
-	stageName := buildOpts.Stage
-	isWebserverBuild := false
-	if strings.HasPrefix(stageName, "webserver-") {
-		isWebserverBuild = true
-		stageName = strings.TrimPrefix(stageName, "webserver-")
-	}
-
-	composerLockLoader := func(stageDef *StageDefinition) error {
-		return LoadComposerLock(ctx, h.solver, stageDef)
-	}
-	stage, err := def.ResolveStageDefinition(stageName, composerLockLoader, true)
-	if err != nil {
-		return state, img, xerrors.Errorf("could not resolve stage %q: %w", stageName, err)
-	}
-
-	state, img, err = h.buildPHP(ctx, def, stage, buildOpts)
+	state, img, err = h.buildPHP(ctx, def, stageDef, buildOpts)
 	if err != nil {
 		err = xerrors.Errorf("could not build php stage: %w", err)
 		return state, img, err
 	}
 
-	if !isWebserverBuild {
+	if !isWebserverStage(buildOpts.Stage) {
 		return state, img, nil
 	}
 
@@ -251,24 +295,15 @@ func (h *PHPHandler) buildWebserver(
 	img *image.Image,
 	buildOpts builddef.BuildOpts,
 ) (llb.State, *image.Image, error) {
-	webserverHandler, err := registry.FindHandler("webserver")
-	if err != nil {
-		return state, img, err
-	}
-	webserverHandler.WithSolver(h.solver)
-
-	webserverLocks, err := def.Locks.Webserver.RawLocks()
+	webserverHandler, err := h.webserverHandler()
 	if err != nil {
 		return state, img, err
 	}
 
-	newOpts := buildOpts
-	newOpts.Def = &builddef.BuildDef{
-		Kind:      "webserver",
-		RawConfig: def.Webserver.RawConfig(),
-		RawLocks:  webserverLocks,
+	newOpts, err := h.webserverBuildOpts(def, &state, buildOpts)
+	if err != nil {
+		return state, img, err
 	}
-	newOpts.Source = &state
 
 	return webserverHandler.Build(ctx, newOpts)
 }

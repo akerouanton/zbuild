@@ -1,0 +1,42 @@
+# syntax=akerouanton/zbuilder:nodejs9
+# @TODO: find a way to provision secrets with zcompose
+kind: php
+version: 7.3
+
+global_deps:
+    symfony/flex: "*"
+
+extensions:
+    # @TODO: wrong version of this ext is pinned for prod stage
+    # @TODO: check why ext requirements from composer.json aren't in the lockfile
+    apcu: "=5.1.17"
+    intl: "*"
+    pdo_pgsql: "*"
+
+sources:
+    - bin/console
+    - config/
+    - fixtures/
+    - public/
+    - src/
+
+config_files:
+    php.ini: docker/php/php.ini
+
+stateful_dirs:
+    - var/
+
+integrations:
+    - blackfire
+
+post_install:
+    - echo '<?php return [];' > .env.local.php
+    - APP_ENV=prod composer run-script --no-dev post-install-cmd
+
+webserver:
+    type: nginx
+    # @TODO: check if healthcheck is enabled by default
+    config_file: docker/nginx/nginx.conf
+    assets:
+        - from: public/
+          to: public/

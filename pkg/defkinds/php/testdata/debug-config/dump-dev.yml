@@ -1,0 +1,243 @@
+stage:
+  externalfiles:
+  - url: https://blackfire.io/api/v1/releases/probe/php/linux/amd64/72
+    compressed: true
+    pattern: blackfire-*.so
+    destination: /usr/local/lib/php/extensions/no-debug-non-zts-20180731/blackfire.so
+    checksum: ""
+    mode: 420
+    owner: ""
+  systempackages:
+    git: '*'
+    libicu-dev: '*'
+    libpcre3-dev: '*'
+    libpq-dev: '*'
+    libxml2-dev: '*'
+    libzip-dev: '*'
+    unzip: '*'
+    zlib1g-dev: '*'
+  fpm: true
+  command: null
+  extensions:
+    apcu: =5.1.17
+    ctype: '*'
+    date: '*'
+    dom: '*'
+    hash: '*'
+    iconv: '*'
+    intl: '*'
+    json: '*'
+    mbstring: '*'
+    openssl: '*'
+    pcre: '*'
+    pdo: '*'
+    pdo_pgsql: '*'
+    spl: '*'
+    tokenizer: '*'
+    xml: '*'
+    xmlwriter: '*'
+    zip: '*'
+  globaldeps:
+    symfony/flex: '*'
+  configfiles:
+    inifile: docker/php/php.ini
+    fpmconfigfile: null
+  composerdumpflags:
+    apcu: false
+    classmapauthoritative: true
+  sources:
+  - bin/console
+  - config/
+  - fixtures/
+  - public/
+  - src/
+  integrations:
+  - blackfire
+  statefuldirs:
+  - var/
+  healthcheck: false
+  postinstall:
+  - echo '<?php return [];' > .env.local.php
+  - APP_ENV=prod composer run-script --no-dev post-install-cmd
+name: dev
+baseimage: docker.io/library/php:7.3-fpm-buster
+version: "7.3"
+majminversion: "7.3"
+infer: true
+dev: true
+lockedpackages:
+  api-platform/api-pack: v1.2.1
+  api-platform/core: v2.5.1
+  composer/ca-bundle: 1.2.4
+  composer/semver: 1.5.0
+  composer/xdebug-handler: 1.4.0
+  csa/guzzle-bundle: v3.1.1
+  csa/guzzle-cache-middleware: v1.0.0
+  csa/guzzle-history-middleware: v1.0.0
+  csa/guzzle-stopwatch-middleware: v1.0.0
+  doctrine/annotations: v1.8.0
+  doctrine/cache: 1.9.1
+  doctrine/collections: 1.6.4
+  doctrine/common: v2.11.0
+  doctrine/data-fixtures: 1.4.0
+  doctrine/dbal: v2.10.0
+  doctrine/doctrine-bundle: 1.11.2
+  doctrine/doctrine-cache-bundle: 1.3.5
+  doctrine/doctrine-migrations-bundle: 2.1.2
+  doctrine/event-manager: 1.1.0
+  doctrine/inflector: 1.3.1
+  doctrine/instantiator: 1.3.0
+  doctrine/lexer: 1.2.0
+  doctrine/migrations: 2.2.0
+  doctrine/orm: v2.6.4
+  doctrine/persistence: 1.2.0
+  doctrine/reflection: v1.0.0
+  fig/link-util: 1.0.0
+  friendsofphp/php-cs-fixer: v2.16.0
+  fzaninotto/faker: v1.9.0
+  guzzlehttp/guzzle: 6.4.1
+  guzzlehttp/promises: v1.3.1
+  guzzlehttp/psr7: 1.6.1
+  hautelook/alice-bundle: v2.5.1
+  jdorn/sql-formatter: v1.2.17
+  justinrainbow/json-schema: 5.2.9
+  lcobucci/jwt: 3.3.1
+  lexik/jwt-authentication-bundle: v2.6.4
+  myclabs/deep-copy: 1.9.3
+  namshi/jose: 7.2.3
+  nelmio/alice: v3.5.7
+  nelmio/cors-bundle: 2.0.1
+  nikic/php-parser: v4.3.0
+  ocramius/package-versions: 1.5.1
+  ocramius/proxy-manager: 2.2.3
+  php-cs-fixer/diff: v1.3.0
+  phpdocumentor/reflection-common: 2.0.0
+  phpdocumentor/reflection-docblock: 4.3.2
+  phpdocumentor/type-resolver: 1.0.1
+  phpunit/php-code-coverage: 7.0.8
+  phpunit/php-file-iterator: 2.0.2
+  phpunit/php-text-template: 1.2.1
+  phpunit/php-token-stream: 3.1.1
+  psr/cache: 1.0.1
+  psr/container: 1.0.0
+  psr/http-message: 1.0.1
+  psr/link: 1.0.0
+  psr/log: 1.1.2
+  ralouphie/getallheaders: 3.0.3
+  ramsey/uuid: 3.8.0
+  ramsey/uuid-doctrine: 1.5.0
+  sebastian/code-unit-reverse-lookup: 1.0.1
+  sebastian/comparator: 3.0.2
+  sebastian/diff: 3.0.2
+  sebastian/environment: 4.2.2
+  sebastian/exporter: 3.1.2
+  sebastian/recursion-context: 3.0.0
+  sebastian/version: 2.0.1
+  sensiolabs/security-checker: v5.0.3
+  symfony/asset: v4.3.8
+  symfony/browser-kit: v4.3.8
+  symfony/cache: v4.3.8
+  symfony/cache-contracts: v1.1.7
+  symfony/config: v4.3.8
+  symfony/console: v4.3.8
+  symfony/css-selector: v4.3.8
+  symfony/debug: v4.3.8
+  symfony/dependency-injection: v4.3.8
+  symfony/doctrine-bridge: v4.3.8
+  symfony/dom-crawler: v4.3.8
+  symfony/dotenv: v4.3.8
+  symfony/event-dispatcher: v4.3.8
+  symfony/event-dispatcher-contracts: v1.1.7
+  symfony/expression-language: v4.3.8
+  symfony/filesystem: v4.3.8
+  symfony/finder: v4.3.8
+  symfony/flex: v1.4.8
+  symfony/framework-bundle: v4.3.8
+  symfony/http-client: v4.3.8
+  symfony/http-client-contracts: v1.1.8
+  symfony/http-foundation: v4.3.8
+  symfony/http-kernel: v4.3.8
+  symfony/inflector: v4.3.8
+  symfony/maker-bundle: v1.14.3
+  symfony/mercure: v0.2.0
+  symfony/mercure-bundle: v0.1.2
+  symfony/messenger: v4.3.8
+  symfony/mime: v4.3.8
+  symfony/options-resolver: v4.3.8
+  symfony/phpunit-bridge: v4.3.8
+  symfony/polyfill-intl-idn: v1.12.0
+  symfony/polyfill-mbstring: v1.12.0
+  symfony/polyfill-php73: v1.12.0
+  symfony/process: v4.3.8
+  symfony/profiler-pack: v1.0.4
+  symfony/property-access: v4.3.8
+  symfony/property-info: v4.3.8
+  symfony/routing: v4.3.8
+  symfony/security-bundle: v4.3.8
+  symfony/security-core: v4.3.8
+  symfony/security-csrf: v4.3.8
+  symfony/security-guard: v4.3.8
+  symfony/security-http: v4.3.8
+  symfony/serializer: v4.3.8
+  symfony/service-contracts: v1.1.8
+  symfony/stopwatch: v4.3.8
+  symfony/test-pack: v1.0.6
+  symfony/translation: v4.3.8
+  symfony/translation-contracts: v1.1.7
+  symfony/twig-bridge: v4.3.8
+  symfony/twig-bundle: v4.3.8
+  symfony/validator: v4.3.8
+  symfony/var-dumper: v4.3.8
+  symfony/var-exporter: v4.3.8
+  symfony/web-link: v4.3.8
+  symfony/web-profiler-bundle: v4.3.8
+  symfony/yaml: v4.3.8
+  theofidry/alice-data-fixtures: v1.1.1
+  theseer/tokenizer: 1.1.3
+  twig/twig: v2.12.2
+  webmozart/assert: 1.5.0
+  webonyx/graphql-php: v0.13.8
+  willdurand/negotiation: v2.3.1
+  zendframework/zend-code: 3.4.0
+  zendframework/zend-eventmanager: 3.2.1
+platformreqs:
+  ctype: '*'
+  date: '*'
+  dom: '*'
+  hash: '*'
+  iconv: '*'
+  json: '*'
+  mbstring: '*'
+  openssl: '*'
+  pcre: '*'
+  pdo: '*'
+  spl: '*'
+  tokenizer: '*'
+  xml: '*'
+  xmlwriter: '*'
+webserver:
+  type: nginx
+  systempackages: {}
+  configfile: docker/nginx/nginx.conf
+  healthcheck: true
+  assets:
+  - from: public/
+    to: public/
+  locks:
+    base_image: ""
+    system_packages: {}
+locks:
+  system_packages:
+    git: 1:2.20.1-2+deb10u1
+    libicu-dev: 63.1-6
+    libpcre3-dev: 2:8.39-12
+    libpq-dev: 11.5-1+deb10u1
+    libxml2-dev: 2.9.4+dfsg1-7+b3
+    libzip-dev: 1.5.1-4
+    unzip: 6.0-23+deb10u1
+    zlib1g-dev: 1:1.2.11.dfsg-1
+  extensions:
+    apcu: 5.1.17
+    intl: '*'
+    pdo_pgsql: '*'
+    zip: '*'

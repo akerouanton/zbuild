@@ -1,6 +1,7 @@
 package php
 
 import (
+	"context"
 	"fmt"
 	"path"
 	"strings"
@@ -12,6 +13,35 @@ import (
 	"golang.org/x/xerrors"
 	"gopkg.in/yaml.v2"
 )
+
+func (h *PHPHandler) loadDefs(
+	ctx context.Context,
+	buildOpts builddef.BuildOpts,
+) (Definition, StageDefinition, error) {
+	var def Definition
+	var stageDef StageDefinition
+
+	def, err := NewKind(buildOpts.Def)
+	if err != nil {
+		return def, stageDef, err
+	}
+
+	stageName := buildOpts.Stage
+	if strings.HasPrefix(stageName, "webserver-") {
+		stageName = strings.TrimPrefix(stageName, "webserver-")
+	}
+
+	composerLockLoader := func(stageDef *StageDefinition) error {
+		return LoadComposerLock(ctx, h.solver, stageDef)
+	}
+
+	stageDef, err = def.ResolveStageDefinition(stageName, composerLockLoader, true)
+	if err != nil {
+		return def, stageDef, xerrors.Errorf("could not resolve stage %q: %w", stageName, err)
+	}
+
+	return def, stageDef, nil
+}
 
 // defaultDefinition returns a Definition with all its fields initialized with
 // default values.

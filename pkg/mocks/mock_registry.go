@@ -52,6 +52,19 @@ func (mr *MockKindHandlerMockRecorder) Build(arg0, arg1 interface{}) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Build", reflect.TypeOf((*MockKindHandler)(nil).Build), arg0, arg1)
 }
 
+// DebugConfig mocks base method
+func (m *MockKindHandler) DebugConfig(arg0 builddef.BuildOpts) (interface{}, error) {
+	ret := m.ctrl.Call(m, "DebugConfig", arg0)
+	ret0, _ := ret[0].(interface{})
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DebugConfig indicates an expected call of DebugConfig
+func (mr *MockKindHandlerMockRecorder) DebugConfig(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DebugConfig", reflect.TypeOf((*MockKindHandler)(nil).DebugConfig), arg0)
+}
+
 // UpdateLocks mocks base method
 func (m *MockKindHandler) UpdateLocks(arg0 context.Context, arg1 pkgsolver.PackageSolver, arg2 *builddef.BuildDef) (builddef.Locks, error) {
 	ret := m.ctrl.Call(m, "UpdateLocks", arg0, arg1, arg2)

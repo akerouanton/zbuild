@@ -31,6 +31,12 @@ func RegisterKind(registry *registry.KindRegistry) {
 	registry.Register("webserver", &WebserverHandler{})
 }
 
+func (h *WebserverHandler) DebugConfig(
+	buildOpts builddef.BuildOpts,
+) (interface{}, error) {
+	return NewKind(buildOpts.Def)
+}
+
 func (h *WebserverHandler) Build(
 	ctx context.Context,
 	buildOpts builddef.BuildOpts,

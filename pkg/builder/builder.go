@@ -15,6 +15,7 @@ import (
 	"github.com/moby/buildkit/exporter/containerimage/exptypes"
 	"github.com/moby/buildkit/frontend/gateway/client"
 	"golang.org/x/xerrors"
+	"gopkg.in/yaml.v2"
 )
 
 // These consts come from: https://github.com/moby/buildkit/blob/master/frontend/dockerfile/builder/build.go
@@ -137,6 +138,37 @@ func (b Builder) Debug(
 	}
 
 	return state, nil
+}
+
+func (b Builder) DumpConfig(
+	solver statesolver.StateSolver,
+	file,
+	stage string,
+) ([]byte, error) {
+	buildOpts := builddef.NewBuildOpts(file)
+	buildOpts.Stage = stage
+	// @TODO: remove?
+	buildOpts.SessionID = "<SESSION-ID>"
+
+	ctx := context.Background()
+	def, err := builddef.Load(ctx, solver, buildOpts)
+	if err != nil {
+		return nil, err
+	}
+	buildOpts.Def = def
+
+	handler, err := b.Registry.FindHandler(def.Kind)
+	if err != nil {
+		return nil, err
+	}
+	handler.WithSolver(solver)
+
+	dumpable, err := handler.DebugConfig(buildOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	return yaml.Marshal(dumpable)
 }
 
 func (b Builder) UpdateLockFile(

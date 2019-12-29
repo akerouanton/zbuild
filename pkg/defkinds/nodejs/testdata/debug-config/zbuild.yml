@@ -1,0 +1,22 @@
+# syntax=akerouanton/zbuilder:nodejs8
+kind: nodejs
+frontend: true
+version: 12
+
+build_command: yarn build
+
+stages:
+    dev:
+        system_packages:
+            chromium: "*"
+        global_packages:
+            api-platform/client-generator: "*"
+            puppeteer: "1.10.0"
+        command: yarn start
+
+webserver:
+    type: nginx
+    # @TODO: check if the healthcheck is enabled
+    assets:
+        - from: build/
+          to: build/
