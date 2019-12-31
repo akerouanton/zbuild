@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"strings"
 	"testing"
 
 	"github.com/NiR-/zbuild/pkg/statesolver"
@@ -129,7 +130,7 @@ func TestDockerReadFile(t *testing.T) {
 			res, err := solver.ReadFile(ctx, tc.path, tc.opt)
 
 			if tc.expectedErr != nil {
-				if err == nil || err.Error() != tc.expectedErr.Error() {
+				if err == nil || !strings.Contains(err.Error(), tc.expectedErr.Error()) {
 					t.Fatalf("Expected error: %v\nGot: %v", tc.expectedErr, err)
 				}
 				return
