@@ -176,6 +176,7 @@ func successfullyBuildFromGitContextTC(mockCtrl *gomock.Controller) testCase {
 
 	ctx := context.TODO()
 	buildOpts := builddef.BuildOpts{
+		// @TODO: define the root dir from the context as the base path of the zbuildfile
 		File:        "zbuild.yml",
 		LockFile:    "zbuild.lock",
 		Stage:       "dev",
