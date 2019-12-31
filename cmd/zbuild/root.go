@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"os"
 
 	_ "github.com/NiR-/zbuild/pkg/defkinds/php"
@@ -35,6 +36,8 @@ func newDockerSolver(rootDir string) statesolver.DockerSolver {
 	if err != nil {
 		logrus.Fatalf("%+v", err)
 	}
+
+	docker.NegotiateAPIVersion(context.TODO())
 
 	if rootDir == "" {
 		var err error

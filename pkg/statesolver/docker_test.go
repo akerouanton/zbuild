@@ -27,6 +27,8 @@ func newDockerClient(t *testing.T) *client.Client {
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	c.NegotiateAPIVersion(context.TODO())
 	return c
 }
 
