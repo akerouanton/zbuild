@@ -1,0 +1,17 @@
+language: go
+
+go:
+  - "1.12"
+
+services:
+  - docker
+
+env:
+  - GO111MODULE=on
+
+script:
+  - make test
+
+cache:
+  directories:
+    - /home/travis/gopath/pkg
