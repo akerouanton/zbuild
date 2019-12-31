@@ -19,9 +19,10 @@ import (
 
 // These consts come from: https://github.com/moby/buildkit/blob/master/frontend/dockerfile/builder/build.go
 const (
-	keyTarget      = "target"
-	keyNameContext = "contextkey"
-	keyFilename    = "filename"
+	keyTarget        = "target"
+	keyContext       = "context"
+	keyDockerContext = "contextkey"
+	keyFilename      = "filename"
 )
 
 type Builder struct {
@@ -49,7 +50,9 @@ func buildOptsFromBuildkitOpts(c client.Client) builddef.BuildOpts {
 	}
 
 	contextName := "context"
-	if v, ok := opts[keyNameContext]; ok {
+	if v, ok := opts[keyDockerContext]; ok {
+		contextName = v
+	} else if v, ok := opts[keyContext]; ok {
 		contextName = v
 	}
 

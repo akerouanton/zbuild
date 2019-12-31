@@ -106,7 +106,8 @@ func Mkdir(state llb.State, owner string, dirs ...string) llb.State {
 		action := llb.Mkdir(dir, 0750,
 			llb.WithParents(true),
 			llb.WithUser(owner))
-		state = state.File(action)
+		state = state.File(action,
+			llb.WithCustomNamef("Mkdir %s", strings.Join(dirs, " ")))
 	}
 
 	return state
@@ -230,4 +231,20 @@ func CopyExternalFiles(state llb.State, externalFiles []ExternalFile) llb.State 
 	}
 
 	return state
+}
+
+func BuildContext(contextRef string, opts ...llb.LocalOption) llb.State {
+	if strings.HasPrefix(contextRef, "git://") {
+		return gitContext(contextRef)
+	}
+	return llb.Local(contextRef, opts...)
+}
+
+func gitContext(url string) llb.State {
+	parts := strings.SplitN(url, "#", 2)
+	ref := ""
+	if len(parts) == 2 {
+		ref = parts[1]
+	}
+	return llb.Git(parts[0], ref)
 }

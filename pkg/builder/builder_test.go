@@ -33,6 +33,7 @@ func TestBuilder(t *testing.T) {
 	testcases := map[string]func(*gomock.Controller) testCase{
 		"successfully build default stage and file":                 successfullyBuildDefaultStageAndFileTC,
 		"successfully build custom stage and file":                  successfullyBuildCustomStageAndFileTC,
+		"successfully build from git context":                       successfullyBuildFromGitContextTC,
 		"fail to read zbuild.yml file":                              failToReadYmlTC,
 		"failing to read zbuild.lock file doesn't prevent building": failToReadLockTC,
 		"fail to find a suitable kind handler":                      failToFindASutableKindHandlerTC,
@@ -114,7 +115,72 @@ func successfullyBuildDefaultStageAndFileTC(mockCtrl *gomock.Controller) testCas
 		LockFile:    "zbuild.lock",
 		Stage:       "dev",
 		SessionID:   "<SESSION-ID>",
-		ContextName: "context",
+		ContextName: "some-context-name",
+	}
+	state := llb.State{}
+	img := image.Image{
+		Image: specs.Image{
+			Author: "zbuild",
+		},
+	}
+	handler := mocks.NewMockKindHandler(mockCtrl)
+	handler.EXPECT().WithSolver(gomock.Any()).Times(1)
+	handler.EXPECT().Build(
+		ctx, MatchBuildOpts(buildOpts),
+	).Return(state, &img, nil)
+
+	registry := registry.NewKindRegistry()
+	registry.Register("php", handler)
+
+	refImage := llbtest.NewMockReference(mockCtrl)
+	resImg := &client.Result{
+		Refs: map[string]client.Reference{"linux/amd64": refImage},
+		Ref:  refImage,
+	}
+	c.EXPECT().Solve(gomock.Any(), gomock.Any()).Return(resImg, nil)
+
+	imgConfig := `{"author":"zbuild","architecture":"","os":"","rootfs":{"type":"","diff_ids":null},"config":{}}`
+	return testCase{
+		client:   c,
+		solver:   solver,
+		registry: registry,
+		expectedRes: &client.Result{
+			Refs: map[string]client.Reference{"linux/amd64": refImage},
+			Ref:  refImage,
+			Metadata: map[string][]byte{
+				"containerimage.config": []byte(imgConfig),
+			},
+		},
+	}
+}
+
+func successfullyBuildFromGitContextTC(mockCtrl *gomock.Controller) testCase {
+	c := llbtest.NewMockClient(mockCtrl)
+	c.EXPECT().BuildOpts().AnyTimes().Return(client.BuildOpts{
+		SessionID: "<SESSION-ID>",
+		Opts: map[string]string{
+			"context": "git://github.com/some/repo",
+		},
+	})
+
+	solver := mocks.NewMockStateSolver(mockCtrl)
+	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
+
+	solver.EXPECT().ReadFile(
+		gomock.Any(), "zbuild.yml", gomock.Any(),
+	).Return(zbuildYml, nil)
+
+	solver.EXPECT().ReadFile(
+		gomock.Any(), "zbuild.lock", gomock.Any(),
+	).Return(zbuildLock, nil)
+
+	ctx := context.TODO()
+	buildOpts := builddef.BuildOpts{
+		File:        "zbuild.yml",
+		LockFile:    "zbuild.lock",
+		Stage:       "dev",
+		SessionID:   "<SESSION-ID>",
+		ContextName: "git://github.com/some/repo",
 	}
 	state := llb.State{}
 	img := image.Image{

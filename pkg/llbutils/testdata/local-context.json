@@ -1,0 +1,48 @@
+[
+  {
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:978c90de88f1869cc1690ab0b6968f0372ddddccd65285cc7cff220682f2d01b",
+          "index": 0
+        }
+      ],
+      "Op": null
+    },
+    "Digest": "sha256:1435889a4b073ed00b1400751bb00b17bc487d22934d2a26c036c79a9e8526c0",
+    "OpMetadata": {
+      "caps": {
+        "constraints": true,
+        "meta.description": true,
+        "platform": true
+      }
+    }
+  },
+  {
+    "Op": {
+      "Op": {
+        "Source": {
+          "identifier": "local://context",
+          "attrs": {
+            "local.includepattern": "[\"some\",\"file\"]",
+            "local.session": "\u003cSESSION-ID\u003e",
+            "local.sharedkeyhint": "some-shared-key-hint"
+          }
+        }
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:978c90de88f1869cc1690ab0b6968f0372ddddccd65285cc7cff220682f2d01b",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "load some file"
+      },
+      "caps": {
+        "source.local": true,
+        "source.local.includepatterns": true,
+        "source.local.sessionid": true,
+        "source.local.sharedkeyhint": true
+      }
+    }
+  }
+]
