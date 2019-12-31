@@ -27,6 +27,8 @@ func newDockerClient(t *testing.T) *client.Client {
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	c.NegotiateAPIVersion(context.TODO())
 	return c
 }
 
@@ -76,7 +78,7 @@ func initFailToFetchFromNonexistantImageTC(t *testing.T, solver statesolver.Dock
 	return dockerReadFileTC{
 		opt:         solver.FromImage("akerouanton/nopenopenope"),
 		path:        "/etc/os-release",
-		expectedErr: xerrors.New("failed to read /etc/os-release from akerouanton/nopenopenope: Error response from daemon: pull access denied for akerouanton/nopenopenope, repository does not exist or may require 'docker login': denied: requested access to the resource is denied"),
+		expectedErr: xerrors.New("failed to read /etc/os-release from akerouanton/nopenopenope: Error response from daemon: pull access denied for akerouanton/nopenopenope, repository does not exist or may require 'docker login'"),
 	}
 }
 
