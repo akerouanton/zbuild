@@ -1,0 +1,5 @@
+kind: nodejs
+base: docker.io/library/node:12-buster-slim
+
+system_packages:
+  curl: "*"

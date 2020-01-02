@@ -1,0 +1,6 @@
+version: 12
+stages:
+  dev:
+    from: prod  
+  prod:
+    from: dev

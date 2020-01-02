@@ -1,0 +1,2 @@
+version: 12
+base: docker.io/library/node:12

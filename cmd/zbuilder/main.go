@@ -6,6 +6,7 @@ import (
 	"github.com/NiR-/zbuild/pkg/builder"
 	_ "github.com/NiR-/zbuild/pkg/defkinds/php"
 	_ "github.com/NiR-/zbuild/pkg/defkinds/webserver"
+	_ "github.com/NiR-/zbuild/pkg/defkinds/nodejs"
 	"github.com/NiR-/zbuild/pkg/registry"
 	"github.com/NiR-/zbuild/pkg/statesolver"
 	"github.com/moby/buildkit/frontend/gateway/client"

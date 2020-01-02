@@ -1,0 +1,188 @@
+[
+  {
+    "RawOp": "GnwKD2xvY2FsOi8vY29udGV4dBImChRsb2NhbC5pbmNsdWRlcGF0dGVybhIOWyJuZ2lueC5jb25mIl0SHQoNbG9jYWwuc2Vzc2lvbhIMPFNFU1NJT04tSUQ+EiIKE2xvY2FsLnNoYXJlZGtleWhpbnQSC2NvbmZpZy1maWxlWgA=",
+    "Op": {
+      "Op": {
+        "Source": {
+          "identifier": "local://context",
+          "attrs": {
+            "local.includepattern": "[\"nginx.conf\"]",
+            "local.session": "\u003cSESSION-ID\u003e",
+            "local.sharedkeyhint": "config-file"
+          }
+        }
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:06f33e5827a64a3d37fbbe5832c3dc6e525ad97f3f735d3b0525b402834ac61b",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "load config file from build context"
+      },
+      "caps": {
+        "source.local": true,
+        "source.local.includepatterns": true,
+        "source.local.sessionid": true,
+        "source.local.sharedkeyhint": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1Njo2YTRmMzdhMWVkMTZiMTAyYTc4MzljNmJiZTE0MGU0M2M1ZGVmMDI4MjM1N2U5NWRkMjhiYTQ0MWY3NWJiZDBj",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:6a4f37a1ed16b102a7839c6bbe140e43c5def0282357e95dd28ba441f75bbd0c",
+          "index": 0
+        }
+      ],
+      "Op": null
+    },
+    "Digest": "sha256:5cbd20f3674930e4428691f29f9f7524be63954c655e921d9073cbcb46ab2aca",
+    "OpMetadata": {
+      "caps": {
+        "constraints": true,
+        "meta.description": true,
+        "platform": true
+      }
+    }
+  },
+  {
+    "RawOp": "Gi8KLWRvY2tlci1pbWFnZTovL2RvY2tlci5pby9saWJyYXJ5L25naW54OmxhdGVzdFIOCgVhbWQ2NBIFbGludXhaAA==",
+    "Op": {
+      "Op": {
+        "Source": {
+          "identifier": "docker-image://docker.io/library/nginx:latest"
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:62549b609c62be5d4a072c8b1697ba6e0f40e59bf6b340565f5132922031518b",
+    "OpMetadata": {
+      "caps": {
+        "source.image": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1NjplMzc1ZWVjMjVlYTJiMmUyMWNkM2ViYjI1NDcwMzhhZGRkYWVlN2M1MmM2NGJjN2ZkZmE5OGNmY2YxYjYxYjIwCkkKR3NoYTI1NjowNmYzM2U1ODI3YTY0YTNkMzdmYmJlNTgzMmMzZGM2ZTUyNWFkOTdmM2Y3MzVkM2IwNTI1YjQwMjgzNGFjNjFiIlQSUhABIk4KCy9uZ2lueC5jb25mEhUvZXRjL25naW54L25naW54LmNvbmYaCgoDEOgHEgMQ6Acg////////////ASgBMAFAAUgBWP///////////wFSDgoFYW1kNjQSBWxpbnV4WgA=",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:e375eec25ea2b2e21cd3ebb2547038adddaee7c52c64bc7fdfa98cfcf1b61b20",
+          "index": 0
+        },
+        {
+          "digest": "sha256:06f33e5827a64a3d37fbbe5832c3dc6e525ad97f3f735d3b0525b402834ac61b",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "File": {
+          "actions": [
+            {
+              "input": 0,
+              "secondaryInput": 1,
+              "output": 0,
+              "Action": {
+                "Copy": {
+                  "src": "/nginx.conf",
+                  "dest": "/etc/nginx/nginx.conf",
+                  "owner": {
+                    "user": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    },
+                    "group": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    }
+                  },
+                  "mode": -1,
+                  "followSymlink": true,
+                  "dirCopyContents": true,
+                  "createDestPath": true,
+                  "allowWildcard": true,
+                  "timestamp": -1
+                }
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:6a4f37a1ed16b102a7839c6bbe140e43c5def0282357e95dd28ba441f75bbd0c",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Copy nginx.conf"
+      },
+      "caps": {
+        "file.base": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1Njo2MjU0OWI2MDljNjJiZTVkNGEwNzJjOGIxNjk3YmE2ZTBmNDBlNTliZjZiMzQwNTY1ZjUxMzI5MjIwMzE1MThiEo4CCoYCCgcvYmluL3NoCgItbwoHZXJyZXhpdAoCLWMKZWFwdC1nZXQgdXBkYXRlOyBhcHQtZ2V0IGluc3RhbGwgLXkgLS1uby1pbnN0YWxsLXJlY29tbWVuZHMgY3VybD03LjY0LjAtNDsgcm0gLXJmIC92YXIvbGliL2FwdC9saXN0cy8qEkFQQVRIPS91c3IvbG9jYWwvc2JpbjovdXNyL2xvY2FsL2JpbjovdXNyL3NiaW46L3Vzci9iaW46L3NiaW46L2JpbhIUTkdJTlhfVkVSU0lPTj0xLjE3LjYSEU5KU19WRVJTSU9OPTAuMy43EhRQS0dfUkVMRUFTRT0xfmJ1c3RlchoBLxIDGgEvUg4KBWFtZDY0EgVsaW51eFoA",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:62549b609c62be5d4a072c8b1697ba6e0f40e59bf6b340565f5132922031518b",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "Exec": {
+          "meta": {
+            "args": [
+              "/bin/sh",
+              "-o",
+              "errexit",
+              "-c",
+              "apt-get update; apt-get install -y --no-install-recommends curl=7.64.0-4; rm -rf /var/lib/apt/lists/*"
+            ],
+            "env": [
+              "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+              "NGINX_VERSION=1.17.6",
+              "NJS_VERSION=0.3.7",
+              "PKG_RELEASE=1~buster"
+            ],
+            "cwd": "/"
+          },
+          "mounts": [
+            {
+              "input": 0,
+              "dest": "/",
+              "output": 0
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:e375eec25ea2b2e21cd3ebb2547038adddaee7c52c64bc7fdfa98cfcf1b61b20",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Install system packages (curl=7.64.0-4)"
+      },
+      "caps": {
+        "exec.meta.base": true,
+        "exec.mount.bind": true
+      }
+    }
+  }
+]
