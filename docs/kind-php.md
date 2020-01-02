@@ -216,6 +216,7 @@ kind: php
 
 base: <string> # (required if version is empty)
 version: <string> # (required if base is empty)
+alpine: <bool> # (default: false)
 fpm: <bool> # (default: true)
 infer: <bool>  # (default: true)
 
@@ -238,7 +239,7 @@ detailed list of what should be available in your base image.
 You can define the `base` stage at the root of the definition. Subsequent
 stages defined in `stages` will then inherit parameters from the `base` stage.
 
-See a [full example below](#example).
+See a [full example below](#full-example).
 
 #### Source context - `<source_context>`
 
@@ -375,18 +376,7 @@ When merging parent stages, the whole map (if declared) erases parent values.
 
 #### Sources - `<sources>`
 
-This is the list of source files and directories you want to copy in the image.
-The paths have to be relative to the root of the source context.
-
-```yaml
-source_dirs:
-  - <string>
-  - <string>
-```
-
-When merging with parent stages, all the `source_dirs` lists are merged
-together. Thus you can't remove a source dir from a parent stage (you should
-reorganize your stages instead).
+See [here](generic-parameters.md#sources---sources).
 
 #### Integrations - `<integrations>`
 
@@ -405,25 +395,7 @@ reorganize your stages instead).
 
 #### Stateful dirs - `<stateful_dirs>`
 
-This is the list of directories containing stateful data that should be
-preserved  across container restart and deployments. zbuild marks these
-directories as volumes but you stil have to configure a persistent volume when
-you run the image).
-
-Common example of such stateful dirs are: upload folders, PHP session storage
-folders, etc...
-
-```yaml
-stateful_dirs:
-  - <string>
-```
-
-These paths can be either relative to the root of the project directory in the 
-image (e.g. `/app`) or absolute.
-
-When merging with parent stages, all the `stateful_dirs` are merged together.
-You can't remove a stateful dir from a parent stage (you should reorganize your
-stages instead).
+See [here](generic-parameters.md#stateful-dirs---stateful_dirs).
 
 #### Post install steps - `<post_install>`
 
@@ -442,9 +414,10 @@ stage.
 
 #### Healthcheck - `<healthcheck>`
 
-The `healthcheck` parameter can be used to preconfigure Docker healthcheck for
-this image. For php kind, it's either of type `fcgi` or `cmd`. See [here](generic-parameters.md#healthcheck)
-for more details about healthcheck parameter.
+The `healthcheck` parameter can be used to preconfigure container healthcheck
+for this image. For php kind, it's either of type `fcgi` or `cmd`. See
+[here](generic-parameters.md#healthcheck) for more details about healthcheck
+parameter.
 
 The default healthcheck for php kind is:
 
@@ -470,7 +443,7 @@ ping.path = /ping
 ## Full example
 
 ```yml
-# syntax=akerouanton/zbuilder:test3
+# syntax=akerouanton/zbuilder:v0.1
 kind: php
 version: 7.4
 fpm: true

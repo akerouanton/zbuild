@@ -10,6 +10,9 @@ Following parameters are common to many or all kinds of definition:
   * [`cmd` healthcheck](#cmd-healthcheck)
   * [`fcgi` healthcheck](#fcgi-healthcheck)
   * [`http` healthcheck](#http-healthcheck)
+* [Sources - `<sources>`](#sources---sources)
+* [Config files - `<config_files>`](#config-files---config_files)
+* [Stateful dirs - `<stateful_dirs>`](#stateful-dirs---stateful_dirs)
 
 #### Config files - `<config_files>`
 
@@ -208,3 +211,56 @@ healthcheck:
 The `http` healthcheck type uses `curl` to send a request to the given `path` to
 `127.0.0.1`. The healthcheck prober expects the HTTP request to return the
 given `expected` parameter.
+
+#### Sources - `<sources>`
+
+This is the list of source files and directories you want to copy in the image.
+The paths have to be relative to the root of the source context.
+
+```yaml
+sources:
+  - <string>
+  - <string>
+```
+
+When merging with parent stages, all the `sources` lists are merged
+together. Thus you can't remove a source dir from a parent stage (you should
+reorganize your stages instead).
+
+#### Config files - `<config_files>`
+
+The `config_files` map takes two parameters pointing to config files in the
+build context. Both paths should be relative to the context root dir (the
+directory at the end of `docker build ...`).
+
+```yaml
+# This is empty by default
+config_files:
+  php.ini: <local_path>
+  fpm.conf: <local_path>
+```
+
+Both can be set independently. When merging parent stages, each property is
+overriden independently too.
+
+#### Stateful dirs - `<stateful_dirs>`
+
+This is the list of directories containing stateful data that should be
+preserved  across container restart and deployments. zbuild marks these
+directories as volumes but you stil have to configure a persistent volume when
+you run the image).
+
+Common example of such stateful dirs are: upload folders, session storage
+folders, etc...
+
+```yaml
+stateful_dirs:
+  - <string>
+```
+
+These paths can be either relative to the root of the project directory in the 
+image (e.g. `/app`) or absolute.
+
+When merging with parent stages, all the `stateful_dirs` are merged together.
+You can't remove a stateful dir from a parent stage (you should reorganize your
+stages instead).
