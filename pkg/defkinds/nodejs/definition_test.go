@@ -8,6 +8,7 @@ import (
 
 	"github.com/NiR-/zbuild/pkg/builddef"
 	"github.com/NiR-/zbuild/pkg/defkinds/nodejs"
+	"github.com/NiR-/zbuild/pkg/defkinds/webserver"
 	"github.com/NiR-/zbuild/pkg/llbutils"
 	"github.com/go-test/deep"
 	"github.com/golang/mock/gomock"
@@ -54,16 +55,30 @@ func initSuccessfullyParseRawDefinitionWithoutStagesTC() newDefinitionTC {
 			Version:    "12",
 			BaseImage:  "docker.io/library/node:12-buster-slim",
 			IsFrontend: true,
-			Stages: map[string]nodejs.DerivedStage{
+			Stages: nodejs.DerivedStageSet{
 				"dev": {
 					DeriveFrom: "base",
 					Dev:        &devStageDevMode,
-					Stage:      nodejs.Stage{},
+					Stage: nodejs.Stage{
+						ExternalFiles:  []llbutils.ExternalFile{},
+						SystemPackages: map[string]string{},
+						GlobalPackages: map[string]string{},
+						ConfigFiles:    map[string]string{},
+						SourceDirs:     []string{},
+						StatefulDirs:   []string{},
+					},
 				},
 				"prod": {
 					DeriveFrom: "base",
 					Dev:        &prodStageDevMode,
-					Stage:      nodejs.Stage{},
+					Stage: nodejs.Stage{
+						ExternalFiles:  []llbutils.ExternalFile{},
+						SystemPackages: map[string]string{},
+						GlobalPackages: map[string]string{},
+						ConfigFiles:    map[string]string{},
+						SourceDirs:     []string{},
+						StatefulDirs:   []string{},
+					},
 				},
 			},
 		},
@@ -88,20 +103,34 @@ func initSuccessfullyParseRawDefinitionWithStagesTC() newDefinitionTC {
 				ConfigFiles:    map[string]string{},
 				GlobalPackages: map[string]string{},
 				Healthcheck:    &baseStageHealthcheck,
+				SourceDirs:     []string{},
+				StatefulDirs:   []string{},
 			},
 			Version:   "12",
 			BaseImage: "docker.io/library/node:12-buster-slim",
-			Stages: map[string]nodejs.DerivedStage{
+			Stages: nodejs.DerivedStageSet{
 				"dev": {
 					Dev: &devStageDevMode,
 					Stage: nodejs.Stage{
-						Command: &cmdDev,
+						Command:        &cmdDev,
+						ExternalFiles:  []llbutils.ExternalFile{},
+						SystemPackages: map[string]string{},
+						ConfigFiles:    map[string]string{},
+						GlobalPackages: map[string]string{},
+						SourceDirs:     []string{},
+						StatefulDirs:   []string{},
 					},
 				},
 				"prod": {
 					Dev: &prodStageDevMode,
 					Stage: nodejs.Stage{
-						Command: &cmdProd,
+						Command:        &cmdProd,
+						ExternalFiles:  []llbutils.ExternalFile{},
+						SystemPackages: map[string]string{},
+						ConfigFiles:    map[string]string{},
+						GlobalPackages: map[string]string{},
+						SourceDirs:     []string{},
+						StatefulDirs:   []string{},
 					},
 				},
 				"worker": {
@@ -774,6 +803,325 @@ func TestStageMerge(t *testing.T) {
 
 			if diff := deep.Equal(base, tc.base()); diff != nil {
 				t.Fatalf("Base stages don't match: %v", diff)
+			}
+		})
+	}
+}
+
+type mergeDefinitionTC struct {
+	base       func() nodejs.Definition
+	overriding nodejs.Definition
+	expected   func() nodejs.Definition
+}
+
+func initMergeBaseStageWithBaseTC() mergeDefinitionTC {
+	return mergeDefinitionTC{
+		base: func() nodejs.Definition {
+			return nodejs.Definition{
+				BaseStage: nodejs.Stage{
+					SourceDirs: []string{"src/"},
+				},
+			}
+		},
+		overriding: nodejs.Definition{
+			BaseStage: nodejs.Stage{
+				SourceDirs: []string{"bin/"},
+			},
+		},
+		expected: func() nodejs.Definition {
+			baseStage := emptyStage()
+			baseStage.SourceDirs = []string{"src/", "bin/"}
+
+			return nodejs.Definition{
+				BaseStage: baseStage,
+				Stages:    nodejs.DerivedStageSet{},
+			}
+		},
+	}
+}
+
+func initMergeBaseStageWithoutBaseTC() mergeDefinitionTC {
+	return mergeDefinitionTC{
+		base: func() nodejs.Definition {
+			return nodejs.Definition{}
+		},
+		overriding: nodejs.Definition{
+			BaseStage: nodejs.Stage{
+				SourceDirs: []string{"bin/"},
+			},
+		},
+		expected: func() nodejs.Definition {
+			baseStage := emptyStage()
+			baseStage.SourceDirs = []string{"bin/"}
+
+			return nodejs.Definition{
+				BaseStage: baseStage,
+				Stages:    nodejs.DerivedStageSet{},
+			}
+		},
+	}
+}
+
+func initMergeBaseImageWithBaseTC() mergeDefinitionTC {
+	return mergeDefinitionTC{
+		base: func() nodejs.Definition {
+			return nodejs.Definition{
+				BaseImage: "docker.io/library/nodejs:latest",
+			}
+		},
+		overriding: nodejs.Definition{
+			BaseImage: "docker.io/library/nodejs:v11.5-alpine",
+		},
+		expected: func() nodejs.Definition {
+			return nodejs.Definition{
+				BaseImage: "docker.io/library/nodejs:v11.5-alpine",
+				BaseStage: emptyStage(),
+				Stages:    nodejs.DerivedStageSet{},
+			}
+		},
+	}
+}
+
+func initMergeBaseImageWithoutBaseTC() mergeDefinitionTC {
+	return mergeDefinitionTC{
+		base: func() nodejs.Definition {
+			return nodejs.Definition{}
+		},
+		overriding: nodejs.Definition{
+			BaseImage: "docker.io/library/nodejs:v11.5-alpine",
+		},
+		expected: func() nodejs.Definition {
+			return nodejs.Definition{
+				BaseImage: "docker.io/library/nodejs:v11.5-alpine",
+				BaseStage: emptyStage(),
+				Stages:    nodejs.DerivedStageSet{},
+			}
+		},
+	}
+}
+
+func initMergeVersionWithBaseTC() mergeDefinitionTC {
+	return mergeDefinitionTC{
+		base: func() nodejs.Definition {
+			return nodejs.Definition{
+				Version: "11.5",
+			}
+		},
+		overriding: nodejs.Definition{
+			Version: "12",
+		},
+		expected: func() nodejs.Definition {
+			return nodejs.Definition{
+				Version:   "12",
+				BaseStage: emptyStage(),
+				Stages:    nodejs.DerivedStageSet{},
+			}
+		},
+	}
+}
+
+func initMergeVersionWithoutBaseTC() mergeDefinitionTC {
+	return mergeDefinitionTC{
+		base: func() nodejs.Definition {
+			return nodejs.Definition{}
+		},
+		overriding: nodejs.Definition{
+			Version: "12",
+		},
+		expected: func() nodejs.Definition {
+			return nodejs.Definition{
+				Version:   "12",
+				BaseStage: emptyStage(),
+				Stages:    nodejs.DerivedStageSet{},
+			}
+		},
+	}
+}
+
+func initMergeStagesWithBaseTC() mergeDefinitionTC {
+	return mergeDefinitionTC{
+		base: func() nodejs.Definition {
+			return nodejs.Definition{
+				Stages: nodejs.DerivedStageSet{
+					"dev": nodejs.DerivedStage{
+						DeriveFrom: "base",
+					},
+				},
+			}
+		},
+		overriding: nodejs.Definition{
+			Stages: nodejs.DerivedStageSet{
+				"dev": nodejs.DerivedStage{
+					DeriveFrom: "prod",
+				},
+			},
+		},
+		expected: func() nodejs.Definition {
+			return nodejs.Definition{
+				Stages: nodejs.DerivedStageSet{
+					"dev": nodejs.DerivedStage{
+						DeriveFrom: "prod",
+						Stage:      emptyStage(),
+					},
+				},
+				BaseStage: emptyStage(),
+			}
+		},
+	}
+}
+
+func initMergeStagesWithoutBaseTC() mergeDefinitionTC {
+	return mergeDefinitionTC{
+		base: func() nodejs.Definition {
+			return nodejs.Definition{}
+		},
+		overriding: nodejs.Definition{
+			Stages: nodejs.DerivedStageSet{
+				"dev": nodejs.DerivedStage{
+					DeriveFrom: "prod",
+				},
+			},
+		},
+		expected: func() nodejs.Definition {
+			return nodejs.Definition{
+				Stages: nodejs.DerivedStageSet{
+					"dev": nodejs.DerivedStage{
+						DeriveFrom: "prod",
+					},
+				},
+				BaseStage: emptyStage(),
+			}
+		},
+	}
+}
+
+func initMergeIsFrontendWithBaseTC() mergeDefinitionTC {
+	return mergeDefinitionTC{
+		base: func() nodejs.Definition {
+			return nodejs.Definition{
+				IsFrontend: true,
+			}
+		},
+		overriding: nodejs.Definition{
+			IsFrontend: false,
+		},
+		expected: func() nodejs.Definition {
+			return nodejs.Definition{
+				IsFrontend: false,
+				BaseStage:  emptyStage(),
+				Stages:     nodejs.DerivedStageSet{},
+			}
+		},
+	}
+}
+
+func initMergeIsFrontendWithoutBaseTC() mergeDefinitionTC {
+	return mergeDefinitionTC{
+		base: func() nodejs.Definition {
+			return nodejs.Definition{}
+		},
+		overriding: nodejs.Definition{
+			IsFrontend: false,
+		},
+		expected: func() nodejs.Definition {
+			return nodejs.Definition{
+				IsFrontend: false,
+				BaseStage:  emptyStage(),
+				Stages:     nodejs.DerivedStageSet{},
+			}
+		},
+	}
+}
+
+func initMergeWebserverWithBaseTC() mergeDefinitionTC {
+	base := "nginx.conf"
+	overriding := "docker/nginx.conf"
+	expected := "docker/nginx.conf"
+
+	return mergeDefinitionTC{
+		base: func() nodejs.Definition {
+			return nodejs.Definition{
+				Webserver: &webserver.Definition{
+					ConfigFile: &base,
+				},
+			}
+		},
+		overriding: nodejs.Definition{
+			Webserver: &webserver.Definition{
+				ConfigFile: &overriding,
+			},
+		},
+		expected: func() nodejs.Definition {
+			return nodejs.Definition{
+				Webserver: &webserver.Definition{
+					ConfigFile:     &expected,
+					SystemPackages: map[string]string{},
+				},
+				BaseStage: emptyStage(),
+				Stages:    nodejs.DerivedStageSet{},
+			}
+		},
+	}
+}
+
+func initMergeWebserverWithoutBaseTC() mergeDefinitionTC {
+	overriding := "docker/nginx.conf"
+	expected := "docker/nginx.conf"
+
+	return mergeDefinitionTC{
+		base: func() nodejs.Definition {
+			return nodejs.Definition{}
+		},
+		overriding: nodejs.Definition{
+			Webserver: &webserver.Definition{
+				ConfigFile: &overriding,
+			},
+		},
+		expected: func() nodejs.Definition {
+			return nodejs.Definition{
+				Webserver: &webserver.Definition{
+					ConfigFile:     &expected,
+					SystemPackages: map[string]string{},
+				},
+				BaseStage: emptyStage(),
+				Stages:    nodejs.DerivedStageSet{},
+			}
+		},
+	}
+}
+
+func TestDefinitionMerge(t *testing.T) {
+	testcases := map[string]func() mergeDefinitionTC{
+		"merge base stage with base":     initMergeBaseStageWithBaseTC,
+		"merge base stage without base":  initMergeBaseStageWithoutBaseTC,
+		"merge base image with base":     initMergeBaseImageWithBaseTC,
+		"merge base image without base":  initMergeBaseImageWithoutBaseTC,
+		"merge version with base":        initMergeVersionWithBaseTC,
+		"merge version without base":     initMergeVersionWithoutBaseTC,
+		"merge stages with base":         initMergeStagesWithBaseTC,
+		"merge stages without base":      initMergeStagesWithoutBaseTC,
+		"merge is frontend with base":    initMergeIsFrontendWithBaseTC,
+		"merge is frontend without base": initMergeIsFrontendWithoutBaseTC,
+		"merge webserver with base":      initMergeWebserverWithBaseTC,
+		"merge webserver without base":   initMergeWebserverWithoutBaseTC,
+	}
+
+	for tcname := range testcases {
+		tcinit := testcases[tcname]
+
+		t.Run(tcname, func(t *testing.T) {
+			t.Parallel()
+
+			tc := tcinit()
+			base := tc.base()
+			new := base.Merge(tc.overriding)
+
+			if diff := deep.Equal(new, tc.expected()); diff != nil {
+				t.Fatal(diff)
+			}
+
+			if diff := deep.Equal(base, tc.base()); diff != nil {
+				t.Fatalf("Base definition has been modified: %v", diff)
 			}
 		})
 	}

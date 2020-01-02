@@ -49,14 +49,9 @@ func defaultDefinition() Definition {
 
 	return Definition{
 		BaseStage: Stage{
-			ExternalFiles:  []llbutils.ExternalFile{},
-			SystemPackages: map[string]string{},
-			GlobalPackages: map[string]string{},
-			ConfigFiles:    map[string]string{},
-			Healthcheck:    &healthcheckEnabled,
+			Healthcheck: &healthcheckEnabled,
 		},
-		BaseImage: "",
-		Stages: map[string]DerivedStage{
+		Stages: DerivedStageSet{
 			"dev": {
 				DeriveFrom: "base",
 				Dev:        &devStageDevMode,
@@ -71,8 +66,7 @@ func defaultDefinition() Definition {
 
 // @TODO: rename into NewDefinition
 func NewKind(genericDef *builddef.BuildDef) (Definition, error) {
-	def := defaultDefinition()
-
+	var def Definition
 	decoderConf := mapstructure.DecoderConfig{
 		ErrorUnused:      true,
 		WeaklyTypedInput: true,
@@ -87,6 +81,8 @@ func NewKind(genericDef *builddef.BuildDef) (Definition, error) {
 		err := xerrors.Errorf("could not decode build manifest: %w", err)
 		return def, err
 	}
+
+	def = defaultDefinition().Merge(def)
 
 	if err := yaml.Unmarshal(genericDef.RawLocks, &def.Locks); err != nil {
 		err := xerrors.Errorf("could not decode lock manifest: %w", err)
@@ -109,22 +105,6 @@ func NewKind(genericDef *builddef.BuildDef) (Definition, error) {
 		def.BaseImage = baseImage
 	}
 
-	// @TODO
-	if devStage, ok := def.Stages["dev"]; ok {
-		if devStage.Dev == nil {
-			isDev := true
-			devStage.Dev = &isDev
-			def.Stages["dev"] = devStage
-		}
-	}
-	if prodStage, ok := def.Stages["prod"]; ok {
-		if prodStage.Dev == nil {
-			isNotDev := false
-			prodStage.Dev = &isNotDev
-			def.Stages["prod"] = prodStage
-		}
-	}
-
 	return def, nil
 }
 
@@ -132,13 +112,51 @@ type Definition struct {
 	BaseStage Stage `mapstructure:",squash"`
 
 	// @TODO: check what happens when base isn't prefixed with docker.io/library/
-	BaseImage  string                  `mapstructure:"base"`
-	Version    string                  `mapstructure:"version"`
-	Stages     map[string]DerivedStage `mapstructure:"stages"`
-	IsFrontend bool                    `mapstructure:"frontend"`
-	Webserver  *webserver.Definition   `mapstructure:"webserver"`
+	BaseImage string          `mapstructure:"base"`
+	Version   string          `mapstructure:"version"`
+	Stages    DerivedStageSet `mapstructure:"stages"`
+	// @TODO: move to Stage?
+	IsFrontend bool                  `mapstructure:"frontend"`
+	Webserver  *webserver.Definition `mapstructure:"webserver"`
 
 	Locks DefinitionLocks `mapstructure:"-"`
+}
+
+func (d Definition) Copy() Definition {
+	new := Definition{
+		BaseStage:  d.BaseStage.Copy(),
+		BaseImage:  d.BaseImage,
+		Version:    d.Version,
+		Stages:     d.Stages.Copy(),
+		IsFrontend: d.IsFrontend,
+	}
+
+	if d.Webserver != nil {
+		webserver := *d.Webserver
+		new.Webserver = &webserver
+	}
+
+	return new
+}
+
+func (base Definition) Merge(overriding Definition) Definition {
+	new := base.Copy()
+
+	new.BaseStage = new.BaseStage.Merge(overriding.BaseStage)
+	new.Stages = new.Stages.Merge(overriding.Stages)
+	new.BaseImage = overriding.BaseImage
+	new.Version = overriding.Version
+	new.IsFrontend = overriding.IsFrontend
+
+	if overriding.Webserver != nil {
+		webserver := overriding.Webserver.Copy()
+		if new.Webserver != nil {
+			webserver = new.Webserver.Merge(*overriding.Webserver)
+		}
+		new.Webserver = &webserver
+	}
+
+	return new
 }
 
 type Stage struct {
@@ -221,6 +239,60 @@ type DerivedStage struct {
 
 	DeriveFrom string `mapstructure:"from"`
 	Dev        *bool  `mapstructure:"dev"`
+}
+
+func (s DerivedStage) Copy() DerivedStage {
+	new := DerivedStage{
+		Stage:      s.Stage.Copy(),
+		DeriveFrom: s.DeriveFrom,
+	}
+
+	if s.Dev != nil {
+		devMode := *s.Dev
+		new.Dev = &devMode
+	}
+
+	return new
+}
+
+func (s DerivedStage) Merge(overriding DerivedStage) DerivedStage {
+	new := s.Copy()
+
+	new.Stage = s.Stage.Merge(overriding.Stage)
+	new.DeriveFrom = overriding.DeriveFrom
+
+	if overriding.Dev != nil {
+		devMode := *overriding.Dev
+		new.Dev = &devMode
+	}
+
+	return new
+}
+
+type DerivedStageSet map[string]DerivedStage
+
+func (set DerivedStageSet) Copy() DerivedStageSet {
+	new := DerivedStageSet{}
+
+	for name, stage := range set {
+		new[name] = stage.Copy()
+	}
+
+	return new
+}
+
+func (base DerivedStageSet) Merge(overriding DerivedStageSet) DerivedStageSet {
+	new := base.Copy()
+
+	for name, stage := range overriding {
+		if _, ok := new[name]; !ok {
+			new[name] = stage
+		} else {
+			new[name] = new[name].Merge(stage)
+		}
+	}
+
+	return new
 }
 
 type StageDefinition struct {
