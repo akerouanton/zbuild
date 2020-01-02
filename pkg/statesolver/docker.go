@@ -2,16 +2,19 @@ package statesolver
 
 import (
 	"archive/tar"
+	"bytes"
 	"context"
 	"io"
 	"io/ioutil"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
+	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/moby/buildkit/client/llb"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/xerrors"
@@ -25,6 +28,98 @@ type DockerSolver struct {
 	Labels map[string]string
 	// RootDir is the path to the root of the build context.
 	RootDir string
+}
+
+func (s DockerSolver) ExecImage(
+	ctx context.Context,
+	imageRef string,
+	cmd []string,
+) (*bytes.Buffer, error) {
+	strcmd := strings.Join(cmd, "; ")
+	shellCmd := []string{
+		"/bin/sh", "-o", "errexit",
+		"-c", strcmd,
+	}
+
+	// @TODO: add a flag to DockerSolver to not pull images each and every time
+	err := s.pullImage(ctx, imageRef)
+	if err != nil {
+		return nil, xerrors.Errorf(
+			"failed to execute %q in %q from %s: %w", strcmd, imageRef, err)
+	}
+
+	c, err := s.createContainer(ctx, imageRef, shellCmd)
+	if err != nil {
+		return nil, err
+	}
+	defer s.removeContainer(ctx, c)
+
+	err = s.startContainerAndWait(ctx, c)
+	if err != nil {
+		return nil, xerrors.Errorf("failed to execute cmd %q in image %q: %w",
+			strcmd, imageRef, err)
+	}
+
+	outbuf, _, err := s.fetchContainerLogs(ctx, c, true, false)
+
+	return outbuf, nil
+}
+
+func (s DockerSolver) startContainerAndWait(ctx context.Context, containerID string) error {
+	waitch, errch := s.Client.ContainerWait(ctx, containerID,
+		container.WaitConditionNextExit)
+
+	err := s.Client.ContainerStart(ctx, containerID,
+		types.ContainerStartOptions{})
+	if err != nil {
+		return err
+	}
+
+	select {
+	case msg := <-waitch:
+		if msg.Error != nil {
+			return xerrors.Errorf("ContainerWait failed: %s", msg.Error.Message)
+		}
+		if msg.StatusCode != 0 {
+			return xerrors.Errorf("command exited with code %d", msg.StatusCode)
+		}
+	case err := <-errch:
+		return err
+	}
+
+	return nil
+}
+
+func (s DockerSolver) fetchContainerLogs(
+	ctx context.Context,
+	containerID string,
+	stdout,
+	stderr bool,
+) (*bytes.Buffer, *bytes.Buffer, error) {
+	var outbuf *bytes.Buffer
+	var errbuf *bytes.Buffer
+
+	opts := types.ContainerLogsOptions{
+		ShowStdout: stdout,
+		ShowStderr: stderr,
+	}
+	r, err := s.Client.ContainerLogs(ctx, containerID, opts)
+	if err != nil {
+		err := xerrors.Errorf("failed to fetch logs for container %s: %w",
+			containerID, err)
+		return outbuf, errbuf, err
+	}
+
+	outbuf = &bytes.Buffer{}
+	errbuf = &bytes.Buffer{}
+
+	if _, err := stdcopy.StdCopy(outbuf, errbuf, r); err != nil {
+		err := xerrors.Errorf("failed to read logs for container %s: %w",
+			containerID, err)
+		return outbuf, errbuf, err
+	}
+
+	return outbuf, errbuf, nil
 }
 
 func (s DockerSolver) ReadFile(
@@ -57,7 +152,7 @@ func (s DockerSolver) FromImage(image string) ReadFileOpt {
 			return res, xerrors.Errorf("failed to read %s from %s: %w", filepath, image, err)
 		}
 
-		cid, err := s.createContainer(ctx, image)
+		cid, err := s.createContainer(ctx, image, []string{})
 		if err != nil {
 			return res, xerrors.Errorf("failed to read %s from %s: %w", filepath, image, err)
 		}
@@ -132,10 +227,14 @@ func (s DockerSolver) pullImage(ctx context.Context, image string) error {
 	return err
 }
 
-func (s DockerSolver) createContainer(ctx context.Context, image string) (string, error) {
+func (s DockerSolver) createContainer(
+	ctx context.Context,
+	image string,
+	cmd []string,
+) (string, error) {
 	cfg := container.Config{
 		Image:  image,
-		Cmd:    []string{},
+		Cmd:    cmd,
 		Labels: s.Labels,
 	}
 	hostCfg := container.HostConfig{}

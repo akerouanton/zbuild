@@ -1,6 +1,7 @@
 package statesolver
 
 import (
+	"bytes"
 	"context"
 
 	"github.com/moby/buildkit/client/llb"
@@ -8,6 +9,10 @@ import (
 )
 
 type StateSolver interface {
+	// ExecImage is a method that execute a given command in the given image
+	// ref. It returns a byte buffer containing the command stdout. An error is
+	// returned if the executed command doesn't return an exit code = 0.
+	ExecImage(ctx context.Context, imageRef string, cmd []string) (*bytes.Buffer, error)
 	// ReadFile is the method to use to read a given file from either an image
 	// or a local source (see From methods). It returns the file content as a
 	// byte slice if it's found. If the path couldn't be found, it returns

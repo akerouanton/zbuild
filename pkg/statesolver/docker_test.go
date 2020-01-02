@@ -167,10 +167,64 @@ func pullImage(t *testing.T, c *client.Client, imgRef string) {
 
 func removeImage(t *testing.T, c *client.Client, imgRef string) {
 	ctx := context.Background()
-	_, err := c.ImageRemove(ctx, "debian:bullseye-slim", types.ImageRemoveOptions{
+	_, err := c.ImageRemove(ctx, imgRef, types.ImageRemoveOptions{
 		Force: true,
 	})
 	if err != nil && !client.IsErrNotFound(err) {
 		t.Fatal(err)
+	}
+}
+
+type dockerExecImageTC struct {
+	imageRef    string
+	command     string
+	expected    string
+	expectedErr error
+}
+
+func TestDockerExecImage(t *testing.T) {
+	testcases := map[string]dockerExecImageTC{
+		"successfully execute command on image": {
+			imageRef: "debian:buster-20191014-slim",
+			command:  "echo -n foobar",
+			expected: "foobar",
+		},
+		"report nonzero exit code": {
+			imageRef:    "debian:buster-20191014-slim",
+			command:     "exit 11",
+			expectedErr: xerrors.New("failed to execute cmd \"exit 11\" in image \"debian:buster-20191014-slim\": command exited with code 11"),
+		},
+	}
+
+	c := newDockerClient(t)
+
+	for tcname := range testcases {
+		tc := testcases[tcname]
+
+		t.Run(tcname, func(t *testing.T) {
+			t.Parallel()
+
+			solver := statesolver.DockerSolver{
+				Client:  c,
+				Labels:  map[string]string{},
+				RootDir: "testdata",
+			}
+
+			ctx := context.Background()
+			out, err := solver.ExecImage(ctx, tc.imageRef, []string{tc.command})
+			if tc.expectedErr != nil {
+				if err == nil || err.Error() != tc.expectedErr.Error() {
+					t.Fatalf("Expected error: %v\nGot: %v", tc.expectedErr, err)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("Unexpected error: %v", err)
+			}
+
+			if out.String() != tc.expected {
+				t.Fatalf("Expected: %s\nGot: %s", tc.expected, out.String())
+			}
+		})
 	}
 }

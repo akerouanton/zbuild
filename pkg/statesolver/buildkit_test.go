@@ -223,3 +223,111 @@ func loadRawTestdata(t *testing.T, filepath string) []byte {
 	}
 	return raw
 }
+
+type buildkitExecImageTC struct {
+	solver      statesolver.BuildkitSolver
+	imageRef    string
+	command     string
+	expected    string
+	expectedErr error
+}
+
+func initBuildkitExecuteCommadOnImageTC(mockCtrl *gomock.Controller) buildkitExecImageTC {
+	srcRef := llbtest.NewMockReference(mockCtrl)
+	solved := &client.Result{
+		Refs: map[string]client.Reference{
+			"linux/amd64": srcRef,
+		},
+		Ref: srcRef,
+	}
+
+	c := llbtest.NewMockClient(mockCtrl)
+	c.EXPECT().BuildOpts().AnyTimes().Return(client.BuildOpts{
+		SessionID: "<SESSION-ID>",
+		Opts: map[string]string{
+			"contextkey": "some-context",
+		},
+	})
+	c.EXPECT().Solve(gomock.Any(), gomock.Any()).
+		Times(1).
+		Return(solved, nil)
+
+	srcRef.EXPECT().ReadFile(gomock.Any(), client.ReadRequest{
+		Filename: "/tmp/result",
+	}).Times(1).Return([]byte("foobar"), nil)
+
+	return buildkitExecImageTC{
+		solver:   statesolver.NewBuildkitSolver(c),
+		imageRef: "debian:buster-20191014-slim",
+		command:  "echo -n foobar",
+		expected: "foobar",
+	}
+}
+
+func initBuildkitReportErrorWhenResultFileDoesntExistTC(mockCtrl *gomock.Controller) buildkitExecImageTC {
+	srcRef := llbtest.NewMockReference(mockCtrl)
+	solved := &client.Result{
+		Refs: map[string]client.Reference{
+			"linux/amd64": srcRef,
+		},
+		Ref: srcRef,
+	}
+
+	c := llbtest.NewMockClient(mockCtrl)
+	c.EXPECT().BuildOpts().AnyTimes().Return(client.BuildOpts{
+		SessionID: "<SESSION-ID>",
+		Opts: map[string]string{
+			"contextkey": "some-context",
+		},
+	})
+	c.EXPECT().Solve(gomock.Any(), gomock.Any()).
+		Times(1).
+		Return(solved, nil)
+
+	err := xerrors.New("file does not exist")
+	srcRef.EXPECT().ReadFile(gomock.Any(), client.ReadRequest{
+		Filename: "/tmp/result",
+	}).Times(1).Return([]byte{}, err)
+
+	return buildkitExecImageTC{
+		solver:      statesolver.NewBuildkitSolver(c),
+		imageRef:    "debian:buster-20191014-slim",
+		command:     "echo -n foobar",
+		expectedErr: xerrors.New("failed to execute \"echo -n foobar\" in \"debian:buster-20191014-slim\""),
+	}
+}
+
+func TestBuildkitExecImage(t *testing.T) {
+	testcases := map[string]func(mockCtrl *gomock.Controller) buildkitExecImageTC{
+		"successfully execute command on image":          initBuildkitExecuteCommadOnImageTC,
+		"return an error when result file doesn't exist": initBuildkitReportErrorWhenResultFileDoesntExistTC,
+	}
+
+	for tcname := range testcases {
+		tcinit := testcases[tcname]
+
+		t.Run(tcname, func(t *testing.T) {
+			t.Parallel()
+
+			mockCtrl := gomock.NewController(t)
+			defer mockCtrl.Finish()
+
+			tc := tcinit(mockCtrl)
+			ctx := context.Background()
+			out, err := tc.solver.ExecImage(ctx, tc.imageRef, []string{tc.command})
+			if tc.expectedErr != nil {
+				if err == nil || err.Error() != tc.expectedErr.Error() {
+					t.Fatalf("Expected error: %v\nGot: %v", tc.expectedErr, err)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("Unexpected error: %v", err)
+			}
+
+			if out.String() != tc.expected {
+				t.Fatalf("Expected: %s\nGot: %s", tc.expected, out.String())
+			}
+		})
+	}
+}

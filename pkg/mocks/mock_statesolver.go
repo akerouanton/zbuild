@@ -5,6 +5,7 @@
 package mocks
 
 import (
+	bytes "bytes"
 	context "context"
 	statesolver "github.com/NiR-/zbuild/pkg/statesolver"
 	gomock "github.com/golang/mock/gomock"
@@ -33,6 +34,19 @@ func NewMockStateSolver(ctrl *gomock.Controller) *MockStateSolver {
 // EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockStateSolver) EXPECT() *MockStateSolverMockRecorder {
 	return m.recorder
+}
+
+// ExecImage mocks base method
+func (m *MockStateSolver) ExecImage(arg0 context.Context, arg1 string, arg2 []string) (*bytes.Buffer, error) {
+	ret := m.ctrl.Call(m, "ExecImage", arg0, arg1, arg2)
+	ret0, _ := ret[0].(*bytes.Buffer)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExecImage indicates an expected call of ExecImage
+func (mr *MockStateSolverMockRecorder) ExecImage(arg0, arg1, arg2 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExecImage", reflect.TypeOf((*MockStateSolver)(nil).ExecImage), arg0, arg1, arg2)
 }
 
 // FromBuildContext mocks base method
