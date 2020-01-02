@@ -103,3 +103,270 @@ func loadBuildDef(t *testing.T, filepath string) *builddef.BuildDef {
 
 	return &def
 }
+
+type mergeDefinitionTC struct {
+	base       func() webserver.Definition
+	overriding func() webserver.Definition
+	expected   func() webserver.Definition
+}
+
+func TestDefinitionMerge(t *testing.T) {
+	testcases := map[string]mergeDefinitionTC{
+		"merge type with base": {
+			base: func() webserver.Definition {
+				return webserver.Definition{
+					Type: webserver.WebserverType("nginx"),
+				}
+			},
+			overriding: func() webserver.Definition {
+				return webserver.Definition{
+					Type: webserver.WebserverType("caddy"),
+				}
+			},
+			expected: func() webserver.Definition {
+				return webserver.Definition{
+					Type:           webserver.WebserverType("caddy"),
+					SystemPackages: map[string]string{},
+				}
+			},
+		},
+		"merge type without base": {
+			base: func() webserver.Definition {
+				return webserver.Definition{}
+			},
+			overriding: func() webserver.Definition {
+				return webserver.Definition{
+					Type: webserver.WebserverType("caddy"),
+				}
+			},
+			expected: func() webserver.Definition {
+				return webserver.Definition{
+					Type:           webserver.WebserverType("caddy"),
+					SystemPackages: map[string]string{},
+				}
+			},
+		},
+		"merge system packages with base": {
+			base: func() webserver.Definition {
+				return webserver.Definition{
+					SystemPackages: map[string]string{
+						"curl": "*",
+					},
+				}
+			},
+			overriding: func() webserver.Definition {
+				return webserver.Definition{
+					SystemPackages: map[string]string{
+						"curl":            "7.64.0-4",
+						"ca-certificates": "*",
+					},
+				}
+			},
+			expected: func() webserver.Definition {
+				return webserver.Definition{
+					SystemPackages: map[string]string{
+						"curl":            "7.64.0-4",
+						"ca-certificates": "*",
+					},
+				}
+			},
+		},
+		"merge system packages without base": {
+			base: func() webserver.Definition {
+				return webserver.Definition{}
+			},
+			overriding: func() webserver.Definition {
+				return webserver.Definition{
+					SystemPackages: map[string]string{
+						"curl":            "7.64.0-4",
+						"ca-certificates": "*",
+					},
+				}
+			},
+			expected: func() webserver.Definition {
+				return webserver.Definition{
+					SystemPackages: map[string]string{
+						"curl":            "7.64.0-4",
+						"ca-certificates": "*",
+					},
+				}
+			},
+		},
+		"merge config file with base": {
+			base: func() webserver.Definition {
+				configFile := "nginx.conf"
+				return webserver.Definition{
+					ConfigFile: &configFile,
+				}
+			},
+			overriding: func() webserver.Definition {
+				configFile := "docker/nginx.conf"
+				return webserver.Definition{
+					ConfigFile: &configFile,
+				}
+			},
+			expected: func() webserver.Definition {
+				configFile := "docker/nginx.conf"
+				return webserver.Definition{
+					ConfigFile:     &configFile,
+					SystemPackages: map[string]string{},
+				}
+			},
+		},
+		"merge config file without base": {
+			base: func() webserver.Definition {
+				return webserver.Definition{}
+			},
+			overriding: func() webserver.Definition {
+				configFile := "docker/nginx.conf"
+				return webserver.Definition{
+					ConfigFile: &configFile,
+				}
+			},
+			expected: func() webserver.Definition {
+				configFile := "docker/nginx.conf"
+				return webserver.Definition{
+					ConfigFile:     &configFile,
+					SystemPackages: map[string]string{},
+				}
+			},
+		},
+		"ignore nil config file": {
+			base: func() webserver.Definition {
+				configFile := "nginx.conf"
+				return webserver.Definition{
+					ConfigFile: &configFile,
+				}
+			},
+			overriding: func() webserver.Definition {
+				return webserver.Definition{}
+			},
+			expected: func() webserver.Definition {
+				configFile := "nginx.conf"
+				return webserver.Definition{
+					ConfigFile:     &configFile,
+					SystemPackages: map[string]string{},
+				}
+			},
+		},
+		"merge healthcheck with base": {
+			base: func() webserver.Definition {
+				healthcheck := true
+				return webserver.Definition{
+					Healthcheck: &healthcheck,
+				}
+			},
+			overriding: func() webserver.Definition {
+				healthcheck := false
+				return webserver.Definition{
+					Healthcheck: &healthcheck,
+				}
+			},
+			expected: func() webserver.Definition {
+				healthcheck := false
+				return webserver.Definition{
+					Healthcheck:    &healthcheck,
+					SystemPackages: map[string]string{},
+				}
+			},
+		},
+		"merge healthcheck without base": {
+			base: func() webserver.Definition {
+				return webserver.Definition{}
+			},
+			overriding: func() webserver.Definition {
+				healthcheck := true
+				return webserver.Definition{
+					Healthcheck: &healthcheck,
+				}
+			},
+			expected: func() webserver.Definition {
+				healthcheck := true
+				return webserver.Definition{
+					Healthcheck:    &healthcheck,
+					SystemPackages: map[string]string{},
+				}
+			},
+		},
+		"ignore nil healthcheck": {
+			base: func() webserver.Definition {
+				healthcheck := true
+				return webserver.Definition{
+					Healthcheck: &healthcheck,
+				}
+			},
+			overriding: func() webserver.Definition {
+				return webserver.Definition{}
+			},
+			expected: func() webserver.Definition {
+				healthcheck := true
+				return webserver.Definition{
+					Healthcheck:    &healthcheck,
+					SystemPackages: map[string]string{},
+				}
+			},
+		},
+		"merge assets with base": {
+			base: func() webserver.Definition {
+				return webserver.Definition{
+					Assets: []webserver.AssetToCopy{
+						{From: "public/", To: "public/"},
+					},
+				}
+			},
+			overriding: func() webserver.Definition {
+				return webserver.Definition{
+					Assets: []webserver.AssetToCopy{
+						{From: "web/", To: "web/"},
+					},
+				}
+			},
+			expected: func() webserver.Definition {
+				return webserver.Definition{
+					Assets: []webserver.AssetToCopy{
+						{From: "public/", To: "public/"},
+						{From: "web/", To: "web/"},
+					},
+					SystemPackages: map[string]string{},
+				}
+			},
+		},
+		"merge assets without base": {
+			base: func() webserver.Definition {
+				return webserver.Definition{}
+			},
+			overriding: func() webserver.Definition {
+				return webserver.Definition{
+					Assets: []webserver.AssetToCopy{
+						{From: "web/", To: "web/"},
+					},
+				}
+			},
+			expected: func() webserver.Definition {
+				return webserver.Definition{
+					Assets: []webserver.AssetToCopy{
+						{From: "web/", To: "web/"},
+					},
+					SystemPackages: map[string]string{},
+				}
+			},
+		},
+	}
+
+	for tcname := range testcases {
+		tc := testcases[tcname]
+
+		t.Run(tcname, func(t *testing.T) {
+			base := tc.base()
+			new := base.Merge(tc.overriding())
+
+			if diff := deep.Equal(new, tc.expected()); diff != nil {
+				t.Fatal(diff)
+			}
+
+			if diff := deep.Equal(base, tc.base()); diff != nil {
+				t.Fatalf("Base definition don't match: %v", diff)
+			}
+		})
+	}
+}

@@ -12,14 +12,14 @@ import (
 func DefaultDefinition() Definition {
 	healthcheck := true
 	return Definition{
-		Type:           "nginx",
+		Type:           WebserverType("nginx"),
 		SystemPackages: map[string]string{},
 		Healthcheck:    &healthcheck,
 	}
 }
 
 func NewKind(genericDef *builddef.BuildDef) (Definition, error) {
-	def := DefaultDefinition()
+	var def Definition
 	decoderConf := mapstructure.DecoderConfig{
 		ErrorUnused:      true,
 		WeaklyTypedInput: true,
@@ -34,6 +34,8 @@ func NewKind(genericDef *builddef.BuildDef) (Definition, error) {
 		err := xerrors.Errorf("could not decode build manifest: %w", err)
 		return def, err
 	}
+
+	def = DefaultDefinition().Merge(def)
 
 	if err := yaml.Unmarshal(genericDef.RawLocks, &def.Locks); err != nil {
 		return def, xerrors.Errorf("could not decode lock manifest: %w", err)
@@ -67,16 +69,39 @@ func (def Definition) Validate() error {
 	return nil
 }
 
+func (def Definition) Copy() Definition {
+	new := Definition{
+		Type:           def.Type,
+		SystemPackages: map[string]string{},
+		Assets:         def.Assets,
+	}
+
+	for pkg, ver := range def.SystemPackages {
+		new.SystemPackages[pkg] = ver
+	}
+
+	if def.ConfigFile != nil {
+		configFile := *def.ConfigFile
+		new.ConfigFile = &configFile
+	}
+	if def.Healthcheck != nil {
+		healthcheck := *def.Healthcheck
+		new.Healthcheck = &healthcheck
+	}
+
+	return new
+}
+
 func (base Definition) Merge(overriding Definition) Definition {
-	new := base
+	new := base.Copy()
 	new.Assets = append(new.Assets, overriding.Assets...)
-	new.Locks = overriding.Locks
+
+	for pkg, version := range overriding.SystemPackages {
+		new.SystemPackages[pkg] = version
+	}
 
 	if !overriding.Type.IsEmpty() {
 		new.Type = overriding.Type
-	}
-	for k, v := range overriding.SystemPackages {
-		new.SystemPackages[k] = v
 	}
 	if overriding.ConfigFile != nil {
 		configFile := *overriding.ConfigFile
