@@ -11,17 +11,14 @@ import (
 
 func defaultDefinition() Definition {
 	return Definition{
-		Type: "nginx",
+		Type:           "nginx",
+		SystemPackages: map[string]string{},
+		Healthcheck:    true,
 	}
 }
 
 func NewKind(genericDef *builddef.BuildDef) (Definition, error) {
-	def := Definition{
-		Type:           WebserverType("nginx"),
-		SystemPackages: map[string]string{},
-		Healthcheck:    true,
-	}
-
+	def := defaultDefinition()
 	decoderConf := mapstructure.DecoderConfig{
 		ErrorUnused:      true,
 		WeaklyTypedInput: true,

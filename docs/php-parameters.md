@@ -35,7 +35,7 @@ no autoload dump, no post install steps, etc...) ;
 zbuild files with php types have following structure:
 
 ```yaml
-# syntax=akerouanton/zbuilder:test9
+# syntax=akerouanton/zbuilder:<tag>
 kind: php
 
 base: <string>

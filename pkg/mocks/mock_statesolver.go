@@ -63,18 +63,6 @@ func (mr *MockStateSolverMockRecorder) FromImage(arg0 interface{}) *gomock.Call 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FromImage", reflect.TypeOf((*MockStateSolver)(nil).FromImage), arg0)
 }
 
-// FromLocalState mocks base method
-func (m *MockStateSolver) FromLocalState(arg0 llb.State) statesolver.ReadFileOpt {
-	ret := m.ctrl.Call(m, "FromLocalState", arg0)
-	ret0, _ := ret[0].(statesolver.ReadFileOpt)
-	return ret0
-}
-
-// FromLocalState indicates an expected call of FromLocalState
-func (mr *MockStateSolverMockRecorder) FromLocalState(arg0 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FromLocalState", reflect.TypeOf((*MockStateSolver)(nil).FromLocalState), arg0)
-}
-
 // ReadFile mocks base method
 func (m *MockStateSolver) ReadFile(arg0 context.Context, arg1 string, arg2 statesolver.ReadFileOpt) ([]byte, error) {
 	ret := m.ctrl.Call(m, "ReadFile", arg0, arg1, arg2)

@@ -6,37 +6,38 @@ import (
 
 	"github.com/NiR-/zbuild/pkg/builddef"
 	"github.com/NiR-/zbuild/pkg/image"
+	"github.com/NiR-/zbuild/pkg/mocks"
 	"github.com/NiR-/zbuild/pkg/pkgsolver"
 	"github.com/NiR-/zbuild/pkg/registry"
 	"github.com/NiR-/zbuild/pkg/statesolver"
-	"github.com/go-test/deep"
 	"github.com/golang/mock/gomock"
 	"github.com/moby/buildkit/client/llb"
-	specs "github.com/opencontainers/image-spec/specs-go/v1"
 	"golang.org/x/xerrors"
 )
 
 type registryTC struct {
-	name          string
-	registry      *registry.KindRegistry
-	builddef      builddef.BuildDef
-	expectedImage *image.Image
-	expectedErr   error
+	registry    *registry.KindRegistry
+	expectedErr error
 }
 
 func TestRegistry(t *testing.T) {
-	testcases := []registryTC{
-		successfullyFindBuilderTC(),
-		failToFindBuilderTC(),
+	testcases := map[string]func(*gomock.Controller) registryTC{
+		"successfully find builder": successfullyFindBuilderTC,
+		"fail to find builder":      failToFindBuilderTC,
 	}
 
-	for tid := range testcases {
-		tc := testcases[tid]
+	for tcname := range testcases {
+		tcinit := testcases[tcname]
 
-		t.Run(tc.name, func(t *testing.T) {
+		t.Run(tcname, func(t *testing.T) {
 			t.Parallel()
 
-			handler, err := tc.registry.FindHandler(tc.builddef.Kind)
+			mockCtrl := gomock.NewController(t)
+			defer mockCtrl.Finish()
+
+			tc := tcinit(mockCtrl)
+
+			_, err := tc.registry.FindHandler("some-kind")
 			if tc.expectedErr != nil {
 				if tc.expectedErr.Error() != err.Error() {
 					t.Fatalf("Expected err: %v\nGot: %v\n", tc.expectedErr, err)
@@ -46,58 +47,24 @@ func TestRegistry(t *testing.T) {
 			if err != nil {
 				t.Fatalf("Unexpected error: %v\n", err)
 			}
-
-			mockCtrl := gomock.NewController(t)
-			defer mockCtrl.Finish()
-
-			buildOpts := builddef.BuildOpts{
-				Def:       &tc.builddef,
-				SessionID: "sessid",
-				Stage:     "base",
-			}
-
-			_, img, err := handler.Build(context.TODO(), buildOpts)
-			if err != nil {
-				t.Fatalf("Unexpected error: %v\n", err)
-			}
-			if diff := deep.Equal(img, tc.expectedImage); diff != nil {
-				t.Error(diff)
-			}
 		})
 	}
 }
 
-func successfullyFindBuilderTC() registryTC {
-	expectedImage := image.Image{
-		Image: specs.Image{
-			Author: "zbuild",
-		},
-	}
+func successfullyFindBuilderTC(mockCtrl *gomock.Controller) registryTC {
+	h := mocks.NewMockKindHandler(mockCtrl)
 
 	reg := registry.NewKindRegistry()
-	reg.Register("some-kind", mockKindHandler{&expectedImage})
+	reg.Register("some-kind", h)
 
 	return registryTC{
-		name:     "it finds the requested service builder",
 		registry: reg,
-		builddef: builddef.BuildDef{
-			Kind:      "some-kind",
-			RawConfig: map[string]interface{}{},
-			RawLocks:  []byte{},
-		},
-		expectedImage: &expectedImage,
 	}
 }
 
-func failToFindBuilderTC() registryTC {
+func failToFindBuilderTC(_ *gomock.Controller) registryTC {
 	return registryTC{
-		name:     "it fails to find the appropriate builder for the given kind",
-		registry: registry.NewKindRegistry(),
-		builddef: builddef.BuildDef{
-			Kind:      "some-kind",
-			RawConfig: map[string]interface{}{},
-			RawLocks:  []byte{},
-		},
+		registry:    registry.NewKindRegistry(),
 		expectedErr: xerrors.New("kind \"some-kind\" is not supported: unknown kind"),
 	}
 }

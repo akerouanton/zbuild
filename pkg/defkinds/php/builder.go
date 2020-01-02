@@ -322,11 +322,11 @@ func composerInstall(
 
 	cmds := []string{
 		"composer global require --prefer-dist hirak/prestissimo",
-		"composer install --no-dev --prefer-dist --no-scripts",
+		"composer install --no-dev --prefer-dist --no-scripts --no-autoloader",
 		"composer clear-cache",
 	}
 	run := state.Run(
-		llbutils.Shellf(strings.Join(cmds, " && ")),
+		llbutils.Shell(cmds...),
 		llb.Dir(state.GetDir()),
 		llb.User("1000"),
 		llb.WithCustomName("Run composer install"),
@@ -347,7 +347,7 @@ func postInstall(state llb.State, stage *StageDefinition) (llb.State, error) {
 	cmds = append(cmds, stage.PostInstall...)
 
 	run := state.Run(
-		llbutils.Shellf(strings.Join(cmds, "; ")),
+		llbutils.Shell(cmds...),
 		llb.Dir(state.GetDir()),
 		llb.WithCustomName("Dump autoloader and execute custom post-install steps"))
 	return run.Root(), nil

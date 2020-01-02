@@ -8,8 +8,8 @@ import (
 // PackageSolver is used by specialzed defkinds to lock system packages.
 type PackageSolver interface {
 	// Configure sets the package "suites" that should be used for subsequent
-	// calls to ResolveVersions(). See GuessSolverConfig()
-	Configure(config SolverConfig) error
+	// calls to ResolveVersions().
+	Configure(osrelease builddef.OSRelease, arch string) error
 	// ResolveVersions takes a map of packages to resolve, associated with their
 	// version constraint. It returns a map of packages associated with their
 	// resolved version. If one of the package cannot be resolved or if the

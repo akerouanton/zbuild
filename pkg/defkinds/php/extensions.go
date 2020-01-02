@@ -239,7 +239,7 @@ func InstallExtensions(state llb.State, majMinVersion string, extensions map[str
 
 	extensionNames := getExtensionNames(extensions)
 	exec := state.Run(
-		llbutils.Shellf(strings.Join(cmds, " && ")),
+		llbutils.Shell(cmds...),
 		llb.WithCustomNamef("Install PHP extensions (%s)", strings.Join(extensionNames, ", ")))
 
 	return exec.Root()

@@ -43,11 +43,7 @@ func (h *WebserverHandler) UpdateLocks(
 		return nil, xerrors.Errorf("unsupported OS %s: only debian-based images are supported", osrelease.Name)
 	}
 
-	pkgSolverCfg, err := pkgsolver.GuessSolverConfig(osrelease, "amd64")
-	if err != nil {
-		return nil, xerrors.Errorf("could not update locks: %w", err)
-	}
-	err = pkgSolver.Configure(pkgSolverCfg)
+	err = pkgSolver.Configure(osrelease, "amd64")
 	if err != nil {
 		return nil, xerrors.Errorf("could not update locks: %w", err)
 	}

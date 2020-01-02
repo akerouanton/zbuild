@@ -97,8 +97,10 @@ func Copy(src llb.State, srcPath string, dest llb.State, destPath string, chown 
 		llb.WithCustomName(fmt.Sprintf("Copy %s", srcPath)))
 }
 
-func Shellf(format string, v ...interface{}) llb.RunOption {
-	return llb.Shlexf("/bin/sh -o errexit -c '"+format+"'", v...)
+func Shell(cmds ...string) llb.RunOption {
+	cmd := strings.Join(cmds, "; ")
+	cmd = strings.Replace(cmd, "\"", "\\\"", -1)
+	return llb.Shlex("/bin/sh -o errexit -c \"" + cmd + "\"")
 }
 
 func Mkdir(state llb.State, owner string, dirs ...string) llb.State {
@@ -148,9 +150,10 @@ func InstallSystemPackages(
 
 	stepName := fmt.Sprintf("Install system packages (%s)", strings.Join(packageSpecs, ", "))
 	state = state.Run(
-		Shellf(strings.Join(cmds, "; ")),
+		Shell(cmds...),
 		llb.WithCustomName(stepName),
 	).Root()
+
 	return state, nil
 }
 

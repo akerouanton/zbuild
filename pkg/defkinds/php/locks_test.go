@@ -51,7 +51,7 @@ func initSuccessfullyUpdateLocksTC(t *testing.T, mockCtrl *gomock.Controller) up
 	).AnyTimes().Return([]byte{}, statesolver.FileNotFound)
 
 	pkgSolver := mocks.NewMockPackageSolver(mockCtrl)
-	pkgSolver.EXPECT().Configure(gomock.Any()).Times(1)
+	pkgSolver.EXPECT().Configure(gomock.Any(), "amd64").Times(1)
 	pkgSolver.EXPECT().ResolveVersions(map[string]string{
 		"git":          "*",
 		"libicu-dev":   "*",
