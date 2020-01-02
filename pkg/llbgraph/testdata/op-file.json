@@ -1,0 +1,66 @@
+[
+  {
+    "RawOp": "CkkKR3NoYTI1NjpiNDRkYWI4MTBlM2M3MDJhY2I5ZmY5OGIxZWZjNGIzMDFjZmM0YzBiNTI0NGIwNGQ1MjNiOGI2YmU4NjU1MDg4CkkKR3NoYTI1Njo5YjJhMDlmYWQ2Mzk5YWEwOTRiZjU3ODBlNTA5MzI5OTA1MjE4YzExODc4NjMyODBlZmMzYTdjMzk1ODQ0OTg5IkYSRBABIkAKDS9wYWNrYWdlLmpzb24SBS9hcHAvGgoKAxDoBxIDEOgHIP///////////wEoATABQAFIAVj///////////8BUg4KBWFtZDY0EgVsaW51eFoA",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:b44dab810e3c702acb9ff98b1efc4b301cfc4c0b5244b04d523b8b6be8655088",
+          "index": 0
+        },
+        {
+          "digest": "sha256:9b2a09fad6399aa094bf5780e509329905218c1187863280efc3a7c395844989",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "File": {
+          "actions": [
+            {
+              "input": 0,
+              "secondaryInput": 1,
+              "output": 0,
+              "Action": {
+                "Copy": {
+                  "src": "/package.json",
+                  "dest": "/app/",
+                  "owner": {
+                    "user": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    },
+                    "group": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    }
+                  },
+                  "mode": -1,
+                  "followSymlink": true,
+                  "dirCopyContents": true,
+                  "createDestPath": true,
+                  "allowWildcard": true,
+                  "timestamp": -1
+                }
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:5cbe67efba158931418f35afdf83bf734b5e9d83782c5713b34e8fb5b08e7356",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Copy package.json"
+      },
+      "caps": {
+        "file.base": true
+      }
+    }
+  }
+]

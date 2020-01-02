@@ -1,5 +1,6 @@
 [
   {
+    "RawOp": "Gi8KLWRvY2tlci1pbWFnZTovL2RvY2tlci5pby9saWJyYXJ5L25naW54OmxhdGVzdFIOCgVhbWQ2NBIFbGludXhaAA==",
     "Op": {
       "Op": {
         "Source": {
@@ -20,6 +21,7 @@
     }
   },
   {
+    "RawOp": "GoUBCg9sb2NhbDovL2NvbnRleHQSLwoUbG9jYWwuaW5jbHVkZXBhdHRlcm4SF1siLi9kb2NrZXIvbmdpbnguY29uZiJdEh0KDWxvY2FsLnNlc3Npb24SDDxTRVNTSU9OLUlEPhIiChNsb2NhbC5zaGFyZWRrZXloaW50Egtjb25maWctZmlsZVoA",
     "Op": {
       "Op": {
         "Source": {
@@ -47,6 +49,7 @@
     }
   },
   {
+    "RawOp": "CkkKR3NoYTI1NjplMzc1ZWVjMjVlYTJiMmUyMWNkM2ViYjI1NDcwMzhhZGRkYWVlN2M1MmM2NGJjN2ZkZmE5OGNmY2YxYjYxYjIwCkkKR3NoYTI1Njo5N2RiNDY5Nzc3YzViOWJjOWY3MzA4MTQ0YmQ2OGNkY2M3N2ViNWRjNDJhZGU0NGNmNzk1ZDE3ZGIwNzk5NGFkIlsSWRABIlUKEi9kb2NrZXIvbmdpbnguY29uZhIVL2V0Yy9uZ2lueC9uZ2lueC5jb25mGgoKAxDoBxIDEOgHIP///////////wEoATABQAFIAVj///////////8BUg4KBWFtZDY0EgVsaW51eFoA",
     "Op": {
       "inputs": [
         {
@@ -110,6 +113,7 @@
     }
   },
   {
+    "RawOp": "CkkKR3NoYTI1NjpiZTFlNDg4OTQwNmEyMjljNjE3MmMwNzQ3NzNhNWY2NmJmOTkwMjc0YTAwMjI5YzM1NzcyZjMwYTdiNWExZGUx",
     "Op": {
       "inputs": [
         {
@@ -129,6 +133,7 @@
     }
   },
   {
+    "RawOp": "CkkKR3NoYTI1Njo2MjU0OWI2MDljNjJiZTVkNGEwNzJjOGIxNjk3YmE2ZTBmNDBlNTliZjZiMzQwNTY1ZjUxMzI5MjIwMzE1MThiEo4CCoYCCgcvYmluL3NoCgItbwoHZXJyZXhpdAoCLWMKZWFwdC1nZXQgdXBkYXRlOyBhcHQtZ2V0IGluc3RhbGwgLXkgLS1uby1pbnN0YWxsLXJlY29tbWVuZHMgY3VybD03LjY0LjAtNDsgcm0gLXJmIC92YXIvbGliL2FwdC9saXN0cy8qEkFQQVRIPS91c3IvbG9jYWwvc2JpbjovdXNyL2xvY2FsL2JpbjovdXNyL3NiaW46L3Vzci9iaW46L3NiaW46L2JpbhIUTkdJTlhfVkVSU0lPTj0xLjE3LjYSEU5KU19WRVJTSU9OPTAuMy43EhRQS0dfUkVMRUFTRT0xfmJ1c3RlchoBLxIDGgEvUg4KBWFtZDY0EgVsaW51eFoA",
     "Op": {
       "inputs": [
         {

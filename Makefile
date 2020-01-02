@@ -20,8 +20,9 @@ build:
 
 .PHONY: test
 test:
-	$(GOTEST) -v -cover -coverprofile cover.out ./...
-	go tool cover -o cover.html -html=cover.out
+	# $(GOTEST) -v -cover -coverprofile cover.out ./...
+	$(GOTEST) -v ./...
+	# go tool cover -o cover.html -html=cover.out
 
 .PHONY: gen-mocks
 gen-mocks:
@@ -30,9 +31,10 @@ gen-mocks:
 .PHONY: gen-testdata
 gen-testdata:
 	@$(GOTEST) -v ./pkg/llbutils -testdata
+	@$(GOTEST) -v ./pkg/llbgraph -testdata
 	@$(GOTEST) -v ./pkg/defkinds/php -testdata
 	@$(GOTEST) -v ./pkg/defkinds/webserver -testdata
-	@echo "WARNING: Be sure to review regenerated testdata files before committing them."
+	@echo "WARNING: Be sure to review generated testdata files before committing them."
 
 .PHONY: build-image
 build-image: .validate-image-tag build

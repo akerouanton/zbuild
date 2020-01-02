@@ -1,5 +1,6 @@
 [
   {
+    "RawOp": "CkkKR3NoYTI1NjpjMWFhZWU4YTM4YmE2ZGVjNjRkNWI4YzkxOWM3Y2Y2YmRkYzA0ZjBiZDE4NzYzNjc4MzQyZDMzYTI1YzA2ODQ0",
     "Op": {
       "inputs": [
         {
@@ -18,6 +19,7 @@
     }
   },
   {
+    "RawOp": "GioKKGRvY2tlci1pbWFnZTovL2RvY2tlci5pby9saWJyYXJ5L3BocDo3LjJSDgoFYW1kNjQSBWxpbnV4WgA=",
     "Op": {
       "Op": {
         "Source": {

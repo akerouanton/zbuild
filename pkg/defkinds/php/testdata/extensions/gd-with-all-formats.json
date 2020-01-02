@@ -1,5 +1,6 @@
 [
   {
+    "RawOp": "CkkKR3NoYTI1Njo5NTE0MTY5YWI5ZTg1NjU1MGFkNmQ4MzY0MWJlODJlZjczMTFmNWY3NDQxNjg1OWMzZTZiYzc2MzI1ZGUxNjZl",
     "Op": {
       "inputs": [
         {
@@ -19,6 +20,7 @@
     }
   },
   {
+    "RawOp": "EqsBCpgBCgcvYmluL3NoCgItbwoHZXJyZXhpdAoCLWMKeWRvY2tlci1waHAtZXh0LWNvbmZpZ3VyZSBnZCAtLXdpdGgtZnJlZXR5cGUtZGlyIC0td2l0aC1qcGVnLWRpciAtLXdpdGgtd2VicC1kaXIgJiYgZG9ja2VyLXBocC1leHQtaW5zdGFsbCAtaiIkKG5wcm9jKSIgZ2QaAS8SDgj///////////8BGgEvUg4KBWFtZDY0EgVsaW51eFoA",
     "Op": {
       "Op": {
         "Exec": {
