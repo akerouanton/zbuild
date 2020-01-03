@@ -51,12 +51,7 @@ func (h *NodeJSHandler) UpdateLocks(
 		return nil, xerrors.Errorf("unsupported OS %q: only debian-based base images are supported", osrelease.Name)
 	}
 
-	err = pkgSolver.Configure(osrelease, "amd64")
-	if err != nil {
-		return nil, xerrors.Errorf("could not update stage locks: %w", err)
-	}
-
-	stagesLocks, err := h.updateStagesLocks(ctx, pkgSolver, def)
+	stagesLocks, err := h.updateStagesLocks(ctx, pkgSolver, def, locks)
 	locks.Stages = stagesLocks
 
 	if def.Webserver != nil {
@@ -97,6 +92,7 @@ func (h *NodeJSHandler) updateStagesLocks(
 	ctx context.Context,
 	pkgSolver pkgsolver.PackageSolver,
 	def Definition,
+	defLocks DefinitionLocks,
 ) (map[string]StageLocks, error) {
 	locks := map[string]StageLocks{}
 
@@ -107,7 +103,9 @@ func (h *NodeJSHandler) updateStagesLocks(
 		}
 
 		stageLocks := StageLocks{}
-		stageLocks.SystemPackages, err = pkgSolver.ResolveVersions(stage.SystemPackages)
+		stageLocks.SystemPackages, err = pkgSolver.ResolveVersions(
+			defLocks.BaseImage,
+			stage.SystemPackages)
 		if err != nil {
 			return nil, xerrors.Errorf("could not resolve versions of system packages to install: %w", err)
 		}

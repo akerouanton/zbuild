@@ -5,7 +5,6 @@ go 1.12
 require (
 	github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78 // indirect
 	github.com/NiR-/notpecl v0.0.0-20191209012103-b55aaac8c3de
-	github.com/bbuck/go-lexer v0.0.0-20150530081543-8752f4c00663 // indirect
 	github.com/docker/docker v1.14.0-0.20190319215453-e7b5f7dbe98c
 	github.com/go-test/deep v1.0.4
 	github.com/gogo/protobuf v1.2.0
@@ -17,7 +16,6 @@ require (
 	github.com/opencontainers/go-digest v1.0.0-rc1
 	github.com/opencontainers/image-spec v1.0.1
 	github.com/sirupsen/logrus v1.4.2
-	github.com/snyh/go-dpkg-parser v0.0.0-20171208093826-d45a4679150f
 	github.com/spf13/cobra v0.0.5
 	github.com/tonistiigi/fsutil v0.0.0-20190819224149-3d2716dd0a4d
 	golang.org/x/xerrors v0.0.0-20191011141410-1b5146add898

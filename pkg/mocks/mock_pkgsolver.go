@@ -5,8 +5,6 @@
 package mocks
 
 import (
-	builddef "github.com/NiR-/zbuild/pkg/builddef"
-	pkgsolver "github.com/NiR-/zbuild/pkg/pkgsolver"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 )
@@ -34,39 +32,15 @@ func (m *MockPackageSolver) EXPECT() *MockPackageSolverMockRecorder {
 	return m.recorder
 }
 
-// Configure mocks base method
-func (m *MockPackageSolver) Configure(arg0 builddef.OSRelease, arg1 string) error {
-	ret := m.ctrl.Call(m, "Configure", arg0, arg1)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Configure indicates an expected call of Configure
-func (mr *MockPackageSolverMockRecorder) Configure(arg0, arg1 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Configure", reflect.TypeOf((*MockPackageSolver)(nil).Configure), arg0, arg1)
-}
-
 // ResolveVersions mocks base method
-func (m *MockPackageSolver) ResolveVersions(arg0 map[string]string) (map[string]string, error) {
-	ret := m.ctrl.Call(m, "ResolveVersions", arg0)
+func (m *MockPackageSolver) ResolveVersions(arg0 string, arg1 map[string]string) (map[string]string, error) {
+	ret := m.ctrl.Call(m, "ResolveVersions", arg0, arg1)
 	ret0, _ := ret[0].(map[string]string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ResolveVersions indicates an expected call of ResolveVersions
-func (mr *MockPackageSolverMockRecorder) ResolveVersions(arg0 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResolveVersions", reflect.TypeOf((*MockPackageSolver)(nil).ResolveVersions), arg0)
-}
-
-// Type mocks base method
-func (m *MockPackageSolver) Type() pkgsolver.SolverType {
-	ret := m.ctrl.Call(m, "Type")
-	ret0, _ := ret[0].(pkgsolver.SolverType)
-	return ret0
-}
-
-// Type indicates an expected call of Type
-func (mr *MockPackageSolverMockRecorder) Type() *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Type", reflect.TypeOf((*MockPackageSolver)(nil).Type))
+func (mr *MockPackageSolverMockRecorder) ResolveVersions(arg0, arg1 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResolveVersions", reflect.TypeOf((*MockPackageSolver)(nil).ResolveVersions), arg0, arg1)
 }

@@ -84,11 +84,7 @@ func (h *PHPHandler) UpdateLocks(
 		return nil, xerrors.Errorf("unsupported OS %q: only debian-based base images are supported", osrelease.Name)
 	}
 
-	if err := pkgSolver.Configure(osrelease, "amd64"); err != nil {
-		return nil, xerrors.Errorf("could not update stage locks: %w", err)
-	}
-
-	stagesLocks, err := h.updateStagesLocks(ctx, pkgSolver, def)
+	stagesLocks, err := h.updateStagesLocks(ctx, pkgSolver, def, def.Locks)
 	def.Locks.Stages = stagesLocks
 	return def.Locks, err
 }
@@ -112,10 +108,12 @@ func (h *PHPHandler) updateWebserverLocks(
 	})
 }
 
+// @TODO: remove pkgSolver?
 func (h *PHPHandler) updateStagesLocks(
 	ctx context.Context,
 	pkgSolver pkgsolver.PackageSolver,
 	def Definition,
+	defLocks DefinitionLocks,
 ) (map[string]StageLocks, error) {
 	locks := map[string]StageLocks{}
 	composerLockLoader := func(stageDef *StageDefinition) error {
@@ -129,7 +127,9 @@ func (h *PHPHandler) updateStagesLocks(
 		}
 
 		stageLocks := StageLocks{}
-		stageLocks.SystemPackages, err = pkgSolver.ResolveVersions(stage.SystemPackages)
+		stageLocks.SystemPackages, err = pkgSolver.ResolveVersions(
+			defLocks.BaseImage,
+			stage.SystemPackages)
 		if err != nil {
 			return nil, xerrors.Errorf("could not resolve systems package versions: %w", err)
 		}

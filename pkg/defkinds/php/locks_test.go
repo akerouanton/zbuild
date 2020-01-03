@@ -51,18 +51,20 @@ func initSuccessfullyUpdateLocksTC(t *testing.T, mockCtrl *gomock.Controller) up
 	).AnyTimes().Return([]byte{}, statesolver.FileNotFound)
 
 	pkgSolver := mocks.NewMockPackageSolver(mockCtrl)
-	pkgSolver.EXPECT().Configure(gomock.Any(), "amd64").Times(1)
-	pkgSolver.EXPECT().ResolveVersions(map[string]string{
-		"git":          "*",
-		"libicu-dev":   "*",
-		"libpcre3-dev": "*",
-		"libssl-dev":   "*",
-		"libxml2-dev":  "*",
-		"libzip-dev":   "*",
-		"openssl":      "*",
-		"unzip":        "*",
-		"zlib1g-dev":   "*",
-	}).AnyTimes().Return(map[string]string{
+	pkgSolver.EXPECT().ResolveVersions(
+		"docker.io/library/php:7.3-fpm-buster",
+		map[string]string{
+			"git":          "*",
+			"libicu-dev":   "*",
+			"libpcre3-dev": "*",
+			"libssl-dev":   "*",
+			"libxml2-dev":  "*",
+			"libzip-dev":   "*",
+			"openssl":      "*",
+			"unzip":        "*",
+			"zlib1g-dev":   "*",
+		},
+	).AnyTimes().Return(map[string]string{
 		"git":          "git-version",
 		"libicu-dev":   "libicu-dev-version",
 		"libpcre3-dev": "libpcre3-dev-version",

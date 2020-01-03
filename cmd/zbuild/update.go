@@ -1,14 +1,10 @@
 package main
 
 import (
-	"os"
-	"path"
-
 	"github.com/NiR-/zbuild/pkg/builder"
 	"github.com/NiR-/zbuild/pkg/pkgsolver"
 	"github.com/NiR-/zbuild/pkg/registry"
 	"github.com/sirupsen/logrus"
-	dpkg "github.com/snyh/go-dpkg-parser"
 	"github.com/spf13/cobra"
 )
 
@@ -32,33 +28,14 @@ func newUpdateCmd() *cobra.Command {
 }
 
 func HandleUpdateCmd(cmd *cobra.Command, args []string) {
-	pkgSolver := initPackageSolver()
+	solver := newDockerSolver(updateFlags.context)
+	pkgSolver := pkgsolver.NewAPTSolver(solver)
 	b := builder.Builder{
 		Registry:  registry.Registry,
 		PkgSolver: pkgSolver,
 	}
-	solver := newDockerSolver(updateFlags.context)
 
 	if err := b.UpdateLockFile(solver, updateFlags.file); err != nil {
 		logrus.Fatalf("%+v", err)
 	}
-}
-
-func initPackageSolver() pkgsolver.PackageSolver {
-	var pkgSolver pkgsolver.PackageSolver
-
-	basepath := os.Getenv("XDG_DATA_HOME")
-	if basepath == "" {
-		home, err := os.UserHomeDir()
-		if err != nil {
-			logrus.Fatalf("%+v", err)
-		}
-		basepath = path.Join(home, ".local/share")
-	}
-
-	path := path.Join(basepath, "zbuild/dpkg")
-	dpkgRepo := dpkg.NewRepository(path)
-	pkgSolver = pkgsolver.NewDpkgSolver(dpkgRepo)
-
-	return pkgSolver
 }

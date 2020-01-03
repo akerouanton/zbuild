@@ -42,10 +42,10 @@ func initSuccessfullyUpdateLocksTC(t *testing.T, mockCtrl *gomock.Controller) up
 	).AnyTimes().Return(rawDebianOSRelease, nil)
 
 	pkgSolver := mocks.NewMockPackageSolver(mockCtrl)
-	pkgSolver.EXPECT().Configure(gomock.Any(), "amd64").Times(1)
-	pkgSolver.EXPECT().ResolveVersions(map[string]string{
-		"curl": "*",
-	}).Times(1).Return(map[string]string{
+	pkgSolver.EXPECT().ResolveVersions(
+		"docker.io/library/nginx:latest",
+		map[string]string{"curl": "*"},
+	).Times(1).Return(map[string]string{
 		"curl": "7.64.0-4",
 	}, nil)
 
