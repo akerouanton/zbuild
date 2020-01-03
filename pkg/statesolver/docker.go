@@ -55,14 +55,12 @@ func (s DockerSolver) ExecImage(
 	defer s.removeContainer(ctx, c)
 
 	err = s.startContainerAndWait(ctx, c)
+	outbuf, _, readErr := s.fetchContainerLogs(ctx, c, true, false)
 	if err != nil {
-		return nil, xerrors.Errorf("failed to execute cmd %q in image %q: %w",
+		return outbuf, xerrors.Errorf("failed to execute cmd %q in image %q: %w",
 			strcmd, imageRef, err)
 	}
-
-	outbuf, _, err := s.fetchContainerLogs(ctx, c, true, false)
-
-	return outbuf, nil
+	return outbuf, readErr
 }
 
 func (s DockerSolver) startContainerAndWait(ctx context.Context, containerID string) error {

@@ -20,6 +20,7 @@ type SolverType string
 
 const (
 	APT SolverType = "apt"
+	APK SolverType = "apk"
 )
 
 func checkMissingPackages(packages, resolved map[string]string) error {

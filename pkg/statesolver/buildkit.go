@@ -56,15 +56,15 @@ func (s BuildkitSolver) ExecImage(
 	}
 
 	raw, ok, err := llbutils.ReadFile(ctx, ref, "/tmp/result")
+	buf := bytes.NewBuffer(raw)
 	if err != nil {
 		err = xerrors.Errorf("failed to execute %q in %q: %w", escapedCmd, imageRef, err)
-		return nil, err
+		return buf, err
 	} else if !ok {
 		err = xerrors.Errorf("failed to execute %q in %q", escapedCmd, imageRef)
-		return nil, err
+		return buf, err
 	}
 
-	buf := bytes.NewBuffer(raw)
 	return buf, nil
 }
 
