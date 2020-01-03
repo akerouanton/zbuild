@@ -18,13 +18,15 @@ type newDefinitionTC struct {
 }
 
 func initSuccessfullyParseRawDefinitionTC() newDefinitionTC {
+	configFile := "./docker/nginx.conf"
+	healthcheck := true
 	return newDefinitionTC{
 		file:     "testdata/locks/definition.yml",
 		lockFile: "testdata/locks/definition.lock",
 		expected: webserver.Definition{
 			Type:        "nginx",
-			ConfigFile:  "./docker/nginx.conf",
-			Healthcheck: true,
+			ConfigFile:  &configFile,
+			Healthcheck: &healthcheck,
 			SystemPackages: map[string]string{
 				"curl": "*",
 			},

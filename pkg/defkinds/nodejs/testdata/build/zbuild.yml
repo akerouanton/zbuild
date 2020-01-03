@@ -2,7 +2,7 @@ kind: nodejs
 version: 12
 
 webserver:
-  webserver: nginx
+  type: nginx
   config_file: nginx.conf
   healthcheck: true
 

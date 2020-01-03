@@ -58,7 +58,7 @@ func (h *WebserverHandler) Build(
 
 	state, err = llbutils.InstallSystemPackages(state, llbutils.APT, def.Locks.SystemPackages)
 
-	if def.ConfigFile != "" {
+	if def.ConfigFile != nil && *def.ConfigFile != "" {
 		state = h.copyConfigFile(state, def, buildOpts)
 	}
 
@@ -78,7 +78,7 @@ func (h *WebserverHandler) copyConfigFile(
 	buildOpts builddef.BuildOpts,
 ) llb.State {
 	configFileSrc := llbutils.BuildContext(buildOpts.ContextName,
-		llb.IncludePatterns([]string{def.ConfigFile}),
+		llb.IncludePatterns([]string{*def.ConfigFile}),
 		llb.LocalUniqueID(buildOpts.LocalUniqueID),
 		llb.SessionID(buildOpts.SessionID),
 		llb.SharedKeyHint(SharedKeys.ConfigFile),
@@ -86,7 +86,7 @@ func (h *WebserverHandler) copyConfigFile(
 
 	return llbutils.Copy(
 		configFileSrc,
-		def.ConfigFile,
+		*def.ConfigFile,
 		state,
 		def.Type.ConfigPath(),
 		fileOwner,

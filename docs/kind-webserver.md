@@ -15,7 +15,7 @@ zbuildfiles with webserver types have following structure:
 ```yaml
 kind: webserver
 
-webserver: <string> # (default: nginx)
+type: <string> # (default: nginx)
 system_packages: <map[string]string>
 config_file: <string> # (required)
 healthcheck: <bool> # (default: true)
