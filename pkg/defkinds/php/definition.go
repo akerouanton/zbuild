@@ -57,7 +57,7 @@ func DefaultDefinition() Definition {
 			ExternalFiles:  []llbutils.ExternalFile{},
 			SystemPackages: map[string]string{},
 			FPM:            &fpm,
-			Extensions:     map[string]string{},
+			Extensions:     &ExtensionSet{},
 			GlobalDeps:     map[string]string{},
 			ComposerDumpFlags: &ComposerDumpFlags{
 				ClassmapAuthoritative: true,
@@ -128,6 +128,77 @@ func NewKind(genericDef *builddef.BuildDef) (Definition, error) {
 	return def, nil
 }
 
+// ExtensionSet is a list of extensions that associates extensions names with
+// either version constraints or versions.
+type ExtensionSet map[string]string
+
+func (set *ExtensionSet) Add(name, val string, overwrite bool) {
+	if set == nil {
+		return
+	}
+	if _, ok := (*set)[name]; ok && !overwrite {
+		return
+	}
+	(*set)[name] = val
+}
+
+func (set *ExtensionSet) Remove(name string) {
+	if set == nil {
+		return
+	}
+	delete(*set, name)
+}
+
+func (set *ExtensionSet) Has(name string) bool {
+	if set == nil {
+		return false
+	}
+	_, ok := (*set)[name]
+	return ok
+}
+
+func (set *ExtensionSet) Names() []string {
+	if set == nil {
+		return []string{}
+	}
+
+	names := make([]string, 0, len(*set))
+	for extName := range *set {
+		names = append(names, extName)
+	}
+
+	return names
+}
+
+func (set *ExtensionSet) Set() map[string]string {
+	if set == nil {
+		return map[string]string{}
+	}
+	return *set
+}
+
+func (set *ExtensionSet) Copy() *ExtensionSet {
+	if set == nil {
+		return &ExtensionSet{}
+	}
+
+	new := ExtensionSet{}
+	for name, val := range *set {
+		new[name] = val
+	}
+
+	return &new
+}
+
+func (set *ExtensionSet) Merge(overriding *ExtensionSet) {
+	if set == nil || overriding == nil {
+		return
+	}
+	for name, val := range *overriding {
+		set.Add(name, val, true)
+	}
+}
+
 // Definition holds the specialized config parameters for php images.
 // It represents the "base" stage and as such holds the PHP version (ths is the
 // only parameter that can't be overriden by derived stages).
@@ -194,7 +265,7 @@ type Stage struct {
 	SystemPackages    map[string]string       `mapstructure:"system_packages"`
 	FPM               *bool                   `mapstructure:",omitempty"`
 	Command           *[]string               `mapstructure:"command"`
-	Extensions        map[string]string       `mapstructure:"extensions"`
+	Extensions        *ExtensionSet           `mapstructure:"extensions"`
 	GlobalDeps        map[string]string       `mapstructure:"global_deps"`
 	ConfigFiles       PHPConfigFiles          `mapstructure:"config_files"`
 	ComposerDumpFlags *ComposerDumpFlags      `mapstructure:"composer_dump"`
@@ -211,7 +282,7 @@ func (s Stage) Copy() Stage {
 		SystemPackages:    map[string]string{},
 		FPM:               s.FPM,
 		Command:           s.Command,
-		Extensions:        map[string]string{},
+		Extensions:        s.Extensions.Copy(),
 		GlobalDeps:        map[string]string{},
 		ConfigFiles:       s.ConfigFiles.Copy(),
 		ComposerDumpFlags: s.ComposerDumpFlags,
@@ -231,9 +302,6 @@ func (s Stage) Copy() Stage {
 	for name, constraint := range s.SystemPackages {
 		new.SystemPackages[name] = constraint
 	}
-	for name, constraint := range s.Extensions {
-		new.Extensions[name] = constraint
-	}
 	for name, constraint := range s.GlobalDeps {
 		new.GlobalDeps[name] = constraint
 	}
@@ -250,6 +318,7 @@ func (s Stage) Merge(overriding Stage) Stage {
 	new.Integrations = append(new.Integrations, overriding.Integrations...)
 	new.StatefulDirs = append(new.StatefulDirs, overriding.StatefulDirs...)
 	new.PostInstall = append(new.PostInstall, overriding.PostInstall...)
+	new.Extensions.Merge(overriding.Extensions)
 
 	for name, constraint := range overriding.SystemPackages {
 		new.SystemPackages[name] = constraint
@@ -261,9 +330,6 @@ func (s Stage) Merge(overriding Stage) Stage {
 	if overriding.Command != nil {
 		cmd := *overriding.Command
 		new.Command = &cmd
-	}
-	for name, constraint := range overriding.Extensions {
-		new.Extensions[name] = constraint
 	}
 	for name, constraint := range overriding.GlobalDeps {
 		new.GlobalDeps[name] = constraint
@@ -454,13 +520,11 @@ func (def *Definition) ResolveStageDefinition(
 	}
 
 	if stageDef.Dev == false && *stageDef.FPM == true {
-		stageDef.Extensions["apcu"] = "*"
-		stageDef.Extensions["opcache"] = "*"
+		stageDef.Extensions.Add("apcu", "*", false)
+		stageDef.Extensions.Add("opcache", "*", false)
 	}
 	for name, constraint := range stageDef.PlatformReqs {
-		if _, ok := stageDef.Extensions[name]; !ok {
-			stageDef.Extensions[name] = constraint
-		}
+		stageDef.Extensions.Add(name, constraint, false)
 	}
 
 	inferExtensions(&stageDef)
@@ -595,54 +659,50 @@ func addIntegrations(stageDef *StageDefinition) error {
 //
 // This list has been obtained using:
 // docker run --rm -t php:7.2-fpm-buster php -r 'var_dump(get_loaded_extensions());'
-var preinstalledExtensions = []string{
-	"core",
-	"ctype",
-	"curl",
-	"date",
-	"dom",
-	"fileinfo",
-	"filter",
-	"ftp",
-	"hash",
-	"iconv",
-	"json",
-	"libxml",
-	"mbstring",
-	"mysqlnd",
-	"openssl",
-	"pcre",
-	"pdo",
-	"pdo_sqlite",
-	"phar",
-	"posix",
-	"readline",
-	"reflection",
-	"session",
-	"simplexml",
-	"sodium",
-	"spl",
-	"sqlite3",
-	"standard",
-	"tokenizer",
-	"xml",
-	"xmlreader",
-	"xmlwriter",
-	"zlib",
+var preinstalledExtensions = map[string]struct{}{
+	"core":       struct{}{},
+	"ctype":      struct{}{},
+	"curl":       struct{}{},
+	"date":       struct{}{},
+	"dom":        struct{}{},
+	"fileinfo":   struct{}{},
+	"filter":     struct{}{},
+	"ftp":        struct{}{},
+	"hash":       struct{}{},
+	"iconv":      struct{}{},
+	"json":       struct{}{},
+	"libxml":     struct{}{},
+	"mbstring":   struct{}{},
+	"mysqlnd":    struct{}{},
+	"openssl":    struct{}{},
+	"pcre":       struct{}{},
+	"pdo":        struct{}{},
+	"pdo_sqlite": struct{}{},
+	"phar":       struct{}{},
+	"posix":      struct{}{},
+	"readline":   struct{}{},
+	"reflection": struct{}{},
+	"session":    struct{}{},
+	"simplexml":  struct{}{},
+	"sodium":     struct{}{},
+	"spl":        struct{}{},
+	"sqlite3":    struct{}{},
+	"standard":   struct{}{},
+	"tokenizer":  struct{}{},
+	"xml":        struct{}{},
+	"xmlreader":  struct{}{},
+	"xmlwriter":  struct{}{},
+	"zlib":       struct{}{},
 }
 
 func inferExtensions(def *StageDefinition) {
 	// soap extension needs sockets extension to work properly
-	if _, ok := def.Extensions["soap"]; ok {
-		if _, ok := def.Extensions["sockets"]; !ok {
-			def.Extensions["sockets"] = "*"
-		}
+	if def.Extensions.Has("soap") {
+		def.Extensions.Add("sockets", "*", false)
 	}
 
 	// Add zip extension if it's missing as it's used by composer to install packages.
-	if _, ok := def.Extensions["zip"]; !ok {
-		def.Extensions["zip"] = "*"
-	}
+	def.Extensions.Add("zip", "*", false)
 }
 
 func inferSystemPackages(def *StageDefinition) {
@@ -650,7 +710,7 @@ func inferSystemPackages(def *StageDefinition) {
 		"libpcre3-dev": "*",
 	}
 
-	for ext := range def.Extensions {
+	for _, ext := range def.Extensions.Names() {
 		deps, ok := extensionsDeps[ext]
 		if !ok {
 			continue
@@ -662,6 +722,7 @@ func inferSystemPackages(def *StageDefinition) {
 	}
 
 	// Add unzip and git packages as they're used by Composer
+	// @TODO: use a struct like ExtensionSet to not overwrite unzip/git reqs
 	if _, ok := def.SystemPackages["unzip"]; !ok {
 		systemPackages["unzip"] = "*"
 	}
