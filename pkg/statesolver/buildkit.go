@@ -1,7 +1,9 @@
 package statesolver
 
 import (
+	"bytes"
 	"context"
+	"strings"
 
 	"github.com/NiR-/zbuild/pkg/llbutils"
 	"github.com/moby/buildkit/client/llb"
@@ -36,6 +38,34 @@ type BuildkitSolver struct {
 	client      client.Client
 	sessionID   string
 	contextName string
+}
+
+func (s BuildkitSolver) ExecImage(
+	ctx context.Context,
+	imageRef string,
+	cmd []string,
+) (*bytes.Buffer, error) {
+	escapedCmd := strings.Replace(strings.Join(cmd, "; "), "\"", "\\\"", -1)
+	src := llbutils.ImageSource(imageRef, false)
+	run := src.Run(
+		llb.Shlex("/bin/sh -o errexit -c \"" + escapedCmd + "\" > /tmp/result"))
+
+	_, ref, err := llbutils.SolveState(ctx, s.client, run.Root())
+	if err != nil {
+		return nil, err
+	}
+
+	raw, ok, err := llbutils.ReadFile(ctx, ref, "/tmp/result")
+	buf := bytes.NewBuffer(raw)
+	if err != nil {
+		err = xerrors.Errorf("failed to execute %q in %q: %w", escapedCmd, imageRef, err)
+		return buf, err
+	} else if !ok {
+		err = xerrors.Errorf("failed to execute %q in %q", escapedCmd, imageRef)
+		return buf, err
+	}
+
+	return buf, nil
 }
 
 func (s BuildkitSolver) FromBuildContext(opts ...llb.LocalOption) ReadFileOpt {

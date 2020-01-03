@@ -1,61 +1,42 @@
 package pkgsolver
 
 import (
-	"github.com/NiR-/zbuild/pkg/builddef"
+	"strings"
+
 	"golang.org/x/xerrors"
 )
 
 // PackageSolver is used by specialzed defkinds to lock system packages.
 type PackageSolver interface {
-	// Configure sets the package "suites" that should be used for subsequent
-	// calls to ResolveVersions().
-	Configure(osrelease builddef.OSRelease, arch string) error
-	// ResolveVersions takes a map of packages to resolve, associated with their
-	// version constraint. It returns a map of packages associated with their
-	// resolved version. If one of the package cannot be resolved or if the
-	// given arch is not supported, it returns an error.
-	ResolveVersions(pkgs map[string]string) (map[string]string, error)
-	// Type returns the SolverType matching the current instance of
-	// PackageSolver.
-	Type() SolverType
+	// ResolveVersions takes the reference of a container image where the
+	// resolution should happen as first arg. It also takes a map of packages
+	// to resolve associated with their version constraint. It returns a map of
+	// packages associated with their resolved version. It returns an error if
+	// one of the package cannot be resolved.
+	ResolveVersions(imageRef string, pkgs map[string]string) (map[string]string, error)
 }
 
 type SolverType string
 
 const (
-	Dpkg SolverType = "dpkg"
+	APT SolverType = "apt"
+	APK SolverType = "apk"
 )
 
-type SolverConfig struct {
-	Arch string
-	// See https://wiki.debian.org/SourcesList
-	DpkgSuites [][]string
-}
+func checkMissingPackages(packages, resolved map[string]string) error {
+	notResolved := []string{}
 
-func GuessSolverConfig(osrelease builddef.OSRelease, arch string) (SolverConfig, error) {
-	solverType := Dpkg
-	if osrelease.Name == "alpine" {
-		return SolverConfig{}, xerrors.New("alpine is not supported yet")
-	}
-
-	dpkgSuites := [][]string{}
-
-	switch solverType {
-	case Dpkg:
-		// @TODO: load these suites from the base image instead of guessing them based on version codename
-		// because of that, zbuild only supports debian for now
-		dpkgSuites = [][]string{
-			{"http://deb.debian.org/debian", osrelease.VersionName},
-			{"http://deb.debian.org/debian", osrelease.VersionName + "-updates"},
-			{"http://security.debian.org", osrelease.VersionName + "/updates"},
+	for name := range packages {
+		if _, ok := resolved[name]; ok {
+			continue
 		}
-	default:
-		return SolverConfig{}, xerrors.Errorf("%q package solver is not supported", solverType)
+		notResolved = append(notResolved, name)
 	}
 
-	config := SolverConfig{
-		Arch:       arch,
-		DpkgSuites: dpkgSuites,
+	if len(notResolved) == 0 {
+		return nil
 	}
-	return config, nil
+
+	return xerrors.Errorf("packages %s not found",
+		strings.Join(notResolved, ", "))
 }

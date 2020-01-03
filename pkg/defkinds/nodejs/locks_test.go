@@ -46,10 +46,10 @@ func initSuccessfullyUpdateLocksTC(t *testing.T, mockCtrl *gomock.Controller) up
 	).Return(rawDebianOSRelease, nil)
 
 	pkgSolver := mocks.NewMockPackageSolver(mockCtrl)
-	pkgSolver.EXPECT().Configure(gomock.Any(), "amd64").Times(1)
-	pkgSolver.EXPECT().ResolveVersions(map[string]string{
-		"curl": "*",
-	}).AnyTimes().Return(map[string]string{
+	pkgSolver.EXPECT().ResolveVersions(
+		"docker.io/library/node:12-buster-slim",
+		map[string]string{"curl": "*"},
+	).AnyTimes().Return(map[string]string{
 		"curl": "curl-version",
 	}, nil)
 
@@ -100,6 +100,7 @@ func initSuccessfullyUpdateWebserverLocksTC(t *testing.T, mockCtrl *gomock.Contr
 		"/etc/os-release",
 		gomock.Any(),
 	).Return(rawDebianOSRelease, nil)
+
 	solver.EXPECT().FromImage("docker.io/library/nginx:latest").Times(1)
 	solver.EXPECT().ReadFile(
 		gomock.Any(),
@@ -108,11 +109,15 @@ func initSuccessfullyUpdateWebserverLocksTC(t *testing.T, mockCtrl *gomock.Contr
 	).Return(rawDebianOSRelease, nil)
 
 	pkgSolver := mocks.NewMockPackageSolver(mockCtrl)
-	pkgSolver.EXPECT().Configure(gomock.Any(), "amd64").Times(2)
-	pkgSolver.EXPECT().ResolveVersions(map[string]string{}).Return(map[string]string{}, nil).Times(2)
-	pkgSolver.EXPECT().ResolveVersions(map[string]string{
-		"curl": "*",
-	}).Return(map[string]string{
+	pkgSolver.EXPECT().ResolveVersions(
+		"docker.io/library/node:12-buster-slim",
+		map[string]string{},
+	).Return(map[string]string{}, nil).Times(2)
+
+	pkgSolver.EXPECT().ResolveVersions(
+		"docker.io/library/nginx:latest",
+		map[string]string{"curl": "*"},
+	).Return(map[string]string{
 		"curl": "curl-version",
 	}, nil).Times(1)
 
