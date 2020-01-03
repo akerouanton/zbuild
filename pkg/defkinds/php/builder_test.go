@@ -315,7 +315,10 @@ func TestDebugConfig(t *testing.T) {
 
 			expected := loadTestdata(t, tc.expected)
 			if expected != string(raw) {
-				t.Fatalf("Expected: %s\nGot: %s", expected, string(raw))
+				tempfile := newTempFile(t)
+				writeTestdata(t, tempfile, string(raw))
+
+				t.Fatalf("Expected: <%s>\nGot: <%s>", tc.expected, tempfile)
 			}
 		})
 	}

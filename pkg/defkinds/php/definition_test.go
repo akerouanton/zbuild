@@ -44,7 +44,7 @@ func initSuccessfullyParseRawDefinitionWithoutStagesTC() newDefinitionTC {
 				ExternalFiles:  []llbutils.ExternalFile{},
 				SystemPackages: map[string]string{},
 				FPM:            &isFPM,
-				Extensions: map[string]string{
+				Extensions: &builddef.VersionMap{
 					"intl":      "*",
 					"pdo_mysql": "*",
 					"soap":      "*",
@@ -135,7 +135,7 @@ func initSuccessfullyParseRawDefinitionWithStagesTC() newDefinitionTC {
 				ExternalFiles:  []llbutils.ExternalFile{},
 				SystemPackages: map[string]string{},
 				FPM:            &isFPM,
-				Extensions: map[string]string{
+				Extensions: &builddef.VersionMap{
 					"intl":      "*",
 					"pdo_mysql": "*",
 					"soap":      "*",
@@ -285,7 +285,7 @@ func initSuccessfullyResolveDefaultDevStageTC(t *testing.T, mockCtrl *gomock.Con
 				},
 				SystemPackages: map[string]string{},
 				FPM:            &isFPM,
-				Extensions: map[string]string{
+				Extensions: &builddef.VersionMap{
 					"intl":      "*",
 					"pdo_mysql": "*",
 					"soap":      "*",
@@ -350,7 +350,7 @@ func initSuccessfullyResolveWorkerStageTC(t *testing.T, mockCtrl *gomock.Control
 				},
 				FPM:     &isNotFPM,
 				Command: &workerCmd,
-				Extensions: map[string]string{
+				Extensions: &builddef.VersionMap{
 					"mbstring": "*",
 					"zip":      "*",
 				},
@@ -427,7 +427,7 @@ func initRemoveDefaultExtensionsTC(t *testing.T, mockCtrl *gomock.Controller) re
 					"libzip-dev":    "*",
 				},
 				FPM: &fpm,
-				Extensions: map[string]string{
+				Extensions: &builddef.VersionMap{
 					"zip":        "*",
 					"mbstring":   "*",
 					"reflection": "*",
@@ -490,7 +490,7 @@ func initPreservePredefinedExtensionConstraintsTC(t *testing.T, mockCtrl *gomock
 					"libzip-dev":   "*",
 				},
 				FPM: &fpm,
-				Extensions: map[string]string{
+				Extensions: &builddef.VersionMap{
 					"zip":   "*",
 					"redis": "^5.1",
 				},
@@ -961,7 +961,7 @@ func emptyStage() php.Stage {
 	return php.Stage{
 		ExternalFiles:  []llbutils.ExternalFile{},
 		SystemPackages: map[string]string{},
-		Extensions:     map[string]string{},
+		Extensions:     &builddef.VersionMap{},
 		GlobalDeps:     map[string]string{},
 		ConfigFiles:    php.PHPConfigFiles{},
 		Sources:        []string{},
@@ -1171,19 +1171,19 @@ func initMergeExtensionsWithBaseTC() mergeStageTC {
 	return mergeStageTC{
 		base: func() php.Stage {
 			return php.Stage{
-				Extensions: map[string]string{
+				Extensions: &builddef.VersionMap{
 					"apcu": "*",
 				},
 			}
 		},
 		overriding: php.Stage{
-			Extensions: map[string]string{
+			Extensions: &builddef.VersionMap{
 				"opcache": "*",
 			},
 		},
 		expected: func() php.Stage {
 			s := emptyStage()
-			s.Extensions = map[string]string{
+			s.Extensions = &builddef.VersionMap{
 				"apcu":    "*",
 				"opcache": "*",
 			}
@@ -1198,13 +1198,13 @@ func initMergeExtensionsWithoutBaseTC() mergeStageTC {
 			return php.Stage{}
 		},
 		overriding: php.Stage{
-			Extensions: map[string]string{
+			Extensions: &builddef.VersionMap{
 				"opcache": "*",
 			},
 		},
 		expected: func() php.Stage {
 			s := emptyStage()
-			s.Extensions = map[string]string{
+			s.Extensions = &builddef.VersionMap{
 				"opcache": "*",
 			}
 			return s

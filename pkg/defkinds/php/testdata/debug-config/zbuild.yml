@@ -9,7 +9,7 @@ global_deps:
 extensions:
     # @TODO: wrong version of this ext is pinned for prod stage
     # @TODO: check why ext requirements from composer.json aren't in the lockfile
-    apcu: "=5.1.17"
+    apcu: "5.1.17"
     intl: "*"
     pdo_pgsql: "*"
 

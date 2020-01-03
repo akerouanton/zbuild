@@ -19,7 +19,7 @@ stage:
   fpm: true
   command: null
   extensions:
-    apcu: =5.1.17
+    apcu: 5.1.17
     ctype: '*'
     date: '*'
     dom: '*'

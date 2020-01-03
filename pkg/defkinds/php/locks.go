@@ -147,19 +147,19 @@ func (h *PHPHandler) updateStagesLocks(
 	return locks, nil
 }
 
-func (h *PHPHandler) lockExtensions(extensions map[string]string) (map[string]string, error) {
+func (h *PHPHandler) lockExtensions(extensions *builddef.VersionMap) (map[string]string, error) {
 	resolved := map[string]string{}
 	ctx := context.Background()
 
 	// Remove extensions installed by default as this would result in a build
 	// error otherwise.
-	for _, name := range preinstalledExtensions {
-		if _, ok := extensions[name]; ok {
-			delete(extensions, name)
+	for _, name := range extensions.Names() {
+		if _, ok := preinstalledExtensions[name]; ok {
+			extensions.Remove(name)
 		}
 	}
 
-	for extName, constraint := range extensions {
+	for extName, constraint := range extensions.Map() {
 		if isCoreExtension(extName) {
 			resolved[extName] = constraint
 			continue
