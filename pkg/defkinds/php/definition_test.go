@@ -6,6 +6,7 @@ import (
 
 	"github.com/NiR-/zbuild/pkg/builddef"
 	"github.com/NiR-/zbuild/pkg/defkinds/php"
+	"github.com/NiR-/zbuild/pkg/defkinds/webserver"
 	"github.com/NiR-/zbuild/pkg/llbutils"
 	"github.com/go-test/deep"
 	"github.com/golang/mock/gomock"
@@ -30,6 +31,10 @@ func initSuccessfullyParseRawDefinitionWithoutStagesTC() newDefinitionTC {
 	healthcheck := true
 	isDev := true
 	isNotDev := false
+	inferMode := false
+
+	devStage := emptyStage()
+	prodStage := emptyStage()
 
 	return newDefinitionTC{
 		file:     file,
@@ -65,15 +70,17 @@ func initSuccessfullyParseRawDefinitionWithoutStagesTC() newDefinitionTC {
 			Version:       "7.4.0",
 			MajMinVersion: "7.4",
 			BaseImage:     "docker.io/library/php:7.4-fpm-buster",
-			Infer:         false,
+			Infer:         &inferMode,
 			Stages: map[string]php.DerivedStage{
 				"dev": {
 					DeriveFrom: "base",
 					Dev:        &isDev,
+					Stage:      devStage,
 				},
 				"prod": {
 					DeriveFrom: "base",
 					Dev:        &isNotDev,
+					Stage:      prodStage,
 				},
 			},
 			Locks: php.DefinitionLocks{
@@ -101,10 +108,24 @@ func initSuccessfullyParseRawDefinitionWithStagesTC() newDefinitionTC {
 	fpmConfigFile := "docker/app/fpm.conf"
 	healthcheckEnabled := true
 	healthcheckDisabled := false
-	isDev := true
+	devStageDevMode := true
+	prodStageDevMode := false
 	isFPM := true
 	isNotFPM := false
 	workerCmd := []string{"bin/worker"}
+	inferMode := true
+
+	devStage := emptyStage()
+	devStage.ConfigFiles = php.PHPConfigFiles{
+		IniFile: &iniDevFile,
+	}
+
+	prodStage := emptyStage()
+	prodStage.ConfigFiles = php.PHPConfigFiles{
+		IniFile: &iniProdFile,
+	}
+	prodStage.Healthcheck = &healthcheckEnabled
+	prodStage.Integrations = []string{"blackfire"}
 
 	return newDefinitionTC{
 		file:     "testdata/def/merge-all.yml",
@@ -136,26 +157,17 @@ func initSuccessfullyParseRawDefinitionWithStagesTC() newDefinitionTC {
 			Version:       "7.4.0",
 			MajMinVersion: "7.4",
 			BaseImage:     "docker.io/library/php:7.4-fpm-buster",
-			Infer:         true,
+			Infer:         &inferMode,
 			Stages: map[string]php.DerivedStage{
 				"dev": {
 					DeriveFrom: "",
-					Dev:        &isDev,
-					Stage: php.Stage{
-						ConfigFiles: php.PHPConfigFiles{
-							IniFile: &iniDevFile,
-						},
-					},
+					Dev:        &devStageDevMode,
+					Stage:      devStage,
 				},
 				"prod": {
 					DeriveFrom: "",
-					Stage: php.Stage{
-						ConfigFiles: php.PHPConfigFiles{
-							IniFile: &iniProdFile,
-						},
-						Healthcheck:  &healthcheckEnabled,
-						Integrations: []string{"blackfire"},
-					},
+					Dev:        &prodStageDevMode,
+					Stage:      prodStage,
 				},
 				"worker": {
 					DeriveFrom: "prod",
@@ -618,6 +630,324 @@ func mockComposerLockLoader(
 		stageDef.LockedPackages = lockedPackages
 		stageDef.PlatformReqs = platformReqs
 		return nil
+	}
+}
+
+type mergeDefinitionTC struct {
+	base       func() php.Definition
+	overriding func() php.Definition
+	expected   func() php.Definition
+}
+
+func TestMergeDefinition(t *testing.T) {
+	testcases := map[string]mergeDefinitionTC{
+		"merge base stage with base": {
+			base: func() php.Definition {
+				return php.Definition{
+					BaseStage: php.Stage{
+						Sources: []string{"src/"},
+					},
+				}
+			},
+			overriding: func() php.Definition {
+				return php.Definition{
+					BaseStage: php.Stage{
+						Sources: []string{"bin/"},
+					},
+				}
+			},
+			expected: func() php.Definition {
+				baseStage := emptyStage()
+				baseStage.Sources = []string{"src/", "bin/"}
+
+				return php.Definition{
+					BaseStage: baseStage,
+					Stages:    php.DerivedStageSet{},
+				}
+			},
+		},
+		"merge base stage without base": {
+			base: func() php.Definition {
+				return php.Definition{}
+			},
+			overriding: func() php.Definition {
+				return php.Definition{
+					BaseStage: php.Stage{
+						Sources: []string{"bin/"},
+					},
+				}
+			},
+			expected: func() php.Definition {
+				baseStage := emptyStage()
+				baseStage.Sources = []string{"bin/"}
+
+				return php.Definition{
+					BaseStage: baseStage,
+					Stages:    php.DerivedStageSet{},
+				}
+			},
+		},
+		"merge base image with base": {
+			base: func() php.Definition {
+				return php.Definition{
+					BaseImage: "docker.io/library/php:7.3-fpm-buster",
+				}
+			},
+			overriding: func() php.Definition {
+				return php.Definition{
+					BaseImage: "docker.io/library/php:7.4-fpm-buster",
+				}
+			},
+			expected: func() php.Definition {
+				return php.Definition{
+					BaseImage: "docker.io/library/php:7.4-fpm-buster",
+					BaseStage: emptyStage(),
+					Stages:    php.DerivedStageSet{},
+				}
+			},
+		},
+		"merge base image without base": {
+			base: func() php.Definition {
+				return php.Definition{}
+			},
+			overriding: func() php.Definition {
+				return php.Definition{
+					BaseImage: "docker.io/library/php:7.4-fpm-buster",
+				}
+			},
+			expected: func() php.Definition {
+				return php.Definition{
+					BaseImage: "docker.io/library/php:7.4-fpm-buster",
+					BaseStage: emptyStage(),
+					Stages:    php.DerivedStageSet{},
+				}
+			},
+		},
+		"merge version with base": {
+			base: func() php.Definition {
+				return php.Definition{
+					Version: "7.3",
+				}
+			},
+			overriding: func() php.Definition {
+				return php.Definition{
+					Version: "7.4",
+				}
+			},
+			expected: func() php.Definition {
+				return php.Definition{
+					Version:   "7.4",
+					BaseStage: emptyStage(),
+					Stages:    php.DerivedStageSet{},
+				}
+			},
+		},
+		"merge version without base": {
+			base: func() php.Definition {
+				return php.Definition{}
+			},
+			overriding: func() php.Definition {
+				return php.Definition{
+					Version: "7.4",
+				}
+			},
+			expected: func() php.Definition {
+				return php.Definition{
+					Version:   "7.4",
+					BaseStage: emptyStage(),
+					Stages:    php.DerivedStageSet{},
+				}
+			},
+		},
+		"merge infer with base": {
+			base: func() php.Definition {
+				infer := true
+				return php.Definition{
+					Infer: &infer,
+				}
+			},
+			overriding: func() php.Definition {
+				infer := false
+				return php.Definition{
+					Infer: &infer,
+				}
+			},
+			expected: func() php.Definition {
+				infer := false
+				return php.Definition{
+					Infer:     &infer,
+					BaseStage: emptyStage(),
+					Stages:    php.DerivedStageSet{},
+				}
+			},
+		},
+		"merge infer without base": {
+			base: func() php.Definition {
+				return php.Definition{}
+			},
+			overriding: func() php.Definition {
+				infer := true
+				return php.Definition{
+					Infer: &infer,
+				}
+			},
+			expected: func() php.Definition {
+				infer := true
+				return php.Definition{
+					Infer:     &infer,
+					BaseStage: emptyStage(),
+					Stages:    php.DerivedStageSet{},
+				}
+			},
+		},
+		"ignore nil infer": {
+			base: func() php.Definition {
+				infer := true
+				return php.Definition{
+					Infer: &infer,
+				}
+			},
+			overriding: func() php.Definition {
+				return php.Definition{}
+			},
+			expected: func() php.Definition {
+				infer := true
+				return php.Definition{
+					Infer:     &infer,
+					BaseStage: emptyStage(),
+					Stages:    php.DerivedStageSet{},
+				}
+			},
+		},
+		"merge stages with base": {
+			base: func() php.Definition {
+				return php.Definition{
+					Stages: php.DerivedStageSet{
+						"staging": php.DerivedStage{
+							DeriveFrom: "dev",
+						},
+					},
+				}
+			},
+			overriding: func() php.Definition {
+				return php.Definition{
+					Stages: php.DerivedStageSet{
+						"staging": php.DerivedStage{
+							DeriveFrom: "prod",
+						},
+					},
+				}
+			},
+			expected: func() php.Definition {
+				return php.Definition{
+					BaseStage: emptyStage(),
+					Stages: php.DerivedStageSet{
+						"staging": php.DerivedStage{
+							DeriveFrom: "prod",
+							Stage:      emptyStage(),
+						},
+					},
+				}
+			},
+		},
+		"merge stages without base": {
+			base: func() php.Definition {
+				return php.Definition{
+					Stages: php.DerivedStageSet{},
+				}
+			},
+			overriding: func() php.Definition {
+				return php.Definition{
+					Stages: php.DerivedStageSet{
+						"staging": php.DerivedStage{
+							DeriveFrom: "prod",
+						},
+					},
+				}
+			},
+			expected: func() php.Definition {
+				return php.Definition{
+					BaseStage: emptyStage(),
+					Stages: php.DerivedStageSet{
+						"staging": php.DerivedStage{
+							DeriveFrom: "prod",
+						},
+					},
+				}
+			},
+		},
+		"merge webserver with base": {
+			base: func() php.Definition {
+				configFile := "nginx.conf"
+				return php.Definition{
+					Webserver: &webserver.Definition{
+						ConfigFile: &configFile,
+					},
+				}
+			},
+			overriding: func() php.Definition {
+				configFile := "docker/nginx.conf"
+				return php.Definition{
+					Webserver: &webserver.Definition{
+						ConfigFile: &configFile,
+					},
+				}
+			},
+			expected: func() php.Definition {
+				configFile := "docker/nginx.conf"
+				return php.Definition{
+					Webserver: &webserver.Definition{
+						ConfigFile:     &configFile,
+						SystemPackages: map[string]string{},
+					},
+					BaseStage: emptyStage(),
+					Stages:    php.DerivedStageSet{},
+				}
+			},
+		},
+		"merge webserver without base": {
+			base: func() php.Definition {
+				return php.Definition{}
+			},
+			overriding: func() php.Definition {
+				configFile := "docker/nginx.conf"
+				return php.Definition{
+					Webserver: &webserver.Definition{
+						ConfigFile: &configFile,
+					},
+				}
+			},
+			expected: func() php.Definition {
+				configFile := "docker/nginx.conf"
+				return php.Definition{
+					Webserver: &webserver.Definition{
+						ConfigFile:     &configFile,
+						SystemPackages: map[string]string{},
+					},
+					BaseStage: emptyStage(),
+					Stages:    php.DerivedStageSet{},
+				}
+			},
+		},
+	}
+
+	for tcname := range testcases {
+		tc := testcases[tcname]
+
+		t.Run(tcname, func(t *testing.T) {
+			t.Parallel()
+
+			base := tc.base()
+			new := base.Merge(tc.overriding())
+
+			if diff := deep.Equal(new, tc.expected()); diff != nil {
+				t.Fatal(diff)
+			}
+
+			if diff := deep.Equal(base, tc.base()); diff != nil {
+				t.Fatalf("Base stages don't match: %v", diff)
+			}
+		})
 	}
 }
 

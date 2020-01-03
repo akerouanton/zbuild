@@ -1,5 +1,6 @@
 # Default extensions aren't automatically removed when inference is disabled
 infer: true
+version: 7.4
 
 extensions:
   filter: "*"

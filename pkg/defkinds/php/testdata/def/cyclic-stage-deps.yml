@@ -1,3 +1,5 @@
+version: 7.4
+
 stages:
   dev:
     derive_from: prod
