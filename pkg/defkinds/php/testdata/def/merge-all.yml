@@ -7,20 +7,14 @@ extensions:
   pdo_mysql: "*"
   soap: "*"
 
-source_dirs:
+sources:
   - 'generated/'
-
-extra_scripts:
-  - 'gencode.php'
 
 stateful_dirs:
   - 'public/uploads'
 
 config_files:
   fpm.conf: 'docker/app/fpm.conf'
-
-integrations:
-  - symfony
 
 post_install:
   - echo some command
@@ -42,10 +36,8 @@ stages:
     derive_from: prod
     composer_dump:
       apcu: true
-    source_dirs:
+    sources:
       - 'worker/'
-    extra_scripts:
-      - 'bin/worker'
     stateful_dirs:
       - 'data/imports'
     post_install:

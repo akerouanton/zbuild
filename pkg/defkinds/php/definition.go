@@ -8,7 +8,6 @@ import (
 	"github.com/NiR-/zbuild/pkg/builddef"
 	"github.com/NiR-/zbuild/pkg/defkinds/webserver"
 	"github.com/NiR-/zbuild/pkg/llbutils"
-	"github.com/mcuadros/go-version"
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/xerrors"
 	"gopkg.in/yaml.v2"
@@ -29,11 +28,11 @@ func defaultDefinition() Definition {
 			SystemPackages: map[string]string{},
 			FPM:            &fpm,
 			Extensions:     map[string]string{},
+			GlobalDeps:     map[string]string{},
 			ComposerDumpFlags: &ComposerDumpFlags{
 				ClassmapAuthoritative: true,
 			},
-			SourceDirs:   []string{},
-			ExtraScripts: []string{},
+			Sources:      []string{},
 			Integrations: []string{},
 			StatefulDirs: []string{},
 			Healthcheck:  &healthcheck,
@@ -119,26 +118,134 @@ type Stage struct {
 	FPM               *bool                   `mapstructure:",omitempty"`
 	Command           *[]string               `mapstructure:"command"`
 	Extensions        map[string]string       `mapstructure:"extensions"`
+	GlobalDeps        map[string]string       `mapstructure:"global_deps"`
 	ConfigFiles       PHPConfigFiles          `mapstructure:"config_files"`
 	ComposerDumpFlags *ComposerDumpFlags      `mapstructure:"composer_dump"`
-	SourceDirs        []string                `mapstructure:"source_dirs"`
-	ExtraScripts      []string                `mapstructure:"extra_scripts"`
+	Sources           []string                `mapstructure:"sources"`
 	Integrations      []string                `mapstructure:"integrations"`
 	StatefulDirs      []string                `mapstructure:"stateful_dirs"`
 	Healthcheck       *bool                   `mapstructure:"healthcheck"`
 	PostInstall       []string                `mapstructure:"post_install"`
 }
 
+func (s Stage) Copy() Stage {
+	new := Stage{
+		ExternalFiles:     make([]llbutils.ExternalFile, len(s.ExternalFiles)),
+		SystemPackages:    map[string]string{},
+		FPM:               s.FPM,
+		Command:           s.Command,
+		Extensions:        map[string]string{},
+		GlobalDeps:        map[string]string{},
+		ConfigFiles:       s.ConfigFiles.Copy(),
+		ComposerDumpFlags: s.ComposerDumpFlags,
+		Sources:           make([]string, len(s.Sources)),
+		Integrations:      make([]string, len(s.Integrations)),
+		StatefulDirs:      make([]string, len(s.StatefulDirs)),
+		Healthcheck:       s.Healthcheck,
+		PostInstall:       make([]string, len(s.PostInstall)),
+	}
+
+	copy(new.ExternalFiles, s.ExternalFiles)
+	copy(new.Sources, s.Sources)
+	copy(new.Integrations, s.Integrations)
+	copy(new.StatefulDirs, s.StatefulDirs)
+	copy(new.PostInstall, s.PostInstall)
+
+	for name, constraint := range s.SystemPackages {
+		new.SystemPackages[name] = constraint
+	}
+	for name, constraint := range s.Extensions {
+		new.Extensions[name] = constraint
+	}
+	for name, constraint := range s.GlobalDeps {
+		new.GlobalDeps[name] = constraint
+	}
+
+	return new
+}
+
+func (s Stage) Merge(overriding Stage) Stage {
+	new := s.Copy()
+	new.ExternalFiles = append(new.ExternalFiles,
+		overriding.ExternalFiles...)
+	new.ConfigFiles = new.ConfigFiles.Merge(overriding.ConfigFiles)
+	new.Sources = append(new.Sources, overriding.Sources...)
+	new.Integrations = append(new.Integrations, overriding.Integrations...)
+	new.StatefulDirs = append(new.StatefulDirs, overriding.StatefulDirs...)
+	new.PostInstall = append(new.PostInstall, overriding.PostInstall...)
+
+	for name, constraint := range overriding.SystemPackages {
+		new.SystemPackages[name] = constraint
+	}
+	if overriding.FPM != nil {
+		fpm := *overriding.FPM
+		new.FPM = &fpm
+	}
+	if overriding.Command != nil {
+		cmd := *overriding.Command
+		new.Command = &cmd
+	}
+	for name, constraint := range overriding.Extensions {
+		new.Extensions[name] = constraint
+	}
+	for name, constraint := range overriding.GlobalDeps {
+		new.GlobalDeps[name] = constraint
+	}
+	if overriding.ComposerDumpFlags != nil {
+		dumpFlags := *overriding.ComposerDumpFlags
+		new.ComposerDumpFlags = &dumpFlags
+	}
+	if overriding.Healthcheck != nil {
+		healthcheck := *overriding.Healthcheck
+		new.Healthcheck = &healthcheck
+	}
+
+	return new
+}
+
 type DerivedStage struct {
 	Stage `mapstructure:",squash"`
 
 	DeriveFrom string `mapstructure:"derive_from"`
-	Dev        *bool  `mapstructure:"dev"`
+	// Dev marks if this is a dev stage (with lighter build process). It's used
+	// as a pointer to distinguish when the value is nil or when it's false. In
+	// the former case, the value from the parent stage is used.
+	Dev *bool `mapstructure:"dev"`
 }
 
 type PHPConfigFiles struct {
 	IniFile       *string `mapstructure:"php.ini"`
 	FPMConfigFile *string `mapstructure:"fpm.conf"`
+}
+
+func (base PHPConfigFiles) Copy() PHPConfigFiles {
+	new := PHPConfigFiles{}
+
+	if base.IniFile != nil {
+		iniFile := *base.IniFile
+		new.IniFile = &iniFile
+	}
+	if base.FPMConfigFile != nil {
+		fpmConfigFile := *base.FPMConfigFile
+		new.FPMConfigFile = &fpmConfigFile
+	}
+
+	return new
+}
+
+func (base PHPConfigFiles) Merge(overriding PHPConfigFiles) PHPConfigFiles {
+	new := base.Copy()
+
+	if overriding.IniFile != nil {
+		iniFile := *overriding.IniFile
+		new.IniFile = &iniFile
+	}
+	if overriding.FPMConfigFile != nil {
+		fpmConfigFile := *overriding.FPMConfigFile
+		new.FPMConfigFile = &fpmConfigFile
+	}
+
+	return new
 }
 
 // ComposerDumpFlags represents the optimization flags taken by Composer for
@@ -176,44 +283,26 @@ type StageDefinition struct {
 	Version        string
 	MajMinVersion  string
 	Infer          bool
-	Dev            *bool
+	Dev            bool
 	LockedPackages map[string]string
 	PlatformReqs   map[string]string
 	Webserver      *webserver.Definition
+	Locks          StageLocks
 }
 
 func (def *Definition) ResolveStageDefinition(
-	name string,
+	stageName string,
 	composerLockLoader func(*StageDefinition) error,
+	withLocks bool,
 ) (StageDefinition, error) {
 	var stageDef StageDefinition
-
-	stages := make([]DerivedStage, 0, len(def.Stages)+1)
-	resolvedStages := make([]string, 0, len(def.Stages)+1)
-	nextStage := name
-
-	for nextStage != "" && nextStage != "base" {
-		for _, stageName := range resolvedStages {
-			if nextStage == stageName {
-				return stageDef, xerrors.Errorf(
-					"there's a cyclic dependency between %q and itself",
-					stageName,
-				)
-			}
-		}
-
-		stage, ok := def.Stages[nextStage]
-		if !ok {
-			return StageDefinition{}, xerrors.Errorf("stage %q not found", nextStage)
-		}
-
-		stages = append(stages, stage)
-		resolvedStages = append(resolvedStages, nextStage)
-		nextStage = stage.DeriveFrom
+	stages, err := def.resolveStageChain(stageName)
+	if err != nil {
+		return stageDef, err
 	}
 
 	stageDef = mergeStages(def, stages...)
-	stageDef.Name = name
+	stageDef.Name = stageName
 
 	// @TODO: this should not be called here as composer.lock content
 	// won't change between stage resolution
@@ -233,7 +322,7 @@ func (def *Definition) ResolveStageDefinition(
 		return stageDef, nil
 	}
 
-	if *stageDef.Dev == false && *stageDef.FPM == true {
+	if stageDef.Dev == false && *stageDef.FPM == true {
 		stageDef.Extensions["apcu"] = "*"
 		stageDef.Extensions["opcache"] = "*"
 	}
@@ -246,7 +335,42 @@ func (def *Definition) ResolveStageDefinition(
 	inferExtensions(&stageDef)
 	inferSystemPackages(&stageDef)
 
+	if !withLocks {
+		return stageDef, nil
+	}
+
+	locks, ok := def.Locks.Stages[stageName]
+	if !ok {
+		return stageDef, xerrors.Errorf(
+			"no locks available for stage %q. Please update your lockfile", stageName)
+	}
+	stageDef.Locks = locks
+
 	return stageDef, nil
+}
+
+func (def *Definition) resolveStageChain(name string) ([]DerivedStage, error) {
+	stages := make([]DerivedStage, 0, len(def.Stages))
+	resolvedStages := map[string]struct{}{}
+	current := name
+
+	for current != "" && current != "base" {
+		if _, ok := resolvedStages[current]; ok {
+			return stages, xerrors.Errorf(
+				"there's a cyclic dependency between %q and itself", current)
+		}
+
+		stage, ok := def.Stages[current]
+		if !ok {
+			return stages, xerrors.Errorf("stage %q not found", current)
+		}
+
+		stages = append(stages, stage)
+		resolvedStages[current] = struct{}{}
+		current = stage.DeriveFrom
+	}
+
+	return stages, nil
 }
 
 func extractMajMinVersion(versionString string) string {
@@ -255,14 +379,12 @@ func extractMajMinVersion(versionString string) string {
 }
 
 func mergeStages(base *Definition, stages ...DerivedStage) StageDefinition {
-	dev := false
 	stageDef := StageDefinition{
 		BaseImage:      base.BaseImage,
 		Version:        base.Version,
 		MajMinVersion:  base.MajMinVersion,
 		Infer:          base.Infer,
-		Stage:          base.BaseStage,
-		Dev:            &dev,
+		Stage:          base.BaseStage.Copy(),
 		PlatformReqs:   map[string]string{},
 		LockedPackages: map[string]string{},
 		Webserver:      base.Webserver,
@@ -270,64 +392,19 @@ func mergeStages(base *Definition, stages ...DerivedStage) StageDefinition {
 
 	stages = reverseStages(stages)
 	for _, stage := range stages {
-		if len(stage.ExternalFiles) > 0 {
-			stageDef.ExternalFiles = append(stageDef.ExternalFiles, stage.ExternalFiles...)
-		}
-		if len(stage.SystemPackages) > 0 {
-			for name, constraint := range stage.SystemPackages {
-				stageDef.SystemPackages[name] = constraint
-			}
-		}
-		if stage.FPM != nil {
-			stageDef.FPM = stage.FPM
-		}
-		if len(stage.Extensions) > 0 {
-			for name, conf := range stage.Extensions {
-				stageDef.Extensions[name] = conf
-			}
-		}
-		if stage.ConfigFiles.IniFile != nil {
-			stageDef.ConfigFiles.IniFile = stage.ConfigFiles.IniFile
-		}
-		if stage.ConfigFiles.FPMConfigFile != nil {
-			stageDef.ConfigFiles.FPMConfigFile = stage.ConfigFiles.FPMConfigFile
-		}
-		if stage.ComposerDumpFlags != nil {
-			stageDef.ComposerDumpFlags = stage.ComposerDumpFlags
-		}
-		if stage.SourceDirs != nil {
-			stageDef.SourceDirs = append(stageDef.SourceDirs, stage.SourceDirs...)
-		}
-		if stage.ExtraScripts != nil {
-			stageDef.ExtraScripts = append(stageDef.ExtraScripts, stage.ExtraScripts...)
-		}
-		if stage.Integrations != nil {
-			stageDef.Integrations = append(stageDef.Integrations, stage.Integrations...)
-		}
-		if stage.StatefulDirs != nil {
-			stageDef.StatefulDirs = append(stageDef.StatefulDirs, stage.StatefulDirs...)
-		}
-		if stage.Healthcheck != nil {
-			stageDef.Healthcheck = stage.Healthcheck
-		}
-		if stage.PostInstall != nil {
-			stageDef.PostInstall = append(stageDef.PostInstall, stage.PostInstall...)
-		}
+		stageDef.Stage = stageDef.Stage.Merge(stage.Stage)
+
 		if stage.Dev != nil {
-			stageDef.Dev = stage.Dev
-		}
-		if stage.Command != nil {
-			stageDef.Command = stage.Command
+			stageDef.Dev = *stage.Dev
 		}
 	}
 
 	if *stageDef.FPM == false {
 		stageDef.ConfigFiles.FPMConfigFile = nil
 	}
-	if *stageDef.Dev == true || *stageDef.FPM == false {
-		disabled := false
-		stageDef.Healthcheck = &disabled
-		removeIntegration(&stageDef, "blackfire")
+	if stageDef.Dev || *stageDef.FPM {
+		healthcheck := false
+		stageDef.Healthcheck = &healthcheck
 	}
 
 	return stageDef
@@ -353,71 +430,23 @@ var phpExtDirs = map[string]string{
 	"7.4": "/usr/local/lib/php/extensions/no-debug-non-zts-20190902/",
 }
 
-var symfonySourceDirs = map[string][]string{
-	"~3.0": []string{"app/", "src/"},
-	"~4.0": []string{"config/", "src/", "templates/", "translations/"},
-	"~5.0": []string{"config/", "src/", "templates/", "translations/"},
-}
-
-var symfonyExtraScripts = map[string][]string{
-	"~3.0": []string{"bin/console", "web/app.php"},
-	"~4.0": []string{"bin/console", "public/index.php"},
-	"~5.0": []string{"bin/console", "public/index.php"},
-}
-
-func findSymfonySourceDirs(symfonyVer string) []string {
-	for constraint, sourceDirs := range symfonySourceDirs {
-		c := version.NewConstrainGroupFromString(constraint)
-		if c.Match(symfonyVer) {
-			return sourceDirs
-		}
-	}
-	return []string{}
-}
-
-func findSymfonyExtraScripts(symfonyVer string) []string {
-	for constraint, extraScripts := range symfonyExtraScripts {
-		c := version.NewConstrainGroupFromString(constraint)
-		if c.Match(symfonyVer) {
-			return extraScripts
-		}
-	}
-	return []string{}
-}
-
-func addIntegrations(def *StageDefinition) error {
-	for _, integration := range def.Integrations {
+func addIntegrations(stageDef *StageDefinition) error {
+	for _, integration := range stageDef.Integrations {
 		switch integration {
 		case "blackfire":
-			dest := path.Join(phpExtDirs[def.MajMinVersion], "blackfire.so")
-			def.ExternalFiles = append(def.ExternalFiles, llbutils.ExternalFile{
+			dest := path.Join(phpExtDirs[stageDef.MajMinVersion], "blackfire.so")
+			stageDef.ExternalFiles = append(stageDef.ExternalFiles, llbutils.ExternalFile{
 				URL:         "https://blackfire.io/api/v1/releases/probe/php/linux/amd64/72",
 				Compressed:  true,
 				Pattern:     "blackfire-*.so",
 				Destination: dest,
 				Mode:        0644,
 			})
-		case "symfony":
-			symfonyVer, ok := def.LockedPackages["symfony/framework-bundle"]
-			if !ok {
-				return xerrors.New("Symfony integration is enabled but symfony/framework-bundle was not found in composer.lock")
-			}
-			symfonyVer = strings.TrimLeft(symfonyVer, "v")
-
-			postInstall := []string{
-				"php -d display_errors=on bin/console cache:warmup --env=prod",
-			}
-			def.PostInstall = append(postInstall, def.PostInstall...)
-
-			def.SourceDirs = append(def.SourceDirs,
-				findSymfonySourceDirs(symfonyVer)...)
-			def.ExtraScripts = append(def.ExtraScripts,
-				findSymfonyExtraScripts(symfonyVer)...)
 		}
 	}
 
-	if *def.Healthcheck {
-		def.ExternalFiles = append(def.ExternalFiles, llbutils.ExternalFile{
+	if *stageDef.Healthcheck {
+		stageDef.ExternalFiles = append(stageDef.ExternalFiles, llbutils.ExternalFile{
 			URL:         "https://github.com/NiR-/fcgi-client/releases/download/v0.1.0/fcgi-client.phar",
 			Destination: "/usr/local/bin/fcgi-client",
 			Mode:        0750,
@@ -426,20 +455,6 @@ func addIntegrations(def *StageDefinition) error {
 	}
 
 	return nil
-}
-
-func removeIntegration(stageDef *StageDefinition, toRemove string) {
-	integrations := make([]string, len(stageDef.Integrations))
-	cur := 0
-	for i := 0; i < len(stageDef.Integrations); i++ {
-		if stageDef.Integrations[i] == toRemove {
-			continue
-		}
-		integrations[cur] = stageDef.Integrations[i]
-		cur++
-	}
-
-	stageDef.Integrations = integrations[:cur]
 }
 
 // List of extensions preinstalled in official PHP images. Fortunately enough,

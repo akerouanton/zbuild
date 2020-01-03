@@ -44,6 +44,7 @@ func initSuccessfullyParseRawDefinitionWithoutStagesTC() newDefinitionTC {
 					"pdo_mysql": "*",
 					"soap":      "*",
 				},
+				GlobalDeps: map[string]string{},
 				ConfigFiles: php.PHPConfigFiles{
 					IniFile:       &iniFile,
 					FPMConfigFile: &fpmConfigFile,
@@ -52,8 +53,7 @@ func initSuccessfullyParseRawDefinitionWithoutStagesTC() newDefinitionTC {
 					APCU:                  false,
 					ClassmapAuthoritative: true,
 				},
-				SourceDirs:   []string{"./src"},
-				ExtraScripts: []string{"./public/index.php"},
+				Sources:      []string{"./src"},
 				Integrations: []string{"blackfire"},
 				StatefulDirs: []string{"./public/uploads"},
 				Healthcheck:  &healthcheck,
@@ -119,6 +119,7 @@ func initSuccessfullyParseRawDefinitionWithStagesTC() newDefinitionTC {
 					"pdo_mysql": "*",
 					"soap":      "*",
 				},
+				GlobalDeps: map[string]string{},
 				ConfigFiles: php.PHPConfigFiles{
 					FPMConfigFile: &fpmConfigFile,
 				},
@@ -126,11 +127,8 @@ func initSuccessfullyParseRawDefinitionWithStagesTC() newDefinitionTC {
 					APCU:                  false,
 					ClassmapAuthoritative: true,
 				},
-				SourceDirs: []string{"generated/"},
-				ExtraScripts: []string{
-					"gencode.php",
-				},
-				Integrations: []string{"symfony"},
+				Sources:      []string{"generated/"},
+				Integrations: []string{},
 				StatefulDirs: []string{"public/uploads"},
 				Healthcheck:  &healthcheckDisabled,
 				PostInstall:  []string{"echo some command"},
@@ -167,8 +165,7 @@ func initSuccessfullyParseRawDefinitionWithStagesTC() newDefinitionTC {
 							APCU:                  true,
 							ClassmapAuthoritative: false,
 						},
-						SourceDirs:   []string{"worker/"},
-						ExtraScripts: []string{"bin/worker"},
+						Sources:      []string{"worker/"},
 						StatefulDirs: []string{"data/imports"},
 						PostInstall:  []string{"echo some other command"},
 						FPM:          &isNotFPM,
@@ -244,7 +241,6 @@ func initSuccessfullyResolveDefaultDevStageTC(t *testing.T, mockCtrl *gomock.Con
 	lockFile := "testdata/def/without-stages.lock"
 
 	isFPM := true
-	isDev := true
 	healthckeck := false
 	phpIni := "docker/app/php.ini"
 	fpmConfigFile := "docker/app/fpm.conf"
@@ -262,11 +258,19 @@ func initSuccessfullyResolveDefaultDevStageTC(t *testing.T, mockCtrl *gomock.Con
 			Version:        "7.4.0",
 			MajMinVersion:  "7.4",
 			Infer:          false,
-			Dev:            &isDev,
+			Dev:            true,
 			LockedPackages: map[string]string{},
 			PlatformReqs:   map[string]string{},
 			Stage: php.Stage{
-				ExternalFiles:  []llbutils.ExternalFile{},
+				ExternalFiles: []llbutils.ExternalFile{
+					{
+						URL:         "https://blackfire.io/api/v1/releases/probe/php/linux/amd64/72",
+						Compressed:  true,
+						Pattern:     "blackfire-*.so",
+						Destination: "/usr/local/lib/php/extensions/no-debug-non-zts-20190902/blackfire.so",
+						Mode:        0644,
+					},
+				},
 				SystemPackages: map[string]string{},
 				FPM:            &isFPM,
 				Extensions: map[string]string{
@@ -274,8 +278,8 @@ func initSuccessfullyResolveDefaultDevStageTC(t *testing.T, mockCtrl *gomock.Con
 					"pdo_mysql": "*",
 					"soap":      "*",
 				},
-				SourceDirs:   []string{"./src"},
-				ExtraScripts: []string{"./public/index.php"},
+				GlobalDeps:   map[string]string{},
+				Sources:      []string{"./src"},
 				StatefulDirs: []string{"./public/uploads"},
 				ConfigFiles: php.PHPConfigFiles{
 					IniFile:       &phpIni,
@@ -285,7 +289,7 @@ func initSuccessfullyResolveDefaultDevStageTC(t *testing.T, mockCtrl *gomock.Con
 					APCU:                  false,
 					ClassmapAuthoritative: true,
 				},
-				Integrations: []string{},
+				Integrations: []string{"blackfire"},
 				Healthcheck:  &healthckeck,
 				PostInstall:  []string{"some more commands", "another one"},
 			},
@@ -295,7 +299,6 @@ func initSuccessfullyResolveDefaultDevStageTC(t *testing.T, mockCtrl *gomock.Con
 
 func initSuccessfullyResolveWorkerStageTC(t *testing.T, mockCtrl *gomock.Controller) resolveStageTC {
 	isNotFPM := false
-	isNotDev := false
 	healthcheckDisabled := false
 	workerCmd := []string{"bin/worker"}
 
@@ -317,7 +320,7 @@ func initSuccessfullyResolveWorkerStageTC(t *testing.T, mockCtrl *gomock.Control
 			Version:       "7.4.0",
 			MajMinVersion: "7.4",
 			Infer:         true,
-			Dev:           &isNotDev,
+			Dev:           false,
 			LockedPackages: map[string]string{
 				"clue/stream-filter": "v1.4.0",
 			},
@@ -339,12 +342,12 @@ func initSuccessfullyResolveWorkerStageTC(t *testing.T, mockCtrl *gomock.Control
 					"mbstring": "*",
 					"zip":      "*",
 				},
+				GlobalDeps: map[string]string{},
 				ComposerDumpFlags: &php.ComposerDumpFlags{
 					APCU:                  false,
 					ClassmapAuthoritative: true,
 				},
-				SourceDirs:   []string{"bin/", "src/"},
-				ExtraScripts: []string{},
+				Sources:      []string{"bin/", "src/"},
 				Integrations: []string{},
 				StatefulDirs: []string{},
 				Healthcheck:  &healthcheckDisabled,
@@ -381,72 +384,7 @@ func initFailToResolveStageWithCyclicDepsTC(t *testing.T, mockCtrl *gomock.Contr
 	}
 }
 
-func initSuccessfullyAddSymfonyIntegrationTC(t *testing.T, mockCtrl *gomock.Controller) resolveStageTC {
-	dev := true
-	fpm := true
-	healthcheck := false
-
-	return resolveStageTC{
-		file:     "testdata/def/symfony-integration.yml",
-		lockFile: "",
-		stage:    "dev",
-		composerLockLoader: mockComposerLockLoader(
-			map[string]string{
-				"symfony/framework-bundle": "v4.4.1",
-			},
-			map[string]string{
-				"ctype": "*",
-				"iconv": "*",
-			},
-		),
-		expected: php.StageDefinition{
-			Name:          "dev",
-			BaseImage:     "docker.io/library/php:7.2-fpm-buster",
-			Version:       "7.2",
-			MajMinVersion: "7.2",
-			Infer:         true,
-			Dev:           &dev,
-			LockedPackages: map[string]string{
-				"symfony/framework-bundle": "v4.4.1",
-			},
-			PlatformReqs: map[string]string{
-				"ctype": "*",
-				"iconv": "*",
-			},
-			Stage: php.Stage{
-				ExternalFiles: []llbutils.ExternalFile{},
-				SystemPackages: map[string]string{
-					"git":          "*",
-					"libpcre3-dev": "*",
-					"libzip-dev":   "*",
-					"unzip":        "*",
-					"zlib1g-dev":   "*",
-				},
-				FPM: &fpm,
-				Extensions: map[string]string{
-					"ctype": "*",
-					"iconv": "*",
-					"zip":   "*",
-				},
-				ConfigFiles: php.PHPConfigFiles{},
-				ComposerDumpFlags: &php.ComposerDumpFlags{
-					ClassmapAuthoritative: true,
-				},
-				SourceDirs:   []string{"config/", "src/", "templates/", "translations/"},
-				ExtraScripts: []string{"bin/console", "public/index.php"},
-				Integrations: []string{"symfony"},
-				StatefulDirs: []string{},
-				Healthcheck:  &healthcheck,
-				PostInstall: []string{
-					"php -d display_errors=on bin/console cache:warmup --env=prod",
-				},
-			},
-		},
-	}
-}
-
 func initRemoveDefaultExtensionsTC(t *testing.T, mockCtrl *gomock.Controller) resolveStageTC {
-	dev := true
 	fpm := true
 	healthcheck := false
 
@@ -463,7 +401,7 @@ func initRemoveDefaultExtensionsTC(t *testing.T, mockCtrl *gomock.Controller) re
 			Version:        "7.4",
 			MajMinVersion:  "7.4",
 			Infer:          true,
-			Dev:            &dev,
+			Dev:            true,
 			LockedPackages: map[string]string{},
 			PlatformReqs:   map[string]string{},
 			Stage: php.Stage{
@@ -488,12 +426,12 @@ func initRemoveDefaultExtensionsTC(t *testing.T, mockCtrl *gomock.Controller) re
 					"json":       "*",
 					"session":    "*",
 				},
+				GlobalDeps:  map[string]string{},
 				ConfigFiles: php.PHPConfigFiles{},
 				ComposerDumpFlags: &php.ComposerDumpFlags{
 					ClassmapAuthoritative: true,
 				},
-				SourceDirs:   []string{},
-				ExtraScripts: []string{},
+				Sources:      []string{},
 				Integrations: []string{},
 				StatefulDirs: []string{},
 				Healthcheck:  &healthcheck,
@@ -506,7 +444,6 @@ func initRemoveDefaultExtensionsTC(t *testing.T, mockCtrl *gomock.Controller) re
 // This TC ensures that the extensions infered from composer.lock aren't
 // erasing version constraints defined in the zbuildfile.
 func initPreservePredefinedExtensionConstraintsTC(t *testing.T, mockCtrl *gomock.Controller) resolveStageTC {
-	dev := true
 	fpm := true
 	healthcheck := false
 
@@ -526,7 +463,7 @@ func initPreservePredefinedExtensionConstraintsTC(t *testing.T, mockCtrl *gomock
 			Version:        "7.4",
 			MajMinVersion:  "7.4",
 			Infer:          true,
-			Dev:            &dev,
+			Dev:            true,
 			LockedPackages: map[string]string{},
 			PlatformReqs: map[string]string{
 				"redis": "*",
@@ -545,12 +482,12 @@ func initPreservePredefinedExtensionConstraintsTC(t *testing.T, mockCtrl *gomock
 					"zip":   "*",
 					"redis": "^5.1",
 				},
+				GlobalDeps:  map[string]string{},
 				ConfigFiles: php.PHPConfigFiles{},
 				ComposerDumpFlags: &php.ComposerDumpFlags{
 					ClassmapAuthoritative: true,
 				},
-				SourceDirs:   []string{},
-				ExtraScripts: []string{},
+				Sources:      []string{},
 				Integrations: []string{},
 				StatefulDirs: []string{},
 				Healthcheck:  &healthcheck,
@@ -568,7 +505,6 @@ func TestResolveStageDefinition(t *testing.T) {
 	testcases := map[string]func(*testing.T, *gomock.Controller) resolveStageTC{
 		"successfully resolve default dev stage":    initSuccessfullyResolveDefaultDevStageTC,
 		"successfully resolve worker stage":         initSuccessfullyResolveWorkerStageTC,
-		"successfully add symfony integration":      initSuccessfullyAddSymfonyIntegrationTC,
 		"fail to resolve unknown stage":             initFailToResolveUnknownStageTC,
 		"fail to resolve stage with cyclic deps":    initFailToResolveStageWithCyclicDepsTC,
 		"remove default extensions":                 initRemoveDefaultExtensionsTC,
@@ -596,7 +532,7 @@ func TestResolveStageDefinition(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			stageDef, err := def.ResolveStageDefinition(tc.stage, tc.composerLockLoader)
+			stageDef, err := def.ResolveStageDefinition(tc.stage, tc.composerLockLoader, false)
 			if tc.expectedErr != nil {
 				if err == nil || err.Error() != tc.expectedErr.Error() {
 					t.Fatalf("Expected: %v\nGot: %v", tc.expectedErr, err)
@@ -682,5 +618,656 @@ func mockComposerLockLoader(
 		stageDef.LockedPackages = lockedPackages
 		stageDef.PlatformReqs = platformReqs
 		return nil
+	}
+}
+
+type mergeStageTC struct {
+	base       func() php.Stage
+	overriding php.Stage
+	expected   func() php.Stage
+}
+
+func emptyStage() php.Stage {
+	return php.Stage{
+		ExternalFiles:  []llbutils.ExternalFile{},
+		SystemPackages: map[string]string{},
+		Extensions:     map[string]string{},
+		GlobalDeps:     map[string]string{},
+		ConfigFiles:    php.PHPConfigFiles{},
+		Sources:        []string{},
+		Integrations:   []string{},
+		StatefulDirs:   []string{},
+		PostInstall:    []string{},
+	}
+}
+
+func initMergeExternalFilesWithBaseTC() mergeStageTC {
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{
+				ExternalFiles: []llbutils.ExternalFile{
+					{
+						URL:         "https://github.com/some/tool",
+						Destination: "/usr/local/bin/some-tool",
+						Mode:        0750,
+					},
+				},
+			}
+		},
+		overriding: php.Stage{
+			ExternalFiles: []llbutils.ExternalFile{
+				{
+					URL:         "https://github.com/some/other/tool",
+					Destination: "/usr/local/bin/some-other-tool",
+					Mode:        0750,
+				},
+			},
+		},
+		expected: func() php.Stage {
+			s := emptyStage()
+			s.ExternalFiles = []llbutils.ExternalFile{
+				{
+					URL:         "https://github.com/some/tool",
+					Destination: "/usr/local/bin/some-tool",
+					Mode:        0750,
+				},
+				{
+					URL:         "https://github.com/some/other/tool",
+					Destination: "/usr/local/bin/some-other-tool",
+					Mode:        0750,
+				},
+			}
+			return s
+		},
+	}
+}
+
+func initMergeExternalFilesWithoutBaseTC() mergeStageTC {
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{}
+		},
+		overriding: php.Stage{
+			ExternalFiles: []llbutils.ExternalFile{
+				{
+					URL:         "https://github.com/some/other/tool",
+					Destination: "/usr/local/bin/some-other-tool",
+					Mode:        0750,
+				},
+			},
+		},
+		expected: func() php.Stage {
+			s := emptyStage()
+			s.ExternalFiles = []llbutils.ExternalFile{
+				{
+					URL:         "https://github.com/some/other/tool",
+					Destination: "/usr/local/bin/some-other-tool",
+					Mode:        0750,
+				},
+			}
+			return s
+		},
+	}
+}
+
+func initMergeSystemPackagesWithBaseTC() mergeStageTC {
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{
+				SystemPackages: map[string]string{
+					"curl": "*",
+				},
+			}
+		},
+		overriding: php.Stage{
+			SystemPackages: map[string]string{
+				"chromium": "*",
+			},
+		},
+		expected: func() php.Stage {
+			s := emptyStage()
+			s.SystemPackages = map[string]string{
+				"curl":     "*",
+				"chromium": "*",
+			}
+			return s
+		},
+	}
+}
+
+func initMergeSystemPackagesWithoutBaseTC() mergeStageTC {
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{}
+		},
+		overriding: php.Stage{
+			SystemPackages: map[string]string{
+				"chromium": "*",
+			},
+		},
+		expected: func() php.Stage {
+			s := emptyStage()
+			s.SystemPackages = map[string]string{
+				"chromium": "*",
+			}
+			return s
+		},
+	}
+}
+
+func initMergeFPMWithBaseTC() mergeStageTC {
+	baseFPM := true
+	overridingFPM := false
+	expectedFPM := false
+
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{
+				FPM: &baseFPM,
+			}
+		},
+		overriding: php.Stage{
+			FPM: &overridingFPM,
+		},
+		expected: func() php.Stage {
+			s := emptyStage()
+			s.FPM = &expectedFPM
+			return s
+		},
+	}
+}
+
+func initMergeFPMWithoutBaseTC() mergeStageTC {
+	overridingFPM := true
+	expectedFPM := true
+
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{}
+		},
+		overriding: php.Stage{
+			FPM: &overridingFPM,
+		},
+		expected: func() php.Stage {
+			s := emptyStage()
+			s.FPM = &expectedFPM
+			return s
+		},
+	}
+}
+
+func initMergeCommandWithBaseTC() mergeStageTC {
+	baseCmd := []string{"bin/some-worker"}
+	overridingCmd := []string{"bin/some-other-worker"}
+	expectedCmd := []string{"bin/some-other-worker"}
+
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{
+				Command: &baseCmd,
+			}
+		},
+		overriding: php.Stage{
+			Command: &overridingCmd,
+		},
+		expected: func() php.Stage {
+			s := emptyStage()
+			s.Command = &expectedCmd
+			return s
+		},
+	}
+}
+
+func initMergeCommandWithoutBaseTC() mergeStageTC {
+	overridingCmd := []string{"bin/some-other-worker"}
+	expectedCmd := []string{"bin/some-other-worker"}
+
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{}
+		},
+		overriding: php.Stage{
+			Command: &overridingCmd,
+		},
+		expected: func() php.Stage {
+			s := emptyStage()
+			s.Command = &expectedCmd
+			return s
+		},
+	}
+}
+
+func initMergeExtensionsWithBaseTC() mergeStageTC {
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{
+				Extensions: map[string]string{
+					"apcu": "*",
+				},
+			}
+		},
+		overriding: php.Stage{
+			Extensions: map[string]string{
+				"opcache": "*",
+			},
+		},
+		expected: func() php.Stage {
+			s := emptyStage()
+			s.Extensions = map[string]string{
+				"apcu":    "*",
+				"opcache": "*",
+			}
+			return s
+		},
+	}
+}
+
+func initMergeExtensionsWithoutBaseTC() mergeStageTC {
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{}
+		},
+		overriding: php.Stage{
+			Extensions: map[string]string{
+				"opcache": "*",
+			},
+		},
+		expected: func() php.Stage {
+			s := emptyStage()
+			s.Extensions = map[string]string{
+				"opcache": "*",
+			}
+			return s
+		},
+	}
+}
+
+func initMergeConfigFilesWithBaseTC() mergeStageTC {
+	baseIniFile := "php.dev.ini"
+	baseFpmConf := "fpm.dev.conf"
+	overridingIniFile := "php.prod.ini"
+	overridingFpmConf := "fpm.prod.conf"
+	expectedIniFile := "php.prod.ini"
+	expectedFpmConf := "fpm.prod.conf"
+
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{
+				ConfigFiles: php.PHPConfigFiles{
+					IniFile:       &baseIniFile,
+					FPMConfigFile: &baseFpmConf,
+				},
+			}
+		},
+		overriding: php.Stage{
+			ConfigFiles: php.PHPConfigFiles{
+				IniFile:       &overridingIniFile,
+				FPMConfigFile: &overridingFpmConf,
+			},
+		},
+		expected: func() php.Stage {
+			s := emptyStage()
+			s.ConfigFiles = php.PHPConfigFiles{
+				IniFile:       &expectedIniFile,
+				FPMConfigFile: &expectedFpmConf,
+			}
+			return s
+		},
+	}
+}
+
+func initMergeConfigFilesWithoutBaseTC() mergeStageTC {
+	overridingIniFile := "php.prod.ini"
+	overridingFpmConf := "fpm.prod.conf"
+	expectedIniFile := "php.prod.ini"
+	expectedFpmConf := "fpm.prod.conf"
+
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{}
+		},
+		overriding: php.Stage{
+			ConfigFiles: php.PHPConfigFiles{
+				IniFile:       &overridingIniFile,
+				FPMConfigFile: &overridingFpmConf,
+			},
+		},
+		expected: func() php.Stage {
+			s := emptyStage()
+			s.ConfigFiles = php.PHPConfigFiles{
+				IniFile:       &expectedIniFile,
+				FPMConfigFile: &expectedFpmConf,
+			}
+			return s
+		},
+	}
+}
+
+func initMergeComposerDumpFlagsWithBaseTC() mergeStageTC {
+	baseFlags := php.ComposerDumpFlags{
+		ClassmapAuthoritative: true,
+	}
+	overridingFlags := php.ComposerDumpFlags{
+		APCU: true,
+	}
+	expectedFlags := php.ComposerDumpFlags{
+		APCU: true,
+	}
+
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{
+				ComposerDumpFlags: &baseFlags,
+			}
+		},
+		overriding: php.Stage{
+			ComposerDumpFlags: &overridingFlags,
+		},
+		expected: func() php.Stage {
+			s := emptyStage()
+			s.ComposerDumpFlags = &expectedFlags
+			return s
+		},
+	}
+}
+
+func initMergeComposerDumpFlagsWithoutBaseTC() mergeStageTC {
+	overridingFlags := php.ComposerDumpFlags{
+		APCU: true,
+	}
+	expectedFlags := php.ComposerDumpFlags{
+		APCU: true,
+	}
+
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{}
+		},
+		overriding: php.Stage{
+			ComposerDumpFlags: &overridingFlags,
+		},
+		expected: func() php.Stage {
+			s := emptyStage()
+			s.ComposerDumpFlags = &expectedFlags
+			return s
+		},
+	}
+}
+
+func initMergeSourcesWithBaseTC() mergeStageTC {
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{
+				Sources: []string{"src/"},
+			}
+		},
+		overriding: php.Stage{
+			Sources: []string{"bin/worker"},
+		},
+		expected: func() php.Stage {
+			s := emptyStage()
+			s.Sources = []string{"src/", "bin/worker"}
+			return s
+		},
+	}
+}
+
+func initMergeSourcesWithoutBaseTC() mergeStageTC {
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{}
+		},
+		overriding: php.Stage{
+			Sources: []string{"bin/worker"},
+		},
+		expected: func() php.Stage {
+			s := emptyStage()
+			s.Sources = []string{"bin/worker"}
+			return s
+		},
+	}
+}
+
+func initMergeIntegrationsWithBaseTC() mergeStageTC {
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{
+				Integrations: []string{"blackfire"},
+			}
+		},
+		overriding: php.Stage{
+			Integrations: []string{"some-other"},
+		},
+		expected: func() php.Stage {
+			s := emptyStage()
+			s.Integrations = []string{"blackfire", "some-other"}
+			return s
+		},
+	}
+}
+
+func initMergeIntegrationsWithoutBaseTC() mergeStageTC {
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{}
+		},
+		overriding: php.Stage{
+			Integrations: []string{"some-other"},
+		},
+		expected: func() php.Stage {
+			s := emptyStage()
+			s.Integrations = []string{"some-other"}
+			return s
+		},
+	}
+}
+
+func initMergeStatefulDirsWithBaseTC() mergeStageTC {
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{
+				StatefulDirs: []string{"var/sessions/"},
+			}
+		},
+		overriding: php.Stage{
+			StatefulDirs: []string{"public/uploads/"},
+		},
+		expected: func() php.Stage {
+			s := emptyStage()
+			s.StatefulDirs = []string{"var/sessions/", "public/uploads/"}
+			return s
+		},
+	}
+}
+
+func initMergeStatefulDirsWithoutBaseTC() mergeStageTC {
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{}
+		},
+		overriding: php.Stage{
+			StatefulDirs: []string{"public/uploads/"},
+		},
+		expected: func() php.Stage {
+			s := emptyStage()
+			s.StatefulDirs = []string{"public/uploads/"}
+			return s
+		},
+	}
+}
+
+func initMergeHealthcheckWithBaseTC() mergeStageTC {
+	baseHealthcheck := true
+	overridingHealthcheck := false
+	expectedHealthcheck := false
+
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{
+				Healthcheck: &baseHealthcheck,
+			}
+		},
+		overriding: php.Stage{
+			Healthcheck: &overridingHealthcheck,
+		},
+		expected: func() php.Stage {
+			s := emptyStage()
+			s.Healthcheck = &expectedHealthcheck
+			return s
+		},
+	}
+}
+
+func initMergeHealthcheckWithoutBaseTC() mergeStageTC {
+	overridingHealthcheck := true
+	expectedHealthcheck := true
+
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{}
+		},
+		overriding: php.Stage{
+			Healthcheck: &overridingHealthcheck,
+		},
+		expected: func() php.Stage {
+			s := emptyStage()
+			s.Healthcheck = &expectedHealthcheck
+			return s
+		},
+	}
+}
+
+func initMergePostInstallWithBaseTC() mergeStageTC {
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{
+				PostInstall: []string{"some-step"},
+			}
+		},
+		overriding: php.Stage{
+			PostInstall: []string{"some-other-step"},
+		},
+		expected: func() php.Stage {
+			s := emptyStage()
+			s.PostInstall = []string{"some-step", "some-other-step"}
+			return s
+		},
+	}
+}
+
+func initMergePostInstallWithoutBaseTC() mergeStageTC {
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{}
+		},
+		overriding: php.Stage{
+			PostInstall: []string{"some-other"},
+		},
+		expected: func() php.Stage {
+			s := emptyStage()
+			s.PostInstall = []string{"some-other"}
+			return s
+		},
+	}
+}
+
+func initMergeGlobalDepsWithBaseTC() mergeStageTC {
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{
+				GlobalDeps: map[string]string{
+					"symfony/flex": "*",
+				},
+			}
+		},
+		overriding: php.Stage{
+			GlobalDeps: map[string]string{
+				"symfony/flex":      "1.6.0",
+				"hirak/prestissimo": "0.3.9",
+			},
+		},
+		expected: func() php.Stage {
+			stage := emptyStage()
+			stage.GlobalDeps = map[string]string{
+				"symfony/flex":      "1.6.0",
+				"hirak/prestissimo": "0.3.9",
+			}
+
+			return stage
+		},
+	}
+}
+
+func initMergeGlobalDepsWithoutBaseTC() mergeStageTC {
+	return mergeStageTC{
+		base: func() php.Stage {
+			return php.Stage{
+				GlobalDeps: map[string]string{},
+			}
+		},
+		overriding: php.Stage{
+			GlobalDeps: map[string]string{
+				"symfony/flex":      "1.6.0",
+				"hirak/prestissimo": "0.3.9",
+			},
+		},
+		expected: func() php.Stage {
+			stage := emptyStage()
+			stage.GlobalDeps = map[string]string{
+				"symfony/flex":      "1.6.0",
+				"hirak/prestissimo": "0.3.9",
+			}
+
+			return stage
+		},
+	}
+}
+
+func TestStageMerge(t *testing.T) {
+	testcases := map[string]func() mergeStageTC{
+		"merge external files with base":         initMergeExternalFilesWithBaseTC,
+		"merge external files without base":      initMergeExternalFilesWithoutBaseTC,
+		"merge system packages with base":        initMergeSystemPackagesWithBaseTC,
+		"merge system packages without base":     initMergeSystemPackagesWithoutBaseTC,
+		"merge fpm with base":                    initMergeFPMWithBaseTC,
+		"merge fpm without base":                 initMergeFPMWithoutBaseTC,
+		"merge command with base":                initMergeCommandWithBaseTC,
+		"merge command without base":             initMergeCommandWithoutBaseTC,
+		"merge extensions with base":             initMergeExtensionsWithBaseTC,
+		"merge extensions without base":          initMergeExtensionsWithoutBaseTC,
+		"merge global deps with base":            initMergeGlobalDepsWithBaseTC,
+		"merge global deps without base":         initMergeGlobalDepsWithoutBaseTC,
+		"merge config files with base":           initMergeConfigFilesWithBaseTC,
+		"merge config files without base":        initMergeConfigFilesWithoutBaseTC,
+		"merge composer dump flags with base":    initMergeComposerDumpFlagsWithBaseTC,
+		"merge composer dump flags without base": initMergeComposerDumpFlagsWithoutBaseTC,
+		"merge sources with base":                initMergeSourcesWithBaseTC,
+		"merge sources without base":             initMergeSourcesWithoutBaseTC,
+		"merge integrations with base":           initMergeIntegrationsWithBaseTC,
+		"merge integrations without base":        initMergeIntegrationsWithoutBaseTC,
+		"merge stateful dirs with base":          initMergeStatefulDirsWithBaseTC,
+		"merge stateful dirs without base":       initMergeStatefulDirsWithoutBaseTC,
+		"merge healthcheck with base":            initMergeHealthcheckWithBaseTC,
+		"merge healthcheck without base":         initMergeHealthcheckWithoutBaseTC,
+		"merge post install with base":           initMergePostInstallWithBaseTC,
+		"merge post install without base":        initMergePostInstallWithoutBaseTC,
+	}
+
+	for tcname := range testcases {
+		tcinit := testcases[tcname]
+
+		t.Run(tcname, func(t *testing.T) {
+			tc := tcinit()
+			base := tc.base()
+			new := base.Merge(tc.overriding)
+
+			if diff := deep.Equal(new, tc.expected()); diff != nil {
+				t.Fatal(diff)
+			}
+
+			if diff := deep.Equal(base, tc.base()); diff != nil {
+				t.Fatalf("Base stages don't match: %v", diff)
+			}
+		})
 	}
 }

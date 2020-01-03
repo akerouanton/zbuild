@@ -15,9 +15,9 @@ type composerLock struct {
 	platformReqs map[string]string
 }
 
-// LoadComposerLockFromContext loads composer.lock file from build context and
-// adds packages and packages-dev (if stageDef is dev) to stageDef.LockedPackages.
-// Also, it adds extensions listed in platform-reqs key to stageDef.PlatformReqs.
+// LoadComposerLock loads composer.lock file from build context and adds
+// packages and packages-dev (if stageDef is dev) to stageDef.LockedPackages.
+// Also it adds extensions listed in platform-reqs key to stageDef.PlatformReqs.
 // It returns nil if the composer.lock file couldn't be found.
 func LoadComposerLock(
 	ctx context.Context,
@@ -36,7 +36,7 @@ func LoadComposerLock(
 		return xerrors.Errorf("could not load composer.lock: %v", err)
 	}
 
-	parsed, err := parseComposerLock(lockdata, *stageDef.Dev)
+	parsed, err := parseComposerLock(lockdata, stageDef.Dev)
 	if err != nil {
 		return err
 	}
@@ -48,68 +48,49 @@ func LoadComposerLock(
 }
 
 func parseComposerLock(lockdata []byte, isDev bool) (composerLock, error) {
-	var parsed map[string]interface{}
+	parsed := struct {
+		Packages    []composerPkg
+		PackagesDev []composerPkg `json:"packages-dev"`
+		Platform    map[string]string
+	}{}
+
+	if err := json.Unmarshal(lockdata, &parsed); err != nil {
+		return composerLock{}, xerrors.Errorf(
+			"could not unmarshal composer.lock: %w", err)
+	}
+
 	lock := composerLock{
 		packages:     map[string]string{},
 		platformReqs: map[string]string{},
 	}
-
-	if err := json.Unmarshal(lockdata, &parsed); err != nil {
-		return lock, xerrors.Errorf("could not unmarshal composer.lock: %w", err)
+	for _, pkg := range parsed.Packages {
+		lock.packages[pkg.Name] = pkg.Version
+		lock.platformReqs = findExtRequirements(lock.platformReqs, pkg.Require)
 	}
 
-	packages, ok := parsed["packages"]
-	if !ok {
-		return lock, xerrors.New("composer.lock has no packages key")
-	}
-
-	for _, rawPkg := range packages.([]interface{}) {
-		pkg := rawPkg.(map[string]interface{})
-		pkgName := pkg["name"].(string)
-		pkgVersion := pkg["version"].(string)
-		lock.packages[pkgName] = pkgVersion
-
-		require := pkg["require"].(map[string]interface{})
-		for name, val := range require {
-			if strings.HasPrefix(name, "ext-") {
-				ext := strings.TrimPrefix(name, "ext-")
-				lock.platformReqs[ext] = val.(string)
-			}
+	if isDev {
+		for _, pkg := range parsed.PackagesDev {
+			lock.packages[pkg.Name] = pkg.Version
+			lock.platformReqs = findExtRequirements(lock.platformReqs, pkg.Require)
 		}
 	}
 
-	devPackages, ok := parsed["packages-dev"]
-	if isDev && ok {
-		for _, rawPkg := range devPackages.([]interface{}) {
-			pkg := rawPkg.(map[string]interface{})
-			pkgName := pkg["name"].(string)
-			pkgVersion := pkg["version"].(string)
-
-			lock.packages[pkgName] = pkgVersion
-
-			require := pkg["require"].(map[string]interface{})
-			for name, val := range require {
-				if strings.HasPrefix(name, "ext-") {
-					ext := strings.TrimPrefix(name, "ext-")
-					lock.platformReqs[ext] = val.(string)
-				}
-			}
-		}
-	}
-
-	platformReqs, ok := parsed["platform"]
-	if !ok {
-		return lock, nil
-	}
-
-	for req, constraint := range platformReqs.(map[string]interface{}) {
-		if !strings.HasPrefix(req, "ext-") {
-			continue
-		}
-
-		ext := strings.TrimPrefix(req, "ext-")
-		lock.platformReqs[ext] = constraint.(string)
-	}
-
+	lock.platformReqs = findExtRequirements(lock.platformReqs, parsed.Platform)
 	return lock, nil
+}
+
+type composerPkg struct {
+	Name    string
+	Version string
+	Require map[string]string
+}
+
+func findExtRequirements(locks map[string]string, reqs map[string]string) map[string]string {
+	for name, val := range reqs {
+		if strings.HasPrefix(name, "ext-") {
+			ext := strings.TrimPrefix(name, "ext-")
+			locks[ext] = val
+		}
+	}
+	return locks
 }
