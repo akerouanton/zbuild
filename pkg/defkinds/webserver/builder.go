@@ -2,6 +2,7 @@ package webserver
 
 import (
 	"context"
+	"time"
 
 	"github.com/NiR-/zbuild/pkg/builddef"
 	"github.com/NiR-/zbuild/pkg/image"
@@ -72,8 +73,7 @@ func (h *WebserverHandler) Build(
 		state = llbutils.Copy(*buildOpts.Source, asset.From, state, asset.To, fileOwner)
 	}
 
-	// Use SIGSTOP to gracefully stop nginx
-	img.Config.StopSignal = "SIGSTOP"
+	setImageMetadata(def, state, img)
 
 	return state, img, nil
 }
@@ -97,6 +97,27 @@ func (h *WebserverHandler) copyConfigFile(
 		def.Type.ConfigPath(),
 		fileOwner,
 	)
+}
+
+func setImageMetadata(
+	def Definition,
+	state llb.State,
+	img *image.Image,
+) {
+	if *def.Healthcheck {
+		img.Config.Healthcheck = &image.HealthConfig{
+			Test:     []string{"CMD", "http_proxy= test \"$(curl --fail http://127.0.0.1/_ping)\" = \"pong\""},
+			Interval: 10 * time.Second,
+			Timeout:  1 * time.Second,
+			Retries:  3,
+		}
+	}
+
+	// Use SIGSTOP to gracefully stop nginx
+	img.Config.StopSignal = "SIGSTOP"
+	img.Config.User = "1000"
+	now := time.Now()
+	img.Created = &now
 }
 
 func (h *WebserverHandler) WithSolver(solver statesolver.StateSolver) {

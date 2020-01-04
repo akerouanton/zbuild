@@ -3,13 +3,17 @@ package nodejs_test
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/NiR-/zbuild/pkg/builddef"
 	"github.com/NiR-/zbuild/pkg/defkinds/nodejs"
+	"github.com/NiR-/zbuild/pkg/image"
 	"github.com/NiR-/zbuild/pkg/llbtest"
 	"github.com/NiR-/zbuild/pkg/mocks"
+	"github.com/go-test/deep"
 	"github.com/golang/mock/gomock"
 	"github.com/moby/buildkit/frontend/gateway/client"
+	specs "github.com/opencontainers/image-spec/specs-go/v1"
 	"gopkg.in/yaml.v2"
 )
 
@@ -18,9 +22,8 @@ type buildTC struct {
 	client        client.Client
 	buildOpts     builddef.BuildOpts
 	expectedState string
-	// @TODO: test image metadata
-	// expectedImage *image.Image
-	expectedErr error
+	expectedImage *image.Image
+	expectedErr   error
 }
 
 func initBuildLLBForDevStageTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
@@ -41,6 +44,31 @@ func initBuildLLBForDevStageTC(t *testing.T, mockCtrl *gomock.Controller) buildT
 			ContextName:   "context",
 		},
 		expectedState: "testdata/build/state-dev.json",
+		expectedImage: &image.Image{
+			Image: specs.Image{
+				Architecture: "amd64",
+				OS:           "linux",
+				RootFS: specs.RootFS{
+					Type: "layers",
+				},
+			},
+			Config: image.ImageConfig{
+				ImageConfig: specs.ImageConfig{
+					User: "1000",
+					Env: []string{
+						"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+						"NODE_ENV=development",
+					},
+					Entrypoint: []string{"docker-entrypoint.sh"},
+					Cmd:        []string{"node"},
+					Volumes:    map[string]struct{}{},
+					WorkingDir: "/app",
+					Labels: map[string]string{
+						"io.zbuild": "true",
+					},
+				},
+			},
+		},
 	}
 }
 
@@ -62,6 +90,35 @@ func initBuildLLBForWorkerStageTC(t *testing.T, mockCtrl *gomock.Controller) bui
 			ContextName:   "context",
 		},
 		expectedState: "testdata/build/state-worker.json",
+		expectedImage: &image.Image{
+			Image: specs.Image{
+				Architecture: "amd64",
+				OS:           "linux",
+				RootFS: specs.RootFS{
+					Type: "layers",
+				},
+			},
+			Config: image.ImageConfig{
+				ImageConfig: specs.ImageConfig{
+					User: "1000",
+					Env: []string{
+						"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+						"NODE_ENV=production",
+					},
+					// Following entrypoint is automatically defined by the
+					// base image. Maybe it should not be kept? :thinking:
+					Entrypoint: []string{"docker-entrypoint.sh"},
+					Cmd:        []string{"bin/worker.js"},
+					Volumes:    map[string]struct{}{},
+					WorkingDir: "/app",
+					Labels: map[string]string{
+						"io.zbuild": "true",
+					},
+				},
+				// @TODO: add healthcheck parameter to nodejs definition
+				// Healthcheck: &image.HealthConfig{},
+			},
+		},
 	}
 }
 
@@ -83,6 +140,43 @@ func initBuildLLBForProdWebserverStageTC(t *testing.T, mockCtrl *gomock.Controll
 			ContextName:   "context",
 		},
 		expectedState: "testdata/build/state-webserver.json",
+		expectedImage: &image.Image{
+			Image: specs.Image{
+				Architecture: "amd64",
+				OS:           "linux",
+				RootFS: specs.RootFS{
+					Type: "layers",
+				},
+			},
+			Config: image.ImageConfig{
+				ImageConfig: specs.ImageConfig{
+					User: "1000",
+					Env: []string{
+						"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+						"NGINX_VERSION=1.17.6",
+						"NJS_VERSION=0.3.7",
+						"PKG_RELEASE=1~buster",
+					},
+					Entrypoint: []string{},
+					Cmd:        []string{"nginx", "-g", "daemon off;"},
+					StopSignal: "SIGSTOP",
+					Volumes:    map[string]struct{}{},
+					ExposedPorts: map[string]struct{}{
+						"80/tcp": {},
+					},
+					Labels: map[string]string{
+						"io.zbuild":  "true",
+						"maintainer": "NGINX Docker Maintainers <docker-maint@nginx.com>",
+					},
+				},
+				Healthcheck: &image.HealthConfig{
+					Test:     []string{"CMD", "http_proxy= test \"$(curl --fail http://127.0.0.1/_ping)\" = \"pong\""},
+					Interval: 10 * time.Second,
+					Timeout:  1 * time.Second,
+					Retries:  3,
+				},
+			},
+		},
 	}
 }
 
@@ -105,7 +199,7 @@ func TestBuild(t *testing.T) {
 			tc := tcinit(t, mockCtrl)
 			ctx := context.TODO()
 
-			state, _, err := tc.handler.Build(ctx, tc.buildOpts)
+			state, img, err := tc.handler.Build(ctx, tc.buildOpts)
 			jsonState := llbtest.StateToJSON(t, state)
 
 			if *flagTestdata {
@@ -124,18 +218,19 @@ func TestBuild(t *testing.T) {
 				t.Fatalf("Unexpected error: %v", err)
 			}
 
-			// @TODO: uncomment
-			/* img.Created = nil
-			if diff := deep.Equal(img, tc.expectedImage); diff != nil {
-				t.Fatal(diff)
-			} */
-
 			expectedState := loadRawTestdata(t, tc.expectedState)
 			if string(expectedState) != jsonState {
 				tempfile := newTempFile(t)
 				writeTestdata(t, tempfile, jsonState)
 
 				t.Fatalf("Expected: <%s>\nGot: <%s>", tc.expectedState, tempfile)
+			}
+
+			img.Created = nil
+			img.History = nil
+			img.RootFS.DiffIDs = nil
+			if diff := deep.Equal(img, tc.expectedImage); diff != nil {
+				t.Fatal(diff)
 			}
 		})
 	}
