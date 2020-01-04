@@ -170,7 +170,7 @@ func (h *NodeJSHandler) buildNodeJS(
 
 	if *stageDef.Dev == false {
 		state = h.yarnInstall(stageDef, state, buildOpts)
-		state = h.copySourceDirs(stageDef, state, buildOpts)
+		state = h.copySources(stageDef, state, buildOpts)
 		state = h.build(stageDef, state)
 	}
 
@@ -292,7 +292,7 @@ func (h *NodeJSHandler) yarnInstall(
 	return run.Root()
 }
 
-func (h *NodeJSHandler) copySourceDirs(
+func (h *NodeJSHandler) copySources(
 	stageDef StageDefinition,
 	state llb.State,
 	buildOpts builddef.BuildOpts,
@@ -311,7 +311,7 @@ func (h *NodeJSHandler) copySourceDirs(
 func excludePatterns(stageDef StageDefinition) []string {
 	excludes := []string{}
 	// Explicitly exclude stateful dirs to ensure they aren't included when
-	// they're in one of sourceDirs
+	// they're in one of Sources
 	for _, dir := range stageDef.StatefulDirs {
 		excludes = append(excludes, dir)
 	}
@@ -320,7 +320,7 @@ func excludePatterns(stageDef StageDefinition) []string {
 
 func includePatterns(stageDef StageDefinition) []string {
 	includes := []string{}
-	for _, dir := range stageDef.SourceDirs {
+	for _, dir := range stageDef.Sources {
 		includes = append(includes, dir)
 	}
 	return includes

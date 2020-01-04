@@ -48,7 +48,7 @@ func initSuccessfullyParseRawDefinitionWithoutStagesTC() newDefinitionTC {
 					".babelrc": ".babelrc",
 				},
 				GlobalPackages: &builddef.VersionMap{},
-				SourceDirs:     []string{"src/"},
+				Sources:        []string{"src/"},
 				StatefulDirs:   []string{"uploads/"},
 				Healthcheck:    &healthcheckDisabled,
 			},
@@ -64,7 +64,7 @@ func initSuccessfullyParseRawDefinitionWithoutStagesTC() newDefinitionTC {
 						SystemPackages: &builddef.VersionMap{},
 						GlobalPackages: &builddef.VersionMap{},
 						ConfigFiles:    map[string]string{},
-						SourceDirs:     []string{},
+						Sources:        []string{},
 						StatefulDirs:   []string{},
 					},
 				},
@@ -76,7 +76,7 @@ func initSuccessfullyParseRawDefinitionWithoutStagesTC() newDefinitionTC {
 						SystemPackages: &builddef.VersionMap{},
 						GlobalPackages: &builddef.VersionMap{},
 						ConfigFiles:    map[string]string{},
-						SourceDirs:     []string{},
+						Sources:        []string{},
 						StatefulDirs:   []string{},
 					},
 				},
@@ -103,7 +103,7 @@ func initSuccessfullyParseRawDefinitionWithStagesTC() newDefinitionTC {
 				ConfigFiles:    map[string]string{},
 				GlobalPackages: &builddef.VersionMap{},
 				Healthcheck:    &baseStageHealthcheck,
-				SourceDirs:     []string{},
+				Sources:        []string{},
 				StatefulDirs:   []string{},
 			},
 			Version:   "12",
@@ -117,7 +117,7 @@ func initSuccessfullyParseRawDefinitionWithStagesTC() newDefinitionTC {
 						SystemPackages: &builddef.VersionMap{},
 						ConfigFiles:    map[string]string{},
 						GlobalPackages: &builddef.VersionMap{},
-						SourceDirs:     []string{},
+						Sources:        []string{},
 						StatefulDirs:   []string{},
 					},
 				},
@@ -129,7 +129,7 @@ func initSuccessfullyParseRawDefinitionWithStagesTC() newDefinitionTC {
 						SystemPackages: &builddef.VersionMap{},
 						ConfigFiles:    map[string]string{},
 						GlobalPackages: &builddef.VersionMap{},
-						SourceDirs:     []string{},
+						Sources:        []string{},
 						StatefulDirs:   []string{},
 					},
 				},
@@ -233,7 +233,7 @@ func initSuccessfullyResolveDefaultDevStageTC() resolveStageTC {
 					"ca-certificates": "*",
 				},
 				GlobalPackages: &builddef.VersionMap{},
-				SourceDirs:     []string{"src/"},
+				Sources:        []string{"src/"},
 				StatefulDirs:   []string{"uploads/"},
 				ConfigFiles:    map[string]string{".babelrc": ".babelrc"},
 				Healthcheck:    &healthckeck,
@@ -260,7 +260,7 @@ func initSuccessfullyResolveWorkerStageTC() resolveStageTC {
 				SystemPackages: &builddef.VersionMap{},
 				ConfigFiles:    map[string]string{},
 				GlobalPackages: &builddef.VersionMap{},
-				SourceDirs:     []string{},
+				Sources:        []string{},
 				StatefulDirs:   []string{},
 				Healthcheck:    &healthckeckDisabled,
 				Command:        &cmd,
@@ -367,7 +367,7 @@ func emptyStage() nodejs.Stage {
 		SystemPackages: &builddef.VersionMap{},
 		GlobalPackages: &builddef.VersionMap{},
 		ConfigFiles:    map[string]string{},
-		SourceDirs:     []string{},
+		Sources:        []string{},
 		StatefulDirs:   []string{},
 	}
 }
@@ -658,35 +658,35 @@ func initMergeConfigFilesWithoutBaseTC() mergeStageTC {
 	}
 }
 
-func initMergeSourceDirsWithBaseTC() mergeStageTC {
+func initMergeSourcesWithBaseTC() mergeStageTC {
 	return mergeStageTC{
 		base: func() nodejs.Stage {
 			return nodejs.Stage{
-				SourceDirs: []string{"lib/"},
+				Sources: []string{"lib/"},
 			}
 		},
 		overriding: nodejs.Stage{
-			SourceDirs: []string{"src/"},
+			Sources: []string{"src/"},
 		},
 		expected: func() nodejs.Stage {
 			s := emptyStage()
-			s.SourceDirs = []string{"lib/", "src/"}
+			s.Sources = []string{"lib/", "src/"}
 			return s
 		},
 	}
 }
 
-func initMergeSourceDirsWithoutBaseTC() mergeStageTC {
+func initMergeSourcesWithoutBaseTC() mergeStageTC {
 	return mergeStageTC{
 		base: func() nodejs.Stage {
 			return nodejs.Stage{}
 		},
 		overriding: nodejs.Stage{
-			SourceDirs: []string{"src/"},
+			Sources: []string{"src/"},
 		},
 		expected: func() nodejs.Stage {
 			s := emptyStage()
-			s.SourceDirs = []string{"src/"}
+			s.Sources = []string{"src/"}
 			return s
 		},
 	}
@@ -781,8 +781,8 @@ func TestStageMerge(t *testing.T) {
 		"merge command without base":         initMergeCommandWithoutBaseTC,
 		"merge config files with base":       initMergeConfigFilesWithBaseTC,
 		"merge config files without base":    initMergeConfigFilesWithoutBaseTC,
-		"merge source dirs with base":        initMergeSourceDirsWithBaseTC,
-		"merge source dirs without base":     initMergeSourceDirsWithoutBaseTC,
+		"merge sources with base":            initMergeSourcesWithBaseTC,
+		"merge sources without base":         initMergeSourcesWithoutBaseTC,
 		"merge stateful dirs with base":      initMergeStatefulDirsWithBaseTC,
 		"merge stateful dirs without base":   initMergeStatefulDirsWithoutBaseTC,
 		"merge healthcheck with base":        initMergeHealthcheckWithBaseTC,
@@ -819,18 +819,18 @@ func initMergeBaseStageWithBaseTC() mergeDefinitionTC {
 		base: func() nodejs.Definition {
 			return nodejs.Definition{
 				BaseStage: nodejs.Stage{
-					SourceDirs: []string{"src/"},
+					Sources: []string{"src/"},
 				},
 			}
 		},
 		overriding: nodejs.Definition{
 			BaseStage: nodejs.Stage{
-				SourceDirs: []string{"bin/"},
+				Sources: []string{"bin/"},
 			},
 		},
 		expected: func() nodejs.Definition {
 			baseStage := emptyStage()
-			baseStage.SourceDirs = []string{"src/", "bin/"}
+			baseStage.Sources = []string{"src/", "bin/"}
 
 			return nodejs.Definition{
 				BaseStage: baseStage,
@@ -847,12 +847,12 @@ func initMergeBaseStageWithoutBaseTC() mergeDefinitionTC {
 		},
 		overriding: nodejs.Definition{
 			BaseStage: nodejs.Stage{
-				SourceDirs: []string{"bin/"},
+				Sources: []string{"bin/"},
 			},
 		},
 		expected: func() nodejs.Definition {
 			baseStage := emptyStage()
-			baseStage.SourceDirs = []string{"bin/"}
+			baseStage.Sources = []string{"bin/"}
 
 			return nodejs.Definition{
 				BaseStage: baseStage,
