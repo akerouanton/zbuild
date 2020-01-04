@@ -516,7 +516,7 @@
     "Digest": "sha256:6fc63953ff5c68078426a02700200c42d3ffcd5d3de333d22ca622d20589e4d7",
     "OpMetadata": {
       "description": {
-        "llb.customname": "Mkdir /app /composer"
+        "llb.customname": "Mkdir /composer"
       },
       "caps": {
         "file.base": true
@@ -708,7 +708,7 @@
     "Digest": "sha256:9bb0b04c9a7a08dc858138f7b21abdc2e59231e24bdb11ec8c4bfcc6a8f4291c",
     "OpMetadata": {
       "description": {
-        "llb.customname": "Mkdir /app /composer"
+        "llb.customname": "Mkdir /app"
       },
       "caps": {
         "file.base": true

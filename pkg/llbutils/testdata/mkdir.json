@@ -48,7 +48,7 @@
     "Digest": "sha256:3d1375acccfa7e74ef59bfaef1874b1f6527d3b4b89bbd93a350c89f2e97e104",
     "OpMetadata": {
       "description": {
-        "llb.customname": "Mkdir /app /usr/src/app"
+        "llb.customname": "Mkdir /usr/src/app"
       },
       "caps": {
         "file.base": true
@@ -104,7 +104,7 @@
     "Digest": "sha256:7382207c90799f3b5f259ab733f37313122e3a6c3f8465834c14da97d82491ec",
     "OpMetadata": {
       "description": {
-        "llb.customname": "Mkdir /app /usr/src/app"
+        "llb.customname": "Mkdir /app"
       },
       "caps": {
         "file.base": true
