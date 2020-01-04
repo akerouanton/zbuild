@@ -1,6 +1,7 @@
 # syntax=akerouanton/zbuilder:test9
 fpm: true
 version: 7.4.0
+healthcheck: false
 
 extensions:
   intl: "*"

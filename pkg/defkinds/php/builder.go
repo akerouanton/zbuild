@@ -207,13 +207,8 @@ func setImageMetadata(
 		img.Config.Volumes[fullpath] = struct{}{}
 	}
 
-	if *stage.Healthcheck {
-		img.Config.Healthcheck = &image.HealthConfig{
-			Test:     []string{"CMD", "http_proxy= test \"$(fcgi-client get 127.0.0.1:9000 /_ping)\" = \"pong\""},
-			Interval: 10 * time.Second,
-			Timeout:  1 * time.Second,
-			Retries:  3,
-		}
+	if stage.Healthcheck != nil {
+		img.Config.Healthcheck = stage.Healthcheck.ToImageConfig()
 	}
 
 	img.Config.User = "1000"

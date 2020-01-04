@@ -61,7 +61,16 @@ stage:
   - blackfire
   statefuldirs:
   - var/
-  healthcheck: true
+  healthcheck:
+    healthcheckhttp: null
+    healthcheckfcgi:
+      path: /ping
+      expected: pong
+    healthcheckcmd: null
+    type: fcgi
+    interval: 10s
+    timeout: 1s
+    retries: 3
   postinstall:
   - echo '<?php return [];' > .env.local.php
   - APP_ENV=prod composer run-script --no-dev post-install-cmd
