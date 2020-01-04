@@ -122,15 +122,9 @@ func setImageMetadata(stageDef StageDefinition, state llb.State, img *image.Imag
 		img.Config.Volumes[fullpath] = struct{}{}
 	}
 
-	// @TODO: improve
-	/* if *stageDef.Healthcheck {
-		img.Config.Healthcheck = &image.HealthConfig{
-			Test:     []string{"CMD", "http_proxy= test \"$(curl --fail http://127.0.0.1/_ping)\" = \"pong\""},
-			Interval: 10 * time.Second,
-			Timeout:  1 * time.Second,
-			Retries:  3,
-		}
-	} */
+	if stageDef.Healthcheck != nil {
+		img.Config.Healthcheck = stageDef.Healthcheck.ToImageConfig()
+	}
 
 	nodeEnv := "development"
 	if *stageDef.Dev == false {

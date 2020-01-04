@@ -3,6 +3,7 @@ package nodejs
 import (
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/NiR-/zbuild/pkg/builddef"
 	"github.com/NiR-/zbuild/pkg/llbutils"
@@ -40,11 +41,11 @@ func (h *NodeJSHandler) loadDefs(
 func defaultDefinition() Definition {
 	devStageDevMode := true
 	prodStageDevMode := false
-	healthcheckEnabled := true
+	healthcheck := defaultHealthcheck
 
 	return Definition{
 		BaseStage: Stage{
-			Healthcheck: &healthcheckEnabled,
+			Healthcheck: &healthcheck,
 		},
 		Stages: DerivedStageSet{
 			"dev": {
@@ -60,12 +61,18 @@ func defaultDefinition() Definition {
 }
 
 func decodeDefinition(raw map[string]interface{}) (Definition, error) {
+	decodeHook := mapstructure.ComposeDecodeHookFunc(
+		builddef.DecodeBoolToHealthcheck(defaultHealthcheck),
+		mapstructure.StringToTimeDurationHookFunc(),
+	)
+
 	var def Definition
 	decoderConf := mapstructure.DecoderConfig{
 		ErrorUnused:      false,
 		WeaklyTypedInput: true,
 		Result:           &def,
 		Metadata:         &mapstructure.Metadata{},
+		DecodeHook:       decodeHook,
 	}
 
 	decoder, err := mapstructure.NewDecoder(&decoderConf)
@@ -84,7 +91,7 @@ func decodeDefinition(raw map[string]interface{}) (Definition, error) {
 	}
 
 	def = defaultDefinition().Merge(def)
-	return def, nil
+	return def, def.IsValid()
 }
 
 func decodeDefinitionLocks(raw map[string]interface{}) (DefinitionLocks, error) {
@@ -174,6 +181,22 @@ type Definition struct {
 	Locks DefinitionLocks `mapstructure:"-"`
 }
 
+func (d Definition) IsValid() error {
+	allowedHCTypes := []string{"http", "cmd"}
+
+	if !d.BaseStage.Healthcheck.IsValid(allowedHCTypes) {
+		return xerrors.New("base stage has an invalid healthcheck")
+	}
+
+	for name, stage := range d.Stages {
+		if !stage.Healthcheck.IsValid(allowedHCTypes) {
+			return xerrors.Errorf("stage %q has an invalid healthcheck", name)
+		}
+	}
+
+	return nil
+}
+
 func (d Definition) Copy() Definition {
 	new := Definition{
 		BaseStage:  d.BaseStage.Copy(),
@@ -199,15 +222,15 @@ func (base Definition) Merge(overriding Definition) Definition {
 }
 
 type Stage struct {
-	ExternalFiles  []llbutils.ExternalFile `mapstructure:"external_files"`
-	SystemPackages *builddef.VersionMap    `mapstructure:"system_packages"`
-	GlobalPackages *builddef.VersionMap    `mapstructure:"global_packages"`
-	BuildCommand   *string                 `mapstructure:"build_command"`
-	Command        *[]string               `mapstructure:"command"`
-	ConfigFiles    map[string]string       `mapstructure:"config_files"`
-	Sources        []string                `mapstructure:"sources"`
-	StatefulDirs   []string                `mapstructure:"stateful_dirs"`
-	Healthcheck    *bool                   `mapstructur:"healthcheck"`
+	ExternalFiles  []llbutils.ExternalFile     `mapstructure:"external_files"`
+	SystemPackages *builddef.VersionMap        `mapstructure:"system_packages"`
+	GlobalPackages *builddef.VersionMap        `mapstructure:"global_packages"`
+	BuildCommand   *string                     `mapstructure:"build_command"`
+	Command        *[]string                   `mapstructure:"command"`
+	ConfigFiles    map[string]string           `mapstructure:"config_files"`
+	Sources        []string                    `mapstructure:"sources"`
+	StatefulDirs   []string                    `mapstructure:"stateful_dirs"`
+	Healthcheck    *builddef.HealthcheckConfig `mapstructure:"healthcheck"`
 }
 
 func (s Stage) Copy() Stage {
@@ -260,6 +283,17 @@ func (s Stage) Merge(overriding Stage) Stage {
 	}
 
 	return new
+}
+
+var defaultHealthcheck = builddef.HealthcheckConfig{
+	HealthcheckHTTP: &builddef.HealthcheckHTTP{
+		Path:     "/ping",
+		Expected: "pong",
+	},
+	Type:     builddef.HealthcheckTypeHTTP,
+	Interval: 10 * time.Second,
+	Timeout:  1 * time.Second,
+	Retries:  3,
 }
 
 type DerivedStage struct {
@@ -405,7 +439,7 @@ func mergeStages(base *Definition, stages ...DerivedStage) StageDefinition {
 	}
 
 	if *stageDef.Dev || stageDef.IsFrontend {
-		*stageDef.Healthcheck = false
+		stageDef.Healthcheck = nil
 	}
 
 	return stageDef

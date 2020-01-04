@@ -11,7 +11,7 @@ stage:
   configfiles: {}
   sources: []
   statefuldirs: []
-  healthcheck: false
+  healthcheck: null
 name: dev
 baseimage: docker.io/library/node:12-buster-slim
 version: "12"

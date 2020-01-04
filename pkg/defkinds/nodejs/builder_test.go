@@ -116,8 +116,9 @@ func initBuildLLBForWorkerStageTC(t *testing.T, mockCtrl *gomock.Controller) bui
 						"io.zbuild": "true",
 					},
 				},
-				// @TODO: add healthcheck parameter to nodejs definition
-				// Healthcheck: &image.HealthConfig{},
+				Healthcheck: &image.HealthConfig{
+					Test: []string{"NONE"},
+				},
 			},
 		},
 	}
