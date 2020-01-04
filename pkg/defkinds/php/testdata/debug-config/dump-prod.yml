@@ -7,6 +7,13 @@ stage:
     checksum: ""
     mode: 420
     owner: ""
+  - url: https://github.com/NiR-/fcgi-client/releases/download/v0.1.0/fcgi-client.phar
+    compressed: false
+    pattern: ""
+    destination: /usr/local/bin/fcgi-client
+    checksum: ""
+    mode: 488
+    owner: 1000:1000
   systempackages:
     git: '*'
     libicu-dev: '*'
@@ -54,7 +61,7 @@ stage:
   - blackfire
   statefuldirs:
   - var/
-  healthcheck: false
+  healthcheck: true
   postinstall:
   - echo '<?php return [];' > .env.local.php
   - APP_ENV=prod composer run-script --no-dev post-install-cmd

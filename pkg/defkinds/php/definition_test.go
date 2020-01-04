@@ -106,8 +106,7 @@ func initSuccessfullyParseRawDefinitionWithStagesTC() newDefinitionTC {
 	iniDevFile := "docker/app/php.dev.ini"
 	iniProdFile := "docker/app/php.prod.ini"
 	fpmConfigFile := "docker/app/fpm.conf"
-	healthcheckEnabled := true
-	healthcheckDisabled := false
+	baseStageHealthcheck := true
 	devStageDevMode := true
 	prodStageDevMode := false
 	isFPM := true
@@ -124,7 +123,8 @@ func initSuccessfullyParseRawDefinitionWithStagesTC() newDefinitionTC {
 	prodStage.ConfigFiles = php.PHPConfigFiles{
 		IniFile: &iniProdFile,
 	}
-	prodStage.Healthcheck = &healthcheckEnabled
+	prodStageHealthcheck := true
+	prodStage.Healthcheck = &prodStageHealthcheck
 	prodStage.Integrations = []string{"blackfire"}
 
 	return newDefinitionTC{
@@ -151,7 +151,7 @@ func initSuccessfullyParseRawDefinitionWithStagesTC() newDefinitionTC {
 				Sources:      []string{"generated/"},
 				Integrations: []string{},
 				StatefulDirs: []string{"public/uploads"},
-				Healthcheck:  &healthcheckDisabled,
+				Healthcheck:  &baseStageHealthcheck,
 				PostInstall:  []string{"echo some command"},
 			},
 			Version:       "7.4.0",
