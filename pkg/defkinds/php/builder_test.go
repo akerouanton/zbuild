@@ -93,7 +93,6 @@ func initBuildLLBForWebserverProdStageTC(t *testing.T, mockCtrl *gomock.Controll
 	kindHandler := php.NewPHPHandler()
 	kindHandler.WithSolver(solver)
 
-	// @TODO: disallow building webserver when fpm mode is disabled?
 	return buildTC{
 		handler: kindHandler,
 		client:  llbtest.NewMockClient(mockCtrl),

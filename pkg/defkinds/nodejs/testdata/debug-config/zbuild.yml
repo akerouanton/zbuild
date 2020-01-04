@@ -16,7 +16,6 @@ stages:
 
 webserver:
     type: nginx
-    # @TODO: check if the healthcheck is enabled
     assets:
         - from: build/
           to: build/

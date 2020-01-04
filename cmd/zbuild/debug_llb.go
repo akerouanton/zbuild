@@ -18,7 +18,6 @@ var debugFlags = struct {
 	asJSON  bool
 }{}
 
-// @TODO: buildctl should not be required
 const debugDescription = `Output LLB DAG in binary or JSON format.
 
 This command alone is not really useful. To have a readable output, you have to
@@ -66,7 +65,6 @@ func HandleDebugLLBCmd(cmd *cobra.Command, args []string) {
 	}
 
 	if debugFlags.asJSON {
-		// @TODO: merge llbtest into llbutils
 		out, err := llbutils.StateToJSON(state)
 		if err != nil {
 			logrus.Fatalf("%+v", err)
