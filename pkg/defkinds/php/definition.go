@@ -58,7 +58,7 @@ func DefaultDefinition() Definition {
 			SystemPackages: &builddef.VersionMap{},
 			FPM:            &fpm,
 			Extensions:     &builddef.VersionMap{},
-			GlobalDeps:     map[string]string{},
+			GlobalDeps:     &builddef.VersionMap{},
 			ComposerDumpFlags: &ComposerDumpFlags{
 				ClassmapAuthoritative: true,
 			},
@@ -195,7 +195,7 @@ type Stage struct {
 	FPM               *bool                   `mapstructure:",omitempty"`
 	Command           *[]string               `mapstructure:"command"`
 	Extensions        *builddef.VersionMap    `mapstructure:"extensions"`
-	GlobalDeps        map[string]string       `mapstructure:"global_deps"`
+	GlobalDeps        *builddef.VersionMap    `mapstructure:"global_deps"`
 	ConfigFiles       PHPConfigFiles          `mapstructure:"config_files"`
 	ComposerDumpFlags *ComposerDumpFlags      `mapstructure:"composer_dump"`
 	Sources           []string                `mapstructure:"sources"`
@@ -212,7 +212,7 @@ func (s Stage) Copy() Stage {
 		FPM:               s.FPM,
 		Command:           s.Command,
 		Extensions:        s.Extensions.Copy(),
-		GlobalDeps:        map[string]string{},
+		GlobalDeps:        s.GlobalDeps.Copy(),
 		ConfigFiles:       s.ConfigFiles.Copy(),
 		ComposerDumpFlags: s.ComposerDumpFlags,
 		Sources:           make([]string, len(s.Sources)),
@@ -228,10 +228,6 @@ func (s Stage) Copy() Stage {
 	copy(new.StatefulDirs, s.StatefulDirs)
 	copy(new.PostInstall, s.PostInstall)
 
-	for name, constraint := range s.GlobalDeps {
-		new.GlobalDeps[name] = constraint
-	}
-
 	return new
 }
 
@@ -246,6 +242,7 @@ func (s Stage) Merge(overriding Stage) Stage {
 	new.PostInstall = append(new.PostInstall, overriding.PostInstall...)
 
 	new.SystemPackages.Merge(overriding.SystemPackages)
+	new.GlobalDeps.Merge(overriding.GlobalDeps)
 	new.Extensions.Merge(overriding.Extensions)
 
 	if overriding.FPM != nil {
@@ -255,9 +252,6 @@ func (s Stage) Merge(overriding Stage) Stage {
 	if overriding.Command != nil {
 		cmd := *overriding.Command
 		new.Command = &cmd
-	}
-	for name, constraint := range overriding.GlobalDeps {
-		new.GlobalDeps[name] = constraint
 	}
 	if overriding.ComposerDumpFlags != nil {
 		dumpFlags := *overriding.ComposerDumpFlags

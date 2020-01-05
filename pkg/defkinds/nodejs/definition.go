@@ -162,7 +162,7 @@ func (base Definition) Merge(overriding Definition) Definition {
 type Stage struct {
 	ExternalFiles  []llbutils.ExternalFile `mapstructure:"external_files"`
 	SystemPackages *builddef.VersionMap    `mapstructure:"system_packages"`
-	GlobalPackages map[string]string       `mapstructure:"global_packages"`
+	GlobalPackages *builddef.VersionMap    `mapstructure:"global_packages"`
 	BuildCommand   *string                 `mapstructure:"build_command"`
 	Command        *[]string               `mapstructure:"command"`
 	ConfigFiles    map[string]string       `mapstructure:"config_files"`
@@ -176,7 +176,7 @@ func (s Stage) Copy() Stage {
 	new := Stage{
 		ExternalFiles:  make([]llbutils.ExternalFile, len(s.ExternalFiles)),
 		SystemPackages: s.SystemPackages.Copy(),
-		GlobalPackages: map[string]string{},
+		GlobalPackages: s.GlobalPackages.Copy(),
 		BuildCommand:   s.BuildCommand,
 		Command:        s.Command,
 		ConfigFiles:    map[string]string{},
@@ -189,9 +189,6 @@ func (s Stage) Copy() Stage {
 	copy(new.SourceDirs, s.SourceDirs)
 	copy(new.StatefulDirs, s.StatefulDirs)
 
-	for name, constraint := range s.GlobalPackages {
-		new.GlobalPackages[name] = constraint
-	}
 	for src, dst := range s.ConfigFiles {
 		new.ConfigFiles[src] = dst
 	}
@@ -205,10 +202,8 @@ func (s Stage) Merge(overriding Stage) Stage {
 	new.SourceDirs = append(new.SourceDirs, overriding.SourceDirs...)
 	new.StatefulDirs = append(new.StatefulDirs, overriding.StatefulDirs...)
 	new.SystemPackages.Merge(overriding.SystemPackages)
+	new.GlobalPackages.Merge(overriding.GlobalPackages)
 
-	for name, constraint := range overriding.GlobalPackages {
-		new.GlobalPackages[name] = constraint
-	}
 	for from, to := range overriding.ConfigFiles {
 		new.ConfigFiles[from] = to
 	}

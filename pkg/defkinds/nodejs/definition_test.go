@@ -47,7 +47,7 @@ func initSuccessfullyParseRawDefinitionWithoutStagesTC() newDefinitionTC {
 				ConfigFiles: map[string]string{
 					".babelrc": ".babelrc",
 				},
-				GlobalPackages: map[string]string{},
+				GlobalPackages: &builddef.VersionMap{},
 				SourceDirs:     []string{"src/"},
 				StatefulDirs:   []string{"uploads/"},
 				Healthcheck:    &healthcheckDisabled,
@@ -62,7 +62,7 @@ func initSuccessfullyParseRawDefinitionWithoutStagesTC() newDefinitionTC {
 					Stage: nodejs.Stage{
 						ExternalFiles:  []llbutils.ExternalFile{},
 						SystemPackages: &builddef.VersionMap{},
-						GlobalPackages: map[string]string{},
+						GlobalPackages: &builddef.VersionMap{},
 						ConfigFiles:    map[string]string{},
 						SourceDirs:     []string{},
 						StatefulDirs:   []string{},
@@ -74,7 +74,7 @@ func initSuccessfullyParseRawDefinitionWithoutStagesTC() newDefinitionTC {
 					Stage: nodejs.Stage{
 						ExternalFiles:  []llbutils.ExternalFile{},
 						SystemPackages: &builddef.VersionMap{},
-						GlobalPackages: map[string]string{},
+						GlobalPackages: &builddef.VersionMap{},
 						ConfigFiles:    map[string]string{},
 						SourceDirs:     []string{},
 						StatefulDirs:   []string{},
@@ -101,7 +101,7 @@ func initSuccessfullyParseRawDefinitionWithStagesTC() newDefinitionTC {
 				ExternalFiles:  []llbutils.ExternalFile{},
 				SystemPackages: &builddef.VersionMap{},
 				ConfigFiles:    map[string]string{},
-				GlobalPackages: map[string]string{},
+				GlobalPackages: &builddef.VersionMap{},
 				Healthcheck:    &baseStageHealthcheck,
 				SourceDirs:     []string{},
 				StatefulDirs:   []string{},
@@ -116,7 +116,7 @@ func initSuccessfullyParseRawDefinitionWithStagesTC() newDefinitionTC {
 						ExternalFiles:  []llbutils.ExternalFile{},
 						SystemPackages: &builddef.VersionMap{},
 						ConfigFiles:    map[string]string{},
-						GlobalPackages: map[string]string{},
+						GlobalPackages: &builddef.VersionMap{},
 						SourceDirs:     []string{},
 						StatefulDirs:   []string{},
 					},
@@ -128,7 +128,7 @@ func initSuccessfullyParseRawDefinitionWithStagesTC() newDefinitionTC {
 						ExternalFiles:  []llbutils.ExternalFile{},
 						SystemPackages: &builddef.VersionMap{},
 						ConfigFiles:    map[string]string{},
-						GlobalPackages: map[string]string{},
+						GlobalPackages: &builddef.VersionMap{},
 						SourceDirs:     []string{},
 						StatefulDirs:   []string{},
 					},
@@ -232,7 +232,7 @@ func initSuccessfullyResolveDefaultDevStageTC() resolveStageTC {
 				SystemPackages: &builddef.VersionMap{
 					"ca-certificates": "*",
 				},
-				GlobalPackages: map[string]string{},
+				GlobalPackages: &builddef.VersionMap{},
 				SourceDirs:     []string{"src/"},
 				StatefulDirs:   []string{"uploads/"},
 				ConfigFiles:    map[string]string{".babelrc": ".babelrc"},
@@ -259,7 +259,7 @@ func initSuccessfullyResolveWorkerStageTC() resolveStageTC {
 				ExternalFiles:  []llbutils.ExternalFile{},
 				SystemPackages: &builddef.VersionMap{},
 				ConfigFiles:    map[string]string{},
-				GlobalPackages: map[string]string{},
+				GlobalPackages: &builddef.VersionMap{},
 				SourceDirs:     []string{},
 				StatefulDirs:   []string{},
 				Healthcheck:    &healthckeckDisabled,
@@ -365,7 +365,7 @@ func emptyStage() nodejs.Stage {
 	return nodejs.Stage{
 		ExternalFiles:  []llbutils.ExternalFile{},
 		SystemPackages: &builddef.VersionMap{},
-		GlobalPackages: map[string]string{},
+		GlobalPackages: &builddef.VersionMap{},
 		ConfigFiles:    map[string]string{},
 		SourceDirs:     []string{},
 		StatefulDirs:   []string{},
@@ -490,19 +490,19 @@ func initMergeGlobalPackagesWithBaseTC() mergeStageTC {
 	return mergeStageTC{
 		base: func() nodejs.Stage {
 			return nodejs.Stage{
-				GlobalPackages: map[string]string{
+				GlobalPackages: &builddef.VersionMap{
 					"puppeteer": "*",
 				},
 			}
 		},
 		overriding: nodejs.Stage{
-			GlobalPackages: map[string]string{
+			GlobalPackages: &builddef.VersionMap{
 				"api-platform/client-generator": "*",
 			},
 		},
 		expected: func() nodejs.Stage {
 			s := emptyStage()
-			s.GlobalPackages = map[string]string{
+			s.GlobalPackages = &builddef.VersionMap{
 				"puppeteer":                     "*",
 				"api-platform/client-generator": "*",
 			}
@@ -517,13 +517,13 @@ func initMergeGlobalPackagesWithoutBaseTC() mergeStageTC {
 			return nodejs.Stage{}
 		},
 		overriding: nodejs.Stage{
-			GlobalPackages: map[string]string{
+			GlobalPackages: &builddef.VersionMap{
 				"puppeteer": "*",
 			},
 		},
 		expected: func() nodejs.Stage {
 			s := emptyStage()
-			s.GlobalPackages = map[string]string{
+			s.GlobalPackages = &builddef.VersionMap{
 				"puppeteer": "*",
 			}
 			return s

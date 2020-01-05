@@ -178,7 +178,7 @@ func (h *PHPHandler) buildPHP(
 	state = state.AddEnv("COMPOSER_HOME", "/composer")
 
 	state = copyConfigFiles(stage, state, buildOpts)
-	state = globalComposerInstall(stage, state)
+	state = globalComposerInstall(state, stage.GlobalDeps.Map())
 
 	if !stage.Dev {
 		state = composerInstall(state, buildOpts)
@@ -332,11 +332,11 @@ func getEnv(src llb.State, name string) string {
 	return val
 }
 
-func globalComposerInstall(stage StageDefinition, state llb.State) llb.State {
-	deps := make([]string, 0, len(stage.GlobalDeps))
+func globalComposerInstall(state llb.State, globalDeps map[string]string) llb.State {
+	deps := make([]string, 0, len(globalDeps))
 	deps = append(deps, "hirak/prestissimo")
 
-	for dep, constraint := range stage.GlobalDeps {
+	for dep, constraint := range globalDeps {
 		if constraint != "" && constraint != "*" {
 			dep += ":" + constraint
 		}
