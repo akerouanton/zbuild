@@ -55,7 +55,7 @@ func DefaultDefinition() Definition {
 	return Definition{
 		BaseStage: Stage{
 			ExternalFiles:  []llbutils.ExternalFile{},
-			SystemPackages: map[string]string{},
+			SystemPackages: &builddef.VersionMap{},
 			FPM:            &fpm,
 			Extensions:     &builddef.VersionMap{},
 			GlobalDeps:     map[string]string{},
@@ -191,7 +191,7 @@ func (base Definition) Merge(overriding Definition) Definition {
 // overriden by derived stages.
 type Stage struct {
 	ExternalFiles     []llbutils.ExternalFile `mapstructure:"external_files"`
-	SystemPackages    map[string]string       `mapstructure:"system_packages"`
+	SystemPackages    *builddef.VersionMap    `mapstructure:"system_packages"`
 	FPM               *bool                   `mapstructure:",omitempty"`
 	Command           *[]string               `mapstructure:"command"`
 	Extensions        *builddef.VersionMap    `mapstructure:"extensions"`
@@ -208,7 +208,7 @@ type Stage struct {
 func (s Stage) Copy() Stage {
 	new := Stage{
 		ExternalFiles:     make([]llbutils.ExternalFile, len(s.ExternalFiles)),
-		SystemPackages:    map[string]string{},
+		SystemPackages:    s.SystemPackages.Copy(),
 		FPM:               s.FPM,
 		Command:           s.Command,
 		Extensions:        s.Extensions.Copy(),
@@ -228,9 +228,6 @@ func (s Stage) Copy() Stage {
 	copy(new.StatefulDirs, s.StatefulDirs)
 	copy(new.PostInstall, s.PostInstall)
 
-	for name, constraint := range s.SystemPackages {
-		new.SystemPackages[name] = constraint
-	}
 	for name, constraint := range s.GlobalDeps {
 		new.GlobalDeps[name] = constraint
 	}
@@ -247,11 +244,10 @@ func (s Stage) Merge(overriding Stage) Stage {
 	new.Integrations = append(new.Integrations, overriding.Integrations...)
 	new.StatefulDirs = append(new.StatefulDirs, overriding.StatefulDirs...)
 	new.PostInstall = append(new.PostInstall, overriding.PostInstall...)
+
+	new.SystemPackages.Merge(overriding.SystemPackages)
 	new.Extensions.Merge(overriding.Extensions)
 
-	for name, constraint := range overriding.SystemPackages {
-		new.SystemPackages[name] = constraint
-	}
 	if overriding.FPM != nil {
 		fpm := *overriding.FPM
 		new.FPM = &fpm
@@ -635,9 +631,8 @@ func inferExtensions(def *StageDefinition) {
 }
 
 func inferSystemPackages(def *StageDefinition) {
-	systemPackages := map[string]string{
-		"libpcre3-dev": "*",
-	}
+	// Add libpcre by default, as most frameworks/CMSes are using regexp
+	def.SystemPackages.Add("libpcre3-dev", "*", false)
 
 	for _, ext := range def.Extensions.Names() {
 		deps, ok := extensionsDeps[ext]
@@ -646,22 +641,11 @@ func inferSystemPackages(def *StageDefinition) {
 		}
 
 		for name, ver := range deps {
-			systemPackages[name] = ver
+			def.SystemPackages.Add(name, ver, false)
 		}
 	}
 
 	// Add unzip and git packages as they're used by Composer
-	// @TODO: use a struct like ExtensionSet to not overwrite unzip/git reqs
-	if _, ok := def.SystemPackages["unzip"]; !ok {
-		systemPackages["unzip"] = "*"
-	}
-	if _, ok := def.SystemPackages["git"]; !ok {
-		systemPackages["git"] = "*"
-	}
-
-	for name, constraint := range systemPackages {
-		if _, ok := def.SystemPackages[name]; !ok {
-			def.SystemPackages[name] = constraint
-		}
-	}
+	def.SystemPackages.Add("unzip", "*", false)
+	def.SystemPackages.Add("git", "*", false)
 }

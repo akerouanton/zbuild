@@ -13,7 +13,7 @@ func DefaultDefinition() Definition {
 	healthcheck := true
 	return Definition{
 		Type:           WebserverType("nginx"),
-		SystemPackages: map[string]string{},
+		SystemPackages: &builddef.VersionMap{},
 		Healthcheck:    &healthcheck,
 	}
 }
@@ -41,24 +41,20 @@ func NewKind(genericDef *builddef.BuildDef) (Definition, error) {
 		return def, xerrors.Errorf("could not decode lock manifest: %w", err)
 	}
 
-	if def.SystemPackages == nil {
-		def.SystemPackages = map[string]string{}
-	}
-
 	if def.Healthcheck != nil && *def.Healthcheck {
-		def.SystemPackages["curl"] = "*"
+		def.SystemPackages.Add("curl", "*", false)
 	}
 
 	return def, def.Validate()
 }
 
 type Definition struct {
-	Type           WebserverType     `mapstructure:"type"`
-	SystemPackages map[string]string `mapstructure:"system_packages"`
-	ConfigFile     *string           `mapstructure:"config_file"`
-	Healthcheck    *bool             `mapstructure:"healthcheck"`
-	Assets         []AssetToCopy     `mapstructure:"assets"`
-	Locks          DefinitionLocks   `mapstructure:"-"`
+	Type           WebserverType        `mapstructure:"type"`
+	SystemPackages *builddef.VersionMap `mapstructure:"system_packages"`
+	ConfigFile     *string              `mapstructure:"config_file"`
+	Healthcheck    *bool                `mapstructure:"healthcheck"`
+	Assets         []AssetToCopy        `mapstructure:"assets"`
+	Locks          DefinitionLocks      `mapstructure:"-"`
 }
 
 func (def Definition) Validate() error {
@@ -72,12 +68,8 @@ func (def Definition) Validate() error {
 func (def Definition) Copy() Definition {
 	new := Definition{
 		Type:           def.Type,
-		SystemPackages: map[string]string{},
+		SystemPackages: def.SystemPackages.Copy(),
 		Assets:         def.Assets,
-	}
-
-	for pkg, ver := range def.SystemPackages {
-		new.SystemPackages[pkg] = ver
 	}
 
 	if def.ConfigFile != nil {
@@ -95,10 +87,7 @@ func (def Definition) Copy() Definition {
 func (base Definition) Merge(overriding Definition) Definition {
 	new := base.Copy()
 	new.Assets = append(new.Assets, overriding.Assets...)
-
-	for pkg, version := range overriding.SystemPackages {
-		new.SystemPackages[pkg] = version
-	}
+	new.SystemPackages.Merge(overriding.SystemPackages)
 
 	if !overriding.Type.IsEmpty() {
 		new.Type = overriding.Type

@@ -42,7 +42,7 @@ func initSuccessfullyParseRawDefinitionWithoutStagesTC() newDefinitionTC {
 		expected: php.Definition{
 			BaseStage: php.Stage{
 				ExternalFiles:  []llbutils.ExternalFile{},
-				SystemPackages: map[string]string{},
+				SystemPackages: &builddef.VersionMap{},
 				FPM:            &isFPM,
 				Extensions: &builddef.VersionMap{
 					"intl":      "*",
@@ -133,7 +133,7 @@ func initSuccessfullyParseRawDefinitionWithStagesTC() newDefinitionTC {
 		expected: php.Definition{
 			BaseStage: php.Stage{
 				ExternalFiles:  []llbutils.ExternalFile{},
-				SystemPackages: map[string]string{},
+				SystemPackages: &builddef.VersionMap{},
 				FPM:            &isFPM,
 				Extensions: &builddef.VersionMap{
 					"intl":      "*",
@@ -283,7 +283,7 @@ func initSuccessfullyResolveDefaultDevStageTC(t *testing.T, mockCtrl *gomock.Con
 						Mode:        0644,
 					},
 				},
-				SystemPackages: map[string]string{},
+				SystemPackages: &builddef.VersionMap{},
 				FPM:            &isFPM,
 				Extensions: &builddef.VersionMap{
 					"intl":      "*",
@@ -341,7 +341,7 @@ func initSuccessfullyResolveWorkerStageTC(t *testing.T, mockCtrl *gomock.Control
 			},
 			Stage: php.Stage{
 				ExternalFiles: []llbutils.ExternalFile{},
-				SystemPackages: map[string]string{
+				SystemPackages: &builddef.VersionMap{
 					"zlib1g-dev":   "*",
 					"unzip":        "*",
 					"git":          "*",
@@ -418,7 +418,7 @@ func initRemoveDefaultExtensionsTC(t *testing.T, mockCtrl *gomock.Controller) re
 			PlatformReqs:   map[string]string{},
 			Stage: php.Stage{
 				ExternalFiles: []llbutils.ExternalFile{},
-				SystemPackages: map[string]string{
+				SystemPackages: &builddef.VersionMap{
 					"zlib1g-dev":    "*",
 					"unzip":         "*",
 					"git":           "*",
@@ -482,7 +482,7 @@ func initPreservePredefinedExtensionConstraintsTC(t *testing.T, mockCtrl *gomock
 			},
 			Stage: php.Stage{
 				ExternalFiles: []llbutils.ExternalFile{},
-				SystemPackages: map[string]string{
+				SystemPackages: &builddef.VersionMap{
 					"zlib1g-dev":   "*",
 					"unzip":        "*",
 					"git":          "*",
@@ -898,7 +898,7 @@ func TestMergeDefinition(t *testing.T) {
 				return php.Definition{
 					Webserver: &webserver.Definition{
 						ConfigFile:     &configFile,
-						SystemPackages: map[string]string{},
+						SystemPackages: &builddef.VersionMap{},
 					},
 					BaseStage: emptyStage(),
 					Stages:    php.DerivedStageSet{},
@@ -922,7 +922,7 @@ func TestMergeDefinition(t *testing.T) {
 				return php.Definition{
 					Webserver: &webserver.Definition{
 						ConfigFile:     &configFile,
-						SystemPackages: map[string]string{},
+						SystemPackages: &builddef.VersionMap{},
 					},
 					BaseStage: emptyStage(),
 					Stages:    php.DerivedStageSet{},
@@ -960,7 +960,7 @@ type mergeStageTC struct {
 func emptyStage() php.Stage {
 	return php.Stage{
 		ExternalFiles:  []llbutils.ExternalFile{},
-		SystemPackages: map[string]string{},
+		SystemPackages: &builddef.VersionMap{},
 		Extensions:     &builddef.VersionMap{},
 		GlobalDeps:     map[string]string{},
 		ConfigFiles:    php.PHPConfigFiles{},
@@ -1044,19 +1044,19 @@ func initMergeSystemPackagesWithBaseTC() mergeStageTC {
 	return mergeStageTC{
 		base: func() php.Stage {
 			return php.Stage{
-				SystemPackages: map[string]string{
+				SystemPackages: &builddef.VersionMap{
 					"curl": "*",
 				},
 			}
 		},
 		overriding: php.Stage{
-			SystemPackages: map[string]string{
+			SystemPackages: &builddef.VersionMap{
 				"chromium": "*",
 			},
 		},
 		expected: func() php.Stage {
 			s := emptyStage()
-			s.SystemPackages = map[string]string{
+			s.SystemPackages = &builddef.VersionMap{
 				"curl":     "*",
 				"chromium": "*",
 			}
@@ -1071,13 +1071,13 @@ func initMergeSystemPackagesWithoutBaseTC() mergeStageTC {
 			return php.Stage{}
 		},
 		overriding: php.Stage{
-			SystemPackages: map[string]string{
+			SystemPackages: &builddef.VersionMap{
 				"chromium": "*",
 			},
 		},
 		expected: func() php.Stage {
 			s := emptyStage()
-			s.SystemPackages = map[string]string{
+			s.SystemPackages = &builddef.VersionMap{
 				"chromium": "*",
 			}
 			return s

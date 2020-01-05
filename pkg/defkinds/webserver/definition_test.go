@@ -27,7 +27,7 @@ func initSuccessfullyParseRawDefinitionTC() newDefinitionTC {
 			Type:        "nginx",
 			ConfigFile:  &configFile,
 			Healthcheck: &healthcheck,
-			SystemPackages: map[string]string{
+			SystemPackages: &builddef.VersionMap{
 				"curl": "*",
 			},
 			Assets: []webserver.AssetToCopy{
@@ -126,7 +126,7 @@ func TestDefinitionMerge(t *testing.T) {
 			expected: func() webserver.Definition {
 				return webserver.Definition{
 					Type:           webserver.WebserverType("caddy"),
-					SystemPackages: map[string]string{},
+					SystemPackages: &builddef.VersionMap{},
 				}
 			},
 		},
@@ -142,21 +142,21 @@ func TestDefinitionMerge(t *testing.T) {
 			expected: func() webserver.Definition {
 				return webserver.Definition{
 					Type:           webserver.WebserverType("caddy"),
-					SystemPackages: map[string]string{},
+					SystemPackages: &builddef.VersionMap{},
 				}
 			},
 		},
 		"merge system packages with base": {
 			base: func() webserver.Definition {
 				return webserver.Definition{
-					SystemPackages: map[string]string{
+					SystemPackages: &builddef.VersionMap{
 						"curl": "*",
 					},
 				}
 			},
 			overriding: func() webserver.Definition {
 				return webserver.Definition{
-					SystemPackages: map[string]string{
+					SystemPackages: &builddef.VersionMap{
 						"curl":            "7.64.0-4",
 						"ca-certificates": "*",
 					},
@@ -164,7 +164,7 @@ func TestDefinitionMerge(t *testing.T) {
 			},
 			expected: func() webserver.Definition {
 				return webserver.Definition{
-					SystemPackages: map[string]string{
+					SystemPackages: &builddef.VersionMap{
 						"curl":            "7.64.0-4",
 						"ca-certificates": "*",
 					},
@@ -177,7 +177,7 @@ func TestDefinitionMerge(t *testing.T) {
 			},
 			overriding: func() webserver.Definition {
 				return webserver.Definition{
-					SystemPackages: map[string]string{
+					SystemPackages: &builddef.VersionMap{
 						"curl":            "7.64.0-4",
 						"ca-certificates": "*",
 					},
@@ -185,7 +185,7 @@ func TestDefinitionMerge(t *testing.T) {
 			},
 			expected: func() webserver.Definition {
 				return webserver.Definition{
-					SystemPackages: map[string]string{
+					SystemPackages: &builddef.VersionMap{
 						"curl":            "7.64.0-4",
 						"ca-certificates": "*",
 					},
@@ -209,7 +209,7 @@ func TestDefinitionMerge(t *testing.T) {
 				configFile := "docker/nginx.conf"
 				return webserver.Definition{
 					ConfigFile:     &configFile,
-					SystemPackages: map[string]string{},
+					SystemPackages: &builddef.VersionMap{},
 				}
 			},
 		},
@@ -227,7 +227,7 @@ func TestDefinitionMerge(t *testing.T) {
 				configFile := "docker/nginx.conf"
 				return webserver.Definition{
 					ConfigFile:     &configFile,
-					SystemPackages: map[string]string{},
+					SystemPackages: &builddef.VersionMap{},
 				}
 			},
 		},
@@ -245,7 +245,7 @@ func TestDefinitionMerge(t *testing.T) {
 				configFile := "nginx.conf"
 				return webserver.Definition{
 					ConfigFile:     &configFile,
-					SystemPackages: map[string]string{},
+					SystemPackages: &builddef.VersionMap{},
 				}
 			},
 		},
@@ -266,7 +266,7 @@ func TestDefinitionMerge(t *testing.T) {
 				healthcheck := false
 				return webserver.Definition{
 					Healthcheck:    &healthcheck,
-					SystemPackages: map[string]string{},
+					SystemPackages: &builddef.VersionMap{},
 				}
 			},
 		},
@@ -284,7 +284,7 @@ func TestDefinitionMerge(t *testing.T) {
 				healthcheck := true
 				return webserver.Definition{
 					Healthcheck:    &healthcheck,
-					SystemPackages: map[string]string{},
+					SystemPackages: &builddef.VersionMap{},
 				}
 			},
 		},
@@ -302,7 +302,7 @@ func TestDefinitionMerge(t *testing.T) {
 				healthcheck := true
 				return webserver.Definition{
 					Healthcheck:    &healthcheck,
-					SystemPackages: map[string]string{},
+					SystemPackages: &builddef.VersionMap{},
 				}
 			},
 		},
@@ -327,7 +327,7 @@ func TestDefinitionMerge(t *testing.T) {
 						{From: "public/", To: "public/"},
 						{From: "web/", To: "web/"},
 					},
-					SystemPackages: map[string]string{},
+					SystemPackages: &builddef.VersionMap{},
 				}
 			},
 		},
@@ -347,7 +347,7 @@ func TestDefinitionMerge(t *testing.T) {
 					Assets: []webserver.AssetToCopy{
 						{From: "web/", To: "web/"},
 					},
-					SystemPackages: map[string]string{},
+					SystemPackages: &builddef.VersionMap{},
 				}
 			},
 		},

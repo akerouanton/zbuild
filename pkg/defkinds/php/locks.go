@@ -129,7 +129,7 @@ func (h *PHPHandler) updateStagesLocks(
 		stageLocks := StageLocks{}
 		stageLocks.SystemPackages, err = pkgSolver.ResolveVersions(
 			defLocks.BaseImage,
-			stage.SystemPackages)
+			stage.SystemPackages.Map())
 		if err != nil {
 			return nil, xerrors.Errorf("could not resolve systems package versions: %w", err)
 		}
