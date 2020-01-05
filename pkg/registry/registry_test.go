@@ -55,7 +55,7 @@ func successfullyFindBuilderTC(mockCtrl *gomock.Controller) registryTC {
 	h := mocks.NewMockKindHandler(mockCtrl)
 
 	reg := registry.NewKindRegistry()
-	reg.Register("some-kind", h)
+	reg.Register("some-kind", h, false)
 
 	return registryTC{
 		registry: reg,

@@ -38,7 +38,7 @@ func init() {
 // RegisterKind adds a LLB DAG builder to the given KindRegistry for php
 // definition kind.
 func RegisterKind(registry *registry.KindRegistry) {
-	registry.Register("php", NewPHPHandler())
+	registry.Register("php", NewPHPHandler(), true)
 }
 
 type PHPHandler struct {

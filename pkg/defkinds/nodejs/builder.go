@@ -31,7 +31,7 @@ func init() {
 }
 
 func RegisterKind(reg *registry.KindRegistry) {
-	reg.Register("nodejs", &NodeJSHandler{})
+	reg.Register("nodejs", &NodeJSHandler{}, true)
 }
 
 type NodeJSHandler struct {
