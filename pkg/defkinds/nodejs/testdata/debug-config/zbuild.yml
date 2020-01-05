@@ -13,9 +13,3 @@ stages:
             api-platform/client-generator: "*"
             puppeteer: "1.10.0"
         command: yarn start
-
-webserver:
-    type: nginx
-    assets:
-        - from: build/
-          to: build/

@@ -45,60 +45,12 @@ func (h *NodeJSHandler) WithSolver(solver statesolver.StateSolver) {
 func (h *NodeJSHandler) DebugConfig(
 	buildOpts builddef.BuildOpts,
 ) (interface{}, error) {
-	def, stageDef, err := h.loadDefs(buildOpts)
+	_, stageDef, err := h.loadDefs(buildOpts)
 	if err != nil {
 		return nil, err
 	}
 
-	if !isWebserverStage(buildOpts.Stage) {
-		return stageDef, nil
-	}
-
-	// @TODO remove?
-	if *stageDef.Dev {
-		return nil, xerrors.Errorf("webserver cannot be built from dev stages")
-	}
-
-	webserverHandler, err := h.webserverHandler()
-	if err != nil {
-		return nil, err
-	}
-
-	newOpts, err := h.webserverBuildOpts(def, &llb.State{}, buildOpts)
-	return webserverHandler.DebugConfig(newOpts)
-}
-
-func isWebserverStage(stage string) bool {
-	return strings.HasPrefix(stage, "webserver-")
-}
-
-func (h *NodeJSHandler) webserverHandler() (registry.KindHandler, error) {
-	handler, err := registry.FindHandler("webserver")
-	if err != nil {
-		return nil, err
-	}
-	handler.WithSolver(h.solver)
-
-	return handler, nil
-}
-
-func (h *NodeJSHandler) webserverBuildOpts(
-	def Definition,
-	state *llb.State,
-	buildOpts builddef.BuildOpts,
-) (builddef.BuildOpts, error) {
-	var newOpts builddef.BuildOpts
-
-	locks := def.Locks.Webserver.RawLocks()
-	newOpts = buildOpts
-	newOpts.Def = &builddef.BuildDef{
-		Kind:      "webserver",
-		RawConfig: def.Webserver.RawConfig(),
-		RawLocks:  locks,
-	}
-	newOpts.Source = state
-
-	return newOpts, nil
+	return stageDef, nil
 }
 
 func (h *NodeJSHandler) Build(
@@ -113,24 +65,9 @@ func (h *NodeJSHandler) Build(
 		return state, img, err
 	}
 
-	isWebserverBuild := isWebserverStage(buildOpts.Stage)
-	if isWebserverBuild && *stageDef.Dev {
-		return state, img, xerrors.Errorf("webserver cannot be built from dev stages")
-	}
-
 	state, img, err = h.buildNodeJS(ctx, def, stageDef, buildOpts)
 	if err != nil {
 		err = xerrors.Errorf("could not build nodejs stage: %w", err)
-		return state, img, err
-	}
-
-	if !isWebserverBuild {
-		return state, img, nil
-	}
-
-	state, img, err = h.buildWebserver(ctx, def, state, buildOpts)
-	if err != nil {
-		err = xerrors.Errorf("could not build webserver stage: %w", err)
 		return state, img, err
 	}
 
@@ -146,7 +83,7 @@ func (h *NodeJSHandler) buildNodeJS(
 	state := llbutils.ImageSource(def.Locks.BaseImage, true)
 	baseImg, err := image.LoadMeta(ctx, def.Locks.BaseImage)
 	if err != nil {
-		return state, nil, xerrors.Errorf("loading %q metadata: %w", def.Locks.BaseImage, err)
+		return state, nil, xerrors.Errorf("failed to load %q metadata: %w", def.Locks.BaseImage, err)
 	}
 
 	img := image.CloneMeta(baseImg)
@@ -212,25 +149,6 @@ func setImageMetadata(stageDef StageDefinition, state llb.State, img *image.Imag
 	if stageDef.Command != nil {
 		img.Config.Cmd = *stageDef.Command
 	}
-}
-
-func (h *NodeJSHandler) buildWebserver(
-	ctx context.Context,
-	def Definition,
-	state llb.State,
-	buildOpts builddef.BuildOpts,
-) (llb.State, *image.Image, error) {
-	webserverHandler, err := h.webserverHandler()
-	if err != nil {
-		return state, nil, err
-	}
-
-	newOpts, err := h.webserverBuildOpts(def, &state, buildOpts)
-	if err != nil {
-		return state, nil, err
-	}
-
-	return webserverHandler.Build(ctx, newOpts)
 }
 
 func getEnv(src llb.State, name string) string {

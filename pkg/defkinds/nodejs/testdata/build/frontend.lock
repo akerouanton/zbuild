@@ -4,7 +4,3 @@ stages:
     system_packages: {}
   prod:
     system_packages: {}
-webserver:
-  base_image: docker.io/library/nginx:latest
-  system_packages:
-    curl: 7.64.0-4

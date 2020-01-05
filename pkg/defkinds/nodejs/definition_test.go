@@ -8,7 +8,6 @@ import (
 
 	"github.com/NiR-/zbuild/pkg/builddef"
 	"github.com/NiR-/zbuild/pkg/defkinds/nodejs"
-	"github.com/NiR-/zbuild/pkg/defkinds/webserver"
 	"github.com/NiR-/zbuild/pkg/llbutils"
 	"github.com/go-test/deep"
 	"github.com/golang/mock/gomock"
@@ -145,10 +144,41 @@ func initSuccessfullyParseRawDefinitionWithStagesTC() newDefinitionTC {
 	}
 }
 
+func initParseRawDefinitionWithWebserverTC() newDefinitionTC {
+	devStageDevMode := true
+	prodStageDevMode := false
+
+	baseStage := emptyStage()
+	baseStageHealthcheck := true
+	baseStage.Healthcheck = &baseStageHealthcheck
+
+	return newDefinitionTC{
+		file: "testdata/def/with-webserver.yml",
+		expected: nodejs.Definition{
+			BaseStage:  baseStage,
+			Version:    "12",
+			BaseImage:  "docker.io/library/node:12-buster-slim",
+			IsFrontend: true,
+			Stages: nodejs.DerivedStageSet{
+				"dev": {
+					DeriveFrom: "base",
+					Dev:        &devStageDevMode,
+					Stage:      emptyStage(),
+				},
+				"prod": {
+					DeriveFrom: "base",
+					Dev:        &prodStageDevMode,
+					Stage:      emptyStage(),
+				},
+			},
+		},
+	}
+}
+
 func initFailToParseUnknownPropertiesTC() newDefinitionTC {
 	return newDefinitionTC{
 		file:        "testdata/def/invalid.yml",
-		expectedErr: errors.New("could not decode build manifest: 1 error(s) decoding:\n\n* '' has invalid keys: foo"),
+		expectedErr: errors.New("could not decode build manifest: invalid config parameter: foo"),
 	}
 }
 
@@ -167,6 +197,7 @@ func TestNewKind(t *testing.T) {
 	testcases := map[string]func() newDefinitionTC{
 		"successfully parse raw definition without stages":               initSuccessfullyParseRawDefinitionWithoutStagesTC,
 		"successfully parse raw definition with stages":                  initSuccessfullyParseRawDefinitionWithStagesTC,
+		"successfully parse raw definition with webserver":               initParseRawDefinitionWithWebserverTC,
 		"fail to parse unknown properties":                               initFailToParseUnknownPropertiesTC,
 		"fail to load zbuildfile with both version and base image props": initFailWhenBothVersionAndBaseImageAreDefinedTC,
 	}
@@ -1044,63 +1075,6 @@ func initMergeIsFrontendWithoutBaseTC() mergeDefinitionTC {
 	}
 }
 
-func initMergeWebserverWithBaseTC() mergeDefinitionTC {
-	base := "nginx.conf"
-	overriding := "docker/nginx.conf"
-	expected := "docker/nginx.conf"
-
-	return mergeDefinitionTC{
-		base: func() nodejs.Definition {
-			return nodejs.Definition{
-				Webserver: &webserver.Definition{
-					ConfigFile: &base,
-				},
-			}
-		},
-		overriding: nodejs.Definition{
-			Webserver: &webserver.Definition{
-				ConfigFile: &overriding,
-			},
-		},
-		expected: func() nodejs.Definition {
-			return nodejs.Definition{
-				Webserver: &webserver.Definition{
-					ConfigFile:     &expected,
-					SystemPackages: &builddef.VersionMap{},
-				},
-				BaseStage: emptyStage(),
-				Stages:    nodejs.DerivedStageSet{},
-			}
-		},
-	}
-}
-
-func initMergeWebserverWithoutBaseTC() mergeDefinitionTC {
-	overriding := "docker/nginx.conf"
-	expected := "docker/nginx.conf"
-
-	return mergeDefinitionTC{
-		base: func() nodejs.Definition {
-			return nodejs.Definition{}
-		},
-		overriding: nodejs.Definition{
-			Webserver: &webserver.Definition{
-				ConfigFile: &overriding,
-			},
-		},
-		expected: func() nodejs.Definition {
-			return nodejs.Definition{
-				Webserver: &webserver.Definition{
-					ConfigFile:     &expected,
-					SystemPackages: &builddef.VersionMap{},
-				},
-				BaseStage: emptyStage(),
-				Stages:    nodejs.DerivedStageSet{},
-			}
-		},
-	}
-}
-
 func TestDefinitionMerge(t *testing.T) {
 	testcases := map[string]func() mergeDefinitionTC{
 		"merge base stage with base":     initMergeBaseStageWithBaseTC,
@@ -1113,8 +1087,6 @@ func TestDefinitionMerge(t *testing.T) {
 		"merge stages without base":      initMergeStagesWithoutBaseTC,
 		"merge is frontend with base":    initMergeIsFrontendWithBaseTC,
 		"merge is frontend without base": initMergeIsFrontendWithoutBaseTC,
-		"merge webserver with base":      initMergeWebserverWithBaseTC,
-		"merge webserver without base":   initMergeWebserverWithoutBaseTC,
 	}
 
 	for tcname := range testcases {

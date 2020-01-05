@@ -92,50 +92,9 @@ func failToUpdateLocksForAlpineBaseImageTC(t *testing.T, mockCtrl *gomock.Contro
 	}
 }
 
-func initSuccessfullyUpdateWebserverLocksTC(t *testing.T, mockCtrl *gomock.Controller) updateLocksTC {
-	solver := mocks.NewMockStateSolver(mockCtrl)
-	solver.EXPECT().FromImage("docker.io/library/node:12-buster-slim").Times(1)
-	solver.EXPECT().ReadFile(
-		gomock.Any(),
-		"/etc/os-release",
-		gomock.Any(),
-	).Return(rawDebianOSRelease, nil)
-
-	solver.EXPECT().FromImage("docker.io/library/nginx:latest").Times(1)
-	solver.EXPECT().ReadFile(
-		gomock.Any(),
-		"/etc/os-release",
-		gomock.Any(),
-	).Return(rawDebianOSRelease, nil)
-
-	pkgSolver := mocks.NewMockPackageSolver(mockCtrl)
-	pkgSolver.EXPECT().ResolveVersions(
-		"docker.io/library/node:12-buster-slim",
-		map[string]string{},
-	).Return(map[string]string{}, nil).Times(2)
-
-	pkgSolver.EXPECT().ResolveVersions(
-		"docker.io/library/nginx:latest",
-		map[string]string{"curl": "*"},
-	).Return(map[string]string{
-		"curl": "curl-version",
-	}, nil).Times(1)
-
-	h := nodejs.NodeJSHandler{}
-	h.WithSolver(solver)
-
-	return updateLocksTC{
-		file:      "testdata/locks/with-webserver.yml",
-		handler:   &h,
-		pkgSolver: pkgSolver,
-		expected:  "testdata/locks/with-webserver.lock",
-	}
-}
-
 func TestUpdateLocks(t *testing.T) {
 	testcases := map[string]func(*testing.T, *gomock.Controller) updateLocksTC{
 		"successfully update locks":                        initSuccessfullyUpdateLocksTC,
-		"successfully update webserver locks":              initSuccessfullyUpdateWebserverLocksTC,
 		"fail to update locks for alpine based base image": failToUpdateLocksForAlpineBaseImageTC,
 	}
 

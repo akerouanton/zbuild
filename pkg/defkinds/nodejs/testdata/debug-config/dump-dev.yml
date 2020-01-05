@@ -17,7 +17,6 @@ baseimage: docker.io/library/node:12-buster-slim
 version: "12"
 dev: true
 isfrontend: true
-webserver: null
 locks:
   systempackages:
     chromium: 78.0.3904.108-1~deb10u1

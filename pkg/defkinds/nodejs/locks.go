@@ -4,16 +4,13 @@ import (
 	"context"
 
 	"github.com/NiR-/zbuild/pkg/builddef"
-	"github.com/NiR-/zbuild/pkg/defkinds/webserver"
 	"github.com/NiR-/zbuild/pkg/pkgsolver"
-	"github.com/NiR-/zbuild/pkg/registry"
 	"golang.org/x/xerrors"
 )
 
 type DefinitionLocks struct {
-	BaseImage string                     `mapstructure:"base"`
-	Stages    map[string]StageLocks      `mapstructure:"stages"`
-	Webserver *webserver.DefinitionLocks `mapstructure:"webserver"`
+	BaseImage string                `mapstructure:"base"`
+	Stages    map[string]StageLocks `mapstructure:"stages"`
 }
 
 func (l DefinitionLocks) RawLocks() map[string]interface{} {
@@ -65,38 +62,7 @@ func (h *NodeJSHandler) UpdateLocks(
 	stagesLocks, err := h.updateStagesLocks(ctx, pkgSolver, def, locks)
 	locks.Stages = stagesLocks
 
-	if def.Webserver != nil {
-		webserverLocks, err := h.updateWebserverLocks(ctx, pkgSolver, def.Webserver)
-		if err != nil {
-			err = xerrors.Errorf("could not update webserver locks: %w", err)
-			return nil, err
-		}
-
-		webDefLocks := webserverLocks.(webserver.DefinitionLocks)
-		locks.Webserver = &webDefLocks
-	}
-
-	def.Locks = locks
 	return locks, err
-}
-
-func (h *NodeJSHandler) updateWebserverLocks(
-	ctx context.Context,
-	pkgSolver pkgsolver.PackageSolver,
-	def *webserver.Definition,
-) (builddef.Locks, error) {
-	var locks builddef.Locks
-
-	webserverHandler, err := registry.FindHandler("webserver")
-	if err != nil {
-		return locks, err
-	}
-	webserverHandler.WithSolver(h.solver)
-
-	return webserverHandler.UpdateLocks(ctx, pkgSolver, &builddef.BuildDef{
-		Kind:      "webserver",
-		RawConfig: def.RawConfig(),
-	})
 }
 
 func (h *NodeJSHandler) updateStagesLocks(
