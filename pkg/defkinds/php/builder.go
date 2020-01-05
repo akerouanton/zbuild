@@ -60,55 +60,12 @@ func (h *PHPHandler) DebugConfig(
 	buildOpts builddef.BuildOpts,
 ) (interface{}, error) {
 	ctx := context.TODO()
-	def, stageDef, err := h.loadDefs(ctx, buildOpts)
+	_, stageDef, err := h.loadDefs(ctx, buildOpts)
 	if err != nil {
 		return nil, err
 	}
 
-	if !isWebserverStage(buildOpts.Stage) {
-		return stageDef, nil
-	}
-
-	webserverHandler, err := h.webserverHandler()
-	if err != nil {
-		return nil, err
-	}
-
-	newOpts, err := h.webserverBuildOpts(def, &llb.State{}, buildOpts)
-	return webserverHandler.DebugConfig(newOpts)
-}
-
-func isWebserverStage(stage string) bool {
-	return strings.HasPrefix(stage, "webserver-")
-}
-
-func (h *PHPHandler) webserverHandler() (registry.KindHandler, error) {
-	handler, err := registry.FindHandler("webserver")
-	if err != nil {
-		return nil, err
-	}
-	handler.WithSolver(h.solver)
-
-	return handler, nil
-}
-
-func (h *PHPHandler) webserverBuildOpts(
-	def Definition,
-	state *llb.State,
-	buildOpts builddef.BuildOpts,
-) (builddef.BuildOpts, error) {
-	var newOpts builddef.BuildOpts
-
-	locks := def.Locks.Webserver.RawLocks()
-	newOpts = buildOpts
-	newOpts.Def = &builddef.BuildDef{
-		Kind:      "webserver",
-		RawConfig: def.Webserver.RawConfig(),
-		RawLocks:  locks,
-	}
-	newOpts.Source = state
-
-	return newOpts, nil
+	return stageDef, nil
 }
 
 func (h *PHPHandler) Build(
@@ -126,16 +83,6 @@ func (h *PHPHandler) Build(
 	state, img, err = h.buildPHP(ctx, def, stageDef, buildOpts)
 	if err != nil {
 		err = xerrors.Errorf("could not build php stage: %w", err)
-		return state, img, err
-	}
-
-	if !isWebserverStage(buildOpts.Stage) {
-		return state, img, nil
-	}
-
-	state, img, err = h.buildWebserver(ctx, def, state, img, buildOpts)
-	if err != nil {
-		err = xerrors.Errorf("could not build webserver stage: %w", err)
 		return state, img, err
 	}
 
@@ -283,26 +230,6 @@ func setImageMetadata(
 	if *stage.FPM == false && stage.Command != nil {
 		img.Config.Cmd = *stage.Command
 	}
-}
-
-func (h *PHPHandler) buildWebserver(
-	ctx context.Context,
-	def Definition,
-	state llb.State,
-	img *image.Image,
-	buildOpts builddef.BuildOpts,
-) (llb.State, *image.Image, error) {
-	webserverHandler, err := h.webserverHandler()
-	if err != nil {
-		return state, img, err
-	}
-
-	newOpts, err := h.webserverBuildOpts(def, &state, buildOpts)
-	if err != nil {
-		return state, img, err
-	}
-
-	return webserverHandler.Build(ctx, newOpts)
 }
 
 func excludePatterns(stage *StageDefinition) []string {

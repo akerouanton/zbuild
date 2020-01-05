@@ -184,17 +184,6 @@ platformreqs:
   spl: '*'
   tokenizer: '*'
   xml: '*'
-webserver:
-  type: nginx
-  systempackages: {}
-  configfile: docker/nginx/nginx.conf
-  healthcheck: true
-  assets:
-  - from: public/
-    to: public/
-  locks:
-    baseimage: ""
-    systempackages: {}
 locks:
   systempackages:
     git: 1:2.20.1-2+deb10u1

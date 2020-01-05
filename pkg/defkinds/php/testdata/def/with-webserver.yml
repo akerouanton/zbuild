@@ -1,0 +1,6 @@
+version: 7.4.0
+fpm: true
+infer: false
+
+webserver:
+  type: nginx
