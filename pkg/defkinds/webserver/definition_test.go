@@ -3,6 +3,7 @@ package webserver_test
 import (
 	"io/ioutil"
 	"testing"
+	"time"
 
 	"github.com/NiR-/zbuild/pkg/builddef"
 	"github.com/NiR-/zbuild/pkg/defkinds/webserver"
@@ -19,14 +20,21 @@ type newDefinitionTC struct {
 
 func initSuccessfullyParseRawDefinitionTC() newDefinitionTC {
 	configFile := "./docker/nginx.conf"
-	healthcheck := true
 	return newDefinitionTC{
 		file:     "testdata/locks/definition.yml",
 		lockFile: "testdata/locks/definition.lock",
 		expected: webserver.Definition{
-			Type:        "nginx",
-			ConfigFile:  &configFile,
-			Healthcheck: &healthcheck,
+			Type:       "nginx",
+			ConfigFile: &configFile,
+			Healthcheck: &builddef.HealthcheckConfig{
+				HealthcheckHTTP: &builddef.HealthcheckHTTP{
+					Path: "/_status",
+				},
+				Type:     builddef.HealthcheckTypeHTTP,
+				Interval: 10 * time.Second,
+				Timeout:  1 * time.Second,
+				Retries:  3,
+			},
 			SystemPackages: &builddef.VersionMap{
 				"curl": "*",
 			},
@@ -46,13 +54,36 @@ func initSuccessfullyParseRawDefinitionTC() newDefinitionTC {
 	}
 }
 
+func initParseDefinitionWithCustomHealthcheckTC() newDefinitionTC {
+	return newDefinitionTC{
+		file: "testdata/def/with-custom-healthcheck.yml",
+		expected: webserver.Definition{
+			Type: "nginx",
+			Healthcheck: &builddef.HealthcheckConfig{
+				HealthcheckHTTP: &builddef.HealthcheckHTTP{
+					Path:     "/some-custom-path",
+					Expected: "some-output",
+				},
+				Type:     builddef.HealthcheckTypeHTTP,
+				Interval: 20 * time.Second,
+				Timeout:  5 * time.Second,
+				Retries:  6,
+			},
+			SystemPackages: &builddef.VersionMap{
+				"curl": "*",
+			},
+		},
+	}
+}
+
 func TestNewKind(t *testing.T) {
 	if *flagTestdata {
 		return
 	}
 
 	testcases := map[string]func() newDefinitionTC{
-		"successfully parse raw definition": initSuccessfullyParseRawDefinitionTC,
+		"parse definition":                         initSuccessfullyParseRawDefinitionTC,
+		"parse definition with custom healthcheck": initParseDefinitionWithCustomHealthcheckTC,
 	}
 
 	for tcname := range testcases {
@@ -262,21 +293,30 @@ func TestDefinitionMerge(t *testing.T) {
 		},
 		"merge healthcheck with base": {
 			base: func() webserver.Definition {
-				healthcheck := true
 				return webserver.Definition{
-					Healthcheck: &healthcheck,
+					Healthcheck: &builddef.HealthcheckConfig{
+						HealthcheckHTTP: &builddef.HealthcheckHTTP{
+							Path: "/_status",
+						},
+						Type:     builddef.HealthcheckTypeHTTP,
+						Interval: 10 * time.Second,
+						Timeout:  1 * time.Second,
+						Retries:  3,
+					},
 				}
 			},
 			overriding: func() webserver.Definition {
-				healthcheck := false
 				return webserver.Definition{
-					Healthcheck: &healthcheck,
+					Healthcheck: &builddef.HealthcheckConfig{
+						Type: builddef.HealthcheckTypeDisabled,
+					},
 				}
 			},
 			expected: func() webserver.Definition {
-				healthcheck := false
 				return webserver.Definition{
-					Healthcheck:    &healthcheck,
+					Healthcheck: &builddef.HealthcheckConfig{
+						Type: builddef.HealthcheckTypeDisabled,
+					},
 					SystemPackages: &builddef.VersionMap{},
 				}
 			},
@@ -286,33 +326,37 @@ func TestDefinitionMerge(t *testing.T) {
 				return webserver.Definition{}
 			},
 			overriding: func() webserver.Definition {
-				healthcheck := true
 				return webserver.Definition{
-					Healthcheck: &healthcheck,
+					Healthcheck: &builddef.HealthcheckConfig{
+						Type: builddef.HealthcheckTypeDisabled,
+					},
 				}
 			},
 			expected: func() webserver.Definition {
-				healthcheck := true
 				return webserver.Definition{
-					Healthcheck:    &healthcheck,
+					Healthcheck: &builddef.HealthcheckConfig{
+						Type: builddef.HealthcheckTypeDisabled,
+					},
 					SystemPackages: &builddef.VersionMap{},
 				}
 			},
 		},
 		"ignore nil healthcheck": {
 			base: func() webserver.Definition {
-				healthcheck := true
 				return webserver.Definition{
-					Healthcheck: &healthcheck,
+					Healthcheck: &builddef.HealthcheckConfig{
+						Type: builddef.HealthcheckTypeDisabled,
+					},
 				}
 			},
 			overriding: func() webserver.Definition {
 				return webserver.Definition{}
 			},
 			expected: func() webserver.Definition {
-				healthcheck := true
 				return webserver.Definition{
-					Healthcheck:    &healthcheck,
+					Healthcheck: &builddef.HealthcheckConfig{
+						Type: builddef.HealthcheckTypeDisabled,
+					},
 					SystemPackages: &builddef.VersionMap{},
 				}
 			},
