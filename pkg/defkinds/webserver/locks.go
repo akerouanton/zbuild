@@ -6,20 +6,18 @@ import (
 	"github.com/NiR-/zbuild/pkg/builddef"
 	"github.com/NiR-/zbuild/pkg/pkgsolver"
 	"golang.org/x/xerrors"
-	"gopkg.in/yaml.v2"
 )
 
 type DefinitionLocks struct {
-	BaseImage      string            `yaml:"base_image"`
-	SystemPackages map[string]string `yaml:"system_packages"`
+	BaseImage      string            `mapstructure:"base_image"`
+	SystemPackages map[string]string `mapstructure:"system_packages"`
 }
 
-func (l DefinitionLocks) RawLocks() ([]byte, error) {
-	lockdata, err := yaml.Marshal(l)
-	if err != nil {
-		return lockdata, xerrors.Errorf("could not marshal webserver locks: %w", err)
+func (l DefinitionLocks) RawLocks() map[string]interface{} {
+	return map[string]interface{}{
+		"base_image":      l.BaseImage,
+		"system_packages": l.SystemPackages,
 	}
-	return lockdata, nil
 }
 
 func (h *WebserverHandler) UpdateLocks(

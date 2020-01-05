@@ -88,6 +88,6 @@ func (h mockKindHandler) UpdateLocks(ctx context.Context, pkgSolver pkgsolver.Pa
 
 type mockLocks struct{}
 
-func (l mockLocks) RawLocks() ([]byte, error) {
-	return []byte{}, nil
+func (l mockLocks) RawLocks() map[string]interface{} {
+	return map[string]interface{}{}
 }

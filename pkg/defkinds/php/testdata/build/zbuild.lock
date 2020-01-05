@@ -1,8 +1,4 @@
 base_image: docker.io/library/php:7.3-fpm-buster
-os:
-  name: debian
-  versionname: buster
-  versionid: 10
 stages:
   dev:
     system_packages:

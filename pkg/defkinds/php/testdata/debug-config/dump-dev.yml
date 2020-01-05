@@ -224,10 +224,10 @@ webserver:
   - from: public/
     to: public/
   locks:
-    base_image: ""
-    system_packages: {}
+    baseimage: ""
+    systempackages: {}
 locks:
-  system_packages:
+  systempackages:
     git: 1:2.20.1-2+deb10u1
     libicu-dev: 63.1-6
     libpcre3-dev: 2:8.39-12

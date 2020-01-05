@@ -19,5 +19,5 @@ dev: true
 isfrontend: true
 webserver: null
 locks:
-  system_packages:
+  systempackages:
     chromium: 78.0.3904.108-1~deb10u1

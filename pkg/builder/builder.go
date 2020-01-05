@@ -193,12 +193,12 @@ func (b Builder) UpdateLockFile(
 		return err
 	}
 
-	lockdata, err := locks.RawLocks()
+	rawLock, err := yaml.Marshal(locks.RawLocks())
 	if err != nil {
 		return err
 	}
 
-	err = ioutil.WriteFile(buildOpts.LockFile, lockdata, 0640)
+	err = ioutil.WriteFile(buildOpts.LockFile, rawLock, 0640)
 	if err != nil {
 		return xerrors.Errorf("could not write %s: %w", buildOpts.LockFile, err)
 	}

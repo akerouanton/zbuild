@@ -7,6 +7,6 @@ assets:
 - from: public/
   to: public/
 locks:
-  base_image: docker.io/library/nginx:latest
-  system_packages:
+  baseimage: docker.io/library/nginx:latest
+  systempackages:
     curl: 7.64.0-4

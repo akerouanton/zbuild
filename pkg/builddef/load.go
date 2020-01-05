@@ -46,7 +46,10 @@ func Load(
 	} else if err != nil {
 		return nil, xerrors.Errorf("could not load %s: %w", buildOpts.LockFile, err)
 	}
-	def.RawLocks = lockContent
+
+	if err = yaml.Unmarshal(lockContent, &def.RawLocks); err != nil {
+		return nil, xerrors.Errorf("could not decode %s: %w", buildOpts.LockFile, err)
+	}
 
 	return &def, nil
 }

@@ -31,7 +31,8 @@ type buildTC struct {
 }
 
 func initBuildLLBTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
-	genericDef := loadGenericDef(t, "testdata/build/zbuild.yml", "testdata/build/zbuild.lock")
+	genericDef := loadGenericDef(t, "testdata/build/zbuild.yml")
+	genericDef.RawLocks = loadDefLocks(t, "testdata/build/zbuild.lock")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
 	kindHandler := webserver.WebserverHandler{}
@@ -89,7 +90,8 @@ func initBuildLLBTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
 }
 
 func initBuildLLBFromGitContextTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
-	genericDef := loadGenericDef(t, "testdata/build/zbuild.yml", "testdata/build/zbuild.lock")
+	genericDef := loadGenericDef(t, "testdata/build/zbuild.yml")
+	genericDef.RawLocks = loadDefLocks(t, "testdata/build/zbuild.lock")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
 	kindHandler := webserver.WebserverHandler{}
@@ -147,7 +149,8 @@ func initBuildLLBFromGitContextTC(t *testing.T, mockCtrl *gomock.Controller) bui
 }
 
 func initFailToBuildWithAssetsWhenNoSourceInTheBuildOptsTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
-	genericDef := loadGenericDef(t, "testdata/build/with-assets.yml", "testdata/build/with-assets.lock")
+	genericDef := loadGenericDef(t, "testdata/build/with-assets.yml")
+	genericDef.RawLocks = loadDefLocks(t, "testdata/build/with-assets.lock")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
 	kindHandler := webserver.WebserverHandler{}

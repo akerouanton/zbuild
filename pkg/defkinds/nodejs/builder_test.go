@@ -27,7 +27,8 @@ type buildTC struct {
 }
 
 func initBuildLLBForDevStageTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
-	genericDef := loadGenericDef(t, "testdata/build/zbuild.yml", "testdata/build/zbuild.lock")
+	genericDef := loadBuildDef(t, "testdata/build/zbuild.yml")
+	genericDef.RawLocks = loadDefLocks(t, "testdata/build/zbuild.lock")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
 	kindHandler := nodejs.NodeJSHandler{}
@@ -37,7 +38,7 @@ func initBuildLLBForDevStageTC(t *testing.T, mockCtrl *gomock.Controller) buildT
 		handler: &kindHandler,
 		client:  llbtest.NewMockClient(mockCtrl),
 		buildOpts: builddef.BuildOpts{
-			Def:           &genericDef,
+			Def:           genericDef,
 			Stage:         "dev",
 			SessionID:     "<SESSION-ID>",
 			LocalUniqueID: "x1htr02606a9rk8b0daewh9es",
@@ -73,7 +74,8 @@ func initBuildLLBForDevStageTC(t *testing.T, mockCtrl *gomock.Controller) buildT
 }
 
 func initBuildLLBForWorkerStageTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
-	genericDef := loadGenericDef(t, "testdata/build/zbuild.yml", "testdata/build/zbuild.lock")
+	genericDef := loadBuildDef(t, "testdata/build/zbuild.yml")
+	genericDef.RawLocks = loadDefLocks(t, "testdata/build/zbuild.lock")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
 	kindHandler := nodejs.NodeJSHandler{}
@@ -83,7 +85,7 @@ func initBuildLLBForWorkerStageTC(t *testing.T, mockCtrl *gomock.Controller) bui
 		handler: &kindHandler,
 		client:  llbtest.NewMockClient(mockCtrl),
 		buildOpts: builddef.BuildOpts{
-			Def:           &genericDef,
+			Def:           genericDef,
 			Stage:         "worker",
 			SessionID:     "<SESSION-ID>",
 			LocalUniqueID: "x1htr02606a9rk8b0daewh9es",
@@ -123,7 +125,8 @@ func initBuildLLBForWorkerStageTC(t *testing.T, mockCtrl *gomock.Controller) bui
 }
 
 func initBuildLLBForProdWebserverStageTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
-	genericDef := loadGenericDef(t, "testdata/build/frontend.yml", "testdata/build/frontend.lock")
+	genericDef := loadBuildDef(t, "testdata/build/frontend.yml")
+	genericDef.RawLocks = loadDefLocks(t, "testdata/build/frontend.lock")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
 	kindHandler := nodejs.NodeJSHandler{}
@@ -133,7 +136,7 @@ func initBuildLLBForProdWebserverStageTC(t *testing.T, mockCtrl *gomock.Controll
 		handler: &kindHandler,
 		client:  llbtest.NewMockClient(mockCtrl),
 		buildOpts: builddef.BuildOpts{
-			Def:           &genericDef,
+			Def:           genericDef,
 			Stage:         "webserver-prod",
 			SessionID:     "<SESSION-ID>",
 			LocalUniqueID: "x1htr02606a9rk8b0daewh9es",
@@ -249,13 +252,13 @@ func initDebugDevStageTC(t *testing.T, mockCtrl *gomock.Controller) debugConfigT
 	h := &nodejs.NodeJSHandler{}
 	h.WithSolver(solver)
 
-	genericDef := loadGenericDef(t, "testdata/debug-config/zbuild.yml",
-		"testdata/debug-config/zbuild.lock")
+	genericDef := loadBuildDef(t, "testdata/debug-config/zbuild.yml")
+	genericDef.RawLocks = loadDefLocks(t, "testdata/debug-config/zbuild.lock")
 
 	return debugConfigTC{
 		handler: h,
 		buildOpts: builddef.BuildOpts{
-			Def:   &genericDef,
+			Def:   genericDef,
 			Stage: "dev",
 		},
 		expected: "testdata/debug-config/dump-dev.yml",
@@ -268,13 +271,13 @@ func initDebugProdStageTC(t *testing.T, mockCtrl *gomock.Controller) debugConfig
 	h := &nodejs.NodeJSHandler{}
 	h.WithSolver(solver)
 
-	genericDef := loadGenericDef(t, "testdata/debug-config/zbuild.yml",
-		"testdata/debug-config/zbuild.lock")
+	genericDef := loadBuildDef(t, "testdata/debug-config/zbuild.yml")
+	genericDef.RawLocks = loadDefLocks(t, "testdata/debug-config/zbuild.lock")
 
 	return debugConfigTC{
 		handler: h,
 		buildOpts: builddef.BuildOpts{
-			Def:   &genericDef,
+			Def:   genericDef,
 			Stage: "prod",
 		},
 		expected: "testdata/debug-config/dump-prod.yml",
@@ -287,13 +290,13 @@ func initDebugWebserverProdStageTC(t *testing.T, mockCtrl *gomock.Controller) de
 	h := &nodejs.NodeJSHandler{}
 	h.WithSolver(solver)
 
-	genericDef := loadGenericDef(t, "testdata/debug-config/zbuild.yml",
-		"testdata/debug-config/zbuild.lock")
+	genericDef := loadBuildDef(t, "testdata/debug-config/zbuild.yml")
+	genericDef.RawLocks = loadDefLocks(t, "testdata/debug-config/zbuild.lock")
 
 	return debugConfigTC{
 		handler: h,
 		buildOpts: builddef.BuildOpts{
-			Def:   &genericDef,
+			Def:   genericDef,
 			Stage: "webserver-prod",
 		},
 		expected: "testdata/debug-config/dump-webserver-prod.yml",

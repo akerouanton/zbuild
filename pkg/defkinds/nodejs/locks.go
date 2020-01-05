@@ -8,25 +8,36 @@ import (
 	"github.com/NiR-/zbuild/pkg/pkgsolver"
 	"github.com/NiR-/zbuild/pkg/registry"
 	"golang.org/x/xerrors"
-	"gopkg.in/yaml.v2"
 )
 
 type DefinitionLocks struct {
-	BaseImage string                     `yaml:"base"`
-	Stages    map[string]StageLocks      `yaml:"stages"`
-	Webserver *webserver.DefinitionLocks `yaml:"webserver"`
+	BaseImage string                     `mapstructure:"base"`
+	Stages    map[string]StageLocks      `mapstructure:"stages"`
+	Webserver *webserver.DefinitionLocks `mapstructure:"webserver"`
 }
 
-func (l DefinitionLocks) RawLocks() ([]byte, error) {
-	lockdata, err := yaml.Marshal(l)
-	if err != nil {
-		return lockdata, xerrors.Errorf("could not marshal nodejs locks: %w", err)
+func (l DefinitionLocks) RawLocks() map[string]interface{} {
+	lockdata := map[string]interface{}{
+		"base": l.BaseImage,
 	}
-	return lockdata, nil
+
+	stages := map[string]interface{}{}
+	for name, stage := range l.Stages {
+		stages[name] = stage.RawLocks()
+	}
+	lockdata["stages"] = stages
+
+	return lockdata
 }
 
 type StageLocks struct {
-	SystemPackages map[string]string `yaml:"system_packages"`
+	SystemPackages map[string]string `mapstructure:"system_packages"`
+}
+
+func (l StageLocks) RawLocks() map[string]interface{} {
+	return map[string]interface{}{
+		"system_packages": l.SystemPackages,
+	}
 }
 
 func (h *NodeJSHandler) UpdateLocks(

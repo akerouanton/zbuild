@@ -8,13 +8,16 @@ var (
 type BuildDef struct {
 	Kind      string                 `yaml:"kind"`
 	RawConfig map[string]interface{} `yaml:",inline"`
-	RawLocks  []byte                 `yaml:"-"`
+	RawLocks  map[string]interface{} `yaml:"-"`
 }
 
 // Locks define a common interface implemented by all specialized Locks structs.
-// Its unique method returns the slice of bytes that should be written in the lock file.
+// Its unique method returns the locks as a map of interfaces, as used by
+// mapstructure. This lets builder package arbitrarily manipulate the locks
+// before writing them to disk. This is used to add the webserver locks
+// when a webserver definition is embedded in a zbuildfile of another kind.
 type Locks interface {
-	RawLocks() ([]byte, error)
+	RawLocks() map[string]interface{}
 }
 
 // VersionMap is a list of packages/extensions/etc... associated to version

@@ -218,7 +218,7 @@ func TestNewKind(t *testing.T) {
 
 			generic := loadBuildDef(t, tc.file)
 			if tc.lockFile != "" {
-				generic.RawLocks = loadRawTestdata(t, tc.lockFile)
+				generic.RawLocks = loadDefLocks(t, tc.lockFile)
 			}
 
 			def, err := php.NewKind(generic)
@@ -536,7 +536,7 @@ func TestResolveStageDefinition(t *testing.T) {
 
 			generic := loadBuildDef(t, tc.file)
 			if tc.lockFile != "" {
-				generic.RawLocks = loadRawTestdata(t, tc.lockFile)
+				generic.RawLocks = loadDefLocks(t, tc.lockFile)
 			}
 
 			def, err := php.NewKind(generic)

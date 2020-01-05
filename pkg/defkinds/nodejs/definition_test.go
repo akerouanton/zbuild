@@ -310,7 +310,7 @@ func TestResolveStageDefinition(t *testing.T) {
 
 			generic := loadBuildDef(t, tc.file)
 			if tc.lockFile != "" {
-				generic.RawLocks = loadRawTestdata(t, tc.lockFile)
+				generic.RawLocks = loadDefLocks(t, tc.lockFile)
 			}
 
 			def, err := nodejs.NewKind(generic)
@@ -353,6 +353,17 @@ func loadBuildDef(t *testing.T, filepath string) *builddef.BuildDef {
 	}
 
 	return &def
+}
+
+func loadDefLocks(t *testing.T, filepath string) map[string]interface{} {
+	raw := loadRawTestdata(t, filepath)
+
+	var locks map[string]interface{}
+	if err := yaml.Unmarshal(raw, &locks); err != nil {
+		t.Fatal(err)
+	}
+
+	return locks
 }
 
 type mergeStageTC struct {

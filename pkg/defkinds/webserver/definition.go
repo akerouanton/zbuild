@@ -6,7 +6,6 @@ import (
 	"github.com/NiR-/zbuild/pkg/builddef"
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/xerrors"
-	"gopkg.in/yaml.v2"
 )
 
 func DefaultDefinition() Definition {
@@ -18,7 +17,7 @@ func DefaultDefinition() Definition {
 	}
 }
 
-func NewKind(genericDef *builddef.BuildDef) (Definition, error) {
+func decodeDefinition(raw map[string]interface{}) (Definition, error) {
 	var def Definition
 	decoderConf := mapstructure.DecoderConfig{
 		ErrorUnused:      true,
@@ -30,15 +29,42 @@ func NewKind(genericDef *builddef.BuildDef) (Definition, error) {
 		return def, err
 	}
 
-	if err := decoder.Decode(genericDef.RawConfig); err != nil {
-		err := xerrors.Errorf("could not decode build manifest: %w", err)
-		return def, err
+	if err := decoder.Decode(raw); err != nil {
+		return def, xerrors.Errorf("could not decode build manifest: %w", err)
 	}
 
 	def = DefaultDefinition().Merge(def)
+	return def, nil
+}
 
-	if err := yaml.Unmarshal(genericDef.RawLocks, &def.Locks); err != nil {
-		return def, xerrors.Errorf("could not decode lock manifest: %w", err)
+func decodeDefinitionLocks(raw map[string]interface{}) (DefinitionLocks, error) {
+	var locks DefinitionLocks
+	decoderConf := mapstructure.DecoderConfig{
+		ErrorUnused:      true,
+		WeaklyTypedInput: true,
+		Result:           &locks,
+	}
+	decoder, err := mapstructure.NewDecoder(&decoderConf)
+	if err != nil {
+		return locks, err
+	}
+
+	if err := decoder.Decode(raw); err != nil {
+		return locks, xerrors.Errorf("could not decode lock manifest: %w", err)
+	}
+
+	return locks, nil
+}
+
+func NewKind(genericDef *builddef.BuildDef) (Definition, error) {
+	def, err := decodeDefinition(genericDef.RawConfig)
+	if err != nil {
+		return def, err
+	}
+
+	def.Locks, err = decodeDefinitionLocks(genericDef.RawLocks)
+	if err != nil {
+		return def, err
 	}
 
 	if def.Healthcheck != nil && *def.Healthcheck {

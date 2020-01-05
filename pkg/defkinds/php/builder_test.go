@@ -29,7 +29,8 @@ type buildTC struct {
 }
 
 func initBuildLLBForDevStageTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
-	genericDef := loadGenericDef(t, "testdata/build/zbuild.yml", "testdata/build/zbuild.lock")
+	genericDef := loadGenericDef(t, "testdata/build/zbuild.yml")
+	genericDef.RawLocks = loadDefLocks(t, "testdata/build/zbuild.lock")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
 
@@ -88,7 +89,8 @@ func initBuildLLBForDevStageTC(t *testing.T, mockCtrl *gomock.Controller) buildT
 }
 
 func initBuildLLBForProdStageTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
-	genericDef := loadGenericDef(t, "testdata/build/zbuild.yml", "testdata/build/zbuild.lock")
+	genericDef := loadGenericDef(t, "testdata/build/zbuild.yml")
+	genericDef.RawLocks = loadDefLocks(t, "testdata/build/zbuild.lock")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
 
@@ -153,7 +155,8 @@ func initBuildLLBForProdStageTC(t *testing.T, mockCtrl *gomock.Controller) build
 }
 
 func initBuildLLBForWebserverProdStageTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
-	genericDef := loadGenericDef(t, "testdata/build/with-webserver.yml", "testdata/build/with-webserver.lock")
+	genericDef := loadGenericDef(t, "testdata/build/with-webserver.yml")
+	genericDef.RawLocks = loadDefLocks(t, "testdata/build/with-webserver.lock")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
 	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
@@ -216,7 +219,8 @@ func initBuildLLBForWebserverProdStageTC(t *testing.T, mockCtrl *gomock.Controll
 }
 
 func initBuildProdStageFromGitBasedBuildContextTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
-	genericDef := loadGenericDef(t, "testdata/build/zbuild.yml", "testdata/build/zbuild.lock")
+	genericDef := loadGenericDef(t, "testdata/build/zbuild.yml")
+	genericDef.RawLocks = loadDefLocks(t, "testdata/build/zbuild.lock")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
 
@@ -356,8 +360,8 @@ func initDebugDevStageTC(t *testing.T, mockCtrl *gomock.Controller) debugConfigT
 	h := php.NewPHPHandler()
 	h.WithSolver(solver)
 
-	genericDef := loadGenericDef(t, "testdata/debug-config/zbuild.yml",
-		"testdata/debug-config/zbuild.lock")
+	genericDef := loadGenericDef(t, "testdata/debug-config/zbuild.yml")
+	genericDef.RawLocks = loadDefLocks(t, "testdata/debug-config/zbuild.lock")
 
 	return debugConfigTC{
 		handler: h,
@@ -381,8 +385,8 @@ func initDebugProdStageTC(t *testing.T, mockCtrl *gomock.Controller) debugConfig
 	h := php.NewPHPHandler()
 	h.WithSolver(solver)
 
-	genericDef := loadGenericDef(t, "testdata/debug-config/zbuild.yml",
-		"testdata/debug-config/zbuild.lock")
+	genericDef := loadGenericDef(t, "testdata/debug-config/zbuild.yml")
+	genericDef.RawLocks = loadDefLocks(t, "testdata/debug-config/zbuild.lock")
 
 	return debugConfigTC{
 		handler: h,
@@ -406,8 +410,8 @@ func initDebugWebserverProdStageTC(t *testing.T, mockCtrl *gomock.Controller) de
 	h := php.NewPHPHandler()
 	h.WithSolver(solver)
 
-	genericDef := loadGenericDef(t, "testdata/debug-config/zbuild.yml",
-		"testdata/debug-config/zbuild.lock")
+	genericDef := loadGenericDef(t, "testdata/debug-config/zbuild.yml")
+	genericDef.RawLocks = loadDefLocks(t, "testdata/debug-config/zbuild.lock")
 
 	return debugConfigTC{
 		handler: h,

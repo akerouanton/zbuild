@@ -144,7 +144,7 @@ func TestUpdateLocks(t *testing.T) {
 			defer mockCtrl.Finish()
 
 			tc := tcinit(t, mockCtrl)
-			genericDef := loadGenericDef(t, tc.deffile, "")
+			genericDef := loadGenericDef(t, tc.deffile)
 
 			var locks builddef.Locks
 			var rawLocks []byte
@@ -152,17 +152,6 @@ func TestUpdateLocks(t *testing.T) {
 
 			ctx := context.Background()
 			locks, err = tc.handler.UpdateLocks(ctx, tc.pkgSolver, &genericDef)
-			if err == nil {
-				rawLocks, err = locks.RawLocks()
-			}
-
-			if *flagTestdata {
-				if tc.expected != "" {
-					writeTestdata(t, tc.expected, string(rawLocks))
-				}
-				return
-			}
-
 			if tc.expectedErr != nil {
 				if err == nil || err.Error() != tc.expectedErr.Error() {
 					t.Fatalf("Expected error: %v\nGot: %v", tc.expectedErr, err)
@@ -171,6 +160,18 @@ func TestUpdateLocks(t *testing.T) {
 			}
 			if err != nil {
 				t.Fatalf("Unexpected error: %v", err)
+			}
+
+			rawLocks, err = yaml.Marshal(locks.RawLocks())
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			if *flagTestdata {
+				if tc.expected != "" {
+					writeTestdata(t, tc.expected, string(rawLocks))
+				}
+				return
 			}
 
 			expectedRaw := loadTestdata(t, tc.expected)
@@ -184,7 +185,7 @@ func TestUpdateLocks(t *testing.T) {
 	}
 }
 
-func loadGenericDef(t *testing.T, filepath, lockpath string) builddef.BuildDef {
+func loadGenericDef(t *testing.T, filepath string) builddef.BuildDef {
 	raw := loadTestdata(t, filepath)
 
 	var def builddef.BuildDef
@@ -192,13 +193,16 @@ func loadGenericDef(t *testing.T, filepath, lockpath string) builddef.BuildDef {
 		t.Fatal(err)
 	}
 
-	if lockpath != "" {
-		lockContent, err := ioutil.ReadFile(lockpath)
-		if err != nil {
-			t.Fatal(err)
-		}
-		def.RawLocks = lockContent
+	return def
+}
+
+func loadDefLocks(t *testing.T, filepath string) map[string]interface{} {
+	raw := loadTestdata(t, filepath)
+
+	var locks map[string]interface{}
+	if err := yaml.Unmarshal([]byte(raw), &locks); err != nil {
+		t.Fatal(err)
 	}
 
-	return def
+	return locks
 }

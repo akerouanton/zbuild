@@ -99,11 +99,7 @@ func (h *PHPHandler) webserverBuildOpts(
 ) (builddef.BuildOpts, error) {
 	var newOpts builddef.BuildOpts
 
-	locks, err := def.Locks.Webserver.RawLocks()
-	if err != nil {
-		return newOpts, err
-	}
-
+	locks := def.Locks.Webserver.RawLocks()
 	newOpts = buildOpts
 	newOpts.Def = &builddef.BuildDef{
 		Kind:      "webserver",

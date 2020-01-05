@@ -2,7 +2,6 @@ package webserver_test
 
 import (
 	"context"
-	"io/ioutil"
 	"testing"
 
 	"github.com/NiR-/zbuild/pkg/builddef"
@@ -79,7 +78,7 @@ func TestUpdateLocks(t *testing.T) {
 			defer mockCtrl.Finish()
 
 			tc := tcinit(t, mockCtrl)
-			genericDef := loadGenericDef(t, tc.deffile, "")
+			genericDef := loadGenericDef(t, tc.deffile)
 
 			var locks builddef.Locks
 			var rawLocks []byte
@@ -87,10 +86,6 @@ func TestUpdateLocks(t *testing.T) {
 
 			ctx := context.Background()
 			locks, err = tc.handler.UpdateLocks(ctx, tc.pkgSolver, &genericDef)
-			if err == nil {
-				rawLocks, err = locks.RawLocks()
-			}
-
 			if tc.expectedErr != nil {
 				if err == nil || err.Error() != tc.expectedErr.Error() {
 					t.Fatalf("Expected error: %v\nGot: %v", tc.expectedErr, err)
@@ -101,6 +96,11 @@ func TestUpdateLocks(t *testing.T) {
 				t.Fatalf("Unexpected error: %v", err)
 			}
 
+			rawLocks, err = yaml.Marshal(locks.RawLocks())
+			if err != nil {
+				t.Fatal(err)
+			}
+
 			expectedRaw := loadRawTestdata(t, tc.expected)
 			if string(expectedRaw) != string(rawLocks) {
 				t.Fatalf("Expected: %s\nGot: %s", expectedRaw, rawLocks)
@@ -109,20 +109,12 @@ func TestUpdateLocks(t *testing.T) {
 	}
 }
 
-func loadGenericDef(t *testing.T, filepath, lockpath string) builddef.BuildDef {
+func loadGenericDef(t *testing.T, filepath string) builddef.BuildDef {
 	raw := loadRawTestdata(t, filepath)
 
 	var def builddef.BuildDef
 	if err := yaml.Unmarshal(raw, &def); err != nil {
 		t.Fatal(err)
-	}
-
-	if lockpath != "" {
-		lockContent, err := ioutil.ReadFile(lockpath)
-		if err != nil {
-			t.Fatal(err)
-		}
-		def.RawLocks = lockContent
 	}
 
 	return def
