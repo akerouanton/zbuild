@@ -166,7 +166,7 @@ func (h *NodeJSHandler) buildNodeJS(
 	state = state.User("1000")
 	state = state.Dir("/app")
 
-	state = h.globalPackagesInstall(stageDef, state, buildOpts)
+	state = h.globalPackagesInstall(state, stageDef.GlobalPackages.Map(), buildOpts)
 
 	if *stageDef.Dev == false {
 		state = h.yarnInstall(stageDef, state, buildOpts)
@@ -242,16 +242,16 @@ func getEnv(src llb.State, name string) string {
 }
 
 func (h *NodeJSHandler) globalPackagesInstall(
-	stageDef StageDefinition,
 	state llb.State,
+	globalPackages map[string]string,
 	buildOpts builddef.BuildOpts,
 ) llb.State {
-	if len(stageDef.GlobalPackages) == 0 {
+	if len(globalPackages) == 0 {
 		return state
 	}
 
-	pkgs := make([]string, 0, len(stageDef.GlobalPackages))
-	for pkg, constraint := range stageDef.GlobalPackages {
+	pkgs := make([]string, 0, len(globalPackages))
+	for pkg, constraint := range globalPackages {
 		if constraint != "" && constraint != "*" {
 			pkg += "@" + constraint
 		}

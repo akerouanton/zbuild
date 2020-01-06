@@ -42,14 +42,14 @@ func initSuccessfullyParseRawDefinitionWithoutStagesTC() newDefinitionTC {
 		expected: php.Definition{
 			BaseStage: php.Stage{
 				ExternalFiles:  []llbutils.ExternalFile{},
-				SystemPackages: map[string]string{},
+				SystemPackages: &builddef.VersionMap{},
 				FPM:            &isFPM,
-				Extensions: map[string]string{
+				Extensions: &builddef.VersionMap{
 					"intl":      "*",
 					"pdo_mysql": "*",
 					"soap":      "*",
 				},
-				GlobalDeps: map[string]string{},
+				GlobalDeps: &builddef.VersionMap{},
 				ConfigFiles: php.PHPConfigFiles{
 					IniFile:       &iniFile,
 					FPMConfigFile: &fpmConfigFile,
@@ -133,14 +133,14 @@ func initSuccessfullyParseRawDefinitionWithStagesTC() newDefinitionTC {
 		expected: php.Definition{
 			BaseStage: php.Stage{
 				ExternalFiles:  []llbutils.ExternalFile{},
-				SystemPackages: map[string]string{},
+				SystemPackages: &builddef.VersionMap{},
 				FPM:            &isFPM,
-				Extensions: map[string]string{
+				Extensions: &builddef.VersionMap{
 					"intl":      "*",
 					"pdo_mysql": "*",
 					"soap":      "*",
 				},
-				GlobalDeps: map[string]string{},
+				GlobalDeps: &builddef.VersionMap{},
 				ConfigFiles: php.PHPConfigFiles{
 					FPMConfigFile: &fpmConfigFile,
 				},
@@ -283,14 +283,14 @@ func initSuccessfullyResolveDefaultDevStageTC(t *testing.T, mockCtrl *gomock.Con
 						Mode:        0644,
 					},
 				},
-				SystemPackages: map[string]string{},
+				SystemPackages: &builddef.VersionMap{},
 				FPM:            &isFPM,
-				Extensions: map[string]string{
+				Extensions: &builddef.VersionMap{
 					"intl":      "*",
 					"pdo_mysql": "*",
 					"soap":      "*",
 				},
-				GlobalDeps:   map[string]string{},
+				GlobalDeps:   &builddef.VersionMap{},
 				Sources:      []string{"./src"},
 				StatefulDirs: []string{"./public/uploads"},
 				ConfigFiles: php.PHPConfigFiles{
@@ -341,7 +341,7 @@ func initSuccessfullyResolveWorkerStageTC(t *testing.T, mockCtrl *gomock.Control
 			},
 			Stage: php.Stage{
 				ExternalFiles: []llbutils.ExternalFile{},
-				SystemPackages: map[string]string{
+				SystemPackages: &builddef.VersionMap{
 					"zlib1g-dev":   "*",
 					"unzip":        "*",
 					"git":          "*",
@@ -350,11 +350,11 @@ func initSuccessfullyResolveWorkerStageTC(t *testing.T, mockCtrl *gomock.Control
 				},
 				FPM:     &isNotFPM,
 				Command: &workerCmd,
-				Extensions: map[string]string{
+				Extensions: &builddef.VersionMap{
 					"mbstring": "*",
 					"zip":      "*",
 				},
-				GlobalDeps: map[string]string{},
+				GlobalDeps: &builddef.VersionMap{},
 				ComposerDumpFlags: &php.ComposerDumpFlags{
 					APCU:                  false,
 					ClassmapAuthoritative: true,
@@ -418,7 +418,7 @@ func initRemoveDefaultExtensionsTC(t *testing.T, mockCtrl *gomock.Controller) re
 			PlatformReqs:   map[string]string{},
 			Stage: php.Stage{
 				ExternalFiles: []llbutils.ExternalFile{},
-				SystemPackages: map[string]string{
+				SystemPackages: &builddef.VersionMap{
 					"zlib1g-dev":    "*",
 					"unzip":         "*",
 					"git":           "*",
@@ -427,7 +427,7 @@ func initRemoveDefaultExtensionsTC(t *testing.T, mockCtrl *gomock.Controller) re
 					"libzip-dev":    "*",
 				},
 				FPM: &fpm,
-				Extensions: map[string]string{
+				Extensions: &builddef.VersionMap{
 					"zip":        "*",
 					"mbstring":   "*",
 					"reflection": "*",
@@ -438,7 +438,7 @@ func initRemoveDefaultExtensionsTC(t *testing.T, mockCtrl *gomock.Controller) re
 					"json":       "*",
 					"session":    "*",
 				},
-				GlobalDeps:  map[string]string{},
+				GlobalDeps:  &builddef.VersionMap{},
 				ConfigFiles: php.PHPConfigFiles{},
 				ComposerDumpFlags: &php.ComposerDumpFlags{
 					ClassmapAuthoritative: true,
@@ -482,7 +482,7 @@ func initPreservePredefinedExtensionConstraintsTC(t *testing.T, mockCtrl *gomock
 			},
 			Stage: php.Stage{
 				ExternalFiles: []llbutils.ExternalFile{},
-				SystemPackages: map[string]string{
+				SystemPackages: &builddef.VersionMap{
 					"zlib1g-dev":   "*",
 					"unzip":        "*",
 					"git":          "*",
@@ -490,11 +490,11 @@ func initPreservePredefinedExtensionConstraintsTC(t *testing.T, mockCtrl *gomock
 					"libzip-dev":   "*",
 				},
 				FPM: &fpm,
-				Extensions: map[string]string{
+				Extensions: &builddef.VersionMap{
 					"zip":   "*",
 					"redis": "^5.1",
 				},
-				GlobalDeps:  map[string]string{},
+				GlobalDeps:  &builddef.VersionMap{},
 				ConfigFiles: php.PHPConfigFiles{},
 				ComposerDumpFlags: &php.ComposerDumpFlags{
 					ClassmapAuthoritative: true,
@@ -898,7 +898,7 @@ func TestMergeDefinition(t *testing.T) {
 				return php.Definition{
 					Webserver: &webserver.Definition{
 						ConfigFile:     &configFile,
-						SystemPackages: map[string]string{},
+						SystemPackages: &builddef.VersionMap{},
 					},
 					BaseStage: emptyStage(),
 					Stages:    php.DerivedStageSet{},
@@ -922,7 +922,7 @@ func TestMergeDefinition(t *testing.T) {
 				return php.Definition{
 					Webserver: &webserver.Definition{
 						ConfigFile:     &configFile,
-						SystemPackages: map[string]string{},
+						SystemPackages: &builddef.VersionMap{},
 					},
 					BaseStage: emptyStage(),
 					Stages:    php.DerivedStageSet{},
@@ -960,9 +960,9 @@ type mergeStageTC struct {
 func emptyStage() php.Stage {
 	return php.Stage{
 		ExternalFiles:  []llbutils.ExternalFile{},
-		SystemPackages: map[string]string{},
-		Extensions:     map[string]string{},
-		GlobalDeps:     map[string]string{},
+		SystemPackages: &builddef.VersionMap{},
+		Extensions:     &builddef.VersionMap{},
+		GlobalDeps:     &builddef.VersionMap{},
 		ConfigFiles:    php.PHPConfigFiles{},
 		Sources:        []string{},
 		Integrations:   []string{},
@@ -1044,19 +1044,19 @@ func initMergeSystemPackagesWithBaseTC() mergeStageTC {
 	return mergeStageTC{
 		base: func() php.Stage {
 			return php.Stage{
-				SystemPackages: map[string]string{
+				SystemPackages: &builddef.VersionMap{
 					"curl": "*",
 				},
 			}
 		},
 		overriding: php.Stage{
-			SystemPackages: map[string]string{
+			SystemPackages: &builddef.VersionMap{
 				"chromium": "*",
 			},
 		},
 		expected: func() php.Stage {
 			s := emptyStage()
-			s.SystemPackages = map[string]string{
+			s.SystemPackages = &builddef.VersionMap{
 				"curl":     "*",
 				"chromium": "*",
 			}
@@ -1071,13 +1071,13 @@ func initMergeSystemPackagesWithoutBaseTC() mergeStageTC {
 			return php.Stage{}
 		},
 		overriding: php.Stage{
-			SystemPackages: map[string]string{
+			SystemPackages: &builddef.VersionMap{
 				"chromium": "*",
 			},
 		},
 		expected: func() php.Stage {
 			s := emptyStage()
-			s.SystemPackages = map[string]string{
+			s.SystemPackages = &builddef.VersionMap{
 				"chromium": "*",
 			}
 			return s
@@ -1171,19 +1171,19 @@ func initMergeExtensionsWithBaseTC() mergeStageTC {
 	return mergeStageTC{
 		base: func() php.Stage {
 			return php.Stage{
-				Extensions: map[string]string{
+				Extensions: &builddef.VersionMap{
 					"apcu": "*",
 				},
 			}
 		},
 		overriding: php.Stage{
-			Extensions: map[string]string{
+			Extensions: &builddef.VersionMap{
 				"opcache": "*",
 			},
 		},
 		expected: func() php.Stage {
 			s := emptyStage()
-			s.Extensions = map[string]string{
+			s.Extensions = &builddef.VersionMap{
 				"apcu":    "*",
 				"opcache": "*",
 			}
@@ -1198,13 +1198,13 @@ func initMergeExtensionsWithoutBaseTC() mergeStageTC {
 			return php.Stage{}
 		},
 		overriding: php.Stage{
-			Extensions: map[string]string{
+			Extensions: &builddef.VersionMap{
 				"opcache": "*",
 			},
 		},
 		expected: func() php.Stage {
 			s := emptyStage()
-			s.Extensions = map[string]string{
+			s.Extensions = &builddef.VersionMap{
 				"opcache": "*",
 			}
 			return s
@@ -1505,20 +1505,20 @@ func initMergeGlobalDepsWithBaseTC() mergeStageTC {
 	return mergeStageTC{
 		base: func() php.Stage {
 			return php.Stage{
-				GlobalDeps: map[string]string{
+				GlobalDeps: &builddef.VersionMap{
 					"symfony/flex": "*",
 				},
 			}
 		},
 		overriding: php.Stage{
-			GlobalDeps: map[string]string{
+			GlobalDeps: &builddef.VersionMap{
 				"symfony/flex":      "1.6.0",
 				"hirak/prestissimo": "0.3.9",
 			},
 		},
 		expected: func() php.Stage {
 			stage := emptyStage()
-			stage.GlobalDeps = map[string]string{
+			stage.GlobalDeps = &builddef.VersionMap{
 				"symfony/flex":      "1.6.0",
 				"hirak/prestissimo": "0.3.9",
 			}
@@ -1532,18 +1532,18 @@ func initMergeGlobalDepsWithoutBaseTC() mergeStageTC {
 	return mergeStageTC{
 		base: func() php.Stage {
 			return php.Stage{
-				GlobalDeps: map[string]string{},
+				GlobalDeps: &builddef.VersionMap{},
 			}
 		},
 		overriding: php.Stage{
-			GlobalDeps: map[string]string{
+			GlobalDeps: &builddef.VersionMap{
 				"symfony/flex":      "1.6.0",
 				"hirak/prestissimo": "0.3.9",
 			},
 		},
 		expected: func() php.Stage {
 			stage := emptyStage()
-			stage.GlobalDeps = map[string]string{
+			stage.GlobalDeps = &builddef.VersionMap{
 				"symfony/flex":      "1.6.0",
 				"hirak/prestissimo": "0.3.9",
 			}

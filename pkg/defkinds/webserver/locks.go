@@ -45,7 +45,7 @@ func (h *WebserverHandler) UpdateLocks(
 
 	def.Locks.SystemPackages, err = pkgSolver.ResolveVersions(
 		def.Locks.BaseImage,
-		def.SystemPackages)
+		def.SystemPackages.Map())
 	if err != nil {
 		return nil, xerrors.Errorf("could not resolve system packages: %w", err)
 	}
