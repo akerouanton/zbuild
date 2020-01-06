@@ -5,6 +5,8 @@ go 1.12
 require (
 	github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78 // indirect
 	github.com/NiR-/notpecl v0.0.0-20191209012103-b55aaac8c3de
+	github.com/containerd/containerd v1.3.0
+	github.com/docker/distribution v2.7.1-0.20190205005809-0d3efadf0154+incompatible
 	github.com/docker/docker v1.14.0-0.20190319215453-e7b5f7dbe98c
 	github.com/go-test/deep v1.0.4
 	github.com/gogo/protobuf v1.2.0

@@ -38,7 +38,11 @@ BUG_REPORT_URL="https://bugs.debian.org/"`)
 
 func initSuccessfullyUpdateLocksTC(t *testing.T, mockCtrl *gomock.Controller) updateLocksTC {
 	solver := mocks.NewMockStateSolver(mockCtrl)
-	solver.EXPECT().FromImage("docker.io/library/php:7.3-fpm-buster").Times(1)
+	solver.EXPECT().ResolveImageRef(
+		gomock.Any(), "docker.io/library/php:7.3-fpm-buster",
+	).Return("docker.io/library/php:7.3-fpm-buster@sha256", nil)
+
+	solver.EXPECT().FromImage("docker.io/library/php:7.3-fpm-buster@sha256").Times(1)
 	solver.EXPECT().ReadFile(
 		gomock.Any(),
 		"/etc/os-release",
@@ -52,7 +56,7 @@ func initSuccessfullyUpdateLocksTC(t *testing.T, mockCtrl *gomock.Controller) up
 
 	pkgSolver := mocks.NewMockPackageSolver(mockCtrl)
 	pkgSolver.EXPECT().ResolveVersions(
-		"docker.io/library/php:7.3-fpm-buster",
+		"docker.io/library/php:7.3-fpm-buster@sha256",
 		map[string]string{
 			"git":          "*",
 			"libicu-dev":   "*",
@@ -109,8 +113,13 @@ BUG_REPORT_URL="https://bugs.alpinelinux.org/"
 `)
 
 func failToUpdateLocksForAlpineBaseImageTC(t *testing.T, mockCtrl *gomock.Controller) updateLocksTC {
+	// @TODO: fix image tag used in this use case once alpine support is added
 	solver := mocks.NewMockStateSolver(mockCtrl)
-	solver.EXPECT().FromImage("docker.io/library/php:7.3-fpm-buster").Times(1)
+	solver.EXPECT().ResolveImageRef(
+		gomock.Any(), "docker.io/library/php:7.3-fpm-buster",
+	).Return("docker.io/library/php:7.3-fpm-buster@sha256", nil)
+
+	solver.EXPECT().FromImage("docker.io/library/php:7.3-fpm-buster@sha256").Times(1)
 	solver.EXPECT().ReadFile(
 		gomock.Any(),
 		"/etc/os-release",

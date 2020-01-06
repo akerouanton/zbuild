@@ -171,7 +171,6 @@ func NewKind(genericDef *builddef.BuildDef) (Definition, error) {
 type Definition struct {
 	BaseStage Stage `mapstructure:",squash"`
 
-	// @TODO: check what happens when base isn't prefixed with docker.io/library/
 	BaseImage string          `mapstructure:"base"`
 	Version   string          `mapstructure:"version"`
 	Stages    DerivedStageSet `mapstructure:"stages"`

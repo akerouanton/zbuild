@@ -116,3 +116,7 @@ func (s BuildkitSolver) readFromLLB(
 func (s BuildkitSolver) ReadFile(ctx context.Context, filepath string, opt ReadFileOpt) ([]byte, error) {
 	return opt(ctx, filepath)
 }
+
+func (s BuildkitSolver) ResolveImageRef(ctx context.Context, imageRef string) (string, error) {
+	return "", xerrors.Errorf("ResolveImageRef is not supported by BuildkitSolver")
+}

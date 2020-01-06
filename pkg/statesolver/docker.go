@@ -10,6 +10,8 @@ import (
 	"path"
 	"strings"
 
+	"github.com/containerd/containerd/remotes"
+	"github.com/docker/distribution/reference"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/network"
@@ -27,7 +29,8 @@ type DockerSolver struct {
 	Client *client.Client
 	Labels map[string]string
 	// RootDir is the path to the root of the build context.
-	RootDir string
+	RootDir       string
+	ImageResolver remotes.Resolver
 }
 
 func (s DockerSolver) ExecImage(
@@ -249,4 +252,27 @@ func (s DockerSolver) removeContainer(ctx context.Context, ID string) {
 	if err != nil {
 		logrus.Error(err)
 	}
+}
+
+func (s DockerSolver) ResolveImageRef(ctx context.Context, imageRef string) (string, error) {
+	normalized, err := reference.ParseNormalizedNamed(imageRef)
+	if err != nil {
+		return "", err
+	}
+
+	if canonical, ok := normalized.(reference.Canonical); ok {
+		return canonical.String(), nil
+	}
+
+	_, desc, err := s.ImageResolver.Resolve(ctx, normalized.String())
+	if err != nil {
+		return "", err
+	}
+
+	resolved, err := reference.WithDigest(normalized, desc.Digest)
+	if err != nil {
+		return "", err
+	}
+
+	return resolved.String(), nil
 }

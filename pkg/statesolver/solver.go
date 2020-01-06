@@ -9,6 +9,13 @@ import (
 )
 
 type StateSolver interface {
+	// ResolveImageRef takes a denormalized image reference (e.g. nginx:latest)
+	// and resolve it into a fully-qualified image reference with a digest. The
+	// returned image reference can be used in lockfiles.
+	// It returns an error if it can't resolve the image ref or if this method
+	// is not supported.
+	ResolveImageRef(ctx context.Context, imageRef string) (string, error)
+
 	// ExecImage is a method that execute a given command in the given image
 	// ref. It returns a byte buffer containing the command stdout. An error is
 	// returned if the executed command doesn't return an exit code = 0.

@@ -1,4 +1,4 @@
-base_image: docker.io/library/php:7.3-fpm-buster
+base_image: docker.io/library/php:7.3-fpm-buster@sha256
 stages:
   dev:
     extensions:
