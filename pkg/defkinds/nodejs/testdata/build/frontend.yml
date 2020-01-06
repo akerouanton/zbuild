@@ -2,7 +2,7 @@ kind: nodejs
 version: 12
 frontend: true
 
-source_dirs:
+sources:
   - src/
 
 stages:

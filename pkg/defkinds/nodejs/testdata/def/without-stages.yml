@@ -16,7 +16,7 @@ external_files:
     Mode: 0640
     Owner: 1000:1000
 
-source_dirs:
+sources:
   - src/
 stateful_dirs:
   - uploads/

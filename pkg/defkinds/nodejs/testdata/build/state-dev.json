@@ -21,69 +21,17 @@
     }
   },
   {
-    "RawOp": "CkkKR3NoYTI1NjowMDU3Yjc5ZmU3NzM3NmE4NmQxYzc4ZmVjNWMyYmE1NmRkNzljN2E0Mzk5OTcwOGZhYTkyNmU1OWI4MDc2NTI4Eu0BCuUBCgcvYmluL3NoCgItbwoHZXJyZXhpdAoCLWMKWGFwdC1nZXQgdXBkYXRlOyBhcHQtZ2V0IGluc3RhbGwgLXkgLS1uby1pbnN0YWxsLXJlY29tbWVuZHMgOyBybSAtcmYgL3Zhci9saWIvYXB0L2xpc3RzLyoSQVBBVEg9L3Vzci9sb2NhbC9zYmluOi91c3IvbG9jYWwvYmluOi91c3Ivc2JpbjovdXNyL2Jpbjovc2JpbjovYmluEhROT0RFX1ZFUlNJT049MTIuMTQuMBITWUFSTl9WRVJTSU9OPTEuMjEuMRoBLxIDGgEvUg4KBWFtZDY0EgVsaW51eFoA",
+    "RawOp": "CkkKR3NoYTI1NjpiNDRkYWI4MTBlM2M3MDJhY2I5ZmY5OGIxZWZjNGIzMDFjZmM0YzBiNTI0NGIwNGQ1MjNiOGI2YmU4NjU1MDg4",
     "Op": {
       "inputs": [
         {
-          "digest": "sha256:0057b79fe77376a86d1c78fec5c2ba56dd79c7a43999708faa926e59b8076528",
-          "index": 0
-        }
-      ],
-      "Op": {
-        "Exec": {
-          "meta": {
-            "args": [
-              "/bin/sh",
-              "-o",
-              "errexit",
-              "-c",
-              "apt-get update; apt-get install -y --no-install-recommends ; rm -rf /var/lib/apt/lists/*"
-            ],
-            "env": [
-              "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
-              "NODE_VERSION=12.14.0",
-              "YARN_VERSION=1.21.1"
-            ],
-            "cwd": "/"
-          },
-          "mounts": [
-            {
-              "input": 0,
-              "dest": "/",
-              "output": 0
-            }
-          ]
-        }
-      },
-      "platform": {
-        "Architecture": "amd64",
-        "OS": "linux"
-      },
-      "constraints": {}
-    },
-    "Digest": "sha256:0fecb769473ad6d67682cfbe55f582522c1260342d4831c9ab3a11666b961fc6",
-    "OpMetadata": {
-      "description": {
-        "llb.customname": "Install system packages ()"
-      },
-      "caps": {
-        "exec.meta.base": true,
-        "exec.mount.bind": true
-      }
-    }
-  },
-  {
-    "RawOp": "CkkKR3NoYTI1NjpjMDhlZmU1NWEyMGE2ZTU4ZDA5YmFhZGUzODBjNWQ5NzNkMThiOGZiYmU0NzFkZWQyMTJhMTU4MjQxNDA4Mzhh",
-    "Op": {
-      "inputs": [
-        {
-          "digest": "sha256:c08efe55a20a6e58d09baade380c5d973d18b8fbbe471ded212a15824140838a",
+          "digest": "sha256:b44dab810e3c702acb9ff98b1efc4b301cfc4c0b5244b04d523b8b6be8655088",
           "index": 0
         }
       ],
       "Op": null
     },
-    "Digest": "sha256:6799581bfaa16bb82148d4e6a5c8d6df82843b1d341a4bcd369562b1816449c0",
+    "Digest": "sha256:1f8c287bf074307143af8bdb661fa1f09656aa00ffadbdeabf66505c4b32bd81",
     "OpMetadata": {
       "caps": {
         "constraints": true,
@@ -93,11 +41,11 @@
     }
   },
   {
-    "RawOp": "CkkKR3NoYTI1NjowZmVjYjc2OTQ3M2FkNmQ2NzY4MmNmYmU1NWY1ODI1MjJjMTI2MDM0MmQ0ODMxYzlhYjNhMTE2NjZiOTYxZmM2IjESLxD///////////8BMiIKBC9hcHAQ6AMYASIKCgMQ6AcSAxDoByj///////////8BUg4KBWFtZDY0EgVsaW51eFoA",
+    "RawOp": "CkkKR3NoYTI1NjowMDU3Yjc5ZmU3NzM3NmE4NmQxYzc4ZmVjNWMyYmE1NmRkNzljN2E0Mzk5OTcwOGZhYTkyNmU1OWI4MDc2NTI4IjESLxD///////////8BMiIKBC9hcHAQ6AMYASIKCgMQ6AcSAxDoByj///////////8BUg4KBWFtZDY0EgVsaW51eFoA",
     "Op": {
       "inputs": [
         {
-          "digest": "sha256:0fecb769473ad6d67682cfbe55f582522c1260342d4831c9ab3a11666b961fc6",
+          "digest": "sha256:0057b79fe77376a86d1c78fec5c2ba56dd79c7a43999708faa926e59b8076528",
           "index": 0
         }
       ],
@@ -138,7 +86,7 @@
       },
       "constraints": {}
     },
-    "Digest": "sha256:c08efe55a20a6e58d09baade380c5d973d18b8fbbe471ded212a15824140838a",
+    "Digest": "sha256:b44dab810e3c702acb9ff98b1efc4b301cfc4c0b5244b04d523b8b6be8655088",
     "OpMetadata": {
       "description": {
         "llb.customname": "Mkdir /app"

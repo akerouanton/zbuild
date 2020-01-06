@@ -5,24 +5,28 @@ import (
 	"flag"
 	"io/ioutil"
 	"testing"
+	"time"
 
 	"github.com/NiR-/zbuild/pkg/builddef"
 	"github.com/NiR-/zbuild/pkg/defkinds/webserver"
+	"github.com/NiR-/zbuild/pkg/image"
 	"github.com/NiR-/zbuild/pkg/llbtest"
 	"github.com/NiR-/zbuild/pkg/mocks"
+	"github.com/go-test/deep"
 	"github.com/golang/mock/gomock"
 	"github.com/moby/buildkit/frontend/gateway/client"
+	specs "github.com/opencontainers/image-spec/specs-go/v1"
 	"golang.org/x/xerrors"
 )
 
 var flagTestdata = flag.Bool("testdata", false, "Use this flag to (re)generate testdata (dumps of LLB states)")
 
 type buildTC struct {
-	handler   *webserver.WebserverHandler
-	client    client.Client
-	buildOpts builddef.BuildOpts
-	// @TODO: test image metadata
+	handler       *webserver.WebserverHandler
+	client        client.Client
+	buildOpts     builddef.BuildOpts
 	expectedState string
+	expectedImage *image.Image
 	expectedErr   error
 }
 
@@ -44,6 +48,43 @@ func initBuildLLBTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
 			ContextName:   "context",
 		},
 		expectedState: "testdata/build/state.json",
+		expectedImage: &image.Image{
+			Image: specs.Image{
+				Architecture: "amd64",
+				OS:           "linux",
+				RootFS: specs.RootFS{
+					Type: "layers",
+				},
+			},
+			Config: image.ImageConfig{
+				ImageConfig: specs.ImageConfig{
+					User: "1000",
+					Env: []string{
+						"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+						"NGINX_VERSION=1.17.6",
+						"NJS_VERSION=0.3.7",
+						"PKG_RELEASE=1~buster",
+					},
+					Entrypoint: []string{},
+					Cmd:        []string{"nginx", "-g", "daemon off;"},
+					StopSignal: "SIGSTOP",
+					Volumes:    map[string]struct{}{},
+					ExposedPorts: map[string]struct{}{
+						"80/tcp": {},
+					},
+					Labels: map[string]string{
+						"io.zbuild":  "true",
+						"maintainer": "NGINX Docker Maintainers <docker-maint@nginx.com>",
+					},
+				},
+				Healthcheck: &image.HealthConfig{
+					Test:     []string{"CMD", "http_proxy= test \"$(curl --fail http://127.0.0.1/_ping)\" = \"pong\""},
+					Interval: 10 * time.Second,
+					Timeout:  1 * time.Second,
+					Retries:  3,
+				},
+			},
+		},
 	}
 }
 
@@ -65,6 +106,43 @@ func initBuildLLBFromGitContextTC(t *testing.T, mockCtrl *gomock.Controller) bui
 			ContextName:   "git://github.com/some/repo",
 		},
 		expectedState: "testdata/build/from-git-context.json",
+		expectedImage: &image.Image{
+			Image: specs.Image{
+				Architecture: "amd64",
+				OS:           "linux",
+				RootFS: specs.RootFS{
+					Type: "layers",
+				},
+			},
+			Config: image.ImageConfig{
+				ImageConfig: specs.ImageConfig{
+					User: "1000",
+					Env: []string{
+						"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+						"NGINX_VERSION=1.17.6",
+						"NJS_VERSION=0.3.7",
+						"PKG_RELEASE=1~buster",
+					},
+					Entrypoint: []string{},
+					Cmd:        []string{"nginx", "-g", "daemon off;"},
+					StopSignal: "SIGSTOP",
+					Volumes:    map[string]struct{}{},
+					ExposedPorts: map[string]struct{}{
+						"80/tcp": {},
+					},
+					Labels: map[string]string{
+						"io.zbuild":  "true",
+						"maintainer": "NGINX Docker Maintainers <docker-maint@nginx.com>",
+					},
+				},
+				Healthcheck: &image.HealthConfig{
+					Test:     []string{"CMD", "http_proxy= test \"$(curl --fail http://127.0.0.1/_ping)\" = \"pong\""},
+					Interval: 10 * time.Second,
+					Timeout:  1 * time.Second,
+					Retries:  3,
+				},
+			},
+		},
 	}
 }
 
@@ -109,7 +187,7 @@ func TestBuild(t *testing.T) {
 			tc := tcinit(t, mockCtrl)
 			ctx := context.Background()
 
-			state, _, err := tc.handler.Build(ctx, tc.buildOpts)
+			state, img, err := tc.handler.Build(ctx, tc.buildOpts)
 			jsonState := llbtest.StateToJSON(t, state)
 
 			if *flagTestdata {
@@ -134,6 +212,13 @@ func TestBuild(t *testing.T) {
 				writeTestdata(t, tempfile, jsonState)
 
 				t.Fatalf("Expected: <%s>\nGot: <%s>", tc.expectedState, tempfile)
+			}
+
+			img.Created = nil
+			img.History = nil
+			img.RootFS.DiffIDs = nil
+			if diff := deep.Equal(img, tc.expectedImage); diff != nil {
+				t.Fatal(diff)
 			}
 		})
 	}

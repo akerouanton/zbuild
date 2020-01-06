@@ -47,7 +47,7 @@ func (h *PHPHandler) loadDefs(
 // default values.
 func DefaultDefinition() Definition {
 	fpm := true
-	healthcheck := false
+	healthcheck := true
 	infer := true
 	isDev := true
 	isNotDev := false
@@ -518,7 +518,7 @@ func mergeStages(base *Definition, stages ...DerivedStage) StageDefinition {
 	if *stageDef.FPM == false {
 		stageDef.ConfigFiles.FPMConfigFile = nil
 	}
-	if stageDef.Dev || *stageDef.FPM {
+	if stageDef.Dev || stageDef.FPM == nil || *stageDef.FPM == false {
 		healthcheck := false
 		stageDef.Healthcheck = &healthcheck
 	}

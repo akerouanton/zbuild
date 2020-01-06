@@ -166,10 +166,9 @@ type Stage struct {
 	BuildCommand   *string                 `mapstructure:"build_command"`
 	Command        *[]string               `mapstructure:"command"`
 	ConfigFiles    map[string]string       `mapstructure:"config_files"`
-	// @TODO: rename into sourcecode and accept both dirs and files
-	SourceDirs   []string `mapstructure:"source_dirs"`
-	StatefulDirs []string `mapstructure:"stateful_dirs"`
-	Healthcheck  *bool    `mapstructur:"healthcheck"`
+	Sources        []string                `mapstructure:"sources"`
+	StatefulDirs   []string                `mapstructure:"stateful_dirs"`
+	Healthcheck    *bool                   `mapstructur:"healthcheck"`
 }
 
 func (s Stage) Copy() Stage {
@@ -180,13 +179,13 @@ func (s Stage) Copy() Stage {
 		BuildCommand:   s.BuildCommand,
 		Command:        s.Command,
 		ConfigFiles:    map[string]string{},
-		SourceDirs:     make([]string, len(s.SourceDirs)),
+		Sources:        make([]string, len(s.Sources)),
 		StatefulDirs:   make([]string, len(s.StatefulDirs)),
 		Healthcheck:    s.Healthcheck,
 	}
 
 	copy(new.ExternalFiles, s.ExternalFiles)
-	copy(new.SourceDirs, s.SourceDirs)
+	copy(new.Sources, s.Sources)
 	copy(new.StatefulDirs, s.StatefulDirs)
 
 	for src, dst := range s.ConfigFiles {
@@ -199,7 +198,7 @@ func (s Stage) Copy() Stage {
 func (s Stage) Merge(overriding Stage) Stage {
 	new := s.Copy()
 	new.ExternalFiles = append(new.ExternalFiles, overriding.ExternalFiles...)
-	new.SourceDirs = append(new.SourceDirs, overriding.SourceDirs...)
+	new.Sources = append(new.Sources, overriding.Sources...)
 	new.StatefulDirs = append(new.StatefulDirs, overriding.StatefulDirs...)
 	new.SystemPackages.Merge(overriding.SystemPackages)
 	new.GlobalPackages.Merge(overriding.GlobalPackages)

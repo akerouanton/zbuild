@@ -124,8 +124,6 @@ func initSuccessfullyUpdateWebserverLocksTC(t *testing.T, mockCtrl *gomock.Contr
 	h := nodejs.NodeJSHandler{}
 	h.WithSolver(solver)
 
-	// @TODO: use proper default values for webserver definition
-	// when used from another defkind
 	return updateLocksTC{
 		file:      "testdata/locks/with-webserver.yml",
 		handler:   &h,

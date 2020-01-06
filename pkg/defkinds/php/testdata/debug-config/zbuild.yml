@@ -1,5 +1,4 @@
 # syntax=akerouanton/zbuilder:nodejs9
-# @TODO: find a way to provision secrets with zcompose
 kind: php
 version: 7.3
 
@@ -7,8 +6,6 @@ global_deps:
     symfony/flex: "*"
 
 extensions:
-    # @TODO: wrong version of this ext is pinned for prod stage
-    # @TODO: check why ext requirements from composer.json aren't in the lockfile
     apcu: "5.1.17"
     intl: "*"
     pdo_pgsql: "*"
@@ -35,7 +32,6 @@ post_install:
 
 webserver:
     type: nginx
-    # @TODO: check if healthcheck is enabled by default
     config_file: docker/nginx/nginx.conf
     assets:
         - from: public/

@@ -5,7 +5,7 @@ stage:
   buildcommand: yarn build
   command: null
   configfiles: {}
-  sourcedirs: []
+  sources: []
   statefuldirs: []
   healthcheck: false
 name: prod

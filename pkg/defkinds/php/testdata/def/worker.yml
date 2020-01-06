@@ -1,6 +1,8 @@
-fpm: false
 version: 7.4.0
+fpm: false
 command: bin/worker
+healthcheck: false
+
 sources:
   - bin/
   - src/
