@@ -43,9 +43,9 @@ func (h *PHPHandler) loadDefs(
 	return def, stageDef, nil
 }
 
-// defaultDefinition returns a Definition with all its fields initialized with
+// DefaultDefinition returns a Definition with all its fields initialized with
 // default values.
-func defaultDefinition() Definition {
+func DefaultDefinition() Definition {
 	fpm := true
 	healthcheck := false
 	infer := true
@@ -69,8 +69,7 @@ func defaultDefinition() Definition {
 			PostInstall:  []string{},
 		},
 		BaseImage: "",
-		Version:   "7.4",
-		Infer:     infer,
+		Infer:     &infer,
 		Stages: map[string]DerivedStage{
 			"dev": {
 				DeriveFrom: "base",
@@ -85,8 +84,7 @@ func defaultDefinition() Definition {
 }
 
 func NewKind(genericDef *builddef.BuildDef) (Definition, error) {
-	def := defaultDefinition()
-
+	var def Definition
 	decoderConf := mapstructure.DecoderConfig{
 		ErrorUnused:      true,
 		WeaklyTypedInput: true,
@@ -101,6 +99,8 @@ func NewKind(genericDef *builddef.BuildDef) (Definition, error) {
 		err := xerrors.Errorf("could not decode build manifest: %w", err)
 		return def, err
 	}
+
+	def = DefaultDefinition().Merge(def)
 
 	if err := yaml.Unmarshal(genericDef.RawLocks, &def.Locks); err != nil {
 		err := xerrors.Errorf("could not decode lock manifest: %w", err)
@@ -134,14 +134,57 @@ func NewKind(genericDef *builddef.BuildDef) (Definition, error) {
 type Definition struct {
 	BaseStage Stage `mapstructure:",squash"`
 
-	BaseImage     string                  `mapstructure:"base"`
-	Version       string                  `mapstructure:"version"`
-	MajMinVersion string                  `mapstructure:"-"`
-	Infer         bool                    `mapstructure:"infer"`
-	Stages        map[string]DerivedStage `mapstructure:"stages"`
-	Webserver     *webserver.Definition   `mapstructure:"webserver"`
+	BaseImage     string                `mapstructure:"base"`
+	Version       string                `mapstructure:"version"`
+	MajMinVersion string                `mapstructure:"-"`
+	Infer         *bool                 `mapstructure:"infer"`
+	Stages        DerivedStageSet       `mapstructure:"stages"`
+	Webserver     *webserver.Definition `mapstructure:"webserver"`
 
 	Locks DefinitionLocks `mapstructure:"-"`
+}
+
+func (def Definition) Copy() Definition {
+	new := Definition{
+		BaseStage: def.BaseStage.Copy(),
+		BaseImage: def.BaseImage,
+		Version:   def.Version,
+		Stages:    def.Stages.Copy(),
+	}
+
+	if def.Infer != nil {
+		infer := *def.Infer
+		new.Infer = &infer
+	}
+	if def.Webserver != nil {
+		webserver := *def.Webserver
+		new.Webserver = &webserver
+	}
+
+	return new
+}
+
+func (base Definition) Merge(overriding Definition) Definition {
+	new := base.Copy()
+
+	new.BaseStage = new.BaseStage.Merge(overriding.BaseStage)
+	new.Stages = new.Stages.Merge(overriding.Stages)
+	new.BaseImage = overriding.BaseImage
+	new.Version = overriding.Version
+
+	if overriding.Infer != nil {
+		infer := *overriding.Infer
+		new.Infer = &infer
+	}
+	if overriding.Webserver != nil {
+		webserver := overriding.Webserver.Copy()
+		if new.Webserver != nil {
+			webserver = new.Webserver.Merge(*overriding.Webserver)
+		}
+		new.Webserver = &webserver
+	}
+
+	return new
 }
 
 // Stage holds all the properties from the base stage that could also be
@@ -245,6 +288,60 @@ type DerivedStage struct {
 	// as a pointer to distinguish when the value is nil or when it's false. In
 	// the former case, the value from the parent stage is used.
 	Dev *bool `mapstructure:"dev"`
+}
+
+func (s DerivedStage) Copy() DerivedStage {
+	new := DerivedStage{
+		Stage:      s.Stage.Copy(),
+		DeriveFrom: s.DeriveFrom,
+	}
+
+	if s.Dev != nil {
+		devMode := *s.Dev
+		new.Dev = &devMode
+	}
+
+	return new
+}
+
+func (s DerivedStage) Merge(overriding DerivedStage) DerivedStage {
+	new := s.Copy()
+
+	new.Stage = s.Stage.Merge(overriding.Stage)
+	new.DeriveFrom = overriding.DeriveFrom
+
+	if overriding.Dev != nil {
+		devMode := *overriding.Dev
+		new.Dev = &devMode
+	}
+
+	return new
+}
+
+type DerivedStageSet map[string]DerivedStage
+
+func (set DerivedStageSet) Copy() DerivedStageSet {
+	new := DerivedStageSet{}
+
+	for name, stage := range set {
+		new[name] = stage.Copy()
+	}
+
+	return new
+}
+
+func (base DerivedStageSet) Merge(overriding DerivedStageSet) DerivedStageSet {
+	new := base.Copy()
+
+	for name, stage := range overriding {
+		if _, ok := new[name]; !ok {
+			new[name] = stage
+		} else {
+			new[name] = new[name].Merge(stage)
+		}
+	}
+
+	return new
 }
 
 type PHPConfigFiles struct {
@@ -352,7 +449,7 @@ func (def *Definition) ResolveStageDefinition(
 		return stageDef, err
 	}
 
-	if !def.Infer {
+	if def.Infer == nil || *def.Infer == false {
 		return stageDef, nil
 	}
 
@@ -417,11 +514,13 @@ func mergeStages(base *Definition, stages ...DerivedStage) StageDefinition {
 		BaseImage:      base.BaseImage,
 		Version:        base.Version,
 		MajMinVersion:  base.MajMinVersion,
-		Infer:          base.Infer,
 		Stage:          base.BaseStage.Copy(),
 		PlatformReqs:   map[string]string{},
 		LockedPackages: map[string]string{},
 		Webserver:      base.Webserver,
+	}
+	if base.Infer != nil {
+		stageDef.Infer = *base.Infer
 	}
 
 	stages = reverseStages(stages)
