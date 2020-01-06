@@ -439,11 +439,11 @@ func (def *Definition) ResolveStageDefinition(
 	}
 
 	if stageDef.Dev == false && *stageDef.FPM == true {
-		stageDef.Extensions.Add("apcu", "*", false)
-		stageDef.Extensions.Add("opcache", "*", false)
+		stageDef.Extensions.Add("apcu", "*")
+		stageDef.Extensions.Add("opcache", "*")
 	}
 	for name, constraint := range stageDef.PlatformReqs {
-		stageDef.Extensions.Add(name, constraint, false)
+		stageDef.Extensions.Add(name, constraint)
 	}
 
 	inferExtensions(&stageDef)
@@ -617,16 +617,16 @@ var preinstalledExtensions = map[string]struct{}{
 func inferExtensions(def *StageDefinition) {
 	// soap extension needs sockets extension to work properly
 	if def.Extensions.Has("soap") {
-		def.Extensions.Add("sockets", "*", false)
+		def.Extensions.Add("sockets", "*")
 	}
 
 	// Add zip extension if it's missing as it's used by composer to install packages.
-	def.Extensions.Add("zip", "*", false)
+	def.Extensions.Add("zip", "*")
 }
 
 func inferSystemPackages(def *StageDefinition) {
 	// Add libpcre by default, as most frameworks/CMSes are using regexp
-	def.SystemPackages.Add("libpcre3-dev", "*", false)
+	def.SystemPackages.Add("libpcre3-dev", "*")
 
 	for _, ext := range def.Extensions.Names() {
 		deps, ok := extensionsDeps[ext]
@@ -635,11 +635,11 @@ func inferSystemPackages(def *StageDefinition) {
 		}
 
 		for name, ver := range deps {
-			def.SystemPackages.Add(name, ver, false)
+			def.SystemPackages.Add(name, ver)
 		}
 	}
 
 	// Add unzip and git packages as they're used by Composer
-	def.SystemPackages.Add("unzip", "*", false)
-	def.SystemPackages.Add("git", "*", false)
+	def.SystemPackages.Add("unzip", "*")
+	def.SystemPackages.Add("git", "*")
 }

@@ -25,11 +25,18 @@ type Locks interface {
 // values.
 type VersionMap map[string]string
 
-func (set *VersionMap) Add(name, val string, overwrite bool) {
+func (set *VersionMap) Add(name, val string) {
 	if set == nil {
 		return
 	}
-	if _, ok := (*set)[name]; ok && !overwrite {
+	if _, ok := (*set)[name]; ok {
+		return
+	}
+	(*set)[name] = val
+}
+
+func (set *VersionMap) Overwrite(name, val string) {
+	if set == nil {
 		return
 	}
 	(*set)[name] = val
@@ -39,7 +46,9 @@ func (set *VersionMap) Remove(name string) {
 	if set == nil {
 		return
 	}
-	delete(*set, name)
+	if _, ok := (*set)[name]; ok {
+		delete(*set, name)
+	}
 }
 
 func (set *VersionMap) Has(name string) bool {
@@ -88,6 +97,6 @@ func (set *VersionMap) Merge(overriding *VersionMap) {
 		return
 	}
 	for name, val := range *overriding {
-		set.Add(name, val, true)
+		set.Overwrite(name, val)
 	}
 }

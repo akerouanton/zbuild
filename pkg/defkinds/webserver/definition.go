@@ -42,7 +42,7 @@ func NewKind(genericDef *builddef.BuildDef) (Definition, error) {
 	}
 
 	if def.Healthcheck != nil && *def.Healthcheck {
-		def.SystemPackages.Add("curl", "*", false)
+		def.SystemPackages.Add("curl", "*")
 	}
 
 	return def, def.Validate()
