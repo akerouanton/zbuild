@@ -6,4 +6,3 @@ stages:
   prod:
     system_packages:
       curl: curl-version
-webserver: null

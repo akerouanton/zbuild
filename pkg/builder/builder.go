@@ -5,8 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
+	"strings"
 
 	"github.com/NiR-/zbuild/pkg/builddef"
+	"github.com/NiR-/zbuild/pkg/image"
 	"github.com/NiR-/zbuild/pkg/llbutils"
 	"github.com/NiR-/zbuild/pkg/pkgsolver"
 	"github.com/NiR-/zbuild/pkg/registry"
@@ -31,9 +33,22 @@ type Builder struct {
 	PkgSolver pkgsolver.PackageSolver
 }
 
-type frontOptions struct {
-	file  string
-	stage string
+func (b Builder) findHandler(
+	kind string,
+	solver statesolver.StateSolver,
+	shouldEmbedWebserverDef bool,
+) (registry.KindHandler, error) {
+	handler, err := b.Registry.FindHandler(kind)
+	if err != nil {
+		return handler, err
+	}
+	handler.WithSolver(solver)
+
+	if shouldEmbedWebserverDef && !b.Registry.EmbedWebserverDef(kind) {
+		err = xerrors.Errorf("you can't call a webserver stage from a %s kind as it doesn't embed webserver definition", kind)
+	}
+
+	return handler, err
 }
 
 func buildOptsFromBuildkitOpts(c client.Client) builddef.BuildOpts {
@@ -75,19 +90,79 @@ func (b Builder) Build(
 	if err != nil {
 		return nil, err
 	}
+	buildOpts.Def = def
 
-	handler, err := b.Registry.FindHandler(def.Kind)
+	state, img, err := b.build(ctx, solver, buildOpts)
 	if err != nil {
 		return nil, err
 	}
-	handler.WithSolver(solver)
 
-	buildOpts.Def = def
+	return solveStateWithImage(ctx, c, state, img)
+}
+
+func (b Builder) build(
+	ctx context.Context,
+	solver statesolver.StateSolver,
+	buildOpts builddef.BuildOpts,
+) (llb.State, *image.Image, error) {
+	webserverStage := isWebserverStage(buildOpts.Stage)
+	if webserverStage {
+		buildOpts.Stage = strings.TrimPrefix(buildOpts.Stage, "webserver-")
+	}
+
+	handler, err := b.findHandler(buildOpts.Def.Kind, solver, webserverStage)
+	if err != nil {
+		return llb.State{}, nil, err
+	}
+
 	state, img, err := handler.Build(ctx, buildOpts)
 	if err != nil {
-		return nil, err
+		return state, img, err
 	}
 
+	if webserverStage {
+		buildOpts.Def = newBuildDefForWebserver(buildOpts.Def)
+		buildOpts.Source = &state
+		buildOpts.Stage = "webserver"
+
+		return b.build(ctx, solver, buildOpts)
+	}
+
+	return state, img, nil
+}
+
+func newBuildDefForWebserver(parent *builddef.BuildDef) *builddef.BuildDef {
+	return &builddef.BuildDef{
+		Kind:      "webserver",
+		RawConfig: extractWebserverFromParent(parent.RawConfig),
+		RawLocks:  extractWebserverFromParent(parent.RawLocks),
+	}
+}
+
+func extractWebserverFromParent(parent map[string]interface{}) map[string]interface{} {
+	raw := map[string]interface{}{}
+	webserver, ok := parent["webserver"]
+	if !ok {
+		return raw
+	}
+
+	for k, v := range webserver.(map[interface{}]interface{}) {
+		raw[k.(string)] = v
+	}
+
+	return raw
+}
+
+func isWebserverStage(stage string) bool {
+	return strings.HasPrefix(stage, "webserver-")
+}
+
+func solveStateWithImage(
+	ctx context.Context,
+	c client.Client,
+	state llb.State,
+	img *image.Image,
+) (*client.Result, error) {
 	if img == nil {
 		return nil, errors.New("specialized builder returned a nil image")
 	}
@@ -113,8 +188,6 @@ func (b Builder) Debug(
 	file,
 	stage string,
 ) (llb.State, error) {
-	var state llb.State
-
 	buildOpts := builddef.NewBuildOpts(file)
 	buildOpts.Stage = stage
 	buildOpts.SessionID = "<SESSION-ID>"
@@ -122,22 +195,12 @@ func (b Builder) Debug(
 	ctx := context.Background()
 	def, err := builddef.Load(ctx, solver, buildOpts)
 	if err != nil {
-		return state, err
+		return llb.State{}, err
 	}
-
-	handler, err := b.Registry.FindHandler(def.Kind)
-	if err != nil {
-		return state, err
-	}
-	handler.WithSolver(solver)
-
 	buildOpts.Def = def
-	state, _, err = handler.Build(ctx, buildOpts)
-	if err != nil {
-		return state, err
-	}
 
-	return state, nil
+	state, _, err := b.build(ctx, solver, buildOpts)
+	return state, err
 }
 
 func (b Builder) DumpConfig(
@@ -147,21 +210,24 @@ func (b Builder) DumpConfig(
 ) ([]byte, error) {
 	buildOpts := builddef.NewBuildOpts(file)
 	buildOpts.Stage = stage
-	// @TODO: remove?
-	buildOpts.SessionID = "<SESSION-ID>"
 
 	ctx := context.Background()
 	def, err := builddef.Load(ctx, solver, buildOpts)
 	if err != nil {
 		return nil, err
 	}
+
+	webserverStage := isWebserverStage(stage)
+	if webserverStage {
+		def = newBuildDefForWebserver(def)
+		buildOpts.Stage = "webserver"
+	}
 	buildOpts.Def = def
 
-	handler, err := b.Registry.FindHandler(def.Kind)
+	handler, err := b.findHandler(def.Kind, solver, webserverStage)
 	if err != nil {
 		return nil, err
 	}
-	handler.WithSolver(solver)
 
 	dumpable, err := handler.DebugConfig(buildOpts)
 	if err != nil {
@@ -182,26 +248,49 @@ func (b Builder) UpdateLockFile(
 		return err
 	}
 
-	handler, err := b.Registry.FindHandler(def.Kind)
-	if err != nil {
-		return err
-	}
-	handler.WithSolver(solver)
-
-	locks, err := handler.UpdateLocks(ctx, b.PkgSolver, def)
+	rawLocks, err := b.updateLocks(ctx, solver, def)
 	if err != nil {
 		return err
 	}
 
-	lockdata, err := locks.RawLocks()
+	buf, err := yaml.Marshal(rawLocks)
 	if err != nil {
 		return err
 	}
 
-	err = ioutil.WriteFile(buildOpts.LockFile, lockdata, 0640)
+	err = ioutil.WriteFile(buildOpts.LockFile, buf, 0640)
 	if err != nil {
 		return xerrors.Errorf("could not write %s: %w", buildOpts.LockFile, err)
 	}
 
 	return nil
+}
+
+func (b Builder) updateLocks(
+	ctx context.Context,
+	solver statesolver.StateSolver,
+	def *builddef.BuildDef,
+) (map[string]interface{}, error) {
+	handler, err := b.findHandler(def.Kind, solver, false)
+	if err != nil {
+		return nil, err
+	}
+
+	locks, err := handler.UpdateLocks(ctx, b.PkgSolver, def)
+	if err != nil {
+		return nil, err
+	}
+
+	rawLocks := locks.RawLocks()
+	if !b.Registry.EmbedWebserverDef(def.Kind) {
+		return rawLocks, nil
+	}
+
+	webserverDef := newBuildDefForWebserver(def)
+	rawLocks["webserver"], err = b.updateLocks(ctx, solver, webserverDef)
+	if err != nil {
+		return nil, err
+	}
+
+	return rawLocks, nil
 }

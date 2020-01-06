@@ -12,8 +12,3 @@ stages:
   prod:
     config_files:
       .env.prod: .env
-
-webserver:
-  type: nginx
-  config_file: nginx.conf
-  healthcheck: true

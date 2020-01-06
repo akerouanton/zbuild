@@ -47,9 +47,10 @@ func itLoadsConfigAndLockFilesTC(
 			RawConfig: map[string]interface{}{
 				"foo": "bar",
 			},
-			RawLocks: []byte(`foo: bar
-baz: plop
-`),
+			RawLocks: map[string]interface{}{
+				"foo": "bar",
+				"baz": "plop",
+			},
 		},
 	}
 }

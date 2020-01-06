@@ -29,7 +29,7 @@ func init() {
 }
 
 func RegisterKind(registry *registry.KindRegistry) {
-	registry.Register("webserver", &WebserverHandler{})
+	registry.Register("webserver", &WebserverHandler{}, false)
 }
 
 func (h *WebserverHandler) DebugConfig(

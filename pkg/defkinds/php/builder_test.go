@@ -11,7 +11,6 @@ import (
 	"github.com/NiR-/zbuild/pkg/image"
 	"github.com/NiR-/zbuild/pkg/llbtest"
 	"github.com/NiR-/zbuild/pkg/mocks"
-	"github.com/NiR-/zbuild/pkg/statesolver"
 	"github.com/go-test/deep"
 	"github.com/golang/mock/gomock"
 	"github.com/moby/buildkit/frontend/gateway/client"
@@ -29,7 +28,8 @@ type buildTC struct {
 }
 
 func initBuildLLBForDevStageTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
-	genericDef := loadGenericDef(t, "testdata/build/zbuild.yml", "testdata/build/zbuild.lock")
+	genericDef := loadGenericDef(t, "testdata/build/zbuild.yml")
+	genericDef.RawLocks = loadDefLocks(t, "testdata/build/zbuild.lock")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
 
@@ -88,7 +88,8 @@ func initBuildLLBForDevStageTC(t *testing.T, mockCtrl *gomock.Controller) buildT
 }
 
 func initBuildLLBForProdStageTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
-	genericDef := loadGenericDef(t, "testdata/build/zbuild.yml", "testdata/build/zbuild.lock")
+	genericDef := loadGenericDef(t, "testdata/build/zbuild.yml")
+	genericDef.RawLocks = loadDefLocks(t, "testdata/build/zbuild.lock")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
 
@@ -152,71 +153,9 @@ func initBuildLLBForProdStageTC(t *testing.T, mockCtrl *gomock.Controller) build
 	}
 }
 
-func initBuildLLBForWebserverProdStageTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
-	genericDef := loadGenericDef(t, "testdata/build/with-webserver.yml", "testdata/build/with-webserver.lock")
-
-	solver := mocks.NewMockStateSolver(mockCtrl)
-	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
-	solver.EXPECT().ReadFile(
-		gomock.Any(), "composer.lock", gomock.Any(),
-	).Return([]byte{}, statesolver.FileNotFound)
-
-	kindHandler := php.NewPHPHandler()
-	kindHandler.WithSolver(solver)
-
-	return buildTC{
-		handler: kindHandler,
-		client:  llbtest.NewMockClient(mockCtrl),
-		buildOpts: builddef.BuildOpts{
-			Def:           &genericDef,
-			Stage:         "webserver-prod",
-			SessionID:     "<SESSION-ID>",
-			LocalUniqueID: "x1htr02606a9rk8b0daewh9es",
-			ContextName:   "context",
-		},
-		expectedState: "testdata/build/with-webserver-prod.json",
-		expectedImage: &image.Image{
-			Image: specs.Image{
-				Architecture: "amd64",
-				OS:           "linux",
-				RootFS: specs.RootFS{
-					Type: "layers",
-				},
-			},
-			Config: image.ImageConfig{
-				ImageConfig: specs.ImageConfig{
-					User: "1000",
-					Env: []string{
-						"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
-						"NGINX_VERSION=1.17.6",
-						"NJS_VERSION=0.3.7",
-						"PKG_RELEASE=1~buster",
-					},
-					Entrypoint: []string{},
-					Cmd:        []string{"nginx", "-g", "daemon off;"},
-					StopSignal: "SIGSTOP",
-					Volumes:    map[string]struct{}{},
-					ExposedPorts: map[string]struct{}{
-						"80/tcp": {},
-					},
-					Labels: map[string]string{
-						"io.zbuild":  "true",
-						"maintainer": "NGINX Docker Maintainers <docker-maint@nginx.com>",
-					},
-				},
-				Healthcheck: &image.HealthConfig{
-					Test:     []string{"CMD", "http_proxy= test \"$(curl --fail http://127.0.0.1/_ping)\" = \"pong\""},
-					Interval: 10 * time.Second,
-					Timeout:  1 * time.Second,
-					Retries:  3,
-				},
-			},
-		},
-	}
-}
-
 func initBuildProdStageFromGitBasedBuildContextTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
-	genericDef := loadGenericDef(t, "testdata/build/zbuild.yml", "testdata/build/zbuild.lock")
+	genericDef := loadGenericDef(t, "testdata/build/zbuild.yml")
+	genericDef.RawLocks = loadDefLocks(t, "testdata/build/zbuild.lock")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
 
@@ -284,7 +223,6 @@ func TestBuild(t *testing.T) {
 	testcases := map[string]func(*testing.T, *gomock.Controller) buildTC{
 		"build LLB DAG for dev stage":                   initBuildLLBForDevStageTC,
 		"build LLB DAG for prod stage":                  initBuildLLBForProdStageTC,
-		"build LLB DAG for webserver-prod stage":        initBuildLLBForWebserverProdStageTC,
 		"build prod stage from git-based build context": initBuildProdStageFromGitBasedBuildContextTC,
 	}
 
@@ -356,8 +294,8 @@ func initDebugDevStageTC(t *testing.T, mockCtrl *gomock.Controller) debugConfigT
 	h := php.NewPHPHandler()
 	h.WithSolver(solver)
 
-	genericDef := loadGenericDef(t, "testdata/debug-config/zbuild.yml",
-		"testdata/debug-config/zbuild.lock")
+	genericDef := loadGenericDef(t, "testdata/debug-config/zbuild.yml")
+	genericDef.RawLocks = loadDefLocks(t, "testdata/debug-config/zbuild.lock")
 
 	return debugConfigTC{
 		handler: h,
@@ -381,8 +319,8 @@ func initDebugProdStageTC(t *testing.T, mockCtrl *gomock.Controller) debugConfig
 	h := php.NewPHPHandler()
 	h.WithSolver(solver)
 
-	genericDef := loadGenericDef(t, "testdata/debug-config/zbuild.yml",
-		"testdata/debug-config/zbuild.lock")
+	genericDef := loadGenericDef(t, "testdata/debug-config/zbuild.yml")
+	genericDef.RawLocks = loadDefLocks(t, "testdata/debug-config/zbuild.lock")
 
 	return debugConfigTC{
 		handler: h,
@@ -394,36 +332,10 @@ func initDebugProdStageTC(t *testing.T, mockCtrl *gomock.Controller) debugConfig
 	}
 }
 
-func initDebugWebserverProdStageTC(t *testing.T, mockCtrl *gomock.Controller) debugConfigTC {
-	solver := mocks.NewMockStateSolver(mockCtrl)
-
-	raw := loadRawTestdata(t, "testdata/debug-config/composer.lock")
-	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
-	solver.EXPECT().ReadFile(
-		gomock.Any(), "composer.lock", gomock.Any(),
-	).Return(raw, nil)
-
-	h := php.NewPHPHandler()
-	h.WithSolver(solver)
-
-	genericDef := loadGenericDef(t, "testdata/debug-config/zbuild.yml",
-		"testdata/debug-config/zbuild.lock")
-
-	return debugConfigTC{
-		handler: h,
-		buildOpts: builddef.BuildOpts{
-			Def:   &genericDef,
-			Stage: "webserver-prod",
-		},
-		expected: "testdata/debug-config/dump-webserver-prod.yml",
-	}
-}
-
 func TestDebugConfig(t *testing.T) {
 	testcases := map[string]func(*testing.T, *gomock.Controller) debugConfigTC{
-		"debug dev stage config":            initDebugDevStageTC,
-		"debug prod stage config":           initDebugProdStageTC,
-		"debug webserver-prod stage config": initDebugWebserverProdStageTC,
+		"debug dev stage config":  initDebugDevStageTC,
+		"debug prod stage config": initDebugProdStageTC,
 	}
 
 	for tcname := range testcases {

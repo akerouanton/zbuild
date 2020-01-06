@@ -34,19 +34,27 @@ type KindHandler interface {
 
 // KindRegistry associates kinds with their respective handler.
 type KindRegistry struct {
-	kinds map[string]KindHandler
+	kinds            map[string]KindHandler
+	withWebserverDef map[string]bool
 }
 
 // NewKindRegistry creates an empty KindRegistry.
 func NewKindRegistry() *KindRegistry {
 	return &KindRegistry{
-		kinds: map[string]KindHandler{},
+		kinds:            map[string]KindHandler{},
+		withWebserverDef: map[string]bool{},
 	}
 }
 
-// Register adds a kind handler to the registry.
-func (reg *KindRegistry) Register(name string, handler KindHandler) {
+// Register adds a kind handler to the registry. The last parameter indicates
+// whether this kind of definition embeds webserver definitions.
+func (reg *KindRegistry) Register(
+	name string,
+	handler KindHandler,
+	withWebserverDef bool,
+) {
 	reg.kinds[name] = handler
+	reg.withWebserverDef[name] = withWebserverDef
 }
 
 // FindHandler checks if there's a known handler for the given kind. It returns
@@ -60,14 +68,22 @@ func (reg *KindRegistry) FindHandler(defkind string) (KindHandler, error) {
 	return builder, nil
 }
 
+func (reg *KindRegistry) EmbedWebserverDef(defkind string) bool {
+	embedding, ok := reg.withWebserverDef[defkind]
+	if !ok {
+		return false
+	}
+	return embedding
+}
+
 // ErrUnknownDefKind is returned when the decoded service has an unknown
 // kind.
 var ErrUnknownDefKind = xerrors.New("unknown kind")
 
 var Registry = NewKindRegistry()
 
-func Register(name string, handler KindHandler) {
-	Registry.Register(name, handler)
+func Register(name string, handler KindHandler, embedWebserverDef bool) {
+	Registry.Register(name, handler, embedWebserverDef)
 }
 
 func FindHandler(defkind string) (KindHandler, error) {

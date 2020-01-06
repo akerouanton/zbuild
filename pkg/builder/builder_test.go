@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"testing"
 
 	"github.com/NiR-/zbuild/pkg/builddef"
@@ -30,10 +31,11 @@ type testCase struct {
 }
 
 func TestBuilder(t *testing.T) {
-	testcases := map[string]func(*gomock.Controller) testCase{
-		"successfully build default stage and file":                 successfullyBuildDefaultStageAndFileTC,
-		"successfully build custom stage and file":                  successfullyBuildCustomStageAndFileTC,
-		"successfully build from git context":                       successfullyBuildFromGitContextTC,
+	testcases := map[string]func(*testing.T, *gomock.Controller) testCase{
+		"build default stage and file":                              initBuildDefaultStageAndFileTC,
+		"build custom stage and file":                               initBuildCustomStageAndFileTC,
+		"build from git context":                                    initBuildFromGitContextTC,
+		"build webserver stage":                                     initBuildWebserverStageTC,
 		"fail to read zbuild.yml file":                              failToReadYmlTC,
 		"failing to read zbuild.lock file doesn't prevent building": failToReadLockTC,
 		"fail to find a suitable kind handler":                      failToFindASutableKindHandlerTC,
@@ -49,7 +51,7 @@ func TestBuilder(t *testing.T) {
 			mockCtrl := gomock.NewController(t)
 			defer mockCtrl.Finish()
 
-			tc := tcinit(mockCtrl)
+			tc := tcinit(t, mockCtrl)
 			b := builder.Builder{
 				Registry: tc.registry,
 			}
@@ -74,22 +76,7 @@ func TestBuilder(t *testing.T) {
 	}
 }
 
-var (
-	zbuildYml = []byte(`
-kind: php
-version: 7.2.29
-
-extensions:
-  intl: "*"`)
-
-	zbuildLock = []byte(`
-system_packages:
-  libicu-dev: "52.1-8+deb8u7"
-extensions:
-  intl: "*"`)
-)
-
-func successfullyBuildDefaultStageAndFileTC(mockCtrl *gomock.Controller) testCase {
+func initBuildDefaultStageAndFileTC(t *testing.T, mockCtrl *gomock.Controller) testCase {
 	c := llbtest.NewMockClient(mockCtrl)
 	c.EXPECT().BuildOpts().AnyTimes().Return(client.BuildOpts{
 		SessionID: "<SESSION-ID>",
@@ -97,6 +84,9 @@ func successfullyBuildDefaultStageAndFileTC(mockCtrl *gomock.Controller) testCas
 			"context": "some-context-name",
 		},
 	})
+
+	zbuildYml := loadRawTestdata(t, "testdata/zbuild.yml")
+	zbuildLock := loadRawTestdata(t, "testdata/zbuild.lock")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
 	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
@@ -130,7 +120,7 @@ func successfullyBuildDefaultStageAndFileTC(mockCtrl *gomock.Controller) testCas
 	).Return(state, &img, nil)
 
 	registry := registry.NewKindRegistry()
-	registry.Register("php", handler)
+	registry.Register("php", handler, false)
 
 	refImage := llbtest.NewMockReference(mockCtrl)
 	resImg := &client.Result{
@@ -154,7 +144,7 @@ func successfullyBuildDefaultStageAndFileTC(mockCtrl *gomock.Controller) testCas
 	}
 }
 
-func successfullyBuildFromGitContextTC(mockCtrl *gomock.Controller) testCase {
+func initBuildFromGitContextTC(t *testing.T, mockCtrl *gomock.Controller) testCase {
 	c := llbtest.NewMockClient(mockCtrl)
 	c.EXPECT().BuildOpts().AnyTimes().Return(client.BuildOpts{
 		SessionID: "<SESSION-ID>",
@@ -162,6 +152,9 @@ func successfullyBuildFromGitContextTC(mockCtrl *gomock.Controller) testCase {
 			"context": "git://github.com/some/repo",
 		},
 	})
+
+	zbuildYml := loadRawTestdata(t, "testdata/zbuild.yml")
+	zbuildLock := loadRawTestdata(t, "testdata/zbuild.lock")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
 	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
@@ -196,7 +189,7 @@ func successfullyBuildFromGitContextTC(mockCtrl *gomock.Controller) testCase {
 	).Return(state, &img, nil)
 
 	registry := registry.NewKindRegistry()
-	registry.Register("php", handler)
+	registry.Register("php", handler, false)
 
 	refImage := llbtest.NewMockReference(mockCtrl)
 	resImg := &client.Result{
@@ -220,7 +213,7 @@ func successfullyBuildFromGitContextTC(mockCtrl *gomock.Controller) testCase {
 	}
 }
 
-func successfullyBuildCustomStageAndFileTC(mockCtrl *gomock.Controller) testCase {
+func initBuildCustomStageAndFileTC(t *testing.T, mockCtrl *gomock.Controller) testCase {
 	c := llbtest.NewMockClient(mockCtrl)
 	c.EXPECT().BuildOpts().AnyTimes().Return(client.BuildOpts{
 		SessionID: "<SESSION-ID>",
@@ -229,6 +222,9 @@ func successfullyBuildCustomStageAndFileTC(mockCtrl *gomock.Controller) testCase
 			"target":   "prod",
 		},
 	})
+
+	zbuildYml := loadRawTestdata(t, "testdata/zbuild.yml")
+	zbuildLock := loadRawTestdata(t, "testdata/zbuild.lock")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
 	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
@@ -269,7 +265,7 @@ func successfullyBuildCustomStageAndFileTC(mockCtrl *gomock.Controller) testCase
 	).Return(state, &img, nil)
 
 	registry := registry.NewKindRegistry()
-	registry.Register("php", handler)
+	registry.Register("php", handler, false)
 
 	imgConfig := `{"author":"zbuild","architecture":"","os":"","rootfs":{"type":"","diff_ids":null},"config":{}}`
 	return testCase{
@@ -286,7 +282,85 @@ func successfullyBuildCustomStageAndFileTC(mockCtrl *gomock.Controller) testCase
 	}
 }
 
-func failToReadYmlTC(mockCtrl *gomock.Controller) testCase {
+func initBuildWebserverStageTC(t *testing.T, mockCtrl *gomock.Controller) testCase {
+	c := llbtest.NewMockClient(mockCtrl)
+	c.EXPECT().BuildOpts().AnyTimes().Return(client.BuildOpts{
+		SessionID: "<SESSION-ID>",
+		Opts: map[string]string{
+			"filename": "api.zbuild.yml",
+			"target":   "webserver-prod",
+		},
+	})
+
+	zbuildYml := loadRawTestdata(t, "testdata/zbuild.yml")
+	zbuildLock := loadRawTestdata(t, "testdata/zbuild.lock")
+
+	solver := mocks.NewMockStateSolver(mockCtrl)
+	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
+
+	solver.EXPECT().ReadFile(
+		gomock.Any(), "api.zbuild.yml", gomock.Any(),
+	).Return(zbuildYml, nil)
+
+	solver.EXPECT().ReadFile(
+		gomock.Any(), "api.zbuild.lock", gomock.Any(),
+	).Return(zbuildLock, nil)
+
+	refImage := llbtest.NewMockReference(mockCtrl)
+	resImg := &client.Result{
+		Refs: map[string]client.Reference{"linux/amd64": refImage},
+		Ref:  refImage,
+	}
+	c.EXPECT().Solve(gomock.Any(), gomock.Any()).Return(resImg, nil)
+
+	ctx := context.TODO()
+	state := llb.State{}
+	img := image.Image{Image: specs.Image{Author: "zbuild"}}
+	phpHandler := mocks.NewMockKindHandler(mockCtrl)
+	phpHandler.EXPECT().WithSolver(gomock.Any()).Times(1)
+	phpHandler.EXPECT().Build(ctx,
+		MatchBuildOpts(builddef.BuildOpts{
+			File:        "api.zbuild.yml",
+			LockFile:    "api.zbuild.lock",
+			Stage:       "prod",
+			SessionID:   "<SESSION-ID>",
+			ContextName: "context",
+		}),
+	).Return(state, &img, nil)
+
+	webHandler := mocks.NewMockKindHandler(mockCtrl)
+	webHandler.EXPECT().WithSolver(gomock.Any()).Times(1)
+	webHandler.EXPECT().Build(ctx,
+		MatchBuildOpts(builddef.BuildOpts{
+			File:        "api.zbuild.yml",
+			LockFile:    "api.zbuild.lock",
+			Stage:       "webserver",
+			SessionID:   "<SESSION-ID>",
+			ContextName: "context",
+			Source:      &llb.State{},
+		}),
+	).Return(state, &img, nil)
+
+	registry := registry.NewKindRegistry()
+	registry.Register("php", phpHandler, true)
+	registry.Register("webserver", webHandler, false)
+
+	imgConfig := `{"author":"zbuild","architecture":"","os":"","rootfs":{"type":"","diff_ids":null},"config":{}}`
+	return testCase{
+		client:   c,
+		solver:   solver,
+		registry: registry,
+		expectedRes: &client.Result{
+			Refs: map[string]client.Reference{"linux/amd64": refImage},
+			Ref:  refImage,
+			Metadata: map[string][]byte{
+				"containerimage.config": []byte(imgConfig),
+			},
+		},
+	}
+}
+
+func failToReadYmlTC(t *testing.T, mockCtrl *gomock.Controller) testCase {
 	c := llbtest.NewMockClient(mockCtrl)
 	c.EXPECT().BuildOpts().AnyTimes().Return(client.BuildOpts{
 		SessionID: "<SESSION-ID>",
@@ -308,7 +382,7 @@ func failToReadYmlTC(mockCtrl *gomock.Controller) testCase {
 	}
 }
 
-func failToReadLockTC(mockCtrl *gomock.Controller) testCase {
+func failToReadLockTC(t *testing.T, mockCtrl *gomock.Controller) testCase {
 	c := llbtest.NewMockClient(mockCtrl)
 	c.EXPECT().BuildOpts().AnyTimes().Return(client.BuildOpts{
 		SessionID: "<SESSION-ID>",
@@ -316,6 +390,8 @@ func failToReadLockTC(mockCtrl *gomock.Controller) testCase {
 			"contextkey": "some-context-name",
 		},
 	})
+
+	zbuildYml := loadRawTestdata(t, "testdata/zbuild.yml")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
 	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
@@ -349,7 +425,7 @@ func failToReadLockTC(mockCtrl *gomock.Controller) testCase {
 	).Return(state, &img, nil)
 
 	registry := registry.NewKindRegistry()
-	registry.Register("php", handler)
+	registry.Register("php", handler, false)
 
 	refImage := llbtest.NewMockReference(mockCtrl)
 	resImg := &client.Result{
@@ -373,7 +449,7 @@ func failToReadLockTC(mockCtrl *gomock.Controller) testCase {
 	}
 }
 
-func failToFindASutableKindHandlerTC(mockCtrl *gomock.Controller) testCase {
+func failToFindASutableKindHandlerTC(t *testing.T, mockCtrl *gomock.Controller) testCase {
 	c := llbtest.NewMockClient(mockCtrl)
 	c.EXPECT().BuildOpts().AnyTimes().Return(client.BuildOpts{
 		SessionID: "<SESSION-ID>",
@@ -381,6 +457,9 @@ func failToFindASutableKindHandlerTC(mockCtrl *gomock.Controller) testCase {
 			"context": "some-context-name",
 		},
 	})
+
+	zbuildYml := loadRawTestdata(t, "testdata/zbuild.yml")
+	zbuildLock := loadRawTestdata(t, "testdata/zbuild.lock")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
 	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
@@ -395,7 +474,7 @@ func failToFindASutableKindHandlerTC(mockCtrl *gomock.Controller) testCase {
 
 	handler := mocks.NewMockKindHandler(mockCtrl)
 	registry := registry.NewKindRegistry()
-	registry.Register("notphp", handler)
+	registry.Register("notphp", handler, false)
 
 	return testCase{
 		client:      c,
@@ -405,7 +484,7 @@ func failToFindASutableKindHandlerTC(mockCtrl *gomock.Controller) testCase {
 	}
 }
 
-func failWhenKindHandlerFailsTC(mockCtrl *gomock.Controller) testCase {
+func failWhenKindHandlerFailsTC(t *testing.T, mockCtrl *gomock.Controller) testCase {
 	c := llbtest.NewMockClient(mockCtrl)
 	c.EXPECT().BuildOpts().AnyTimes().Return(client.BuildOpts{
 		SessionID: "<SESSION-ID>",
@@ -413,6 +492,9 @@ func failWhenKindHandlerFailsTC(mockCtrl *gomock.Controller) testCase {
 			"context": "some-context-name",
 		},
 	})
+
+	zbuildYml := loadRawTestdata(t, "testdata/zbuild.yml")
+	zbuildLock := loadRawTestdata(t, "testdata/zbuild.lock")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
 	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
@@ -434,7 +516,7 @@ func failWhenKindHandlerFailsTC(mockCtrl *gomock.Controller) testCase {
 	handler.EXPECT().Build(gomock.Any(), gomock.Any()).Return(state, &img, err)
 
 	registry := registry.NewKindRegistry()
-	registry.Register("php", handler)
+	registry.Register("php", handler, false)
 
 	return testCase{
 		client:      c,
@@ -471,4 +553,12 @@ func (m buildOptsMatcher) String() string {
 		m.opts.Stage,
 		m.opts.SessionID,
 		m.opts.ContextName)
+}
+
+func loadRawTestdata(t *testing.T, filepath string) []byte {
+	buf, err := ioutil.ReadFile(filepath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return buf
 }

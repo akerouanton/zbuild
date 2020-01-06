@@ -1,11 +1,6 @@
 kind: nodejs
 version: 12
 
-webserver:
-  type: nginx
-  config_file: nginx.conf
-  healthcheck: true
-
 stages:
   worker:
     command: bin/worker.js

@@ -55,7 +55,7 @@ func successfullyFindBuilderTC(mockCtrl *gomock.Controller) registryTC {
 	h := mocks.NewMockKindHandler(mockCtrl)
 
 	reg := registry.NewKindRegistry()
-	reg.Register("some-kind", h)
+	reg.Register("some-kind", h, false)
 
 	return registryTC{
 		registry: reg,
@@ -88,6 +88,6 @@ func (h mockKindHandler) UpdateLocks(ctx context.Context, pkgSolver pkgsolver.Pa
 
 type mockLocks struct{}
 
-func (l mockLocks) RawLocks() ([]byte, error) {
-	return []byte{}, nil
+func (l mockLocks) RawLocks() map[string]interface{} {
+	return map[string]interface{}{}
 }

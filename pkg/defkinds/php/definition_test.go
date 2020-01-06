@@ -6,7 +6,6 @@ import (
 
 	"github.com/NiR-/zbuild/pkg/builddef"
 	"github.com/NiR-/zbuild/pkg/defkinds/php"
-	"github.com/NiR-/zbuild/pkg/defkinds/webserver"
 	"github.com/NiR-/zbuild/pkg/llbutils"
 	"github.com/go-test/deep"
 	"github.com/golang/mock/gomock"
@@ -190,11 +189,52 @@ func initSuccessfullyParseRawDefinitionWithStagesTC() newDefinitionTC {
 	}
 }
 
+func initParseRawDefinitionWithWebserverTC() newDefinitionTC {
+	devStageDevMode := true
+	prodStageDevMode := false
+	inferMode := false
+	baseStageFPM := true
+	baseStageHealthcheck := true
+
+	baseStage := emptyStage()
+	baseStage.Healthcheck = &baseStageHealthcheck
+	baseStage.FPM = &baseStageFPM
+	baseStage.ComposerDumpFlags = &php.ComposerDumpFlags{
+		ClassmapAuthoritative: true,
+	}
+
+	devStage := emptyStage()
+	prodStage := emptyStage()
+
+	return newDefinitionTC{
+		file: "testdata/def/with-webserver.yml",
+		expected: php.Definition{
+			BaseStage:     baseStage,
+			Version:       "7.4.0",
+			MajMinVersion: "7.4",
+			BaseImage:     "docker.io/library/php:7.4-fpm-buster",
+			Infer:         &inferMode,
+			Stages: map[string]php.DerivedStage{
+				"dev": {
+					DeriveFrom: "base",
+					Dev:        &devStageDevMode,
+					Stage:      devStage,
+				},
+				"prod": {
+					DeriveFrom: "base",
+					Dev:        &prodStageDevMode,
+					Stage:      prodStage,
+				},
+			},
+		},
+	}
+}
+
 func initFailToParseUnknownPropertiesTC() newDefinitionTC {
 	return newDefinitionTC{
 		file:        "testdata/def/with-invalid-properties.yml",
 		lockFile:    "",
-		expectedErr: errors.New("could not decode build manifest: 1 error(s) decoding:\n\n* '' has invalid keys: foo"),
+		expectedErr: errors.New("could not decode build manifest: invalid config parameter: foo"),
 	}
 }
 
@@ -206,6 +246,7 @@ func TestNewKind(t *testing.T) {
 	testcases := map[string]func() newDefinitionTC{
 		"successfully parse raw definition without stages": initSuccessfullyParseRawDefinitionWithoutStagesTC,
 		"successfully parse raw definition with stages":    initSuccessfullyParseRawDefinitionWithStagesTC,
+		"successfully parse raw definition with webserver": initParseRawDefinitionWithWebserverTC,
 		"fail to parse unknown properties":                 initFailToParseUnknownPropertiesTC,
 	}
 
@@ -218,7 +259,7 @@ func TestNewKind(t *testing.T) {
 
 			generic := loadBuildDef(t, tc.file)
 			if tc.lockFile != "" {
-				generic.RawLocks = loadRawTestdata(t, tc.lockFile)
+				generic.RawLocks = loadDefLocks(t, tc.lockFile)
 			}
 
 			def, err := php.NewKind(generic)
@@ -536,7 +577,7 @@ func TestResolveStageDefinition(t *testing.T) {
 
 			generic := loadBuildDef(t, tc.file)
 			if tc.lockFile != "" {
-				generic.RawLocks = loadRawTestdata(t, tc.lockFile)
+				generic.RawLocks = loadDefLocks(t, tc.lockFile)
 			}
 
 			def, err := php.NewKind(generic)
@@ -873,59 +914,6 @@ func TestMergeDefinition(t *testing.T) {
 							DeriveFrom: "prod",
 						},
 					},
-				}
-			},
-		},
-		"merge webserver with base": {
-			base: func() php.Definition {
-				configFile := "nginx.conf"
-				return php.Definition{
-					Webserver: &webserver.Definition{
-						ConfigFile: &configFile,
-					},
-				}
-			},
-			overriding: func() php.Definition {
-				configFile := "docker/nginx.conf"
-				return php.Definition{
-					Webserver: &webserver.Definition{
-						ConfigFile: &configFile,
-					},
-				}
-			},
-			expected: func() php.Definition {
-				configFile := "docker/nginx.conf"
-				return php.Definition{
-					Webserver: &webserver.Definition{
-						ConfigFile:     &configFile,
-						SystemPackages: &builddef.VersionMap{},
-					},
-					BaseStage: emptyStage(),
-					Stages:    php.DerivedStageSet{},
-				}
-			},
-		},
-		"merge webserver without base": {
-			base: func() php.Definition {
-				return php.Definition{}
-			},
-			overriding: func() php.Definition {
-				configFile := "docker/nginx.conf"
-				return php.Definition{
-					Webserver: &webserver.Definition{
-						ConfigFile: &configFile,
-					},
-				}
-			},
-			expected: func() php.Definition {
-				configFile := "docker/nginx.conf"
-				return php.Definition{
-					Webserver: &webserver.Definition{
-						ConfigFile:     &configFile,
-						SystemPackages: &builddef.VersionMap{},
-					},
-					BaseStage: emptyStage(),
-					Stages:    php.DerivedStageSet{},
 				}
 			},
 		},

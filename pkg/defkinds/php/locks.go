@@ -6,11 +6,8 @@ import (
 
 	"github.com/NiR-/notpecl/extindex"
 	"github.com/NiR-/zbuild/pkg/builddef"
-	"github.com/NiR-/zbuild/pkg/defkinds/webserver"
 	"github.com/NiR-/zbuild/pkg/pkgsolver"
-	"github.com/NiR-/zbuild/pkg/registry"
 	"golang.org/x/xerrors"
-	"gopkg.in/yaml.v2"
 )
 
 var defaultBaseImages = map[string]struct {
@@ -34,23 +31,35 @@ var defaultBaseImages = map[string]struct {
 // DefinitionLocks defines version locks for system packages and PHP extensions used
 // by each stage.
 type DefinitionLocks struct {
-	BaseImage string                     `yaml:"base_image"`
-	Stages    map[string]StageLocks      `yaml:"stages"`
-	Webserver *webserver.DefinitionLocks `yaml:"webserver"`
+	BaseImage string                `mapstructure:"base_image"`
+	Stages    map[string]StageLocks `mapstructure:"stages"`
 }
 
-func (l DefinitionLocks) RawLocks() ([]byte, error) {
-	lockdata, err := yaml.Marshal(l)
-	if err != nil {
-		return lockdata, xerrors.Errorf("could not marshal php locks: %w", err)
+func (l DefinitionLocks) RawLocks() map[string]interface{} {
+	lockdata := map[string]interface{}{
+		"base_image": l.BaseImage,
 	}
-	return lockdata, nil
+
+	stages := map[string]interface{}{}
+	for name, stage := range l.Stages {
+		stages[name] = stage.RawLocks()
+	}
+	lockdata["stages"] = stages
+
+	return lockdata
 }
 
 // StageLocks represents the version locks for a single stage.
 type StageLocks struct {
-	SystemPackages map[string]string `yaml:"system_packages"`
-	Extensions     map[string]string `yaml:"extensions"`
+	SystemPackages map[string]string `mapstructure:"system_packages"`
+	Extensions     map[string]string `mapstructure:"extensions"`
+}
+
+func (l StageLocks) RawLocks() map[string]interface{} {
+	return map[string]interface{}{
+		"system_packages": l.SystemPackages,
+		"extensions":      l.Extensions,
+	}
 }
 
 func (h *PHPHandler) UpdateLocks(
@@ -63,16 +72,6 @@ func (h *PHPHandler) UpdateLocks(
 		return nil, err
 	}
 
-	if def.Webserver != nil {
-		webserverLocks, err := h.updateWebserverLocks(ctx, pkgSolver, def.Webserver)
-		if err != nil {
-			err = xerrors.Errorf("could not update webserver locks: %w", err)
-			return nil, err
-		}
-
-		locks := webserverLocks.(webserver.DefinitionLocks)
-		def.Locks.Webserver = &locks
-	}
 	// @TODO: resolve sha256 of the base image and lock it
 	def.Locks.BaseImage = def.BaseImage
 
@@ -87,25 +86,6 @@ func (h *PHPHandler) UpdateLocks(
 	stagesLocks, err := h.updateStagesLocks(ctx, pkgSolver, def, def.Locks)
 	def.Locks.Stages = stagesLocks
 	return def.Locks, err
-}
-
-func (h *PHPHandler) updateWebserverLocks(
-	ctx context.Context,
-	pkgSolver pkgsolver.PackageSolver,
-	def *webserver.Definition,
-) (builddef.Locks, error) {
-	var locks builddef.Locks
-
-	webserverHandler, err := registry.FindHandler("webserver")
-	if err != nil {
-		return locks, err
-	}
-	webserverHandler.WithSolver(h.solver)
-
-	return webserverHandler.UpdateLocks(ctx, pkgSolver, &builddef.BuildDef{
-		Kind:      "webserver",
-		RawConfig: def.RawConfig(),
-	})
 }
 
 // @TODO: remove pkgSolver?

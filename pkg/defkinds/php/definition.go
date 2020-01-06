@@ -4,14 +4,13 @@ import (
 	"context"
 	"fmt"
 	"path"
+	"sort"
 	"strings"
 
 	"github.com/NiR-/zbuild/pkg/builddef"
-	"github.com/NiR-/zbuild/pkg/defkinds/webserver"
 	"github.com/NiR-/zbuild/pkg/llbutils"
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/xerrors"
-	"gopkg.in/yaml.v2"
 )
 
 func (h *PHPHandler) loadDefs(
@@ -26,18 +25,15 @@ func (h *PHPHandler) loadDefs(
 		return def, stageDef, err
 	}
 
-	stageName := buildOpts.Stage
-	if strings.HasPrefix(stageName, "webserver-") {
-		stageName = strings.TrimPrefix(stageName, "webserver-")
-	}
-
 	composerLockLoader := func(stageDef *StageDefinition) error {
 		return LoadComposerLock(ctx, h.solver, stageDef)
 	}
 
-	stageDef, err = def.ResolveStageDefinition(stageName, composerLockLoader, true)
+	stageDef, err = def.ResolveStageDefinition(buildOpts.Stage,
+		composerLockLoader, true)
 	if err != nil {
-		return def, stageDef, xerrors.Errorf("could not resolve stage %q: %w", stageName, err)
+		err = xerrors.Errorf("could not resolve stage %q: %w", buildOpts.Stage, err)
+		return def, stageDef, err
 	}
 
 	return def, stageDef, nil
@@ -83,32 +79,88 @@ func DefaultDefinition() Definition {
 	}
 }
 
-func NewKind(genericDef *builddef.BuildDef) (Definition, error) {
+func decodeDefinition(raw map[string]interface{}) (Definition, error) {
 	var def Definition
 	decoderConf := mapstructure.DecoderConfig{
-		ErrorUnused:      true,
+		ErrorUnused:      false,
 		WeaklyTypedInput: true,
 		Result:           &def,
+		Metadata:         &mapstructure.Metadata{},
 	}
 	decoder, err := mapstructure.NewDecoder(&decoderConf)
 	if err != nil {
 		return def, err
 	}
 
-	if err := decoder.Decode(genericDef.RawConfig); err != nil {
+	if err := decoder.Decode(raw); err != nil {
 		err := xerrors.Errorf("could not decode build manifest: %w", err)
 		return def, err
 	}
 
-	def = DefaultDefinition().Merge(def)
-
-	if err := yaml.Unmarshal(genericDef.RawLocks, &def.Locks); err != nil {
-		err := xerrors.Errorf("could not decode lock manifest: %w", err)
+	if err := checkUndecodedKeys(decoderConf.Metadata); err != nil {
+		err = xerrors.Errorf("could not decode build manifest: %w", err)
 		return def, err
 	}
 
-	if def.Webserver != nil {
-		*def.Webserver = webserver.DefaultDefinition().Merge(*def.Webserver)
+	def = DefaultDefinition().Merge(def)
+	return def, nil
+}
+
+func decodeDefinitionLocks(raw map[string]interface{}) (DefinitionLocks, error) {
+	var locks DefinitionLocks
+	decoderConf := mapstructure.DecoderConfig{
+		ErrorUnused:      false,
+		WeaklyTypedInput: true,
+		Result:           &locks,
+		Metadata:         &mapstructure.Metadata{},
+	}
+	decoder, err := mapstructure.NewDecoder(&decoderConf)
+	if err != nil {
+		return locks, err
+	}
+
+	if err := decoder.Decode(raw); err != nil {
+		err := xerrors.Errorf("could not decode lock manifest: %w", err)
+		return locks, err
+	}
+
+	if err := checkUndecodedKeys(decoderConf.Metadata); err != nil {
+		err = xerrors.Errorf("could not decode lock manifest: %w", err)
+		return locks, err
+	}
+
+	return locks, nil
+}
+
+func checkUndecodedKeys(meta *mapstructure.Metadata) error {
+	unused := make([]string, 0, len(meta.Unused))
+	for _, key := range meta.Unused {
+		// webserver key is ignored since definition files with nodejs kind
+		// might embed webserver definition.
+		if key != "webserver" {
+			unused = append(unused, key)
+		}
+	}
+
+	if len(unused) > 0 {
+		sort.Strings(unused)
+
+		return xerrors.Errorf("invalid config parameter: %s",
+			strings.Join(unused, ", "))
+	}
+
+	return nil
+}
+
+func NewKind(genericDef *builddef.BuildDef) (Definition, error) {
+	def, err := decodeDefinition(genericDef.RawConfig)
+	if err != nil {
+		return def, err
+	}
+
+	def.Locks, err = decodeDefinitionLocks(genericDef.RawLocks)
+	if err != nil {
+		return def, err
 	}
 
 	def.MajMinVersion = extractMajMinVersion(def.Version)
@@ -134,12 +186,11 @@ func NewKind(genericDef *builddef.BuildDef) (Definition, error) {
 type Definition struct {
 	BaseStage Stage `mapstructure:",squash"`
 
-	BaseImage     string                `mapstructure:"base"`
-	Version       string                `mapstructure:"version"`
-	MajMinVersion string                `mapstructure:"-"`
-	Infer         *bool                 `mapstructure:"infer"`
-	Stages        DerivedStageSet       `mapstructure:"stages"`
-	Webserver     *webserver.Definition `mapstructure:"webserver"`
+	BaseImage     string          `mapstructure:"base"`
+	Version       string          `mapstructure:"version"`
+	MajMinVersion string          `mapstructure:"-"`
+	Infer         *bool           `mapstructure:"infer"`
+	Stages        DerivedStageSet `mapstructure:"stages"`
 
 	Locks DefinitionLocks `mapstructure:"-"`
 }
@@ -156,10 +207,6 @@ func (def Definition) Copy() Definition {
 		infer := *def.Infer
 		new.Infer = &infer
 	}
-	if def.Webserver != nil {
-		webserver := *def.Webserver
-		new.Webserver = &webserver
-	}
 
 	return new
 }
@@ -175,13 +222,6 @@ func (base Definition) Merge(overriding Definition) Definition {
 	if overriding.Infer != nil {
 		infer := *overriding.Infer
 		new.Infer = &infer
-	}
-	if overriding.Webserver != nil {
-		webserver := overriding.Webserver.Copy()
-		if new.Webserver != nil {
-			webserver = new.Webserver.Merge(*overriding.Webserver)
-		}
-		new.Webserver = &webserver
 	}
 
 	return new
@@ -402,7 +442,6 @@ type StageDefinition struct {
 	Dev            bool
 	LockedPackages map[string]string
 	PlatformReqs   map[string]string
-	Webserver      *webserver.Definition
 	Locks          StageLocks
 }
 
@@ -500,7 +539,6 @@ func mergeStages(base *Definition, stages ...DerivedStage) StageDefinition {
 		Stage:          base.BaseStage.Copy(),
 		PlatformReqs:   map[string]string{},
 		LockedPackages: map[string]string{},
-		Webserver:      base.Webserver,
 	}
 	if base.Infer != nil {
 		stageDef.Infer = *base.Infer

@@ -1,0 +1,6 @@
+kind: nodejs
+version: 12
+frontend: true
+
+webserver:
+  type: nginx

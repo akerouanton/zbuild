@@ -1,0 +1,5 @@
+kind: php
+version: 7.2.29
+
+extensions:
+  intl: "*"
