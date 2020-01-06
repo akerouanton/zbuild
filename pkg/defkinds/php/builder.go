@@ -178,6 +178,7 @@ func (h *PHPHandler) buildPHP(
 	state = state.AddEnv("COMPOSER_HOME", "/composer")
 
 	state = copyConfigFiles(stage, state, buildOpts)
+	state = globalComposerInstall(stage, state)
 
 	if !stage.Dev {
 		state = composerInstall(state, buildOpts)
@@ -369,7 +370,6 @@ func composerInstall(
 	state = llbutils.Copy(composerSrc, "composer.*", state, "/app/", "1000:1000")
 
 	cmds := []string{
-		"composer global require --prefer-dist hirak/prestissimo",
 		"composer install --no-dev --prefer-dist --no-scripts --no-autoloader",
 		"composer clear-cache",
 	}
