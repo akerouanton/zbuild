@@ -3,6 +3,7 @@ package php_test
 import (
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/NiR-/zbuild/pkg/builddef"
 	"github.com/NiR-/zbuild/pkg/defkinds/php"
@@ -20,14 +21,13 @@ type newDefinitionTC struct {
 	expectedErr error
 }
 
-func initSuccessfullyParseRawDefinitionWithoutStagesTC() newDefinitionTC {
+func initParseRawDefinitionWithoutStagesTC() newDefinitionTC {
 	file := "testdata/def/without-stages.yml"
 	lockFile := "testdata/def/without-stages.lock"
 
 	isFPM := true
 	iniFile := "docker/app/php.ini"
 	fpmConfigFile := "docker/app/fpm.conf"
-	healthcheck := true
 	isDev := true
 	isNotDev := false
 	inferMode := false
@@ -60,7 +60,16 @@ func initSuccessfullyParseRawDefinitionWithoutStagesTC() newDefinitionTC {
 				Sources:      []string{"./src"},
 				Integrations: []string{"blackfire"},
 				StatefulDirs: []string{"./public/uploads"},
-				Healthcheck:  &healthcheck,
+				Healthcheck: &builddef.HealthcheckConfig{
+					HealthcheckFCGI: &builddef.HealthcheckFCGI{
+						Path:     "/ping",
+						Expected: "pong",
+					},
+					Type:     builddef.HealthcheckTypeFCGI,
+					Interval: 10 * time.Second,
+					Timeout:  1 * time.Second,
+					Retries:  3,
+				},
 				PostInstall: []string{
 					"some more commands",
 					"another one",
@@ -101,11 +110,10 @@ func initSuccessfullyParseRawDefinitionWithoutStagesTC() newDefinitionTC {
 	}
 }
 
-func initSuccessfullyParseRawDefinitionWithStagesTC() newDefinitionTC {
+func initParseRawDefinitionWithStagesTC() newDefinitionTC {
 	iniDevFile := "docker/app/php.dev.ini"
 	iniProdFile := "docker/app/php.prod.ini"
 	fpmConfigFile := "docker/app/fpm.conf"
-	baseStageHealthcheck := true
 	devStageDevMode := true
 	prodStageDevMode := false
 	isFPM := true
@@ -122,8 +130,16 @@ func initSuccessfullyParseRawDefinitionWithStagesTC() newDefinitionTC {
 	prodStage.ConfigFiles = php.PHPConfigFiles{
 		IniFile: &iniProdFile,
 	}
-	prodStageHealthcheck := true
-	prodStage.Healthcheck = &prodStageHealthcheck
+	prodStage.Healthcheck = &builddef.HealthcheckConfig{
+		HealthcheckFCGI: &builddef.HealthcheckFCGI{
+			Path:     "/ping",
+			Expected: "pong",
+		},
+		Type:     builddef.HealthcheckTypeFCGI,
+		Interval: 10 * time.Second,
+		Timeout:  1 * time.Second,
+		Retries:  3,
+	}
 	prodStage.Integrations = []string{"blackfire"}
 
 	return newDefinitionTC{
@@ -150,8 +166,10 @@ func initSuccessfullyParseRawDefinitionWithStagesTC() newDefinitionTC {
 				Sources:      []string{"generated/"},
 				Integrations: []string{},
 				StatefulDirs: []string{"public/uploads"},
-				Healthcheck:  &baseStageHealthcheck,
-				PostInstall:  []string{"echo some command"},
+				Healthcheck: &builddef.HealthcheckConfig{
+					Type: builddef.HealthcheckTypeDisabled,
+				},
+				PostInstall: []string{"echo some command"},
 			},
 			Version:       "7.4.0",
 			MajMinVersion: "7.4",
@@ -194,10 +212,18 @@ func initParseRawDefinitionWithWebserverTC() newDefinitionTC {
 	prodStageDevMode := false
 	inferMode := false
 	baseStageFPM := true
-	baseStageHealthcheck := true
 
 	baseStage := emptyStage()
-	baseStage.Healthcheck = &baseStageHealthcheck
+	baseStage.Healthcheck = &builddef.HealthcheckConfig{
+		HealthcheckFCGI: &builddef.HealthcheckFCGI{
+			Path:     "/ping",
+			Expected: "pong",
+		},
+		Type:     builddef.HealthcheckTypeFCGI,
+		Interval: 10 * time.Second,
+		Timeout:  1 * time.Second,
+		Retries:  3,
+	}
 	baseStage.FPM = &baseStageFPM
 	baseStage.ComposerDumpFlags = &php.ComposerDumpFlags{
 		ClassmapAuthoritative: true,
@@ -210,6 +236,63 @@ func initParseRawDefinitionWithWebserverTC() newDefinitionTC {
 		file: "testdata/def/with-webserver.yml",
 		expected: php.Definition{
 			BaseStage:     baseStage,
+			Version:       "7.4.0",
+			MajMinVersion: "7.4",
+			BaseImage:     "docker.io/library/php:7.4-fpm-buster",
+			Infer:         &inferMode,
+			Stages: map[string]php.DerivedStage{
+				"dev": {
+					DeriveFrom: "base",
+					Dev:        &devStageDevMode,
+					Stage:      devStage,
+				},
+				"prod": {
+					DeriveFrom: "base",
+					Dev:        &prodStageDevMode,
+					Stage:      prodStage,
+				},
+			},
+		},
+	}
+}
+
+func initParseRawDefinitionWithCustomFCGIHealthcheckTC() newDefinitionTC {
+	devStageDevMode := true
+	prodStageDevMode := false
+	inferMode := false
+	baseStageFPM := true
+
+	devStage := emptyStage()
+	prodStage := emptyStage()
+
+	return newDefinitionTC{
+		file: "testdata/def/with-custom-fcgi-healthcheck.yml",
+		expected: php.Definition{
+			BaseStage: php.Stage{
+				ExternalFiles:  []llbutils.ExternalFile{},
+				SystemPackages: &builddef.VersionMap{},
+				Extensions:     &builddef.VersionMap{},
+				GlobalDeps:     &builddef.VersionMap{},
+				ConfigFiles:    php.PHPConfigFiles{},
+				Sources:        []string{},
+				Integrations:   []string{},
+				StatefulDirs:   []string{},
+				PostInstall:    []string{},
+				FPM:            &baseStageFPM,
+				ComposerDumpFlags: &php.ComposerDumpFlags{
+					ClassmapAuthoritative: true,
+				},
+				Healthcheck: &builddef.HealthcheckConfig{
+					HealthcheckFCGI: &builddef.HealthcheckFCGI{
+						Path:     "/some-custom-path",
+						Expected: "some-output",
+					},
+					Type:     builddef.HealthcheckTypeFCGI,
+					Interval: 20 * time.Second,
+					Timeout:  5 * time.Second,
+					Retries:  3,
+				},
+			},
 			Version:       "7.4.0",
 			MajMinVersion: "7.4",
 			BaseImage:     "docker.io/library/php:7.4-fpm-buster",
@@ -244,10 +327,11 @@ func TestNewKind(t *testing.T) {
 	}
 
 	testcases := map[string]func() newDefinitionTC{
-		"successfully parse raw definition without stages": initSuccessfullyParseRawDefinitionWithoutStagesTC,
-		"successfully parse raw definition with stages":    initSuccessfullyParseRawDefinitionWithStagesTC,
-		"successfully parse raw definition with webserver": initParseRawDefinitionWithWebserverTC,
-		"fail to parse unknown properties":                 initFailToParseUnknownPropertiesTC,
+		"without stages":                   initParseRawDefinitionWithoutStagesTC,
+		"with stages":                      initParseRawDefinitionWithStagesTC,
+		"with webserver":                   initParseRawDefinitionWithWebserverTC,
+		"with custom fcgi healthcheck":     initParseRawDefinitionWithCustomFCGIHealthcheckTC,
+		"fail to parse unknown properties": initFailToParseUnknownPropertiesTC,
 	}
 
 	for tcname := range testcases {
@@ -294,7 +378,6 @@ func initSuccessfullyResolveDefaultDevStageTC(t *testing.T, mockCtrl *gomock.Con
 	lockFile := "testdata/def/without-stages.lock"
 
 	isFPM := true
-	healthckeck := false
 	phpIni := "docker/app/php.ini"
 	fpmConfigFile := "docker/app/fpm.conf"
 
@@ -343,7 +426,6 @@ func initSuccessfullyResolveDefaultDevStageTC(t *testing.T, mockCtrl *gomock.Con
 					ClassmapAuthoritative: true,
 				},
 				Integrations: []string{"blackfire"},
-				Healthcheck:  &healthckeck,
 				PostInstall:  []string{"some more commands", "another one"},
 			},
 		},
@@ -352,7 +434,6 @@ func initSuccessfullyResolveDefaultDevStageTC(t *testing.T, mockCtrl *gomock.Con
 
 func initSuccessfullyResolveWorkerStageTC(t *testing.T, mockCtrl *gomock.Controller) resolveStageTC {
 	isNotFPM := false
-	healthcheckDisabled := false
 	workerCmd := []string{"bin/worker"}
 
 	return resolveStageTC{
@@ -403,7 +484,6 @@ func initSuccessfullyResolveWorkerStageTC(t *testing.T, mockCtrl *gomock.Control
 				Sources:      []string{"bin/", "src/"},
 				Integrations: []string{},
 				StatefulDirs: []string{},
-				Healthcheck:  &healthcheckDisabled,
 				PostInstall:  []string{},
 			},
 		},
@@ -439,7 +519,6 @@ func initFailToResolveStageWithCyclicDepsTC(t *testing.T, mockCtrl *gomock.Contr
 
 func initRemoveDefaultExtensionsTC(t *testing.T, mockCtrl *gomock.Controller) resolveStageTC {
 	fpm := true
-	healthcheck := false
 
 	composerLockLoader := mockComposerLockLoader(map[string]string{}, map[string]string{})
 
@@ -487,7 +566,6 @@ func initRemoveDefaultExtensionsTC(t *testing.T, mockCtrl *gomock.Controller) re
 				Sources:      []string{},
 				Integrations: []string{},
 				StatefulDirs: []string{},
-				Healthcheck:  &healthcheck,
 				PostInstall:  []string{},
 			},
 		},
@@ -498,7 +576,6 @@ func initRemoveDefaultExtensionsTC(t *testing.T, mockCtrl *gomock.Controller) re
 // erasing version constraints defined in the zbuildfile.
 func initPreservePredefinedExtensionConstraintsTC(t *testing.T, mockCtrl *gomock.Controller) resolveStageTC {
 	fpm := true
-	healthcheck := false
 
 	return resolveStageTC{
 		file:     "testdata/def/with-predefined-extension.yml",
@@ -543,7 +620,6 @@ func initPreservePredefinedExtensionConstraintsTC(t *testing.T, mockCtrl *gomock
 				Sources:      []string{},
 				Integrations: []string{},
 				StatefulDirs: []string{},
-				Healthcheck:  &healthcheck,
 				PostInstall:  []string{},
 			},
 		},
@@ -1415,41 +1491,51 @@ func initMergeStatefulDirsWithoutBaseTC() mergeStageTC {
 }
 
 func initMergeHealthcheckWithBaseTC() mergeStageTC {
-	baseHealthcheck := true
-	overridingHealthcheck := false
-	expectedHealthcheck := false
-
 	return mergeStageTC{
 		base: func() php.Stage {
 			return php.Stage{
-				Healthcheck: &baseHealthcheck,
+				Healthcheck: &builddef.HealthcheckConfig{
+					HealthcheckFCGI: &builddef.HealthcheckFCGI{
+						Path:     "/ping",
+						Expected: "pong",
+					},
+					Type:     builddef.HealthcheckTypeFCGI,
+					Interval: 10 * time.Second,
+					Timeout:  1 * time.Second,
+					Retries:  3,
+				},
 			}
 		},
 		overriding: php.Stage{
-			Healthcheck: &overridingHealthcheck,
+			Healthcheck: &builddef.HealthcheckConfig{
+				Type: builddef.HealthcheckTypeDisabled,
+			},
 		},
 		expected: func() php.Stage {
 			s := emptyStage()
-			s.Healthcheck = &expectedHealthcheck
+			s.Healthcheck = &builddef.HealthcheckConfig{
+				Type: builddef.HealthcheckTypeDisabled,
+			}
 			return s
 		},
 	}
 }
 
 func initMergeHealthcheckWithoutBaseTC() mergeStageTC {
-	overridingHealthcheck := true
-	expectedHealthcheck := true
-
 	return mergeStageTC{
 		base: func() php.Stage {
 			return php.Stage{}
 		},
 		overriding: php.Stage{
-			Healthcheck: &overridingHealthcheck,
+			Healthcheck: &builddef.HealthcheckConfig{
+				Type: builddef.HealthcheckTypeDisabled,
+			},
 		},
 		expected: func() php.Stage {
 			s := emptyStage()
-			s.Healthcheck = &expectedHealthcheck
+			s.Healthcheck = &builddef.HealthcheckConfig{
+				Type: builddef.HealthcheckTypeDisabled,
+			}
 			return s
 		},
 	}

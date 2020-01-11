@@ -1,0 +1,13 @@
+version: 7.4.0
+fpm: true
+infer: false
+
+healthcheck:
+  type: fcgi
+  fcgi:
+    path: /some-custom-path
+    expected: some-output
+  # @TODO: define these params by default
+  interval: 20s
+  timeout: 5s
+  retries: 3

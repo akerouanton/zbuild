@@ -1,0 +1,11 @@
+kind: webserver
+type: nginx
+
+healthcheck:
+  type: http
+  http:
+    path: /some-custom-path
+    expected: some-output
+  interval: 20s
+  timeout: 5s
+  retries: 6

@@ -55,7 +55,7 @@ stage:
   - blackfire
   statefuldirs:
   - var/
-  healthcheck: false
+  healthcheck: null
   postinstall:
   - echo '<?php return [];' > .env.local.php
   - APP_ENV=prod composer run-script --no-dev post-install-cmd

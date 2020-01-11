@@ -79,7 +79,7 @@ func initBuildLLBTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
 					},
 				},
 				Healthcheck: &image.HealthConfig{
-					Test:     []string{"CMD", "http_proxy= test \"$(curl --fail http://127.0.0.1/_ping)\" = \"pong\""},
+					Test:     []string{"CMD", "http_proxy= test \"$(curl --fail http://127.0.0.1/_status)\" = \"pong\""},
 					Interval: 10 * time.Second,
 					Timeout:  1 * time.Second,
 					Retries:  3,
@@ -138,7 +138,7 @@ func initBuildLLBFromGitContextTC(t *testing.T, mockCtrl *gomock.Controller) bui
 					},
 				},
 				Healthcheck: &image.HealthConfig{
-					Test:     []string{"CMD", "http_proxy= test \"$(curl --fail http://127.0.0.1/_ping)\" = \"pong\""},
+					Test:     []string{"CMD", "http_proxy= test \"$(curl --fail http://127.0.0.1/_status)\" = \"pong\""},
 					Interval: 10 * time.Second,
 					Timeout:  1 * time.Second,
 					Retries:  3,

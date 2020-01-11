@@ -6,6 +6,7 @@ import (
 	"path"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/NiR-/zbuild/pkg/builddef"
 	"github.com/NiR-/zbuild/pkg/llbutils"
@@ -43,7 +44,7 @@ func (h *PHPHandler) loadDefs(
 // default values.
 func DefaultDefinition() Definition {
 	fpm := true
-	healthcheck := true
+	healthcheck := defaultHealthcheck
 	infer := true
 	isDev := true
 	isNotDev := false
@@ -80,13 +81,20 @@ func DefaultDefinition() Definition {
 }
 
 func decodeDefinition(raw map[string]interface{}) (Definition, error) {
+	decodeHook := mapstructure.ComposeDecodeHookFunc(
+		builddef.DecodeBoolToHealthcheck(defaultHealthcheck),
+		mapstructure.StringToTimeDurationHookFunc(),
+	)
+
 	var def Definition
 	decoderConf := mapstructure.DecoderConfig{
 		ErrorUnused:      false,
 		WeaklyTypedInput: true,
 		Result:           &def,
 		Metadata:         &mapstructure.Metadata{},
+		DecodeHook:       decodeHook,
 	}
+
 	decoder, err := mapstructure.NewDecoder(&decoderConf)
 	if err != nil {
 		return def, err
@@ -165,11 +173,12 @@ func NewKind(genericDef *builddef.BuildDef) (Definition, error) {
 
 	def.MajMinVersion = extractMajMinVersion(def.Version)
 
-	if def.BaseImage == "" {
-		baseImages, ok := defaultBaseImages[def.MajMinVersion]
-		if !ok {
-			return def, xerrors.Errorf("no default base image defined for PHP v%s, you have to define it by yourself in your zbuild file", def.MajMinVersion)
-		}
+	if err = def.IsValid(); err != nil {
+		return def, err
+	}
+
+	if def.BaseImage == "" && def.Version != "" {
+		baseImages := defaultBaseImages[def.MajMinVersion]
 		if *def.BaseStage.FPM {
 			def.BaseImage = baseImages.FPM
 		} else {
@@ -193,6 +202,33 @@ type Definition struct {
 	Stages        DerivedStageSet `mapstructure:"stages"`
 
 	Locks DefinitionLocks `mapstructure:"-"`
+}
+
+func (def Definition) IsValid() error {
+	if def.Version != "" && def.BaseImage != "" {
+		return xerrors.Errorf("you can't specify version and base parameters at the same time")
+	}
+
+	if def.Version != "" {
+		if _, ok := defaultBaseImages[def.MajMinVersion]; !ok {
+			return xerrors.Errorf(
+				"no default base image defined for PHP v%s, you have to define it by yourself in your zbuild file",
+				def.MajMinVersion)
+		}
+	}
+
+	allowedHCTypes := []string{"fcgi", "cmd"}
+	if !def.BaseStage.Healthcheck.IsValid(allowedHCTypes) {
+		return xerrors.New("base stage healthcheck is invalid")
+	}
+
+	for name, stage := range def.Stages {
+		if !stage.Healthcheck.IsValid(allowedHCTypes) {
+			return xerrors.Errorf("stage %q has an invalid healthcheck", name)
+		}
+	}
+
+	return nil
 }
 
 func (def Definition) Copy() Definition {
@@ -230,19 +266,19 @@ func (base Definition) Merge(overriding Definition) Definition {
 // Stage holds all the properties from the base stage that could also be
 // overriden by derived stages.
 type Stage struct {
-	ExternalFiles     []llbutils.ExternalFile `mapstructure:"external_files"`
-	SystemPackages    *builddef.VersionMap    `mapstructure:"system_packages"`
-	FPM               *bool                   `mapstructure:",omitempty"`
-	Command           *[]string               `mapstructure:"command"`
-	Extensions        *builddef.VersionMap    `mapstructure:"extensions"`
-	GlobalDeps        *builddef.VersionMap    `mapstructure:"global_deps"`
-	ConfigFiles       PHPConfigFiles          `mapstructure:"config_files"`
-	ComposerDumpFlags *ComposerDumpFlags      `mapstructure:"composer_dump"`
-	Sources           []string                `mapstructure:"sources"`
-	Integrations      []string                `mapstructure:"integrations"`
-	StatefulDirs      []string                `mapstructure:"stateful_dirs"`
-	Healthcheck       *bool                   `mapstructure:"healthcheck"`
-	PostInstall       []string                `mapstructure:"post_install"`
+	ExternalFiles     []llbutils.ExternalFile     `mapstructure:"external_files"`
+	SystemPackages    *builddef.VersionMap        `mapstructure:"system_packages"`
+	FPM               *bool                       `mapstructure:",omitempty"`
+	Command           *[]string                   `mapstructure:"command"`
+	Extensions        *builddef.VersionMap        `mapstructure:"extensions"`
+	GlobalDeps        *builddef.VersionMap        `mapstructure:"global_deps"`
+	ConfigFiles       PHPConfigFiles              `mapstructure:"config_files"`
+	ComposerDumpFlags *ComposerDumpFlags          `mapstructure:"composer_dump"`
+	Sources           []string                    `mapstructure:"sources"`
+	Integrations      []string                    `mapstructure:"integrations"`
+	StatefulDirs      []string                    `mapstructure:"stateful_dirs"`
+	Healthcheck       *builddef.HealthcheckConfig `mapstructure:"healthcheck"`
+	PostInstall       []string                    `mapstructure:"post_install"`
 }
 
 func (s Stage) Copy() Stage {
@@ -303,6 +339,17 @@ func (s Stage) Merge(overriding Stage) Stage {
 	}
 
 	return new
+}
+
+var defaultHealthcheck = builddef.HealthcheckConfig{
+	HealthcheckFCGI: &builddef.HealthcheckFCGI{
+		Path:     "/ping",
+		Expected: "pong",
+	},
+	Type:     builddef.HealthcheckTypeFCGI,
+	Interval: 10 * time.Second,
+	Timeout:  1 * time.Second,
+	Retries:  3,
 }
 
 type DerivedStage struct {
@@ -557,8 +604,7 @@ func mergeStages(base *Definition, stages ...DerivedStage) StageDefinition {
 		stageDef.ConfigFiles.FPMConfigFile = nil
 	}
 	if stageDef.Dev || stageDef.FPM == nil || *stageDef.FPM == false {
-		healthcheck := false
-		stageDef.Healthcheck = &healthcheck
+		stageDef.Healthcheck = nil
 	}
 
 	return stageDef
@@ -599,7 +645,8 @@ func addIntegrations(stageDef *StageDefinition) error {
 		}
 	}
 
-	if *stageDef.Healthcheck {
+	if stageDef.Healthcheck != nil &&
+		stageDef.Healthcheck.Type == builddef.HealthcheckTypeFCGI {
 		stageDef.ExternalFiles = append(stageDef.ExternalFiles, llbutils.ExternalFile{
 			URL:         "https://github.com/NiR-/fcgi-client/releases/download/v0.1.0/fcgi-client.phar",
 			Destination: "/usr/local/bin/fcgi-client",

@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/NiR-/zbuild/pkg/builddef"
 	"github.com/NiR-/zbuild/pkg/defkinds/nodejs"
@@ -20,10 +21,9 @@ type newDefinitionTC struct {
 	expectedErr error
 }
 
-func initSuccessfullyParseRawDefinitionWithoutStagesTC() newDefinitionTC {
+func initParseRawDefinitionWithoutStagesTC() newDefinitionTC {
 	devStageDevMode := true
 	prodStageDevMode := false
-	healthcheckDisabled := true
 
 	return newDefinitionTC{
 		file: "testdata/def/without-stages.yml",
@@ -49,7 +49,16 @@ func initSuccessfullyParseRawDefinitionWithoutStagesTC() newDefinitionTC {
 				GlobalPackages: &builddef.VersionMap{},
 				Sources:        []string{"src/"},
 				StatefulDirs:   []string{"uploads/"},
-				Healthcheck:    &healthcheckDisabled,
+				Healthcheck: &builddef.HealthcheckConfig{
+					HealthcheckHTTP: &builddef.HealthcheckHTTP{
+						Path:     "/ping",
+						Expected: "pong",
+					},
+					Type:     builddef.HealthcheckTypeHTTP,
+					Interval: 10 * time.Second,
+					Timeout:  1 * time.Second,
+					Retries:  3,
+				},
 			},
 			Version:    "12",
 			BaseImage:  "docker.io/library/node:12-buster-slim",
@@ -84,14 +93,12 @@ func initSuccessfullyParseRawDefinitionWithoutStagesTC() newDefinitionTC {
 	}
 }
 
-func initSuccessfullyParseRawDefinitionWithStagesTC() newDefinitionTC {
+func initParseRawDefinitionWithStagesTC() newDefinitionTC {
 	cmdDev := []string{"yarn run start-dev"}
 	cmdProd := []string{"yarn run start"}
 	cmdWorker := []string{"yarn run worker"}
 	devStageDevMode := true
 	prodStageDevMode := false
-	baseStageHealthcheck := true
-	workerStageHealthcheck := false
 
 	return newDefinitionTC{
 		file: "testdata/def/with-stages.yml",
@@ -101,9 +108,18 @@ func initSuccessfullyParseRawDefinitionWithStagesTC() newDefinitionTC {
 				SystemPackages: &builddef.VersionMap{},
 				ConfigFiles:    map[string]string{},
 				GlobalPackages: &builddef.VersionMap{},
-				Healthcheck:    &baseStageHealthcheck,
-				Sources:        []string{},
-				StatefulDirs:   []string{},
+				Healthcheck: &builddef.HealthcheckConfig{
+					HealthcheckHTTP: &builddef.HealthcheckHTTP{
+						Path:     "/ping",
+						Expected: "pong",
+					},
+					Type:     builddef.HealthcheckTypeHTTP,
+					Interval: 10 * time.Second,
+					Timeout:  1 * time.Second,
+					Retries:  3,
+				},
+				Sources:      []string{},
+				StatefulDirs: []string{},
 			},
 			Version:   "12",
 			BaseImage: "docker.io/library/node:12-buster-slim",
@@ -135,8 +151,10 @@ func initSuccessfullyParseRawDefinitionWithStagesTC() newDefinitionTC {
 				"worker": {
 					DeriveFrom: "prod",
 					Stage: nodejs.Stage{
-						Command:     &cmdWorker,
-						Healthcheck: &workerStageHealthcheck,
+						Command: &cmdWorker,
+						Healthcheck: &builddef.HealthcheckConfig{
+							Type: builddef.HealthcheckTypeDisabled,
+						},
 					},
 				},
 			},
@@ -149,13 +167,65 @@ func initParseRawDefinitionWithWebserverTC() newDefinitionTC {
 	prodStageDevMode := false
 
 	baseStage := emptyStage()
-	baseStageHealthcheck := true
-	baseStage.Healthcheck = &baseStageHealthcheck
+	baseStage.Healthcheck = &builddef.HealthcheckConfig{
+		HealthcheckHTTP: &builddef.HealthcheckHTTP{
+			Path:     "/ping",
+			Expected: "pong",
+		},
+		Type:     builddef.HealthcheckTypeHTTP,
+		Interval: 10 * time.Second,
+		Timeout:  1 * time.Second,
+		Retries:  3,
+	}
 
 	return newDefinitionTC{
 		file: "testdata/def/with-webserver.yml",
 		expected: nodejs.Definition{
 			BaseStage:  baseStage,
+			Version:    "12",
+			BaseImage:  "docker.io/library/node:12-buster-slim",
+			IsFrontend: true,
+			Stages: nodejs.DerivedStageSet{
+				"dev": {
+					DeriveFrom: "base",
+					Dev:        &devStageDevMode,
+					Stage:      emptyStage(),
+				},
+				"prod": {
+					DeriveFrom: "base",
+					Dev:        &prodStageDevMode,
+					Stage:      emptyStage(),
+				},
+			},
+		},
+	}
+}
+
+func initParseRawDefinitionWithCustomHealthcheckTC() newDefinitionTC {
+	devStageDevMode := true
+	prodStageDevMode := false
+
+	return newDefinitionTC{
+		file: "testdata/def/with-custom-http-healthcheck.yml",
+		expected: nodejs.Definition{
+			BaseStage: nodejs.Stage{
+				ExternalFiles:  []llbutils.ExternalFile{},
+				SystemPackages: &builddef.VersionMap{},
+				GlobalPackages: &builddef.VersionMap{},
+				ConfigFiles:    map[string]string{},
+				Sources:        []string{},
+				StatefulDirs:   []string{},
+				Healthcheck: &builddef.HealthcheckConfig{
+					HealthcheckHTTP: &builddef.HealthcheckHTTP{
+						Path:     "/some-custom-path",
+						Expected: "some-output",
+					},
+					Type:     builddef.HealthcheckTypeHTTP,
+					Interval: 20 * time.Second,
+					Timeout:  5 * time.Second,
+					Retries:  6,
+				},
+			},
 			Version:    "12",
 			BaseImage:  "docker.io/library/node:12-buster-slim",
 			IsFrontend: true,
@@ -195,10 +265,11 @@ func TestNewKind(t *testing.T) {
 	}
 
 	testcases := map[string]func() newDefinitionTC{
-		"successfully parse raw definition without stages":               initSuccessfullyParseRawDefinitionWithoutStagesTC,
-		"successfully parse raw definition with stages":                  initSuccessfullyParseRawDefinitionWithStagesTC,
-		"successfully parse raw definition with webserver":               initParseRawDefinitionWithWebserverTC,
-		"fail to parse unknown properties":                               initFailToParseUnknownPropertiesTC,
+		"without stages":                   initParseRawDefinitionWithoutStagesTC,
+		"with stages":                      initParseRawDefinitionWithStagesTC,
+		"with webserver":                   initParseRawDefinitionWithWebserverTC,
+		"with custom healthcheck":          initParseRawDefinitionWithCustomHealthcheckTC,
+		"fail to parse unknown properties": initFailToParseUnknownPropertiesTC,
 		"fail to load zbuildfile with both version and base image props": initFailWhenBothVersionAndBaseImageAreDefinedTC,
 	}
 
@@ -238,7 +309,6 @@ type resolveStageTC struct {
 
 func initSuccessfullyResolveDefaultDevStageTC() resolveStageTC {
 	devMode := true
-	healthckeck := false
 
 	return resolveStageTC{
 		file:  "testdata/def/without-stages.yml",
@@ -267,7 +337,7 @@ func initSuccessfullyResolveDefaultDevStageTC() resolveStageTC {
 				Sources:        []string{"src/"},
 				StatefulDirs:   []string{"uploads/"},
 				ConfigFiles:    map[string]string{".babelrc": ".babelrc"},
-				Healthcheck:    &healthckeck,
+				Healthcheck:    nil,
 			},
 		},
 	}
@@ -275,7 +345,6 @@ func initSuccessfullyResolveDefaultDevStageTC() resolveStageTC {
 
 func initSuccessfullyResolveWorkerStageTC() resolveStageTC {
 	devMode := false
-	healthckeckDisabled := false
 	cmd := []string{"yarn run worker"}
 
 	return resolveStageTC{
@@ -293,8 +362,10 @@ func initSuccessfullyResolveWorkerStageTC() resolveStageTC {
 				GlobalPackages: &builddef.VersionMap{},
 				Sources:        []string{},
 				StatefulDirs:   []string{},
-				Healthcheck:    &healthckeckDisabled,
 				Command:        &cmd,
+				Healthcheck: &builddef.HealthcheckConfig{
+					Type: builddef.HealthcheckTypeDisabled,
+				},
 			},
 		},
 	}
@@ -769,41 +840,71 @@ func initMergeStatefulDirsWithoutBaseTC() mergeStageTC {
 }
 
 func initMergeHealthcheckWithBaseTC() mergeStageTC {
-	baseHealthcheck := true
-	overridingHealthcheck := false
-	expectedHealthcheck := false
-
 	return mergeStageTC{
 		base: func() nodejs.Stage {
 			return nodejs.Stage{
-				Healthcheck: &baseHealthcheck,
+				Healthcheck: &builddef.HealthcheckConfig{
+					HealthcheckHTTP: &builddef.HealthcheckHTTP{
+						Path:     "/ping",
+						Expected: "pong",
+					},
+					Type:     builddef.HealthcheckTypeHTTP,
+					Interval: 10 * time.Second,
+					Timeout:  1 * time.Second,
+					Retries:  3,
+				},
 			}
 		},
 		overriding: nodejs.Stage{
-			Healthcheck: &overridingHealthcheck,
+			Healthcheck: &builddef.HealthcheckConfig{
+				Type: builddef.HealthcheckTypeDisabled,
+			},
 		},
 		expected: func() nodejs.Stage {
 			s := emptyStage()
-			s.Healthcheck = &expectedHealthcheck
+			s.Healthcheck = &builddef.HealthcheckConfig{
+				Type: builddef.HealthcheckTypeDisabled,
+			}
 			return s
 		},
 	}
 }
 
 func initMergeHealthcheckWithoutBaseTC() mergeStageTC {
-	overridingHealthcheck := true
-	expectedHealthcheck := true
-
 	return mergeStageTC{
 		base: func() nodejs.Stage {
 			return nodejs.Stage{}
 		},
 		overriding: nodejs.Stage{
-			Healthcheck: &overridingHealthcheck,
+			Healthcheck: &builddef.HealthcheckConfig{
+				Type: builddef.HealthcheckTypeDisabled,
+			},
 		},
 		expected: func() nodejs.Stage {
 			s := emptyStage()
-			s.Healthcheck = &expectedHealthcheck
+			s.Healthcheck = &builddef.HealthcheckConfig{
+				Type: builddef.HealthcheckTypeDisabled,
+			}
+			return s
+		},
+	}
+}
+
+func initIgnoreNilHealthcheckTC() mergeStageTC {
+	return mergeStageTC{
+		base: func() nodejs.Stage {
+			return nodejs.Stage{
+				Healthcheck: &builddef.HealthcheckConfig{
+					Type: builddef.HealthcheckTypeDisabled,
+				},
+			}
+		},
+		overriding: nodejs.Stage{},
+		expected: func() nodejs.Stage {
+			s := emptyStage()
+			s.Healthcheck = &builddef.HealthcheckConfig{
+				Type: builddef.HealthcheckTypeDisabled,
+			}
 			return s
 		},
 	}
@@ -829,6 +930,7 @@ func TestStageMerge(t *testing.T) {
 		"merge stateful dirs without base":   initMergeStatefulDirsWithoutBaseTC,
 		"merge healthcheck with base":        initMergeHealthcheckWithBaseTC,
 		"merge healthcheck without base":     initMergeHealthcheckWithoutBaseTC,
+		"ignore nil healthcheck":             initIgnoreNilHealthcheckTC,
 	}
 
 	for tcname := range testcases {

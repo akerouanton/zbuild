@@ -104,9 +104,9 @@ func setImageMetadata(
 	state llb.State,
 	img *image.Image,
 ) {
-	if *def.Healthcheck {
+	if def.Healthcheck.IsEnabled() {
 		img.Config.Healthcheck = &image.HealthConfig{
-			Test:     []string{"CMD", "http_proxy= test \"$(curl --fail http://127.0.0.1/_ping)\" = \"pong\""},
+			Test:     []string{"CMD", "http_proxy= test \"$(curl --fail http://127.0.0.1/_status)\" = \"pong\""},
 			Interval: 10 * time.Second,
 			Timeout:  1 * time.Second,
 			Retries:  3,

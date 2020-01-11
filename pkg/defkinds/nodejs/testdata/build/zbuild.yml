@@ -4,3 +4,4 @@ version: 12
 stages:
   worker:
     command: bin/worker.js
+    healthcheck: false

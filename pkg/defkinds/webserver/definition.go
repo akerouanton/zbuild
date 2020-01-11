@@ -2,6 +2,7 @@ package webserver
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/NiR-/zbuild/pkg/builddef"
 	"github.com/mitchellh/mapstructure"
@@ -9,7 +10,7 @@ import (
 )
 
 func DefaultDefinition() Definition {
-	healthcheck := true
+	healthcheck := defaultHealthcheck
 	return Definition{
 		Type:           WebserverType("nginx"),
 		SystemPackages: &builddef.VersionMap{},
@@ -17,12 +18,27 @@ func DefaultDefinition() Definition {
 	}
 }
 
+var defaultHealthcheck = builddef.HealthcheckConfig{
+	HealthcheckHTTP: &builddef.HealthcheckHTTP{
+		Path: "/_status",
+	},
+	Type:     builddef.HealthcheckTypeHTTP,
+	Interval: 10 * time.Second,
+	Timeout:  1 * time.Second,
+	Retries:  3,
+}
+
 func decodeDefinition(raw map[string]interface{}) (Definition, error) {
+	decodeHook := mapstructure.ComposeDecodeHookFunc(
+		builddef.DecodeBoolToHealthcheck(defaultHealthcheck),
+		mapstructure.StringToTimeDurationHookFunc())
+
 	var def Definition
 	decoderConf := mapstructure.DecoderConfig{
 		ErrorUnused:      true,
 		WeaklyTypedInput: true,
 		Result:           &def,
+		DecodeHook:       decodeHook,
 	}
 	decoder, err := mapstructure.NewDecoder(&decoderConf)
 	if err != nil {
@@ -67,7 +83,7 @@ func NewKind(genericDef *builddef.BuildDef) (Definition, error) {
 		return def, err
 	}
 
-	if def.Healthcheck != nil && *def.Healthcheck {
+	if def.Healthcheck.IsEnabled() {
 		def.SystemPackages.Add("curl", "*")
 	}
 
@@ -75,17 +91,22 @@ func NewKind(genericDef *builddef.BuildDef) (Definition, error) {
 }
 
 type Definition struct {
-	Type           WebserverType        `mapstructure:"type"`
-	SystemPackages *builddef.VersionMap `mapstructure:"system_packages"`
-	ConfigFile     *string              `mapstructure:"config_file"`
-	Healthcheck    *bool                `mapstructure:"healthcheck"`
-	Assets         []AssetToCopy        `mapstructure:"assets"`
-	Locks          DefinitionLocks      `mapstructure:"-"`
+	Type           WebserverType               `mapstructure:"type"`
+	SystemPackages *builddef.VersionMap        `mapstructure:"system_packages"`
+	ConfigFile     *string                     `mapstructure:"config_file"`
+	Healthcheck    *builddef.HealthcheckConfig `mapstructure:"healthcheck"`
+	Assets         []AssetToCopy               `mapstructure:"assets"`
+	Locks          DefinitionLocks             `mapstructure:"-"`
 }
 
 func (def Definition) Validate() error {
 	if def.Type.IsEmpty() {
 		return xerrors.New("webserver build manifest has no type nor base_image parameters.")
+	}
+
+	if !def.Healthcheck.Type.IsValid([]string{"http", "cmd"}) {
+		return xerrors.Errorf("healthcheck type %q is not supported",
+			def.Healthcheck.Type)
 	}
 
 	return nil
@@ -130,23 +151,6 @@ func (base Definition) Merge(overriding Definition) Definition {
 	return new
 }
 
-func (def Definition) RawConfig() map[string]interface{} {
-	raw := map[string]interface{}{
-		"type":            def.Type,
-		"system_packages": def.SystemPackages,
-		"assets":          def.Assets,
-	}
-
-	if def.ConfigFile != nil {
-		raw["config_file"] = def.ConfigFile
-	}
-	if def.Healthcheck != nil {
-		raw["healthcheck"] = def.Healthcheck
-	}
-
-	return raw
-}
-
 type WebserverType string
 
 func (t WebserverType) IsValid() bool {
@@ -178,4 +182,18 @@ func (t WebserverType) BaseImage() string {
 type AssetToCopy struct {
 	From string `mapstructure:"from"`
 	To   string `mapstructure:"to"`
+}
+
+func ExtractRawDefFromParent(parentDef map[string]interface{}) map[string]interface{} {
+	rawDef := map[string]interface{}{}
+	webserver, ok := parentDef["webserver"]
+	if !ok {
+		return rawDef
+	}
+
+	for k, v := range webserver.(map[interface{}]interface{}) {
+		rawDef[k.(string)] = v.(interface{})
+	}
+
+	return rawDef
 }
