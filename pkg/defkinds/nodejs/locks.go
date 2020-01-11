@@ -47,11 +47,14 @@ func (h *NodeJSHandler) UpdateLocks(
 		return nil, err
 	}
 
-	locks := DefinitionLocks{}
-	// @TODO: resolve sha256 of the base image and lock it
-	locks.BaseImage = def.BaseImage
+	def.Locks = DefinitionLocks{}
+	def.Locks.BaseImage, err = h.solver.ResolveImageRef(ctx, def.BaseImage)
+	if err != nil {
+		return nil, xerrors.Errorf("could not resolve image %q: %w",
+			def.BaseImage, err)
+	}
 
-	osrelease, err := builddef.ResolveImageOS(ctx, h.solver, locks.BaseImage)
+	osrelease, err := builddef.ResolveImageOS(ctx, h.solver, def.Locks.BaseImage)
 	if err != nil {
 		return nil, xerrors.Errorf("could not resolve OS details from base image: %w", err)
 	}
@@ -59,17 +62,16 @@ func (h *NodeJSHandler) UpdateLocks(
 		return nil, xerrors.Errorf("unsupported OS %q: only debian-based base images are supported", osrelease.Name)
 	}
 
-	stagesLocks, err := h.updateStagesLocks(ctx, pkgSolver, def, locks)
-	locks.Stages = stagesLocks
+	stagesLocks, err := h.updateStagesLocks(ctx, pkgSolver, def)
+	def.Locks.Stages = stagesLocks
 
-	return locks, err
+	return def.Locks, err
 }
 
 func (h *NodeJSHandler) updateStagesLocks(
 	ctx context.Context,
 	pkgSolver pkgsolver.PackageSolver,
 	def Definition,
-	defLocks DefinitionLocks,
 ) (map[string]StageLocks, error) {
 	locks := map[string]StageLocks{}
 
@@ -81,7 +83,7 @@ func (h *NodeJSHandler) updateStagesLocks(
 
 		stageLocks := StageLocks{}
 		stageLocks.SystemPackages, err = pkgSolver.ResolveVersions(
-			defLocks.BaseImage,
+			def.Locks.BaseImage,
 			stage.SystemPackages.Map())
 		if err != nil {
 			return nil, xerrors.Errorf("could not resolve versions of system packages to install: %w", err)

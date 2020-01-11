@@ -72,8 +72,11 @@ func (h *PHPHandler) UpdateLocks(
 		return nil, err
 	}
 
-	// @TODO: resolve sha256 of the base image and lock it
-	def.Locks.BaseImage = def.BaseImage
+	def.Locks.BaseImage, err = h.solver.ResolveImageRef(ctx, def.BaseImage)
+	if err != nil {
+		return nil, xerrors.Errorf("could not resolve image %q: %w",
+			def.BaseImage, err)
+	}
 
 	osrelease, err := builddef.ResolveImageOS(ctx, h.solver, def.Locks.BaseImage)
 	if err != nil {
@@ -84,7 +87,11 @@ func (h *PHPHandler) UpdateLocks(
 	}
 
 	stagesLocks, err := h.updateStagesLocks(ctx, pkgSolver, def, def.Locks)
+	if err != nil {
+		return nil, err
+	}
 	def.Locks.Stages = stagesLocks
+
 	return def.Locks, err
 }
 

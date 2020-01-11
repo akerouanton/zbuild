@@ -8,6 +8,7 @@ import (
 	_ "github.com/NiR-/zbuild/pkg/defkinds/php"
 	_ "github.com/NiR-/zbuild/pkg/defkinds/webserver"
 	"github.com/NiR-/zbuild/pkg/statesolver"
+	"github.com/containerd/containerd/remotes/docker"
 	"github.com/docker/docker/client"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -35,12 +36,12 @@ func main() {
 }
 
 func newDockerSolver(rootDir string) statesolver.DockerSolver {
-	docker, err := client.NewClientWithOpts(client.FromEnv)
+	c, err := client.NewClientWithOpts(client.FromEnv)
 	if err != nil {
 		logrus.Fatalf("%+v", err)
 	}
 
-	docker.NegotiateAPIVersion(context.TODO())
+	c.NegotiateAPIVersion(context.TODO())
 
 	if rootDir == "" {
 		var err error
@@ -51,9 +52,10 @@ func newDockerSolver(rootDir string) statesolver.DockerSolver {
 	}
 
 	return statesolver.DockerSolver{
-		Client:  docker,
-		Labels:  map[string]string{},
-		RootDir: rootDir,
+		Client:        c,
+		Labels:        map[string]string{},
+		RootDir:       rootDir,
+		ImageResolver: docker.NewResolver(docker.ResolverOptions{}),
 	}
 }
 

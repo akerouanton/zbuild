@@ -45,7 +45,7 @@ func initSuccessfullyParseRawDefinitionTC() newDefinitionTC {
 				},
 			},
 			Locks: webserver.DefinitionLocks{
-				BaseImage: "docker.io/library/nginx:latest",
+				BaseImage: "docker.io/library/nginx:latest@sha256",
 				SystemPackages: map[string]string{
 					"curl": "7.64.0-4",
 				},

@@ -30,8 +30,12 @@ func (h *WebserverHandler) UpdateLocks(
 		return nil, err
 	}
 
-	// @TODO: resolve the sha256 of the base image
-	def.Locks.BaseImage = def.Type.BaseImage()
+	def.Locks = DefinitionLocks{}
+	def.Locks.BaseImage, err = h.solver.ResolveImageRef(ctx, def.Type.BaseImage())
+	if err != nil {
+		return nil, xerrors.Errorf("could not resolve image %q: %w",
+			def.Type.BaseImage(), err)
+	}
 
 	osrelease, err := builddef.ResolveImageOS(ctx, h.solver, def.Locks.BaseImage)
 	if err != nil {

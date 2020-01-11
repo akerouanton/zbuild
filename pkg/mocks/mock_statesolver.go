@@ -89,3 +89,16 @@ func (m *MockStateSolver) ReadFile(arg0 context.Context, arg1 string, arg2 state
 func (mr *MockStateSolverMockRecorder) ReadFile(arg0, arg1, arg2 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReadFile", reflect.TypeOf((*MockStateSolver)(nil).ReadFile), arg0, arg1, arg2)
 }
+
+// ResolveImageRef mocks base method
+func (m *MockStateSolver) ResolveImageRef(arg0 context.Context, arg1 string) (string, error) {
+	ret := m.ctrl.Call(m, "ResolveImageRef", arg0, arg1)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ResolveImageRef indicates an expected call of ResolveImageRef
+func (mr *MockStateSolverMockRecorder) ResolveImageRef(arg0, arg1 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResolveImageRef", reflect.TypeOf((*MockStateSolver)(nil).ResolveImageRef), arg0, arg1)
+}

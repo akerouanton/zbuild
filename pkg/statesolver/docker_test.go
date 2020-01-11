@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/NiR-/zbuild/pkg/statesolver"
+	"github.com/containerd/containerd/remotes/docker"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
 	"golang.org/x/xerrors"
@@ -224,6 +225,56 @@ func TestDockerExecImage(t *testing.T) {
 
 			if out.String() != tc.expected {
 				t.Fatalf("Expected: %s\nGot: %s", tc.expected, out.String())
+			}
+		})
+	}
+}
+
+func TestDockerResolveImageRef(t *testing.T) {
+	testcases := map[string]struct {
+		imageRef    string
+		expected    string
+		expectedErr error
+	}{
+		"resolve zbuilder image tag": {
+			// @TODO: use a proper version tag once the 1st version of zbuild got released
+			imageRef: "akerouanton/zbuilder:nodejs13",
+			expected: "docker.io/akerouanton/zbuilder:nodejs13@sha256:9ba7ef1203743cd9ce761317f07d0dd4331f0f2c91157022ee01d4b5f5f4bf1b",
+		},
+		"return the same reference when a canonical ref is provided": {
+			imageRef: "docker.io/akerouanton/zbuilder:nodejs13@sha256:9ba7ef1203743cd9ce761317f07d0dd4331f0f2c91157022ee01d4b5f5f4bf1b",
+			expected: "docker.io/akerouanton/zbuilder:nodejs13@sha256:9ba7ef1203743cd9ce761317f07d0dd4331f0f2c91157022ee01d4b5f5f4bf1b",
+		},
+		"fail to resolve ref with schema": {
+			imageRef:    "http://docker.io/akerouanton/zbuilder:nodejs13",
+			expectedErr: xerrors.New("invalid reference format"),
+		},
+	}
+
+	solver := statesolver.DockerSolver{
+		ImageResolver: docker.NewResolver(docker.ResolverOptions{}),
+	}
+
+	for tcname := range testcases {
+		tc := testcases[tcname]
+
+		t.Run(tcname, func(t *testing.T) {
+			t.Parallel()
+
+			ctx := context.Background()
+			resolved, err := solver.ResolveImageRef(ctx, tc.imageRef)
+			if tc.expectedErr != nil {
+				if err == nil || err.Error() != tc.expectedErr.Error() {
+					t.Fatalf("Expected error: %v\nGot: %v", tc.expectedErr, err)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("Unexpected error: %v", err)
+			}
+
+			if resolved != tc.expected {
+				t.Fatalf("Expected: %s\nGot: %s", tc.expected, resolved)
 			}
 		})
 	}

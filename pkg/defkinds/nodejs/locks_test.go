@@ -38,7 +38,11 @@ BUG_REPORT_URL="https://bugs.debian.org/"`)
 
 func initSuccessfullyUpdateLocksTC(t *testing.T, mockCtrl *gomock.Controller) updateLocksTC {
 	solver := mocks.NewMockStateSolver(mockCtrl)
-	solver.EXPECT().FromImage("docker.io/library/node:12-buster-slim").Times(1)
+	solver.EXPECT().ResolveImageRef(
+		gomock.Any(), "docker.io/library/node:12-buster-slim",
+	).Return("docker.io/library/node:12-buster-slim@sha256", nil)
+
+	solver.EXPECT().FromImage("docker.io/library/node:12-buster-slim@sha256").Times(1)
 	solver.EXPECT().ReadFile(
 		gomock.Any(),
 		"/etc/os-release",
@@ -47,7 +51,7 @@ func initSuccessfullyUpdateLocksTC(t *testing.T, mockCtrl *gomock.Controller) up
 
 	pkgSolver := mocks.NewMockPackageSolver(mockCtrl)
 	pkgSolver.EXPECT().ResolveVersions(
-		"docker.io/library/node:12-buster-slim",
+		"docker.io/library/node:12-buster-slim@sha256",
 		map[string]string{"curl": "*"},
 	).AnyTimes().Return(map[string]string{
 		"curl": "curl-version",
@@ -74,7 +78,11 @@ BUG_REPORT_URL="https://bugs.alpinelinux.org/"
 
 func failToUpdateLocksForAlpineBaseImageTC(t *testing.T, mockCtrl *gomock.Controller) updateLocksTC {
 	solver := mocks.NewMockStateSolver(mockCtrl)
-	solver.EXPECT().FromImage("docker.io/library/node:12-alpine").Times(1)
+	solver.EXPECT().ResolveImageRef(
+		gomock.Any(), "node:12-alpine",
+	).Return("docker.io/library/node:12-alpine@sha256", nil)
+
+	solver.EXPECT().FromImage("docker.io/library/node:12-alpine@sha256").Times(1)
 	solver.EXPECT().ReadFile(
 		gomock.Any(),
 		"/etc/os-release",

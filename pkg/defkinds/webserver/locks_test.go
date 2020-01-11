@@ -32,8 +32,11 @@ BUG_REPORT_URL="https://bugs.debian.org/"`)
 
 func initSuccessfullyUpdateLocksTC(t *testing.T, mockCtrl *gomock.Controller) updateLocksTC {
 	solver := mocks.NewMockStateSolver(mockCtrl)
-	solver.EXPECT().FromImage("docker.io/library/nginx:latest").Times(1)
+	solver.EXPECT().ResolveImageRef(
+		gomock.Any(), "docker.io/library/nginx:latest",
+	).Return("docker.io/library/nginx:latest@sha256", nil)
 
+	solver.EXPECT().FromImage("docker.io/library/nginx:latest@sha256").Times(1)
 	solver.EXPECT().ReadFile(
 		gomock.Any(),
 		"/etc/os-release",
@@ -42,7 +45,7 @@ func initSuccessfullyUpdateLocksTC(t *testing.T, mockCtrl *gomock.Controller) up
 
 	pkgSolver := mocks.NewMockPackageSolver(mockCtrl)
 	pkgSolver.EXPECT().ResolveVersions(
-		"docker.io/library/nginx:latest",
+		"docker.io/library/nginx:latest@sha256",
 		map[string]string{"curl": "*"},
 	).Times(1).Return(map[string]string{
 		"curl": "7.64.0-4",

@@ -1,2 +1,2 @@
 kind: nodejs
-base: docker.io/library/node:12-alpine
+base: node:12-alpine
