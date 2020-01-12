@@ -1,4 +1,4 @@
-base: docker.io/library/node:12-buster-slim
+base: docker.io/library/node:12-buster-slim@sha256:4d1016eefc4e6dc52ba9be6550dcb25a6e1826117507e65eda3650d6eb19f042
 stages:
   dev:
     system_packages: {}
@@ -6,3 +6,7 @@ stages:
     system_packages: {}
   worker:
     system_packages: {}
+webserver:
+  base_image: docker.io/library/nginx:latest@sha256:8aa7f6a9585d908a63e5e418dc5d14ae7467d2e36e1ab4f0d8f9d059a3d071ce
+  system_packages:
+    curl: 7.64.0-4

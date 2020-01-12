@@ -62,7 +62,7 @@ func initBuildLLBTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
 					User: "1000",
 					Env: []string{
 						"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
-						"NGINX_VERSION=1.17.6",
+						"NGINX_VERSION=1.17.7",
 						"NJS_VERSION=0.3.7",
 						"PKG_RELEASE=1~buster",
 					},
@@ -121,7 +121,7 @@ func initBuildLLBFromGitContextTC(t *testing.T, mockCtrl *gomock.Controller) bui
 					User: "1000",
 					Env: []string{
 						"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
-						"NGINX_VERSION=1.17.6",
+						"NGINX_VERSION=1.17.7",
 						"NJS_VERSION=0.3.7",
 						"PKG_RELEASE=1~buster",
 					},
