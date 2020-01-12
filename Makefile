@@ -37,6 +37,10 @@ gen-testdata:
 	@$(GOTEST) -v ./pkg/defkinds/webserver -testdata
 	@echo "WARNING: Be sure to review generated testdata files before committing them."
 
+.PHONY: gen-diagrams
+gen-diagrams: build install
+	./tools/gen-diagrams.py
+
 .PHONY: build-image
 build-image: .validate-image-tag build
 	docker build -t akerouanton/zbuilder:$(IMAGE_TAG) -f Dockerfile.builder bin/

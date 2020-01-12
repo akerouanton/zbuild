@@ -2,7 +2,7 @@
 
 Building container images without the hassle of writing Dockerfiles.
 
-zbuild is a high-level container image builder providing an alternative to 
+zbuild is a high-level container image build format providing an alternative to 
 Dockerfiles but still fully compatible with Docker CLI. You don't have to write
 system commands to build images anymore and you can instead focus on what
 matters.
@@ -27,7 +27,7 @@ Instead of writing Dockerfiles, you have to write zbuild files in YAML format.
 As zbuild implements builder backends for multiple kinds of images, you have to
 refer to their specific parameters.
 
-* [php](docs/php-parameters.md)
+* [php](docs/kind-php.md)
 * [webserver](docs/kind-webserver.md)
 * More to come soon...
 
