@@ -1,10 +1,58 @@
 [
   {
-    "RawOp": "Gi8KLWRvY2tlci1pbWFnZTovL2RvY2tlci5pby9saWJyYXJ5L25naW54OmxhdGVzdFIOCgVhbWQ2NBIFbGludXhaAA==",
+    "RawOp": "CkkKR3NoYTI1NjpmMjAwNDNjOGQ4NzAzODUxOWRlMTNkZjExMTU2N2NkYTM1NDQxZmJjYjUxOGVkOTZiOTBkZjVlNTU5YWU3MmY3",
     "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:f20043c8d87038519de13df111567cda35441fbcb518ed96b90df5e559ae72f7",
+          "index": 0
+        }
+      ],
+      "Op": null
+    },
+    "Digest": "sha256:630cd58daf496d2053dbf9cee41c7be6f1cf13fb5a6f9aca97c7edba5ee1db4e",
+    "OpMetadata": {
+      "caps": {
+        "constraints": true,
+        "meta.description": true,
+        "platform": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1NjpmMWQxM2JmYmYzYjgwYjM2YTI4ZmFkNTEyODVhMjZhYjg4ZTY4OWU1MmI0NWRmMGE0ZThjZGIyOTRkYjIxOTRhEo4CCoYCCgcvYmluL3NoCgItbwoHZXJyZXhpdAoCLWMKZWFwdC1nZXQgdXBkYXRlOyBhcHQtZ2V0IGluc3RhbGwgLXkgLS1uby1pbnN0YWxsLXJlY29tbWVuZHMgY3VybD03LjY0LjAtNDsgcm0gLXJmIC92YXIvbGliL2FwdC9saXN0cy8qEkFQQVRIPS91c3IvbG9jYWwvc2JpbjovdXNyL2xvY2FsL2JpbjovdXNyL3NiaW46L3Vzci9iaW46L3NiaW46L2JpbhIUTkdJTlhfVkVSU0lPTj0xLjE3LjcSEU5KU19WRVJTSU9OPTAuMy43EhRQS0dfUkVMRUFTRT0xfmJ1c3RlchoBLxIDGgEvUg4KBWFtZDY0EgVsaW51eFoA",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:f1d13bfbf3b80b36a28fad51285a26ab88e689e52b45df0a4e8cdb294db2194a",
+          "index": 0
+        }
+      ],
       "Op": {
-        "Source": {
-          "identifier": "docker-image://docker.io/library/nginx:latest"
+        "Exec": {
+          "meta": {
+            "args": [
+              "/bin/sh",
+              "-o",
+              "errexit",
+              "-c",
+              "apt-get update; apt-get install -y --no-install-recommends curl=7.64.0-4; rm -rf /var/lib/apt/lists/*"
+            ],
+            "env": [
+              "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+              "NGINX_VERSION=1.17.7",
+              "NJS_VERSION=0.3.7",
+              "PKG_RELEASE=1~buster"
+            ],
+            "cwd": "/"
+          },
+          "mounts": [
+            {
+              "input": 0,
+              "dest": "/",
+              "output": 0
+            }
+          ]
         }
       },
       "platform": {
@@ -13,10 +61,14 @@
       },
       "constraints": {}
     },
-    "Digest": "sha256:62549b609c62be5d4a072c8b1697ba6e0f40e59bf6b340565f5132922031518b",
+    "Digest": "sha256:7e6b5c71111c4082903d752cf79abdce02e0e1277fd4a9d2fb075c5a0313c5fa",
     "OpMetadata": {
+      "description": {
+        "llb.customname": "Install system packages (curl=7.64.0-4)"
+      },
       "caps": {
-        "source.image": true
+        "exec.meta.base": true,
+        "exec.mount.bind": true
       }
     }
   },
@@ -49,11 +101,32 @@
     }
   },
   {
-    "RawOp": "CkkKR3NoYTI1NjplMzc1ZWVjMjVlYTJiMmUyMWNkM2ViYjI1NDcwMzhhZGRkYWVlN2M1MmM2NGJjN2ZkZmE5OGNmY2YxYjYxYjIwCkkKR3NoYTI1Njo5N2RiNDY5Nzc3YzViOWJjOWY3MzA4MTQ0YmQ2OGNkY2M3N2ViNWRjNDJhZGU0NGNmNzk1ZDE3ZGIwNzk5NGFkIlsSWRABIlUKEi9kb2NrZXIvbmdpbnguY29uZhIVL2V0Yy9uZ2lueC9uZ2lueC5jb25mGgoKAxDoBxIDEOgHIP///////////wEoATABQAFIAVj///////////8BUg4KBWFtZDY0EgVsaW51eFoA",
+    "RawOp": "GncKdWRvY2tlci1pbWFnZTovL2RvY2tlci5pby9saWJyYXJ5L25naW54OmxhdGVzdEBzaGEyNTY6OGFhN2Y2YTk1ODVkOTA4YTYzZTVlNDE4ZGM1ZDE0YWU3NDY3ZDJlMzZlMWFiNGYwZDhmOWQwNTlhM2QwNzFjZVIOCgVhbWQ2NBIFbGludXhaAA==",
+    "Op": {
+      "Op": {
+        "Source": {
+          "identifier": "docker-image://docker.io/library/nginx:latest@sha256:8aa7f6a9585d908a63e5e418dc5d14ae7467d2e36e1ab4f0d8f9d059a3d071ce"
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:f1d13bfbf3b80b36a28fad51285a26ab88e689e52b45df0a4e8cdb294db2194a",
+    "OpMetadata": {
+      "caps": {
+        "source.image": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1Njo3ZTZiNWM3MTExMWM0MDgyOTAzZDc1MmNmNzlhYmRjZTAyZTBlMTI3N2ZkNGE5ZDJmYjA3NWM1YTAzMTNjNWZhCkkKR3NoYTI1Njo5N2RiNDY5Nzc3YzViOWJjOWY3MzA4MTQ0YmQ2OGNkY2M3N2ViNWRjNDJhZGU0NGNmNzk1ZDE3ZGIwNzk5NGFkIlsSWRABIlUKEi9kb2NrZXIvbmdpbnguY29uZhIVL2V0Yy9uZ2lueC9uZ2lueC5jb25mGgoKAxDoBxIDEOgHIP///////////wEoATABQAFIAVj///////////8BUg4KBWFtZDY0EgVsaW51eFoA",
     "Op": {
       "inputs": [
         {
-          "digest": "sha256:e375eec25ea2b2e21cd3ebb2547038adddaee7c52c64bc7fdfa98cfcf1b61b20",
+          "digest": "sha256:7e6b5c71111c4082903d752cf79abdce02e0e1277fd4a9d2fb075c5a0313c5fa",
           "index": 0
         },
         {
@@ -102,86 +175,13 @@
       },
       "constraints": {}
     },
-    "Digest": "sha256:be1e4889406a229c6172c074773a5f66bf990274a00229c35772f30a7b5a1de1",
+    "Digest": "sha256:f20043c8d87038519de13df111567cda35441fbcb518ed96b90df5e559ae72f7",
     "OpMetadata": {
       "description": {
         "llb.customname": "Copy ./docker/nginx.conf"
       },
       "caps": {
         "file.base": true
-      }
-    }
-  },
-  {
-    "RawOp": "CkkKR3NoYTI1NjpiZTFlNDg4OTQwNmEyMjljNjE3MmMwNzQ3NzNhNWY2NmJmOTkwMjc0YTAwMjI5YzM1NzcyZjMwYTdiNWExZGUx",
-    "Op": {
-      "inputs": [
-        {
-          "digest": "sha256:be1e4889406a229c6172c074773a5f66bf990274a00229c35772f30a7b5a1de1",
-          "index": 0
-        }
-      ],
-      "Op": null
-    },
-    "Digest": "sha256:dddecd8713264a96bf363570eff49af9a5bf28627b768e6b3c1ccb750d61ef48",
-    "OpMetadata": {
-      "caps": {
-        "constraints": true,
-        "meta.description": true,
-        "platform": true
-      }
-    }
-  },
-  {
-    "RawOp": "CkkKR3NoYTI1Njo2MjU0OWI2MDljNjJiZTVkNGEwNzJjOGIxNjk3YmE2ZTBmNDBlNTliZjZiMzQwNTY1ZjUxMzI5MjIwMzE1MThiEo4CCoYCCgcvYmluL3NoCgItbwoHZXJyZXhpdAoCLWMKZWFwdC1nZXQgdXBkYXRlOyBhcHQtZ2V0IGluc3RhbGwgLXkgLS1uby1pbnN0YWxsLXJlY29tbWVuZHMgY3VybD03LjY0LjAtNDsgcm0gLXJmIC92YXIvbGliL2FwdC9saXN0cy8qEkFQQVRIPS91c3IvbG9jYWwvc2JpbjovdXNyL2xvY2FsL2JpbjovdXNyL3NiaW46L3Vzci9iaW46L3NiaW46L2JpbhIUTkdJTlhfVkVSU0lPTj0xLjE3LjYSEU5KU19WRVJTSU9OPTAuMy43EhRQS0dfUkVMRUFTRT0xfmJ1c3RlchoBLxIDGgEvUg4KBWFtZDY0EgVsaW51eFoA",
-    "Op": {
-      "inputs": [
-        {
-          "digest": "sha256:62549b609c62be5d4a072c8b1697ba6e0f40e59bf6b340565f5132922031518b",
-          "index": 0
-        }
-      ],
-      "Op": {
-        "Exec": {
-          "meta": {
-            "args": [
-              "/bin/sh",
-              "-o",
-              "errexit",
-              "-c",
-              "apt-get update; apt-get install -y --no-install-recommends curl=7.64.0-4; rm -rf /var/lib/apt/lists/*"
-            ],
-            "env": [
-              "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
-              "NGINX_VERSION=1.17.6",
-              "NJS_VERSION=0.3.7",
-              "PKG_RELEASE=1~buster"
-            ],
-            "cwd": "/"
-          },
-          "mounts": [
-            {
-              "input": 0,
-              "dest": "/",
-              "output": 0
-            }
-          ]
-        }
-      },
-      "platform": {
-        "Architecture": "amd64",
-        "OS": "linux"
-      },
-      "constraints": {}
-    },
-    "Digest": "sha256:e375eec25ea2b2e21cd3ebb2547038adddaee7c52c64bc7fdfa98cfcf1b61b20",
-    "OpMetadata": {
-      "description": {
-        "llb.customname": "Install system packages (curl=7.64.0-4)"
-      },
-      "caps": {
-        "exec.meta.base": true,
-        "exec.mount.bind": true
       }
     }
   }
