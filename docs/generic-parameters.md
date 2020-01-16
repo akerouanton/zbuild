@@ -14,7 +14,10 @@ Following parameters are common to many or all kinds of definition:
 This parameter allows you to download files through HTTP or HTTPS to put them
 at a specific path in your image. These files might be compressed or
 uncompressed, and you might either decompress a full archive or a single path
-from your archive. Moreover, it supports checksum verification.
+from that archive. It supports tar archives, either uncompressed or compressed
+with gzip, bzip2 or xz.
+
+Moreover, it supports checksum verification.
 
 When merging this parameter with a parent stage, the list of external files 
 of the parent is appended to the child's list. As such, you can't remove a
@@ -59,7 +62,7 @@ packages that can be installed using the package manager available in the base
 image (only apt is supported as of now since Alpine is using rolling updates).
 
 Package requirements can be either a `*` or a specific version. When a wildcard
-is used, the last version available is locked. For more details about version
+is used, the latest version available is locked. For more details about version
 locking, see the doc pages for each kind.
 
 ```yaml
@@ -90,7 +93,7 @@ healthcheck:
   <healthcheck_type>: <specialized_parameters>
 ```
 
-`<duration>` fields are integers followed by duration suffix `ms` or `s`.
+`<duration>` types are integers followed by duration suffix `ms` or `s`.
 
 Each type of healthcheck have its own set of specialized parameters:
 
@@ -125,7 +128,7 @@ healthcheck:
 The `fcgi` healthcheck type uses [fcgi-client](https://github.com/NiR-/fcgi-client)
 to send FCGI requests to a php-fpm server listening on `127.0.0.1:9000` with
 the given `path` parameter. The healthcheck prober expects the FCGI request
-to return the given `expected` parameter.
+to return the given `expected` parameter as response body.
 
 ##### `http` healthcheck
 
@@ -134,7 +137,7 @@ healthcheck:
   type: http
   http:
     path: /ping
-    expected: /pong
+    expected: pong
 ```
 
 The `http` healthcheck type uses `curl` to send a request to the given `path` to

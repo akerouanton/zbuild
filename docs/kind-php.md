@@ -68,7 +68,7 @@ files ;
 
 ## Build process
 
-The images build from php kinds have following steps:
+The image build process for the php kinds have the following steps:
 
 * Install system packages ;
 * Install PHP extensions ;
@@ -106,8 +106,10 @@ constraint is locked.
 
 ## Assets and webserver
 
-Sometimes you need to run some PHP commands to build some static assets. To
-help you do so, zbuilfiles for php kind lets you embed a webserver definition:
+When you build images from PHP project, it's sometimes needed to run some PHP
+commands to build some static assets and then include these assets into a
+webserver image. To help you do so, zbuilfiles for php kind lets you embed a
+webserver definition and reference folders from `php` stages:
 
 ```yaml
 # syntax=akerouanton/zbuilder:<TAG>
@@ -296,7 +298,7 @@ composer_dump:
   classmap_authoritative: <bool> # (default: true on base stage)
 ```
 
-When merging parent stages, the whole map (if declared) erase parent values.
+When merging parent stages, the whole map (if declared) erases parent values.
 
 #### Sources - `<sources>`
 
