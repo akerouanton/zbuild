@@ -11,24 +11,6 @@ import (
 	"golang.org/x/xerrors"
 )
 
-var defaultBaseImages = map[string]struct {
-	FPM string
-	CLI string
-}{
-	"7.2": {
-		FPM: "docker.io/library/php:7.2-fpm-buster",
-		CLI: "docker.io/library/php:7.2-cli-buster",
-	},
-	"7.3": {
-		FPM: "docker.io/library/php:7.3-fpm-buster",
-		CLI: "docker.io/library/php:7.3-cli-buster",
-	},
-	"7.4": {
-		FPM: "docker.io/library/php:7.4-fpm-buster",
-		CLI: "docker.io/library/php:7.4-cli-buster",
-	},
-}
-
 // DefinitionLocks defines version locks for system packages and PHP extensions used
 // by each stage.
 type DefinitionLocks struct {

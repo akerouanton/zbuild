@@ -178,11 +178,10 @@ func NewKind(genericDef *builddef.BuildDef) (Definition, error) {
 	}
 
 	if def.BaseImage == "" && def.Version != "" {
-		baseImages := defaultBaseImages[def.MajMinVersion]
 		if *def.BaseStage.FPM {
-			def.BaseImage = baseImages.FPM
+			def.BaseImage = fmt.Sprintf("docker.io/library/php:%s-fpm-buster", def.Version)
 		} else {
-			def.BaseImage = baseImages.CLI
+			def.BaseImage = fmt.Sprintf("docker.io/library/php:%s-cli-buster", def.Version)
 		}
 	}
 
@@ -207,14 +206,6 @@ type Definition struct {
 func (def Definition) IsValid() error {
 	if def.Version != "" && def.BaseImage != "" {
 		return xerrors.Errorf("you can't specify version and base parameters at the same time")
-	}
-
-	if def.Version != "" {
-		if _, ok := defaultBaseImages[def.MajMinVersion]; !ok {
-			return xerrors.Errorf(
-				"no default base image defined for PHP v%s, you have to define it by yourself in your zbuild file",
-				def.MajMinVersion)
-		}
 	}
 
 	allowedHCTypes := []string{"fcgi", "cmd"}

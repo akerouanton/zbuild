@@ -77,7 +77,7 @@ func initParseRawDefinitionWithoutStagesTC() newDefinitionTC {
 			},
 			Version:       "7.4.0",
 			MajMinVersion: "7.4",
-			BaseImage:     "docker.io/library/php:7.4-fpm-buster",
+			BaseImage:     "docker.io/library/php:7.4.0-fpm-buster",
 			Infer:         &inferMode,
 			Stages: map[string]php.DerivedStage{
 				"dev": {
@@ -173,7 +173,7 @@ func initParseRawDefinitionWithStagesTC() newDefinitionTC {
 			},
 			Version:       "7.4.0",
 			MajMinVersion: "7.4",
-			BaseImage:     "docker.io/library/php:7.4-fpm-buster",
+			BaseImage:     "docker.io/library/php:7.4.0-fpm-buster",
 			Infer:         &inferMode,
 			Stages: map[string]php.DerivedStage{
 				"dev": {
@@ -238,7 +238,7 @@ func initParseRawDefinitionWithWebserverTC() newDefinitionTC {
 			BaseStage:     baseStage,
 			Version:       "7.4.0",
 			MajMinVersion: "7.4",
-			BaseImage:     "docker.io/library/php:7.4-fpm-buster",
+			BaseImage:     "docker.io/library/php:7.4.0-fpm-buster",
 			Infer:         &inferMode,
 			Stages: map[string]php.DerivedStage{
 				"dev": {
@@ -295,7 +295,7 @@ func initParseRawDefinitionWithCustomFCGIHealthcheckTC() newDefinitionTC {
 			},
 			Version:       "7.4.0",
 			MajMinVersion: "7.4",
-			BaseImage:     "docker.io/library/php:7.4-fpm-buster",
+			BaseImage:     "docker.io/library/php:7.4.0-fpm-buster",
 			Infer:         &inferMode,
 			Stages: map[string]php.DerivedStage{
 				"dev": {
@@ -390,7 +390,7 @@ func initSuccessfullyResolveDefaultDevStageTC(t *testing.T, mockCtrl *gomock.Con
 		},
 		expected: php.StageDefinition{
 			Name:           "dev",
-			BaseImage:      "docker.io/library/php:7.4-fpm-buster",
+			BaseImage:      "docker.io/library/php:7.4.0-fpm-buster",
 			Version:        "7.4.0",
 			MajMinVersion:  "7.4",
 			Infer:          false,
@@ -451,7 +451,7 @@ func initSuccessfullyResolveWorkerStageTC(t *testing.T, mockCtrl *gomock.Control
 		expected: php.StageDefinition{
 			Name:          "prod",
 			BaseImage:     "docker.io/library/php:7.4-cli-buster",
-			Version:       "7.4.0",
+			Version:       "7.4",
 			MajMinVersion: "7.4",
 			Infer:         true,
 			Dev:           false,
