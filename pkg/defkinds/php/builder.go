@@ -222,7 +222,7 @@ func setImageMetadata(
 	now := time.Now()
 	img.Created = &now
 
-	if *stage.FPM == false && stage.Command != nil {
+	if stage.Command != nil {
 		img.Config.Cmd = *stage.Command
 	}
 }
