@@ -523,24 +523,13 @@ func (def *Definition) ResolveStageDefinition(
 		return stageDef, xerrors.Errorf("invalid final stage config: %w", err)
 	}
 
-	if err := addIntegrations(&stageDef); err != nil {
+	if err := addIntegrations(def.Locks, &stageDef); err != nil {
 		return stageDef, err
 	}
 
-	if def.Infer == nil || *def.Infer == false {
-		return stageDef, nil
+	if def.Infer != nil && *def.Infer {
+		inferConfig(&stageDef)
 	}
-
-	if stageDef.Dev == false && *stageDef.FPM == true {
-		stageDef.Extensions.Add("apcu", "*")
-		stageDef.Extensions.Add("opcache", "*")
-	}
-	for name, constraint := range stageDef.PlatformReqs {
-		stageDef.Extensions.Add(name, constraint)
-	}
-
-	inferExtensions(&stageDef)
-	inferSystemPackages(&stageDef)
 
 	if !withLocks {
 		return stageDef, nil
@@ -698,6 +687,19 @@ var preinstalledExtensions = map[string]struct{}{
 	"xmlreader":  struct{}{},
 	"xmlwriter":  struct{}{},
 	"zlib":       struct{}{},
+}
+
+func inferConfig(stageDef *StageDefinition) {
+	if stageDef.Dev == false && *stageDef.FPM == true {
+		stageDef.Extensions.Add("apcu", "*")
+		stageDef.Extensions.Add("opcache", "*")
+	}
+	for name, constraint := range stageDef.PlatformReqs {
+		stageDef.Extensions.Add(name, constraint)
+	}
+
+	inferExtensions(stageDef)
+	inferSystemPackages(stageDef)
 }
 
 func inferExtensions(def *StageDefinition) {
