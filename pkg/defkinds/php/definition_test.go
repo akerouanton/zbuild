@@ -10,7 +10,6 @@ import (
 	"github.com/NiR-/zbuild/pkg/llbutils"
 	"github.com/go-test/deep"
 	"github.com/golang/mock/gomock"
-	"golang.org/x/xerrors"
 	"gopkg.in/yaml.v2"
 )
 
@@ -626,6 +625,18 @@ func initPreservePredefinedExtensionConstraintsTC(t *testing.T, mockCtrl *gomock
 	}
 }
 
+func initFailWhenComposerFlagsAreInvalidTC(t *testing.T, _ *gomock.Controller) resolveStageTC {
+	composerLockLoader := mockComposerLockLoader(map[string]string{}, map[string]string{})
+
+	return resolveStageTC{
+		file:               "testdata/def/invalid-composer-flags.yml",
+		lockFile:           "",
+		stage:              "dev",
+		composerLockLoader: composerLockLoader,
+		expectedErr:        errors.New(`invalid final stage config: you can't use both --apcu and --classmap-authoritative flags. See https://getcomposer.org/doc/articles/autoloader-optimization.md`),
+	}
+}
+
 func TestResolveStageDefinition(t *testing.T) {
 	if *flagTestdata {
 		return
@@ -636,6 +647,7 @@ func TestResolveStageDefinition(t *testing.T) {
 		"successfully resolve worker stage":         initSuccessfullyResolveWorkerStageTC,
 		"fail to resolve unknown stage":             initFailToResolveUnknownStageTC,
 		"fail to resolve stage with cyclic deps":    initFailToResolveStageWithCyclicDepsTC,
+		"fail when composer flags are invalid":      initFailWhenComposerFlagsAreInvalidTC,
 		"remove default extensions":                 initRemoveDefaultExtensionsTC,
 		"preserve predefined extension constraints": initPreservePredefinedExtensionConstraintsTC,
 	}
@@ -680,6 +692,10 @@ func TestResolveStageDefinition(t *testing.T) {
 }
 
 func TestComposerDumpFlags(t *testing.T) {
+	if !*flagTestdata {
+		return
+	}
+
 	testcases := map[string]struct {
 		obj         php.ComposerDumpFlags
 		expected    string
@@ -696,10 +712,6 @@ func TestComposerDumpFlags(t *testing.T) {
 		"with no particular optimization": {
 			obj:      php.ComposerDumpFlags{},
 			expected: "--no-dev --optimize",
-		},
-		"fail when both optimizations are enabled": {
-			obj:         php.ComposerDumpFlags{APCU: true, ClassmapAuthoritative: true},
-			expectedErr: xerrors.New("you can't use both --apcu and --classmap-authoritative flags. See https://getcomposer.org/doc/articles/autoloader-optimization.md"),
 		},
 	}
 

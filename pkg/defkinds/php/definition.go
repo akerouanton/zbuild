@@ -259,7 +259,7 @@ func (base Definition) Merge(overriding Definition) Definition {
 type Stage struct {
 	ExternalFiles     []llbutils.ExternalFile     `mapstructure:"external_files"`
 	SystemPackages    *builddef.VersionMap        `mapstructure:"system_packages"`
-	FPM               *bool                       `mapstructure:",omitempty"`
+	FPM               *bool                       `mapstructure:"fpm"`
 	Command           *[]string                   `mapstructure:"command"`
 	Extensions        *builddef.VersionMap        `mapstructure:"extensions"`
 	GlobalDeps        *builddef.VersionMap        `mapstructure:"global_deps"`
@@ -453,11 +453,15 @@ type ComposerDumpFlags struct {
 	ClassmapAuthoritative bool `mapstructure:"classmap_authoritative"`
 }
 
-func (fl ComposerDumpFlags) Flags() (string, error) {
+func (fl ComposerDumpFlags) IsValid() error {
 	if fl.APCU && fl.ClassmapAuthoritative {
-		return "", xerrors.New("you can't use both --apcu and --classmap-authoritative flags. See https://getcomposer.org/doc/articles/autoloader-optimization.md")
+		return xerrors.New("you can't use both --apcu and --classmap-authoritative flags. See https://getcomposer.org/doc/articles/autoloader-optimization.md")
 	}
 
+	return nil
+}
+
+func (fl ComposerDumpFlags) Flags() (string, error) {
 	flags := "--no-dev --optimize"
 	if fl.APCU {
 		flags += " --apcu"
@@ -483,6 +487,18 @@ type StageDefinition struct {
 	Locks          StageLocks
 }
 
+func (stageDef StageDefinition) IsValid() error {
+	if *stageDef.FPM == false && stageDef.Command == nil {
+		return xerrors.New("FPM mode is disabled but no command was provided")
+	}
+
+	if err := stageDef.ComposerDumpFlags.IsValid(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (def *Definition) ResolveStageDefinition(
 	stageName string,
 	composerLockLoader func(*StageDefinition) error,
@@ -503,8 +519,8 @@ func (def *Definition) ResolveStageDefinition(
 		return stageDef, err
 	}
 
-	if *stageDef.FPM == false && stageDef.Command == nil {
-		return stageDef, xerrors.New("FPM mode is disabled but no command was provided")
+	if err := stageDef.IsValid(); err != nil {
+		return stageDef, xerrors.Errorf("invalid final stage config: %w", err)
 	}
 
 	if err := addIntegrations(&stageDef); err != nil {

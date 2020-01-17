@@ -1,0 +1,7 @@
+version: 7.4.0
+fpm: true
+infer: false
+
+composer_dump:
+  apcu: true
+  classmap_authoritative: true
