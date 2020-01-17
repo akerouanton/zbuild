@@ -91,6 +91,7 @@ func initParseRawDefinitionWithoutStagesTC() newDefinitionTC {
 				},
 			},
 			Locks: php.DefinitionLocks{
+				ExtensionDir: "/usr/local/lib/php/extensions/no-debug-non-zts-20190902/",
 				Stages: map[string]php.StageLocks{
 					"dev": {
 						SystemPackages: map[string]string{

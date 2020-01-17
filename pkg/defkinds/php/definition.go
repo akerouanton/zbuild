@@ -631,17 +631,11 @@ func reverseStages(stages []DerivedStage) []DerivedStage {
 	return reversed
 }
 
-var phpExtDirs = map[string]string{
-	"7.2": "/usr/local/lib/php/extensions/no-debug-non-zts-20170718/",
-	"7.3": "/usr/local/lib/php/extensions/no-debug-non-zts-20180731/",
-	"7.4": "/usr/local/lib/php/extensions/no-debug-non-zts-20190902/",
-}
-
-func addIntegrations(stageDef *StageDefinition) error {
+func addIntegrations(defLocks DefinitionLocks, stageDef *StageDefinition) error {
 	for _, integration := range stageDef.Integrations {
 		switch integration {
 		case "blackfire":
-			dest := path.Join(phpExtDirs[stageDef.MajMinVersion], "blackfire.so")
+			dest := path.Join(defLocks.ExtensionDir, "blackfire.so")
 			stageDef.ExternalFiles = append(stageDef.ExternalFiles, llbutils.ExternalFile{
 				URL:         "https://blackfire.io/api/v1/releases/probe/php/linux/amd64/72",
 				Compressed:  true,

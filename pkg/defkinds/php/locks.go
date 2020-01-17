@@ -14,8 +14,9 @@ import (
 // DefinitionLocks defines version locks for system packages and PHP extensions used
 // by each stage.
 type DefinitionLocks struct {
-	BaseImage string                `mapstructure:"base_image"`
-	Stages    map[string]StageLocks `mapstructure:"stages"`
+	BaseImage    string                `mapstructure:"base_image"`
+	ExtensionDir string                `mapstructure:"extension_dir"`
+	Stages       map[string]StageLocks `mapstructure:"stages"`
 }
 
 func (l DefinitionLocks) RawLocks() map[string]interface{} {
@@ -69,6 +70,11 @@ func (h *PHPHandler) UpdateLocks(
 		return nil, xerrors.Errorf("unsupported OS %q: only debian-based base images are supported", osrelease.Name)
 	}
 
+	def.Locks.ExtensionDir, err = h.resolveExtensionDir(ctx, def.Locks.BaseImage)
+	if err != nil {
+		return nil, err
+	}
+
 	stagesLocks, err := h.updateStagesLocks(ctx, pkgSolver, def, def.Locks)
 	if err != nil {
 		return nil, err
@@ -76,6 +82,17 @@ func (h *PHPHandler) UpdateLocks(
 	def.Locks.Stages = stagesLocks
 
 	return def.Locks, err
+}
+
+func (h *PHPHandler) resolveExtensionDir(ctx context.Context, image string) (string, error) {
+	buf, err := h.solver.ExecImage(ctx, image, []string{
+		"php", "-r", "echo ini_get('extension_dir');",
+	})
+	if err != nil {
+		return "", xerrors.Errorf("fail to resolve extension dir from base image: %w", err)
+	}
+
+	return buf.String(), nil
 }
 
 // @TODO: remove pkgSolver?

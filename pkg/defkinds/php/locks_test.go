@@ -1,6 +1,7 @@
 package php_test
 
 import (
+	"bytes"
 	"context"
 	"io/ioutil"
 	"testing"
@@ -41,6 +42,10 @@ func initSuccessfullyUpdateLocksTC(t *testing.T, mockCtrl *gomock.Controller) up
 	solver.EXPECT().ResolveImageRef(
 		gomock.Any(), "docker.io/library/php:7.3-fpm-buster",
 	).Return("docker.io/library/php:7.3-fpm-buster@sha256", nil)
+
+	solver.EXPECT().ExecImage(gomock.Any(), "docker.io/library/php:7.3-fpm-buster@sha256", []string{
+		"php", "-r", "echo ini_get('extension_dir');",
+	}).Return(bytes.NewBufferString("/some/path"), nil)
 
 	solver.EXPECT().FromImage("docker.io/library/php:7.3-fpm-buster@sha256").Times(1)
 	solver.EXPECT().ReadFile(
