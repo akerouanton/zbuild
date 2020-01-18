@@ -50,7 +50,8 @@ func initBuildLLBForDevStageTC(t *testing.T, mockCtrl *gomock.Controller) buildT
 			Stage:         "dev",
 			SessionID:     "<SESSION-ID>",
 			LocalUniqueID: "x1htr02606a9rk8b0daewh9es",
-			ContextName:   "context",
+			SourceContext: "context",
+			ConfigContext: "context",
 		},
 		expectedState: "testdata/build/state-dev.json",
 		expectedImage: &image.Image{
@@ -110,7 +111,8 @@ func initBuildLLBForProdStageTC(t *testing.T, mockCtrl *gomock.Controller) build
 			Stage:         "prod",
 			SessionID:     "<SESSION-ID>",
 			LocalUniqueID: "x1htr02606a9rk8b0daewh9es",
-			ContextName:   "context",
+			SourceContext: "context",
+			ConfigContext: "context",
 		},
 		expectedState: "testdata/build/state-prod.json",
 		expectedImage: &image.Image{
@@ -176,7 +178,8 @@ func initBuildProdStageFromGitBasedBuildContextTC(t *testing.T, mockCtrl *gomock
 			Stage:         "prod",
 			SessionID:     "<SESSION-ID>",
 			LocalUniqueID: "x1htr02606a9rk8b0daewh9es",
-			ContextName:   "git://github.com/some/repo",
+			SourceContext: "git://github.com/some/repo",
+			ConfigContext: "git://github.com/some/repo",
 		},
 		expectedState: "testdata/build/from-git-context.json",
 		expectedImage: &image.Image{

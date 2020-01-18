@@ -59,7 +59,7 @@ func (h *WebserverHandler) Build(
 	img = image.CloneMeta(baseImg)
 	img.Config.Labels[builddef.ZbuildLabel] = "true"
 
-	if buildOpts.Source == nil && len(def.Assets) > 0 {
+	if buildOpts.SourceState == nil && len(def.Assets) > 0 {
 		return state, img, xerrors.New("no source state to copy assets from has been provided")
 	}
 
@@ -70,7 +70,7 @@ func (h *WebserverHandler) Build(
 	}
 
 	for _, asset := range def.Assets {
-		state = llbutils.Copy(*buildOpts.Source, asset.From, state, asset.To, fileOwner)
+		state = llbutils.Copy(*buildOpts.SourceState, asset.From, state, asset.To, fileOwner)
 	}
 
 	setImageMetadata(def, state, img)
@@ -83,7 +83,7 @@ func (h *WebserverHandler) copyConfigFile(
 	def Definition,
 	buildOpts builddef.BuildOpts,
 ) llb.State {
-	configFileSrc := llbutils.BuildContext(buildOpts.ContextName,
+	configFileSrc := llbutils.BuildContext(buildOpts.ConfigContext,
 		llb.IncludePatterns([]string{*def.ConfigFile}),
 		llb.LocalUniqueID(buildOpts.LocalUniqueID),
 		llb.SessionID(buildOpts.SessionID),

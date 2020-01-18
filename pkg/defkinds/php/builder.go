@@ -150,7 +150,7 @@ func copyConfigFiles(
 		configFiles = append(configFiles, *stage.ConfigFiles.FPMConfigFile)
 	}
 
-	configFilesSrc := llbutils.BuildContext(buildOpts.ContextName,
+	configFilesSrc := llbutils.BuildContext(buildOpts.ConfigContext,
 		llb.IncludePatterns(configFiles),
 		llb.LocalUniqueID(buildOpts.LocalUniqueID),
 		llb.SessionID(buildOpts.SessionID),
@@ -182,7 +182,7 @@ func copySourceFiles(
 	state llb.State,
 	buildOpts builddef.BuildOpts,
 ) llb.State {
-	buildContextSrc := llbutils.BuildContext(buildOpts.ContextName,
+	buildContextSrc := llbutils.BuildContext(buildOpts.SourceContext,
 		llb.IncludePatterns(includePatterns(&stage)),
 		llb.ExcludePatterns(excludePatterns(&stage)),
 		llb.LocalUniqueID(buildOpts.LocalUniqueID),
@@ -279,7 +279,7 @@ func composerInstall(
 	state llb.State,
 	buildOpts builddef.BuildOpts,
 ) llb.State {
-	composerSrc := llbutils.BuildContext(buildOpts.ContextName,
+	composerSrc := llbutils.BuildContext(buildOpts.SourceContext,
 		llb.IncludePatterns([]string{"composer.json", "composer.lock"}),
 		llb.LocalUniqueID(buildOpts.LocalUniqueID),
 		llb.SessionID(buildOpts.SessionID),

@@ -41,7 +41,8 @@ func initBuildLLBForDevStageTC(t *testing.T, mockCtrl *gomock.Controller) buildT
 			Stage:         "dev",
 			SessionID:     "<SESSION-ID>",
 			LocalUniqueID: "x1htr02606a9rk8b0daewh9es",
-			ContextName:   "context",
+			SourceContext: "context",
+			ConfigContext: "context",
 		},
 		expectedState: "testdata/build/state-dev.json",
 		expectedImage: &image.Image{
@@ -88,7 +89,8 @@ func initBuildLLBForWorkerStageTC(t *testing.T, mockCtrl *gomock.Controller) bui
 			Stage:         "worker",
 			SessionID:     "<SESSION-ID>",
 			LocalUniqueID: "x1htr02606a9rk8b0daewh9es",
-			ContextName:   "context",
+			SourceContext: "context",
+			ConfigContext: "context",
 		},
 		expectedState: "testdata/build/state-worker.json",
 		expectedImage: &image.Image{

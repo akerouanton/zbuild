@@ -24,6 +24,7 @@ import (
 const (
 	keyTarget        = "target"
 	keyContext       = "context"
+	keyConfigContext = "config-context"
 	keyDockerContext = "contextkey"
 	keyFilename      = "filename"
 )
@@ -65,17 +66,23 @@ func buildOptsFromBuildkitOpts(c client.Client) builddef.BuildOpts {
 		stage = v
 	}
 
-	contextName := "context"
+	sourceContext := "context"
 	if v, ok := opts[keyDockerContext]; ok {
-		contextName = v
+		sourceContext = v
 	} else if v, ok := opts[keyContext]; ok {
-		contextName = v
+		sourceContext = v
+	}
+
+	configContext := sourceContext
+	if v, ok := opts["build-arg:"+keyConfigContext]; ok {
+		configContext = v
 	}
 
 	buildOpts := builddef.NewBuildOpts(file)
 	buildOpts.Stage = stage
 	buildOpts.SessionID = sessionID
-	buildOpts.ContextName = contextName
+	buildOpts.SourceContext = sourceContext
+	buildOpts.ConfigContext = configContext
 
 	return buildOpts
 }
@@ -122,7 +129,7 @@ func (b Builder) build(
 
 	if webserverStage {
 		buildOpts.Def = newBuildDefForWebserver(buildOpts.Def)
-		buildOpts.Source = &state
+		buildOpts.SourceState = &state
 		buildOpts.Stage = "webserver"
 
 		return b.build(ctx, solver, buildOpts)

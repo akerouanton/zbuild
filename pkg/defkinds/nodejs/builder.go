@@ -182,7 +182,7 @@ func (h *NodeJSHandler) yarnInstall(
 	state llb.State,
 	buildOpts builddef.BuildOpts,
 ) llb.State {
-	packageSrc := llb.Local(buildOpts.ContextName,
+	packageSrc := llb.Local(buildOpts.ConfigContext,
 		llb.IncludePatterns([]string{"package.json", "yarn.lock"}),
 		llb.LocalUniqueID(buildOpts.LocalUniqueID),
 		llb.SessionID(buildOpts.SessionID),
@@ -205,7 +205,7 @@ func (h *NodeJSHandler) copySources(
 	state llb.State,
 	buildOpts builddef.BuildOpts,
 ) llb.State {
-	buildContextSrc := llb.Local(buildOpts.ContextName,
+	buildContextSrc := llb.Local(buildOpts.SourceContext,
 		llb.IncludePatterns(includePatterns(stageDef)),
 		llb.ExcludePatterns(excludePatterns(stageDef)),
 		llb.LocalUniqueID(buildOpts.LocalUniqueID),

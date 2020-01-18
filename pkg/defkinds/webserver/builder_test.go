@@ -46,7 +46,8 @@ func initBuildLLBTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
 			Stage:         "",
 			SessionID:     "<SESSION-ID>",
 			LocalUniqueID: "x1htr02606a9rk8b0daewh9es",
-			ContextName:   "context",
+			SourceContext: "context",
+			ConfigContext: "context",
 		},
 		expectedState: "testdata/build/state.json",
 		expectedImage: &image.Image{
@@ -105,7 +106,8 @@ func initBuildLLBFromGitContextTC(t *testing.T, mockCtrl *gomock.Controller) bui
 			Stage:         "",
 			SessionID:     "<SESSION-ID>",
 			LocalUniqueID: "x1htr02606a9rk8b0daewh9es",
-			ContextName:   "git://github.com/some/repo",
+			SourceContext: "git://github.com/some/repo",
+			ConfigContext: "git://github.com/some/repo",
 		},
 		expectedState: "testdata/build/from-git-context.json",
 		expectedImage: &image.Image{
@@ -164,8 +166,9 @@ func initFailToBuildWithAssetsWhenNoSourceInTheBuildOptsTC(t *testing.T, mockCtr
 			Stage:         "",
 			SessionID:     "<SESSION-ID>",
 			LocalUniqueID: "x1htr02606a9rk8b0daewh9es",
-			ContextName:   "context",
-			Source:        nil,
+			SourceContext: "context",
+			ConfigContext: "context",
+			SourceState:   nil,
 		},
 		expectedErr: xerrors.New("no source state to copy assets from has been provided"),
 	}
