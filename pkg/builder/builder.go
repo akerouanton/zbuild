@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/NiR-/zbuild/pkg/builddef"
+	"github.com/NiR-/zbuild/pkg/defloader"
 	"github.com/NiR-/zbuild/pkg/image"
 	"github.com/NiR-/zbuild/pkg/llbutils"
 	"github.com/NiR-/zbuild/pkg/pkgsolver"
@@ -60,22 +61,17 @@ func buildOptsFromBuildkitOpts(c client.Client) builddef.BuildOpts {
 		file = v
 	}
 
-	stage := "dev"
+	buildOpts := builddef.NewBuildOpts(file, "context", "dev", sessionID)
+
 	if v, ok := opts[keyTarget]; ok {
-		stage = v
+		buildOpts.Stage = v
 	}
 
-	contextName := "context"
 	if v, ok := opts[keyDockerContext]; ok {
-		contextName = v
+		buildOpts.ContextName = v
 	} else if v, ok := opts[keyContext]; ok {
-		contextName = v
+		buildOpts.ContextName = v
 	}
-
-	buildOpts := builddef.NewBuildOpts(file)
-	buildOpts.Stage = stage
-	buildOpts.SessionID = sessionID
-	buildOpts.ContextName = contextName
 
 	return buildOpts
 }
@@ -86,7 +82,7 @@ func (b Builder) Build(
 	c client.Client,
 ) (*client.Result, error) {
 	buildOpts := buildOptsFromBuildkitOpts(c)
-	def, err := builddef.Load(ctx, solver, buildOpts)
+	def, err := defloader.Load(ctx, solver, buildOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -188,12 +184,10 @@ func (b Builder) Debug(
 	file,
 	stage string,
 ) (llb.State, error) {
-	buildOpts := builddef.NewBuildOpts(file)
-	buildOpts.Stage = stage
-	buildOpts.SessionID = "<SESSION-ID>"
+	buildOpts := builddef.NewBuildOpts(file, "", stage, "")
 
 	ctx := context.Background()
-	def, err := builddef.Load(ctx, solver, buildOpts)
+	def, err := defloader.Load(ctx, solver, buildOpts)
 	if err != nil {
 		return llb.State{}, err
 	}
@@ -208,11 +202,10 @@ func (b Builder) DumpConfig(
 	file,
 	stage string,
 ) ([]byte, error) {
-	buildOpts := builddef.NewBuildOpts(file)
-	buildOpts.Stage = stage
+	buildOpts := builddef.NewBuildOpts(file, "", stage, "")
 
 	ctx := context.Background()
-	def, err := builddef.Load(ctx, solver, buildOpts)
+	def, err := defloader.Load(ctx, solver, buildOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -242,8 +235,8 @@ func (b Builder) UpdateLockFile(
 	file string,
 ) error {
 	ctx := context.Background()
-	buildOpts := builddef.NewBuildOpts(file)
-	def, err := builddef.Load(ctx, solver, buildOpts)
+	buildOpts := builddef.NewBuildOpts(file, "", "", "")
+	def, err := defloader.Load(ctx, solver, buildOpts)
 	if err != nil {
 		return err
 	}

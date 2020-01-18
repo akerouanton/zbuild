@@ -1,8 +1,9 @@
-package builddef
+package defloader
 
 import (
 	"context"
 
+	"github.com/NiR-/zbuild/pkg/builddef"
 	"github.com/NiR-/zbuild/pkg/statesolver"
 	"github.com/moby/buildkit/client/llb"
 	"golang.org/x/xerrors"
@@ -18,13 +19,10 @@ const SharedKeyZbuildfiles = "zbuildfiles"
 func Load(
 	ctx context.Context,
 	solver statesolver.StateSolver,
-	buildOpts BuildOpts,
-) (*BuildDef, error) {
+	buildOpts builddef.BuildOpts,
+) (*builddef.BuildDef, error) {
 	src := solver.FromBuildContext(
-		llb.IncludePatterns([]string{
-			buildOpts.File,
-			buildOpts.LockFile,
-		}),
+		llb.IncludePatterns([]string{buildOpts.File, buildOpts.LockFile}),
 		llb.SharedKeyHint(SharedKeyZbuildfiles),
 		llb.WithCustomName("load zbuild config files from build context"))
 
@@ -35,7 +33,7 @@ func Load(
 		return nil, xerrors.Errorf("could not load %s: %w", buildOpts.File, err)
 	}
 
-	var def BuildDef
+	var def builddef.BuildDef
 	if err = yaml.Unmarshal(ymlContent, &def); err != nil {
 		return nil, xerrors.Errorf("could not decode %s: %w", buildOpts.File, err)
 	}

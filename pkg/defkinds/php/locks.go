@@ -7,6 +7,7 @@ import (
 	"github.com/NiR-/notpecl/extindex"
 	"github.com/NiR-/zbuild/pkg/builddef"
 	"github.com/NiR-/zbuild/pkg/pkgsolver"
+	"github.com/NiR-/zbuild/pkg/statesolver"
 	"golang.org/x/xerrors"
 )
 
@@ -78,7 +79,7 @@ func (h *PHPHandler) UpdateLocks(
 			def.BaseImage, err)
 	}
 
-	osrelease, err := builddef.ResolveImageOS(ctx, h.solver, def.Locks.BaseImage)
+	osrelease, err := statesolver.ResolveImageOS(ctx, h.solver, def.Locks.BaseImage)
 	if err != nil {
 		return nil, xerrors.Errorf("could not resolve OS details from base image: %w", err)
 	}

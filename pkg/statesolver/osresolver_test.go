@@ -1,11 +1,11 @@
-package builddef_test
+package statesolver_test
 
 import (
 	"context"
 	"testing"
 
-	"github.com/NiR-/zbuild/pkg/builddef"
 	"github.com/NiR-/zbuild/pkg/mocks"
+	"github.com/NiR-/zbuild/pkg/statesolver"
 	"github.com/go-test/deep"
 	"github.com/golang/mock/gomock"
 )
@@ -14,7 +14,7 @@ func TestResolveImageOS(t *testing.T) {
 	testcases := map[string]struct {
 		imageRef string
 		file     []byte
-		expected builddef.OSRelease
+		expected statesolver.OSRelease
 	}{
 		"successfully parse an os-release file": {
 			imageRef: "debian:buster-20191118-slim",
@@ -28,7 +28,7 @@ ID=debian
 HOME_URL="https://www.debian.org/"
 SUPPORT_URL="https://www.debian.org/support"
 BUG_REPORT_URL="https://bugs.debian.org/"`),
-			expected: builddef.OSRelease{
+			expected: statesolver.OSRelease{
 				Name:        "debian",
 				VersionName: "stretch",
 				VersionID:   "9",
@@ -53,7 +53,7 @@ BUG_REPORT_URL="https://bugs.debian.org/"`),
 				ctx, "/etc/os-release", gomock.Any(),
 			).Return(tc.file, nil)
 
-			res, err := builddef.ResolveImageOS(ctx, solver, tc.imageRef)
+			res, err := statesolver.ResolveImageOS(ctx, solver, tc.imageRef)
 			if err != nil {
 				t.Fatalf("Unexpected error: %v", err)
 			}
