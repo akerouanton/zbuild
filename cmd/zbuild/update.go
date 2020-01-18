@@ -9,9 +9,12 @@ import (
 )
 
 var updateFlags = struct {
-	file    string
-	context string
-}{}
+	file     string
+	context  string
+	logLevel string
+}{
+	logLevel: "warn",
+}
 
 func newUpdateCmd() *cobra.Command {
 	cmd := &cobra.Command{
@@ -23,11 +26,14 @@ func newUpdateCmd() *cobra.Command {
 
 	AddFileFlag(cmd, &updateFlags.file)
 	AddContextFlag(cmd, &updateFlags.context)
+	AddLogLevelFlag(cmd, &updateFlags.logLevel)
 
 	return cmd
 }
 
 func HandleUpdateCmd(cmd *cobra.Command, args []string) {
+	configureLogger(cmd, updateFlags.logLevel)
+
 	solver := newDockerSolver(updateFlags.context)
 	pkgSolver := pkgsolver.NewAPTSolver(solver)
 	b := builder.Builder{
