@@ -21,8 +21,10 @@ func Load(
 	solver statesolver.StateSolver,
 	buildOpts builddef.BuildOpts,
 ) (*builddef.BuildDef, error) {
-	src := solver.FromBuildContext(
+	src := solver.FromContext(buildOpts.BuildContext,
 		llb.IncludePatterns([]string{buildOpts.File, buildOpts.LockFile}),
+		llb.LocalUniqueID(buildOpts.LocalUniqueID),
+		llb.SessionID(buildOpts.SessionID),
 		llb.SharedKeyHint(SharedKeyZbuildfiles),
 		llb.WithCustomName("load zbuild config files from build context"))
 

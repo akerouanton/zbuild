@@ -7,6 +7,7 @@ package mocks
 import (
 	bytes "bytes"
 	context "context"
+	builddef "github.com/NiR-/zbuild/pkg/builddef"
 	statesolver "github.com/NiR-/zbuild/pkg/statesolver"
 	gomock "github.com/golang/mock/gomock"
 	llb "github.com/moby/buildkit/client/llb"
@@ -49,20 +50,21 @@ func (mr *MockStateSolverMockRecorder) ExecImage(arg0, arg1, arg2 interface{}) *
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExecImage", reflect.TypeOf((*MockStateSolver)(nil).ExecImage), arg0, arg1, arg2)
 }
 
-// FromBuildContext mocks base method
-func (m *MockStateSolver) FromBuildContext(arg0 ...llb.LocalOption) statesolver.ReadFileOpt {
-	varargs := []interface{}{}
-	for _, a := range arg0 {
+// FromContext mocks base method
+func (m *MockStateSolver) FromContext(arg0 *builddef.Context, arg1 ...llb.LocalOption) statesolver.ReadFileOpt {
+	varargs := []interface{}{arg0}
+	for _, a := range arg1 {
 		varargs = append(varargs, a)
 	}
-	ret := m.ctrl.Call(m, "FromBuildContext", varargs...)
+	ret := m.ctrl.Call(m, "FromContext", varargs...)
 	ret0, _ := ret[0].(statesolver.ReadFileOpt)
 	return ret0
 }
 
-// FromBuildContext indicates an expected call of FromBuildContext
-func (mr *MockStateSolverMockRecorder) FromBuildContext(arg0 ...interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FromBuildContext", reflect.TypeOf((*MockStateSolver)(nil).FromBuildContext), arg0...)
+// FromContext indicates an expected call of FromContext
+func (mr *MockStateSolverMockRecorder) FromContext(arg0 interface{}, arg1 ...interface{}) *gomock.Call {
+	varargs := append([]interface{}{arg0}, arg1...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FromContext", reflect.TypeOf((*MockStateSolver)(nil).FromContext), varargs...)
 }
 
 // FromImage mocks base method

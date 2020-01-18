@@ -24,7 +24,7 @@ func LoadComposerLock(
 	solver statesolver.StateSolver,
 	stageDef *StageDefinition,
 ) error {
-	composerSrc := solver.FromBuildContext(
+	composerSrc := solver.FromContext(stageDef.DefLocks.SourceContext,
 		llb.IncludePatterns([]string{"composer.json", "composer.lock"}),
 		llb.SharedKeyHint(SharedKeys.ComposerFiles),
 		llb.WithCustomName("load composer files from build context"))

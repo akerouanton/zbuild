@@ -89,7 +89,7 @@ func initBuildDefaultStageAndFileTC(t *testing.T, mockCtrl *gomock.Controller) t
 	zbuildLock := loadRawTestdata(t, "testdata/zbuild.lock")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
-	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
+	solver.EXPECT().FromContext(gomock.Any(), gomock.Any()).Times(1)
 
 	solver.EXPECT().ReadFile(
 		gomock.Any(), "zbuild.yml", gomock.Any(),
@@ -101,11 +101,14 @@ func initBuildDefaultStageAndFileTC(t *testing.T, mockCtrl *gomock.Controller) t
 
 	ctx := context.TODO()
 	buildOpts := builddef.BuildOpts{
-		File:        "zbuild.yml",
-		LockFile:    "zbuild.lock",
-		Stage:       "dev",
-		SessionID:   "<SESSION-ID>",
-		ContextName: "some-context-name",
+		File:      "zbuild.yml",
+		LockFile:  "zbuild.lock",
+		Stage:     "dev",
+		SessionID: "<SESSION-ID>",
+		BuildContext: &builddef.Context{
+			Source: "some-context-name",
+			Type:   builddef.ContextTypeLocal,
+		},
 	}
 	state := llb.State{}
 	img := image.Image{
@@ -157,7 +160,7 @@ func initBuildFromGitContextTC(t *testing.T, mockCtrl *gomock.Controller) testCa
 	zbuildLock := loadRawTestdata(t, "testdata/zbuild.lock")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
-	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
+	solver.EXPECT().FromContext(gomock.Any(), gomock.Any()).Times(1)
 
 	solver.EXPECT().ReadFile(
 		gomock.Any(), "zbuild.yml", gomock.Any(),
@@ -170,11 +173,14 @@ func initBuildFromGitContextTC(t *testing.T, mockCtrl *gomock.Controller) testCa
 	ctx := context.TODO()
 	buildOpts := builddef.BuildOpts{
 		// @TODO: define the root dir from the context as the base path of the zbuildfile
-		File:        "zbuild.yml",
-		LockFile:    "zbuild.lock",
-		Stage:       "dev",
-		SessionID:   "<SESSION-ID>",
-		ContextName: "git://github.com/some/repo",
+		File:      "zbuild.yml",
+		LockFile:  "zbuild.lock",
+		Stage:     "dev",
+		SessionID: "<SESSION-ID>",
+		BuildContext: &builddef.Context{
+			Source: "git://github.com/some/repo",
+			Type:   builddef.ContextTypeGit,
+		},
 	}
 	state := llb.State{}
 	img := image.Image{
@@ -227,7 +233,7 @@ func initBuildCustomStageAndFileTC(t *testing.T, mockCtrl *gomock.Controller) te
 	zbuildLock := loadRawTestdata(t, "testdata/zbuild.lock")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
-	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
+	solver.EXPECT().FromContext(gomock.Any(), gomock.Any()).Times(1)
 
 	solver.EXPECT().ReadFile(
 		gomock.Any(), "api.zbuild.yml", gomock.Any(),
@@ -246,11 +252,14 @@ func initBuildCustomStageAndFileTC(t *testing.T, mockCtrl *gomock.Controller) te
 
 	ctx := context.TODO()
 	buildOpts := builddef.BuildOpts{
-		File:        "api.zbuild.yml",
-		LockFile:    "api.zbuild.lock",
-		Stage:       "prod",
-		SessionID:   "<SESSION-ID>",
-		ContextName: "context",
+		File:      "api.zbuild.yml",
+		LockFile:  "api.zbuild.lock",
+		Stage:     "prod",
+		SessionID: "<SESSION-ID>",
+		BuildContext: &builddef.Context{
+			Source: "context",
+			Type:   builddef.ContextTypeLocal,
+		},
 	}
 	state := llb.State{}
 	img := image.Image{
@@ -296,7 +305,7 @@ func initBuildWebserverStageTC(t *testing.T, mockCtrl *gomock.Controller) testCa
 	zbuildLock := loadRawTestdata(t, "testdata/zbuild.lock")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
-	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
+	solver.EXPECT().FromContext(gomock.Any(), gomock.Any()).Times(1)
 
 	solver.EXPECT().ReadFile(
 		gomock.Any(), "api.zbuild.yml", gomock.Any(),
@@ -320,11 +329,14 @@ func initBuildWebserverStageTC(t *testing.T, mockCtrl *gomock.Controller) testCa
 	phpHandler.EXPECT().WithSolver(gomock.Any()).Times(1)
 	phpHandler.EXPECT().Build(ctx,
 		MatchBuildOpts(builddef.BuildOpts{
-			File:        "api.zbuild.yml",
-			LockFile:    "api.zbuild.lock",
-			Stage:       "prod",
-			SessionID:   "<SESSION-ID>",
-			ContextName: "context",
+			File:      "api.zbuild.yml",
+			LockFile:  "api.zbuild.lock",
+			Stage:     "prod",
+			SessionID: "<SESSION-ID>",
+			BuildContext: &builddef.Context{
+				Source: "context",
+				Type:   builddef.ContextTypeLocal,
+			},
 		}),
 	).Return(state, &img, nil)
 
@@ -336,8 +348,11 @@ func initBuildWebserverStageTC(t *testing.T, mockCtrl *gomock.Controller) testCa
 			LockFile:    "api.zbuild.lock",
 			Stage:       "webserver",
 			SessionID:   "<SESSION-ID>",
-			ContextName: "context",
-			Source:      &llb.State{},
+			SourceState: &llb.State{},
+			BuildContext: &builddef.Context{
+				Source: "context",
+				Type:   builddef.ContextTypeLocal,
+			},
 		}),
 	).Return(state, &img, nil)
 
@@ -368,7 +383,7 @@ func failToReadYmlTC(t *testing.T, mockCtrl *gomock.Controller) testCase {
 	})
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
-	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
+	solver.EXPECT().FromContext(gomock.Any(), gomock.Any()).Times(1)
 
 	solver.EXPECT().ReadFile(
 		gomock.Any(), "zbuild.yml", gomock.Any(),
@@ -394,7 +409,7 @@ func failToReadLockTC(t *testing.T, mockCtrl *gomock.Controller) testCase {
 	zbuildYml := loadRawTestdata(t, "testdata/zbuild.yml")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
-	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
+	solver.EXPECT().FromContext(gomock.Any(), gomock.Any()).Times(1)
 
 	solver.EXPECT().ReadFile(
 		gomock.Any(), "zbuild.yml", gomock.Any(),
@@ -406,11 +421,14 @@ func failToReadLockTC(t *testing.T, mockCtrl *gomock.Controller) testCase {
 
 	ctx := context.TODO()
 	buildOpts := builddef.BuildOpts{
-		File:        "zbuild.yml",
-		LockFile:    "zbuild.lock",
-		Stage:       "dev",
-		SessionID:   "<SESSION-ID>",
-		ContextName: "some-context-name",
+		File:      "zbuild.yml",
+		LockFile:  "zbuild.lock",
+		Stage:     "dev",
+		SessionID: "<SESSION-ID>",
+		BuildContext: &builddef.Context{
+			Source: "some-context-name",
+			Type:   builddef.ContextTypeLocal,
+		},
 	}
 	state := llb.State{}
 	img := image.Image{
@@ -462,7 +480,7 @@ func failToFindASutableKindHandlerTC(t *testing.T, mockCtrl *gomock.Controller) 
 	zbuildLock := loadRawTestdata(t, "testdata/zbuild.lock")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
-	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
+	solver.EXPECT().FromContext(gomock.Any(), gomock.Any()).Times(1)
 
 	solver.EXPECT().ReadFile(
 		gomock.Any(), "zbuild.yml", gomock.Any(),
@@ -497,7 +515,7 @@ func failWhenKindHandlerFailsTC(t *testing.T, mockCtrl *gomock.Controller) testC
 	zbuildLock := loadRawTestdata(t, "testdata/zbuild.lock")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
-	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
+	solver.EXPECT().FromContext(gomock.Any(), gomock.Any()).Times(1)
 
 	solver.EXPECT().ReadFile(
 		gomock.Any(), "zbuild.yml", gomock.Any(),
@@ -535,15 +553,8 @@ type buildOptsMatcher struct {
 }
 
 func (m buildOptsMatcher) Matches(x interface{}) bool {
-	opts, ok := x.(builddef.BuildOpts)
-	if !ok {
-		return false
-	}
-	return opts.SessionID == m.opts.SessionID &&
-		opts.File == m.opts.File &&
-		opts.LockFile == m.opts.LockFile &&
-		opts.Stage == m.opts.Stage &&
-		opts.ContextName == m.opts.ContextName
+	diff := deep.Equal(m, x)
+	return len(diff) > 0
 }
 
 func (m buildOptsMatcher) String() string {
@@ -552,7 +563,7 @@ func (m buildOptsMatcher) String() string {
 		m.opts.LockFile,
 		m.opts.Stage,
 		m.opts.SessionID,
-		m.opts.ContextName)
+		m.opts.BuildContext)
 }
 
 func loadRawTestdata(t *testing.T, filepath string) []byte {

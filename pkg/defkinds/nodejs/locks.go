@@ -10,8 +10,9 @@ import (
 )
 
 type DefinitionLocks struct {
-	BaseImage string                `mapstructure:"base"`
-	Stages    map[string]StageLocks `mapstructure:"stages"`
+	BaseImage     string                `mapstructure:"base"`
+	Stages        map[string]StageLocks `mapstructure:"stages"`
+	SourceContext *builddef.Context     `mapstructure:"source_context"`
 }
 
 func (l DefinitionLocks) RawLocks() map[string]interface{} {
@@ -65,6 +66,8 @@ func (h *NodeJSHandler) UpdateLocks(
 
 	stagesLocks, err := h.updateStagesLocks(ctx, pkgSolver, def)
 	def.Locks.Stages = stagesLocks
+	// @TODO
+	def.Locks.SourceContext = def.SourceContext
 
 	return def.Locks, err
 }

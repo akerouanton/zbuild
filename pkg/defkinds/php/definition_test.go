@@ -313,6 +313,69 @@ func initParseRawDefinitionWithCustomFCGIHealthcheckTC() newDefinitionTC {
 	}
 }
 
+func initParseRawDefinitionWithCustomSourceContextTC() newDefinitionTC {
+	devStageDevMode := true
+	prodStageDevMode := false
+	inferMode := true
+	baseStageFPM := true
+
+	devStage := emptyStage()
+	prodStage := emptyStage()
+
+	return newDefinitionTC{
+		file: "testdata/def/with-source-context.yml",
+		expected: php.Definition{
+			BaseStage: php.Stage{
+				ExternalFiles:  []llbutils.ExternalFile{},
+				SystemPackages: &builddef.VersionMap{},
+				Extensions:     &builddef.VersionMap{},
+				GlobalDeps:     &builddef.VersionMap{},
+				ConfigFiles:    php.PHPConfigFiles{},
+				Sources: []string{
+					"src/",
+				},
+				Integrations: []string{},
+				StatefulDirs: []string{},
+				PostInstall:  []string{},
+				FPM:          &baseStageFPM,
+				ComposerDumpFlags: &php.ComposerDumpFlags{
+					ClassmapAuthoritative: true,
+				},
+				Healthcheck: &builddef.HealthcheckConfig{
+					HealthcheckFCGI: &builddef.HealthcheckFCGI{
+						Path:     "/ping",
+						Expected: "pong",
+					},
+					Type:     builddef.HealthcheckTypeFCGI,
+					Interval: 10 * time.Second,
+					Timeout:  1 * time.Second,
+					Retries:  3,
+				},
+			},
+			Infer: &inferMode,
+			SourceContext: &builddef.Context{
+				Source: "git://github.com/api-platform/demo",
+				Type:   builddef.ContextTypeGit,
+				GitContext: builddef.GitContext{
+					Reference: "5ecd217",
+				},
+			},
+			Stages: map[string]php.DerivedStage{
+				"dev": {
+					DeriveFrom: "base",
+					Dev:        &devStageDevMode,
+					Stage:      devStage,
+				},
+				"prod": {
+					DeriveFrom: "base",
+					Dev:        &prodStageDevMode,
+					Stage:      prodStage,
+				},
+			},
+		},
+	}
+}
+
 func initFailToParseUnknownPropertiesTC() newDefinitionTC {
 	return newDefinitionTC{
 		file:        "testdata/def/with-invalid-properties.yml",
@@ -331,6 +394,7 @@ func TestNewKind(t *testing.T) {
 		"with stages":                      initParseRawDefinitionWithStagesTC,
 		"with webserver":                   initParseRawDefinitionWithWebserverTC,
 		"with custom fcgi healthcheck":     initParseRawDefinitionWithCustomFCGIHealthcheckTC,
+		"with source context":              initParseRawDefinitionWithCustomSourceContextTC,
 		"fail to parse unknown properties": initFailToParseUnknownPropertiesTC,
 	}
 

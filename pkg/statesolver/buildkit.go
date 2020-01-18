@@ -5,6 +5,7 @@ import (
 	"context"
 	"strings"
 
+	"github.com/NiR-/zbuild/pkg/builddef"
 	"github.com/NiR-/zbuild/pkg/llbutils"
 	"github.com/moby/buildkit/client/llb"
 	"github.com/moby/buildkit/frontend/gateway/client"
@@ -68,9 +69,12 @@ func (s BuildkitSolver) ExecImage(
 	return buf, nil
 }
 
-func (s BuildkitSolver) FromBuildContext(opts ...llb.LocalOption) ReadFileOpt {
+func (s BuildkitSolver) FromContext(
+	source *builddef.Context,
+	opts ...llb.LocalOption,
+) ReadFileOpt {
 	opts = append(opts, llb.SessionID(s.sessionID))
-	src := llbutils.BuildContext(s.contextName, opts...)
+	src := llbutils.FromContext(source, opts...)
 
 	return func(ctx context.Context, filepath string) ([]byte, error) {
 		raw, err := s.readFromLLB(ctx, src, filepath)

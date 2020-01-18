@@ -184,7 +184,8 @@ func (h *NodeJSHandler) yarnInstall(
 	state llb.State,
 	buildOpts builddef.BuildOpts,
 ) llb.State {
-	packageSrc := llb.Local(buildOpts.ContextName,
+	sourceContext := resolveSourceContext(stageDef, buildOpts)
+	packageSrc := llbutils.FromContext(sourceContext,
 		llb.IncludePatterns([]string{"package.json", "yarn.lock"}),
 		llb.LocalUniqueID(buildOpts.LocalUniqueID),
 		llb.SessionID(buildOpts.SessionID),
@@ -207,7 +208,8 @@ func (h *NodeJSHandler) copySources(
 	state llb.State,
 	buildOpts builddef.BuildOpts,
 ) llb.State {
-	buildContextSrc := llb.Local(buildOpts.ContextName,
+	sourceContext := resolveSourceContext(stageDef, buildOpts)
+	src := llbutils.FromContext(sourceContext,
 		llb.IncludePatterns(includePatterns(stageDef)),
 		llb.ExcludePatterns(excludePatterns(stageDef)),
 		llb.LocalUniqueID(buildOpts.LocalUniqueID),
@@ -215,7 +217,18 @@ func (h *NodeJSHandler) copySources(
 		llb.SharedKeyHint(SharedKeys.BuildContext),
 		llb.WithCustomName("load build context"))
 
-	return llbutils.Copy(buildContextSrc, "/", state, "/app", "1000:1000")
+	return llbutils.Copy(src, "/", state, "/app", "1000:1000")
+}
+
+func resolveSourceContext(
+	stageDef StageDefinition,
+	buildOpts builddef.BuildOpts,
+) *builddef.Context {
+	if stageDef.DefLocks.SourceContext != nil {
+		return stageDef.DefLocks.SourceContext
+	}
+
+	return buildOpts.BuildContext
 }
 
 func excludePatterns(stageDef StageDefinition) []string {

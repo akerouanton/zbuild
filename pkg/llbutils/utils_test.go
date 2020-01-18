@@ -8,6 +8,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/NiR-/zbuild/pkg/builddef"
 	"github.com/NiR-/zbuild/pkg/llbtest"
 	"github.com/NiR-/zbuild/pkg/llbutils"
 	"github.com/go-test/deep"
@@ -261,11 +262,18 @@ func TestStateHelpers(t *testing.T) {
 				return llbutils.CopyExternalFiles(dest, externalFiles)
 			},
 		},
-		"BuildContext_from_git_context_ref": {
+		"FromContext_from_git_context_ref": {
 			testdata: "testdata/git-context.json",
 			init: func(_ *testing.T) llb.State {
-				return llbutils.BuildContext(
-					"git://github.com/NiR-/zbuild",
+				context := &builddef.Context{
+					Source: "git://github.com/NiR-/zbuild",
+					Type:   builddef.ContextTypeGit,
+					GitContext: builddef.GitContext{
+						Reference: "89c0c9507d725b35522426c294249ee3b4566dcd",
+					},
+				}
+
+				return llbutils.FromContext(context,
 					llb.IncludePatterns([]string{"some", "file"}),
 					llb.LocalUniqueID("hyewwv7qqidqfhx943284s4mr"),
 					llb.SessionID("<SESSION-ID>"),
@@ -276,8 +284,12 @@ func TestStateHelpers(t *testing.T) {
 		"BuildContext_from_local_context": {
 			testdata: "testdata/local-context.json",
 			init: func(_ *testing.T) llb.State {
-				return llbutils.BuildContext(
-					"context",
+				context := &builddef.Context{
+					Source: "context",
+					Type:   builddef.ContextTypeLocal,
+				}
+
+				return llbutils.FromContext(context,
 					llb.IncludePatterns([]string{"some", "file"}),
 					llb.LocalUniqueID("hyewwv7qqidqfhx943284s4mr"),
 					llb.SessionID("<SESSION-ID>"),
@@ -303,10 +315,22 @@ func TestStateHelpers(t *testing.T) {
 
 			testdata := loadTestdata(t, tc.testdata)
 			if diff := deep.Equal(jsonState, testdata); diff != nil {
-				t.Fatal(diff)
+				tempfile := newTempfile(t)
+				writeTestdata(t, tempfile, jsonState)
+
+				t.Fatalf("Expected: <%s>\nGot: <%s>", tc.testdata, tempfile)
 			}
 		})
 	}
+}
+
+func newTempfile(t *testing.T) string {
+	file, err := ioutil.TempFile("", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer file.Close()
+	return file.Name()
 }
 
 func writeTestdata(t *testing.T, filepath string, content string) {

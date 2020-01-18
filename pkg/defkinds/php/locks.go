@@ -14,9 +14,10 @@ import (
 // DefinitionLocks defines version locks for system packages and PHP extensions used
 // by each stage.
 type DefinitionLocks struct {
-	BaseImage    string                `mapstructure:"base_image"`
-	ExtensionDir string                `mapstructure:"extension_dir"`
-	Stages       map[string]StageLocks `mapstructure:"stages"`
+	BaseImage     string                `mapstructure:"base_image"`
+	ExtensionDir  string                `mapstructure:"extension_dir"`
+	Stages        map[string]StageLocks `mapstructure:"stages"`
+	SourceContext *builddef.Context     `mapstructure:"source_context"`
 }
 
 func (l DefinitionLocks) RawLocks() map[string]interface{} {
@@ -79,7 +80,10 @@ func (h *PHPHandler) UpdateLocks(
 	if err != nil {
 		return nil, err
 	}
+
 	def.Locks.Stages = stagesLocks
+	// @TODO
+	def.Locks.SourceContext = def.SourceContext
 
 	return def.Locks, err
 }

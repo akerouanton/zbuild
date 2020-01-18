@@ -125,7 +125,7 @@ func (h *PHPHandler) buildPHP(
 	state = globalComposerInstall(state, stage.GlobalDeps.Map())
 
 	if !stage.Dev {
-		state = composerInstall(state, buildOpts)
+		state = composerInstall(stage, state, buildOpts)
 		state = copySourceFiles(stage, state, buildOpts)
 		state, err = postInstall(state, &stage)
 		if err != nil {
@@ -151,7 +151,7 @@ func copyConfigFiles(
 		configFiles = append(configFiles, *stage.ConfigFiles.FPMConfigFile)
 	}
 
-	configFilesSrc := llbutils.BuildContext(buildOpts.ContextName,
+	sourceState := llbutils.FromContext(buildOpts.BuildContext,
 		llb.IncludePatterns(configFiles),
 		llb.LocalUniqueID(buildOpts.LocalUniqueID),
 		llb.SessionID(buildOpts.SessionID),
@@ -160,7 +160,7 @@ func copyConfigFiles(
 
 	if stage.ConfigFiles.IniFile != nil {
 		state = llbutils.Copy(
-			configFilesSrc,
+			sourceState,
 			*stage.ConfigFiles.IniFile,
 			state,
 			"/usr/local/etc/php/php.ini",
@@ -168,7 +168,7 @@ func copyConfigFiles(
 	}
 	if stage.ConfigFiles.FPMConfigFile != nil {
 		state = llbutils.Copy(
-			configFilesSrc,
+			sourceState,
 			*stage.ConfigFiles.FPMConfigFile,
 			state,
 			"/usr/local/etc/php-fpm.conf",
@@ -183,7 +183,8 @@ func copySourceFiles(
 	state llb.State,
 	buildOpts builddef.BuildOpts,
 ) llb.State {
-	buildContextSrc := llbutils.BuildContext(buildOpts.ContextName,
+	sourceContext := resolveSourceContext(stage, buildOpts)
+	stateSrc := llbutils.FromContext(sourceContext,
 		llb.IncludePatterns(includePatterns(&stage)),
 		llb.ExcludePatterns(excludePatterns(&stage)),
 		llb.LocalUniqueID(buildOpts.LocalUniqueID),
@@ -191,7 +192,18 @@ func copySourceFiles(
 		llb.SharedKeyHint(SharedKeys.BuildContext),
 		llb.WithCustomName("load build context"))
 
-	return llbutils.Copy(buildContextSrc, "/", state, "/app/", "1000:1000")
+	return llbutils.Copy(stateSrc, "/", state, "/app/", "1000:1000")
+}
+
+func resolveSourceContext(
+	stageDef StageDefinition,
+	buildOpts builddef.BuildOpts,
+) *builddef.Context {
+	if stageDef.DefLocks.SourceContext != nil {
+		return stageDef.DefLocks.SourceContext
+	}
+
+	return buildOpts.BuildContext
 }
 
 func setImageMetadata(
@@ -277,10 +289,12 @@ func globalComposerInstall(state llb.State, globalDeps map[string]string) llb.St
 }
 
 func composerInstall(
+	stageDef StageDefinition,
 	state llb.State,
 	buildOpts builddef.BuildOpts,
 ) llb.State {
-	composerSrc := llbutils.BuildContext(buildOpts.ContextName,
+	sourceContext := resolveSourceContext(stageDef, buildOpts)
+	composerSrc := llbutils.FromContext(sourceContext,
 		llb.IncludePatterns([]string{"composer.json", "composer.lock"}),
 		llb.LocalUniqueID(buildOpts.LocalUniqueID),
 		llb.SessionID(buildOpts.SessionID),

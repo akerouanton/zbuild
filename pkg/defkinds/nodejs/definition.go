@@ -166,10 +166,16 @@ type Definition struct {
 	// @TODO: move to Stage?
 	IsFrontend bool `mapstructure:"frontend"`
 
+	SourceContext *builddef.Context `mapstructure:"source_context"`
+
 	Locks DefinitionLocks `mapstructure:"-"`
 }
 
 func (d Definition) IsValid() error {
+	if err := d.SourceContext.IsValid(); err != nil {
+		return err
+	}
+
 	allowedHCTypes := []string{"http", "cmd"}
 
 	if !d.BaseStage.Healthcheck.IsValid(allowedHCTypes) {
@@ -187,11 +193,12 @@ func (d Definition) IsValid() error {
 
 func (d Definition) Copy() Definition {
 	new := Definition{
-		BaseStage:  d.BaseStage.Copy(),
-		BaseImage:  d.BaseImage,
-		Version:    d.Version,
-		Stages:     d.Stages.Copy(),
-		IsFrontend: d.IsFrontend,
+		BaseStage:     d.BaseStage.Copy(),
+		BaseImage:     d.BaseImage,
+		Version:       d.Version,
+		Stages:        d.Stages.Copy(),
+		IsFrontend:    d.IsFrontend,
+		SourceContext: d.SourceContext.Copy(),
 	}
 
 	return new
@@ -205,6 +212,7 @@ func (base Definition) Merge(overriding Definition) Definition {
 	new.BaseImage = overriding.BaseImage
 	new.Version = overriding.Version
 	new.IsFrontend = overriding.IsFrontend
+	new.SourceContext = overriding.SourceContext.Copy()
 
 	return new
 }

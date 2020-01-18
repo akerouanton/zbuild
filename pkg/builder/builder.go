@@ -68,9 +68,9 @@ func buildOptsFromBuildkitOpts(c client.Client) builddef.BuildOpts {
 	}
 
 	if v, ok := opts[keyDockerContext]; ok {
-		buildOpts.ContextName = v
+		buildOpts.BuildContext = builddef.NewContext(v, "")
 	} else if v, ok := opts[keyContext]; ok {
-		buildOpts.ContextName = v
+		buildOpts.BuildContext = builddef.NewContext(v, "")
 	}
 
 	return buildOpts
@@ -118,7 +118,7 @@ func (b Builder) build(
 
 	if webserverStage {
 		buildOpts.Def = newBuildDefForWebserver(buildOpts.Def)
-		buildOpts.Source = &state
+		buildOpts.SourceState = &state
 		buildOpts.Stage = "webserver"
 
 		return b.build(ctx, solver, buildOpts)

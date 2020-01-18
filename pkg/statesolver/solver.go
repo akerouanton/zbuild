@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 
+	"github.com/NiR-/zbuild/pkg/builddef"
 	"github.com/moby/buildkit/client/llb"
 	"golang.org/x/xerrors"
 )
@@ -26,7 +27,7 @@ type StateSolver interface {
 	// a FileNotFound error.
 	ReadFile(ctx context.Context, filepath string, opt ReadFileOpt) ([]byte, error)
 
-	FromBuildContext(opts ...llb.LocalOption) ReadFileOpt
+	FromContext(source *builddef.Context, opts ...llb.LocalOption) ReadFileOpt
 	// Fromimage returns a ReadFileOpt that can be used with the ReadFile
 	// method of the same solver to read a given path from an image.
 	FromImage(image string) ReadFileOpt

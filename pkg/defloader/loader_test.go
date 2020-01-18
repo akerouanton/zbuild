@@ -27,7 +27,14 @@ func itLoadsConfigAndLockFilesTC(
 	solver := mocks.NewMockStateSolver(mockCtrl)
 	ymlContent := readTestdata(t, "testdata/config-files/zbuild.yml")
 
-	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
+	solver.EXPECT().FromContext(
+		gomock.Any(),
+		gomock.Any(),
+		gomock.Any(),
+		gomock.Any(),
+		gomock.Any(),
+		gomock.Any(),
+	).Times(1)
 	solver.EXPECT().ReadFile(
 		gomock.Any(), "zbuild.yml", gomock.Any(),
 	).Return(ymlContent, nil)
@@ -61,7 +68,14 @@ func itLoadsConfigFileWithoutLockTC(
 	mockCtrl *gomock.Controller,
 ) loadTC {
 	solver := mocks.NewMockStateSolver(mockCtrl)
-	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
+	solver.EXPECT().FromContext(
+		gomock.Any(),
+		gomock.Any(),
+		gomock.Any(),
+		gomock.Any(),
+		gomock.Any(),
+		gomock.Any(),
+	).Times(1)
 
 	ymlContent := readTestdata(t, "testdata/without-lock/zbuild.yml")
 	solver.EXPECT().ReadFile(
@@ -95,7 +109,14 @@ func itFailsToLoadConfigFilesWhenTheresNoYmlFileTC(
 	mockCtrl *gomock.Controller,
 ) loadTC {
 	solver := mocks.NewMockStateSolver(mockCtrl)
-	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
+	solver.EXPECT().FromContext(
+		gomock.Any(),
+		gomock.Any(),
+		gomock.Any(),
+		gomock.Any(),
+		gomock.Any(),
+		gomock.Any(),
+	).Times(1)
 
 	solver.EXPECT().ReadFile(
 		gomock.Any(),

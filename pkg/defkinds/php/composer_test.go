@@ -25,7 +25,7 @@ func initSuccessfullyLoadAndParseComposerLockTC(
 	mockCtrl *gomock.Controller,
 ) loadComposerLockTC {
 	solver := mocks.NewMockStateSolver(mockCtrl)
-	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
+	solver.EXPECT().FromContext(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(1)
 
 	raw := loadRawTestdata(t, "testdata/composer/valid/composer.lock")
 	solver.EXPECT().ReadFile(
@@ -57,7 +57,7 @@ func initSilentlyFailWhenComposerLockFileDoesNotExistTC(
 	mockCtrl *gomock.Controller,
 ) loadComposerLockTC {
 	solver := mocks.NewMockStateSolver(mockCtrl)
-	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
+	solver.EXPECT().FromContext(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(1)
 
 	solver.EXPECT().ReadFile(
 		gomock.Any(), "composer.lock", gomock.Any(),
@@ -81,7 +81,7 @@ func initFailToLoadBrokenComposerLockFileTC(
 	mockCtrl *gomock.Controller,
 ) loadComposerLockTC {
 	solver := mocks.NewMockStateSolver(mockCtrl)
-	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
+	solver.EXPECT().FromContext(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(1)
 
 	raw := loadRawTestdata(t, "testdata/composer/broken/composer.lock")
 	solver.EXPECT().ReadFile(
