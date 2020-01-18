@@ -143,7 +143,7 @@ func initBuildLLBForProdStageTC(t *testing.T, mockCtrl *gomock.Controller) build
 					},
 				},
 				Healthcheck: &image.HealthConfig{
-					Test:     []string{"CMD", "http_proxy= test \"$(fcgi-client get 127.0.0.1:9000 /ping)\" = \"pong\""},
+					Test:     []string{"CMD-SHELL", "test \"$(fcgi-client get 127.0.0.1:9000 /ping)\" = \"pong\""},
 					Interval: 10 * time.Second,
 					Timeout:  1 * time.Second,
 					Retries:  3,
@@ -209,7 +209,7 @@ func initBuildProdStageFromGitBasedBuildContextTC(t *testing.T, mockCtrl *gomock
 					},
 				},
 				Healthcheck: &image.HealthConfig{
-					Test:     []string{"CMD", "http_proxy= test \"$(fcgi-client get 127.0.0.1:9000 /ping)\" = \"pong\""},
+					Test:     []string{"CMD-SHELL", "test \"$(fcgi-client get 127.0.0.1:9000 /ping)\" = \"pong\""},
 					Interval: 10 * time.Second,
 					Timeout:  1 * time.Second,
 					Retries:  3,

@@ -110,12 +110,13 @@ type HealthcheckHTTP struct {
 // healthTest returns a string slice containing the command to execute to check
 // the health. It's formatted like HealthConfig.Test.
 func (hc HealthcheckHTTP) healthTest() []string {
+	// @TODO: unset http_proxy
 	cmd := fmt.Sprintf(
-		"http_proxy= test \"$(curl --fail http://127.0.0.1/%s)\" = \"%s\"",
+		"test \"$(curl --fail http://127.0.0.1/%s)\" = \"%s\"",
 		hc.Path,
 		hc.Expected)
 
-	return []string{"CMD", cmd}
+	return []string{"CMD-SHELL", cmd}
 }
 
 // HealthcheckFCGI are healthcheck parameters that can be specified in
@@ -129,11 +130,12 @@ type HealthcheckFCGI struct {
 // the health. It's formatted like HealthConfig.Test.
 func (hc HealthcheckFCGI) healthTest() []string {
 	cmd := fmt.Sprintf(
-		"http_proxy= test \"$(fcgi-client get 127.0.0.1:9000 %s)\" = \"%s\"",
+		// @TODO: disable http_proxy
+		"test \"$(fcgi-client get 127.0.0.1:9000 %s)\" = \"%s\"",
 		hc.Path,
 		hc.Expected)
 
-	return []string{"CMD", cmd}
+	return []string{"CMD-SHELL", cmd}
 }
 
 // HealthcheckCmd are healthcheck parameters that can be specified in
