@@ -1,6 +1,7 @@
 package nodejs
 
 import (
+	"fmt"
 	"sort"
 	"strings"
 	"time"
@@ -10,13 +11,6 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/xerrors"
 )
-
-var defaultBaseImages = map[string]string{
-	"10": "docker.io/library/node:10-buster-slim",
-	"12": "docker.io/library/node:12-buster-slim",
-	"13": "docker.io/library/node:13-buster-slim",
-}
-var supportedVersions = "10, 12, 13"
 
 func (h *NodeJSHandler) loadDefs(
 	buildOpts builddef.BuildOpts,
@@ -157,11 +151,7 @@ func NewKind(genericDef *builddef.BuildDef) (Definition, error) {
 	}
 
 	if def.BaseImage == "" {
-		baseImage, ok := defaultBaseImages[def.Version]
-		if !ok {
-			return def, xerrors.Errorf("no default base image defined for NodeJS v%s, you have to define it by yourself in your zbuildfile or use one of the supported versions: %s", def.Version, supportedVersions)
-		}
-		def.BaseImage = baseImage
+		def.BaseImage = fmt.Sprintf("docker.io/library/node:%s-buster-slim", def.Version)
 	}
 
 	return def, nil
