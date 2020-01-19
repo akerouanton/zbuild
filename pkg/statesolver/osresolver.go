@@ -1,10 +1,9 @@
-package builddef
+package statesolver
 
 import (
 	"context"
 	"strings"
 
-	"github.com/NiR-/zbuild/pkg/statesolver"
 	"golang.org/x/xerrors"
 )
 
@@ -38,13 +37,13 @@ func ParseOSRelease(file []byte) (OSRelease, error) {
 
 func ResolveImageOS(
 	ctx context.Context,
-	solver statesolver.StateSolver,
+	solver StateSolver,
 	imageRef string,
 ) (OSRelease, error) {
 	var res OSRelease
 	raw, err := solver.ReadFile(ctx, "/etc/os-release",
 		solver.FromImage(imageRef))
-	if xerrors.Is(err, statesolver.FileNotFound) {
+	if xerrors.Is(err, FileNotFound) {
 		return res, xerrors.Errorf("could not find /etc/os-release in %s", imageRef)
 	} else if err != nil {
 		return res, err

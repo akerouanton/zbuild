@@ -1,4 +1,4 @@
-package builddef_test
+package defloader_test
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/NiR-/zbuild/pkg/builddef"
+	"github.com/NiR-/zbuild/pkg/defloader"
 	"github.com/NiR-/zbuild/pkg/mocks"
 	"github.com/NiR-/zbuild/pkg/statesolver"
 	"github.com/go-test/deep"
@@ -108,7 +109,7 @@ func itFailsToLoadConfigFilesWhenTheresNoYmlFileTC(
 			File:     "zbuild.yml",
 			LockFile: "zbuild.lock",
 		},
-		expectedErr: builddef.ZbuildfileNotFound,
+		expectedErr: defloader.ZbuildfileNotFound,
 	}
 }
 
@@ -131,7 +132,7 @@ func TestLoadConfig(t *testing.T) {
 			tc := tcinit(t, mockCtrl)
 			ctx := context.TODO()
 
-			buildDef, err := builddef.Load(
+			buildDef, err := defloader.Load(
 				ctx, tc.solver, tc.buildOpts,
 			)
 			if tc.expectedErr != nil {
