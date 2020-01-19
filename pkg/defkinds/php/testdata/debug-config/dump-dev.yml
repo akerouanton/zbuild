@@ -60,7 +60,6 @@ stage:
   - echo '<?php return [];' > .env.local.php
   - APP_ENV=prod composer run-script --no-dev post-install-cmd
 name: dev
-baseimage: docker.io/library/php:7.3-fpm-buster
 version: "7.3"
 majminversion: "7.3"
 infer: true
@@ -215,7 +214,11 @@ platformreqs:
   tokenizer: '*'
   xml: '*'
   xmlwriter: '*'
-locks:
+deflocks:
+  baseimage: docker.io/library/php:7.3-fpm-buster
+  extensiondir: /usr/local/lib/php/extensions/no-debug-non-zts-20180731/
+  stages: {}
+stagelocks:
   systempackages:
     git: 1:2.20.1-2+deb10u1
     libicu-dev: 63.1-6

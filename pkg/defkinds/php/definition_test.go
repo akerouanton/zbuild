@@ -390,7 +390,6 @@ func initSuccessfullyResolveDefaultDevStageTC(t *testing.T, mockCtrl *gomock.Con
 		},
 		expected: php.StageDefinition{
 			Name:           "dev",
-			BaseImage:      "docker.io/library/php:7.4.0-fpm-buster",
 			Version:        "7.4.0",
 			MajMinVersion:  "7.4",
 			Infer:          false,
@@ -450,7 +449,6 @@ func initSuccessfullyResolveWorkerStageTC(t *testing.T, mockCtrl *gomock.Control
 		),
 		expected: php.StageDefinition{
 			Name:          "prod",
-			BaseImage:     "docker.io/library/php:7.4-cli-buster",
 			Version:       "7.4",
 			MajMinVersion: "7.4",
 			Infer:         true,
@@ -529,7 +527,6 @@ func initRemoveDefaultExtensionsTC(t *testing.T, mockCtrl *gomock.Controller) re
 		composerLockLoader: composerLockLoader,
 		expected: php.StageDefinition{
 			Name:           "dev",
-			BaseImage:      "docker.io/library/php:7.4-fpm-buster",
 			Version:        "7.4",
 			MajMinVersion:  "7.4",
 			Infer:          true,
@@ -589,7 +586,6 @@ func initPreservePredefinedExtensionConstraintsTC(t *testing.T, mockCtrl *gomock
 		),
 		expected: php.StageDefinition{
 			Name:           "dev",
-			BaseImage:      "docker.io/library/php:7.4-fpm-buster",
 			Version:        "7.4",
 			MajMinVersion:  "7.4",
 			Infer:          true,

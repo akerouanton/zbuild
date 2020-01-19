@@ -60,10 +60,13 @@ func (h *PHPHandler) DebugConfig(
 	buildOpts builddef.BuildOpts,
 ) (interface{}, error) {
 	ctx := context.TODO()
-	_, stageDef, err := h.loadDefs(ctx, buildOpts)
+	stageDef, err := h.loadDefs(ctx, buildOpts)
 	if err != nil {
 		return nil, err
 	}
+
+	// Remove this value as it would pollute the dump
+	stageDef.DefLocks.Stages = map[string]StageLocks{}
 
 	return stageDef, nil
 }
@@ -75,12 +78,12 @@ func (h *PHPHandler) Build(
 	var state llb.State
 	var img *image.Image
 
-	def, stageDef, err := h.loadDefs(ctx, buildOpts)
+	stageDef, err := h.loadDefs(ctx, buildOpts)
 	if err != nil {
 		return state, img, err
 	}
 
-	state, img, err = h.buildPHP(ctx, def, stageDef, buildOpts)
+	state, img, err = h.buildPHP(ctx, stageDef, buildOpts)
 	if err != nil {
 		err = xerrors.Errorf("could not build php stage: %w", err)
 		return state, img, err
@@ -89,17 +92,15 @@ func (h *PHPHandler) Build(
 	return state, img, nil
 }
 
-// @TODO: move BaseImage from DefinitionLocks to StageLocks and remove Definition arg.
 func (h *PHPHandler) buildPHP(
 	ctx context.Context,
-	def Definition,
 	stage StageDefinition,
 	buildOpts builddef.BuildOpts,
 ) (llb.State, *image.Image, error) {
-	state := llbutils.ImageSource(def.Locks.BaseImage, true)
-	baseImg, err := image.LoadMeta(ctx, def.Locks.BaseImage)
+	state := llbutils.ImageSource(stage.DefLocks.BaseImage, true)
+	baseImg, err := image.LoadMeta(ctx, stage.DefLocks.BaseImage)
 	if err != nil {
-		return state, nil, xerrors.Errorf("failed to load %q metadata: %w", def.Locks.BaseImage, err)
+		return state, nil, xerrors.Errorf("failed to load %q metadata: %w", stage.DefLocks.BaseImage, err)
 	}
 
 	img := image.CloneMeta(baseImg)
@@ -107,12 +108,12 @@ func (h *PHPHandler) buildPHP(
 
 	composer := llbutils.ImageSource(defaultComposerImageTag, false)
 	state = llbutils.Copy(composer, "/usr/bin/composer", state, "/usr/bin/composer", "")
-	state, err = llbutils.InstallSystemPackages(state, llbutils.APT, stage.Locks.SystemPackages)
+	state, err = llbutils.InstallSystemPackages(state, llbutils.APT, stage.StageLocks.SystemPackages)
 	if err != nil {
 		return state, img, xerrors.Errorf("failed to add \"install system pacakges\" steps: %w", err)
 	}
 
-	state = InstallExtensions(state, stage.MajMinVersion, stage.Locks.Extensions)
+	state = InstallExtensions(state, stage.MajMinVersion, stage.StageLocks.Extensions)
 	state = llbutils.CopyExternalFiles(state, stage.ExternalFiles)
 
 	state = llbutils.Mkdir(state, "1000:1000", "/app", "/composer")

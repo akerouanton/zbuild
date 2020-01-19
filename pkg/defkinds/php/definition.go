@@ -17,13 +17,12 @@ import (
 func (h *PHPHandler) loadDefs(
 	ctx context.Context,
 	buildOpts builddef.BuildOpts,
-) (Definition, StageDefinition, error) {
-	var def Definition
+) (StageDefinition, error) {
 	var stageDef StageDefinition
 
 	def, err := NewKind(buildOpts.Def)
 	if err != nil {
-		return def, stageDef, err
+		return stageDef, err
 	}
 
 	composerLockLoader := func(stageDef *StageDefinition) error {
@@ -34,10 +33,10 @@ func (h *PHPHandler) loadDefs(
 		composerLockLoader, true)
 	if err != nil {
 		err = xerrors.Errorf("could not resolve stage %q: %w", buildOpts.Stage, err)
-		return def, stageDef, err
+		return stageDef, err
 	}
 
-	return def, stageDef, nil
+	return stageDef, nil
 }
 
 // DefaultDefinition returns a Definition with all its fields initialized with
@@ -476,15 +475,16 @@ func (fl ComposerDumpFlags) Flags() (string, error) {
 // its ancestors.
 type StageDefinition struct {
 	Stage
-	Name           string
-	BaseImage      string
-	Version        string
-	MajMinVersion  string
-	Infer          bool
-	Dev            bool
+	Name          string
+	Version       string
+	MajMinVersion string
+	Infer         bool
+	Dev           bool
+	// LockedPackages is the set of packages found in composer.lock
 	LockedPackages map[string]string
 	PlatformReqs   map[string]string
-	Locks          StageLocks
+	DefLocks       DefinitionLocks
+	StageLocks     StageLocks
 }
 
 func (stageDef StageDefinition) IsValid() error {
@@ -540,7 +540,9 @@ func (def *Definition) ResolveStageDefinition(
 		return stageDef, xerrors.Errorf(
 			"no locks available for stage %q. Please update your lockfile", stageName)
 	}
-	stageDef.Locks = locks
+
+	stageDef.DefLocks = def.Locks
+	stageDef.StageLocks = locks
 
 	return stageDef, nil
 }
@@ -576,7 +578,6 @@ func extractMajMinVersion(versionString string) string {
 
 func mergeStages(base *Definition, stages ...DerivedStage) StageDefinition {
 	stageDef := StageDefinition{
-		BaseImage:      base.BaseImage,
 		Version:        base.Version,
 		MajMinVersion:  base.MajMinVersion,
 		Stage:          base.BaseStage.Copy(),
