@@ -315,7 +315,6 @@ func initSuccessfullyResolveDefaultDevStageTC() resolveStageTC {
 		stage: "dev",
 		expected: nodejs.StageDefinition{
 			Name:       "dev",
-			BaseImage:  "docker.io/library/node:12-buster-slim",
 			Version:    "12",
 			Dev:        &devMode,
 			IsFrontend: true,
@@ -351,10 +350,9 @@ func initSuccessfullyResolveWorkerStageTC() resolveStageTC {
 		file:  "testdata/def/with-stages.yml",
 		stage: "worker",
 		expected: nodejs.StageDefinition{
-			Name:      "worker",
-			BaseImage: "docker.io/library/node:12-buster-slim",
-			Version:   "12",
-			Dev:       &devMode,
+			Name:    "worker",
+			Version: "12",
+			Dev:     &devMode,
 			Stage: nodejs.Stage{
 				ExternalFiles:  []llbutils.ExternalFile{},
 				SystemPackages: &builddef.VersionMap{},

@@ -20,22 +20,21 @@ var supportedVersions = "10, 12, 13"
 
 func (h *NodeJSHandler) loadDefs(
 	buildOpts builddef.BuildOpts,
-) (Definition, StageDefinition, error) {
-	var def Definition
+) (StageDefinition, error) {
 	var stageDef StageDefinition
 
 	def, err := NewKind(buildOpts.Def)
 	if err != nil {
-		return def, stageDef, err
+		return stageDef, err
 	}
 
 	stageDef, err = def.ResolveStageDefinition(buildOpts.Stage, true)
 	if err != nil {
 		err = xerrors.Errorf("could not resolve stage %q: %w", buildOpts.Stage, err)
-		return def, stageDef, err
+		return stageDef, err
 	}
 
-	return def, stageDef, nil
+	return stageDef, nil
 }
 
 func defaultDefinition() Definition {
@@ -359,11 +358,11 @@ func (base DerivedStageSet) Merge(overriding DerivedStageSet) DerivedStageSet {
 type StageDefinition struct {
 	Stage
 	Name       string
-	BaseImage  string
 	Version    string
 	Dev        *bool
 	IsFrontend bool
-	Locks      StageLocks
+	DefLocks   DefinitionLocks
+	StageLocks StageLocks
 }
 
 func (def *Definition) ResolveStageDefinition(
@@ -389,7 +388,8 @@ func (def *Definition) ResolveStageDefinition(
 			"no locks available for stage %q. Please update your lockfile", name)
 	}
 
-	stageDef.Locks = locks
+	stageDef.DefLocks = def.Locks
+	stageDef.StageLocks = locks
 
 	return stageDef, nil
 }
@@ -421,7 +421,6 @@ func (def *Definition) resolveStageChain(name string) ([]DerivedStage, error) {
 func mergeStages(base *Definition, stages ...DerivedStage) StageDefinition {
 	devMode := false
 	stageDef := StageDefinition{
-		BaseImage:  base.BaseImage,
 		Version:    base.Version,
 		Stage:      base.BaseStage.Copy(),
 		IsFrontend: base.IsFrontend,
