@@ -162,7 +162,7 @@ to exist in the base image. For instance, `extensions` parameter is based on
 `docker-php-ext-install` (see below for more details).
 
 You can define the `base` stage at the root of the definition. Subsequent
-stages defined in `stages` will then inherent parameters from the `base` stage.
+stages defined in `stages` will then inherit parameters from the `base` stage.
 
 See a [full example below](#example).
 
