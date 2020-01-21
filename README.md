@@ -60,6 +60,21 @@ $ docker build -f zbuild.yml -t prod .
 
 ```bash
 $ zbuild debug-llb --target prod | buildctl debug dump-llb
+# Or
+$ zbuild debug-llb --target prod --json | zbuild llbgraph | dot /dev/stdin -o /dev/stdout -T png | feh -
+```
+
+#### Review LLB DAGs changes
+
+```bash
+# Visually review differences between two LLB DAGs
+$ ./tools/diff-dotgraph.py "$(cat graph1)" "$(cat graph2)"
+# Visually review unstaged changes
+$ ./tools/diff-dumps-from-git.py
+# Visually review changes from a commit range
+$ ./tools/diff-dumps-from-git.py HEAD~10:HEAD~1
+# Visually review a bunch of graphs from a commit range
+$ ./tools/diff-dumps-from-git.py HEAD~10:HEAD~1 path/to/graph1 path/to/graph2
 ```
 
 #### Run with buildkitd
