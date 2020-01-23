@@ -45,10 +45,13 @@ func (h *NodeJSHandler) WithSolver(solver statesolver.StateSolver) {
 func (h *NodeJSHandler) DebugConfig(
 	buildOpts builddef.BuildOpts,
 ) (interface{}, error) {
-	_, stageDef, err := h.loadDefs(buildOpts)
+	stageDef, err := h.loadDefs(buildOpts)
 	if err != nil {
 		return nil, err
 	}
+
+	// This property would pollute the dumped config
+	stageDef.DefLocks.Stages = map[string]StageLocks{}
 
 	return stageDef, nil
 }
@@ -60,12 +63,12 @@ func (h *NodeJSHandler) Build(
 	var state llb.State
 	var img *image.Image
 
-	def, stageDef, err := h.loadDefs(buildOpts)
+	stageDef, err := h.loadDefs(buildOpts)
 	if err != nil {
 		return state, img, err
 	}
 
-	state, img, err = h.buildNodeJS(ctx, def, stageDef, buildOpts)
+	state, img, err = h.buildNodeJS(ctx, stageDef, buildOpts)
 	if err != nil {
 		err = xerrors.Errorf("could not build nodejs stage: %w", err)
 		return state, img, err
@@ -76,20 +79,19 @@ func (h *NodeJSHandler) Build(
 
 func (h *NodeJSHandler) buildNodeJS(
 	ctx context.Context,
-	def Definition,
 	stageDef StageDefinition,
 	buildOpts builddef.BuildOpts,
 ) (llb.State, *image.Image, error) {
-	state := llbutils.ImageSource(def.Locks.BaseImage, true)
-	baseImg, err := image.LoadMeta(ctx, def.Locks.BaseImage)
+	state := llbutils.ImageSource(stageDef.DefLocks.BaseImage, true)
+	baseImg, err := image.LoadMeta(ctx, stageDef.DefLocks.BaseImage)
 	if err != nil {
-		return state, nil, xerrors.Errorf("failed to load %q metadata: %w", def.Locks.BaseImage, err)
+		return state, nil, xerrors.Errorf("failed to load %q metadata: %w", stageDef.DefLocks.BaseImage, err)
 	}
 
 	img := image.CloneMeta(baseImg)
 	img.Config.Labels[builddef.ZbuildLabel] = "true"
 
-	state, err = llbutils.InstallSystemPackages(state, llbutils.APT, stageDef.Locks.SystemPackages)
+	state, err = llbutils.InstallSystemPackages(state, llbutils.APT, stageDef.StageLocks.SystemPackages)
 	if err != nil {
 		return state, img, xerrors.Errorf("failed to add \"install system pacakges\" steps: %w", err)
 	}

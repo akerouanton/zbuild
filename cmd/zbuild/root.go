@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"os"
 
 	_ "github.com/NiR-/zbuild/pkg/defkinds/nodejs"
@@ -69,4 +70,19 @@ func AddContextFlag(cmd *cobra.Command, val *string) {
 
 func AddStageFlag(cmd *cobra.Command, val *string) {
 	cmd.Flags().StringVarP(val, "stage", "s", "dev", "Name of the stage to use")
+}
+
+func AddLogLevelFlag(cmd *cobra.Command, val *string) {
+	cmd.Flags().StringVar(val, "log-level", *val, "Log level (one of: error, warn, info, debug)")
+}
+
+func configureLogger(cmd *cobra.Command, level string) {
+	parsed, err := logrus.ParseLevel(level)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "ERROR: Invalid log level %q.", level)
+		cmd.Usage()
+		os.Exit(1)
+	}
+
+	logrus.SetLevel(parsed)
 }

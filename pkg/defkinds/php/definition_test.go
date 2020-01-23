@@ -10,7 +10,6 @@ import (
 	"github.com/NiR-/zbuild/pkg/llbutils"
 	"github.com/go-test/deep"
 	"github.com/golang/mock/gomock"
-	"golang.org/x/xerrors"
 	"gopkg.in/yaml.v2"
 )
 
@@ -77,7 +76,7 @@ func initParseRawDefinitionWithoutStagesTC() newDefinitionTC {
 			},
 			Version:       "7.4.0",
 			MajMinVersion: "7.4",
-			BaseImage:     "docker.io/library/php:7.4-fpm-buster",
+			BaseImage:     "docker.io/library/php:7.4.0-fpm-buster",
 			Infer:         &inferMode,
 			Stages: map[string]php.DerivedStage{
 				"dev": {
@@ -92,6 +91,7 @@ func initParseRawDefinitionWithoutStagesTC() newDefinitionTC {
 				},
 			},
 			Locks: php.DefinitionLocks{
+				ExtensionDir: "/usr/local/lib/php/extensions/no-debug-non-zts-20190902/",
 				Stages: map[string]php.StageLocks{
 					"dev": {
 						SystemPackages: map[string]string{
@@ -173,7 +173,7 @@ func initParseRawDefinitionWithStagesTC() newDefinitionTC {
 			},
 			Version:       "7.4.0",
 			MajMinVersion: "7.4",
-			BaseImage:     "docker.io/library/php:7.4-fpm-buster",
+			BaseImage:     "docker.io/library/php:7.4.0-fpm-buster",
 			Infer:         &inferMode,
 			Stages: map[string]php.DerivedStage{
 				"dev": {
@@ -238,7 +238,7 @@ func initParseRawDefinitionWithWebserverTC() newDefinitionTC {
 			BaseStage:     baseStage,
 			Version:       "7.4.0",
 			MajMinVersion: "7.4",
-			BaseImage:     "docker.io/library/php:7.4-fpm-buster",
+			BaseImage:     "docker.io/library/php:7.4.0-fpm-buster",
 			Infer:         &inferMode,
 			Stages: map[string]php.DerivedStage{
 				"dev": {
@@ -295,7 +295,7 @@ func initParseRawDefinitionWithCustomFCGIHealthcheckTC() newDefinitionTC {
 			},
 			Version:       "7.4.0",
 			MajMinVersion: "7.4",
-			BaseImage:     "docker.io/library/php:7.4-fpm-buster",
+			BaseImage:     "docker.io/library/php:7.4.0-fpm-buster",
 			Infer:         &inferMode,
 			Stages: map[string]php.DerivedStage{
 				"dev": {
@@ -390,7 +390,6 @@ func initSuccessfullyResolveDefaultDevStageTC(t *testing.T, mockCtrl *gomock.Con
 		},
 		expected: php.StageDefinition{
 			Name:           "dev",
-			BaseImage:      "docker.io/library/php:7.4-fpm-buster",
 			Version:        "7.4.0",
 			MajMinVersion:  "7.4",
 			Infer:          false,
@@ -450,8 +449,7 @@ func initSuccessfullyResolveWorkerStageTC(t *testing.T, mockCtrl *gomock.Control
 		),
 		expected: php.StageDefinition{
 			Name:          "prod",
-			BaseImage:     "docker.io/library/php:7.4-cli-buster",
-			Version:       "7.4.0",
+			Version:       "7.4",
 			MajMinVersion: "7.4",
 			Infer:         true,
 			Dev:           false,
@@ -529,7 +527,6 @@ func initRemoveDefaultExtensionsTC(t *testing.T, mockCtrl *gomock.Controller) re
 		composerLockLoader: composerLockLoader,
 		expected: php.StageDefinition{
 			Name:           "dev",
-			BaseImage:      "docker.io/library/php:7.4-fpm-buster",
 			Version:        "7.4",
 			MajMinVersion:  "7.4",
 			Infer:          true,
@@ -589,7 +586,6 @@ func initPreservePredefinedExtensionConstraintsTC(t *testing.T, mockCtrl *gomock
 		),
 		expected: php.StageDefinition{
 			Name:           "dev",
-			BaseImage:      "docker.io/library/php:7.4-fpm-buster",
 			Version:        "7.4",
 			MajMinVersion:  "7.4",
 			Infer:          true,
@@ -626,6 +622,18 @@ func initPreservePredefinedExtensionConstraintsTC(t *testing.T, mockCtrl *gomock
 	}
 }
 
+func initFailWhenComposerFlagsAreInvalidTC(t *testing.T, _ *gomock.Controller) resolveStageTC {
+	composerLockLoader := mockComposerLockLoader(map[string]string{}, map[string]string{})
+
+	return resolveStageTC{
+		file:               "testdata/def/invalid-composer-flags.yml",
+		lockFile:           "",
+		stage:              "dev",
+		composerLockLoader: composerLockLoader,
+		expectedErr:        errors.New(`invalid final stage config: you can't use both --apcu and --classmap-authoritative flags. See https://getcomposer.org/doc/articles/autoloader-optimization.md`),
+	}
+}
+
 func TestResolveStageDefinition(t *testing.T) {
 	if *flagTestdata {
 		return
@@ -636,6 +644,7 @@ func TestResolveStageDefinition(t *testing.T) {
 		"successfully resolve worker stage":         initSuccessfullyResolveWorkerStageTC,
 		"fail to resolve unknown stage":             initFailToResolveUnknownStageTC,
 		"fail to resolve stage with cyclic deps":    initFailToResolveStageWithCyclicDepsTC,
+		"fail when composer flags are invalid":      initFailWhenComposerFlagsAreInvalidTC,
 		"remove default extensions":                 initRemoveDefaultExtensionsTC,
 		"preserve predefined extension constraints": initPreservePredefinedExtensionConstraintsTC,
 	}
@@ -680,6 +689,10 @@ func TestResolveStageDefinition(t *testing.T) {
 }
 
 func TestComposerDumpFlags(t *testing.T) {
+	if !*flagTestdata {
+		return
+	}
+
 	testcases := map[string]struct {
 		obj         php.ComposerDumpFlags
 		expected    string
@@ -696,10 +709,6 @@ func TestComposerDumpFlags(t *testing.T) {
 		"with no particular optimization": {
 			obj:      php.ComposerDumpFlags{},
 			expected: "--no-dev --optimize",
-		},
-		"fail when both optimizations are enabled": {
-			obj:         php.ComposerDumpFlags{APCU: true, ClassmapAuthoritative: true},
-			expectedErr: xerrors.New("you can't use both --apcu and --classmap-authoritative flags. See https://getcomposer.org/doc/articles/autoloader-optimization.md"),
 		},
 	}
 

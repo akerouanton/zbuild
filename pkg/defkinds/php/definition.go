@@ -17,13 +17,12 @@ import (
 func (h *PHPHandler) loadDefs(
 	ctx context.Context,
 	buildOpts builddef.BuildOpts,
-) (Definition, StageDefinition, error) {
-	var def Definition
+) (StageDefinition, error) {
 	var stageDef StageDefinition
 
 	def, err := NewKind(buildOpts.Def)
 	if err != nil {
-		return def, stageDef, err
+		return stageDef, err
 	}
 
 	composerLockLoader := func(stageDef *StageDefinition) error {
@@ -34,10 +33,10 @@ func (h *PHPHandler) loadDefs(
 		composerLockLoader, true)
 	if err != nil {
 		err = xerrors.Errorf("could not resolve stage %q: %w", buildOpts.Stage, err)
-		return def, stageDef, err
+		return stageDef, err
 	}
 
-	return def, stageDef, nil
+	return stageDef, nil
 }
 
 // DefaultDefinition returns a Definition with all its fields initialized with
@@ -178,11 +177,10 @@ func NewKind(genericDef *builddef.BuildDef) (Definition, error) {
 	}
 
 	if def.BaseImage == "" && def.Version != "" {
-		baseImages := defaultBaseImages[def.MajMinVersion]
 		if *def.BaseStage.FPM {
-			def.BaseImage = baseImages.FPM
+			def.BaseImage = fmt.Sprintf("docker.io/library/php:%s-fpm-buster", def.Version)
 		} else {
-			def.BaseImage = baseImages.CLI
+			def.BaseImage = fmt.Sprintf("docker.io/library/php:%s-cli-buster", def.Version)
 		}
 	}
 
@@ -207,14 +205,6 @@ type Definition struct {
 func (def Definition) IsValid() error {
 	if def.Version != "" && def.BaseImage != "" {
 		return xerrors.Errorf("you can't specify version and base parameters at the same time")
-	}
-
-	if def.Version != "" {
-		if _, ok := defaultBaseImages[def.MajMinVersion]; !ok {
-			return xerrors.Errorf(
-				"no default base image defined for PHP v%s, you have to define it by yourself in your zbuild file",
-				def.MajMinVersion)
-		}
 	}
 
 	allowedHCTypes := []string{"fcgi", "cmd"}
@@ -268,7 +258,7 @@ func (base Definition) Merge(overriding Definition) Definition {
 type Stage struct {
 	ExternalFiles     []llbutils.ExternalFile     `mapstructure:"external_files"`
 	SystemPackages    *builddef.VersionMap        `mapstructure:"system_packages"`
-	FPM               *bool                       `mapstructure:",omitempty"`
+	FPM               *bool                       `mapstructure:"fpm"`
 	Command           *[]string                   `mapstructure:"command"`
 	Extensions        *builddef.VersionMap        `mapstructure:"extensions"`
 	GlobalDeps        *builddef.VersionMap        `mapstructure:"global_deps"`
@@ -462,11 +452,15 @@ type ComposerDumpFlags struct {
 	ClassmapAuthoritative bool `mapstructure:"classmap_authoritative"`
 }
 
-func (fl ComposerDumpFlags) Flags() (string, error) {
+func (fl ComposerDumpFlags) IsValid() error {
 	if fl.APCU && fl.ClassmapAuthoritative {
-		return "", xerrors.New("you can't use both --apcu and --classmap-authoritative flags. See https://getcomposer.org/doc/articles/autoloader-optimization.md")
+		return xerrors.New("you can't use both --apcu and --classmap-authoritative flags. See https://getcomposer.org/doc/articles/autoloader-optimization.md")
 	}
 
+	return nil
+}
+
+func (fl ComposerDumpFlags) Flags() (string, error) {
 	flags := "--no-dev --optimize"
 	if fl.APCU {
 		flags += " --apcu"
@@ -481,15 +475,28 @@ func (fl ComposerDumpFlags) Flags() (string, error) {
 // its ancestors.
 type StageDefinition struct {
 	Stage
-	Name           string
-	BaseImage      string
-	Version        string
-	MajMinVersion  string
-	Infer          bool
-	Dev            bool
+	Name          string
+	Version       string
+	MajMinVersion string
+	Infer         bool
+	Dev           bool
+	// LockedPackages is the set of packages found in composer.lock
 	LockedPackages map[string]string
 	PlatformReqs   map[string]string
-	Locks          StageLocks
+	DefLocks       DefinitionLocks
+	StageLocks     StageLocks
+}
+
+func (stageDef StageDefinition) IsValid() error {
+	if *stageDef.FPM == false && stageDef.Command == nil {
+		return xerrors.New("FPM mode is disabled but no command was provided")
+	}
+
+	if err := stageDef.ComposerDumpFlags.IsValid(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (def *Definition) ResolveStageDefinition(
@@ -512,28 +519,17 @@ func (def *Definition) ResolveStageDefinition(
 		return stageDef, err
 	}
 
-	if *stageDef.FPM == false && stageDef.Command == nil {
-		return stageDef, xerrors.New("FPM mode is disabled but no command was provided")
+	if err := stageDef.IsValid(); err != nil {
+		return stageDef, xerrors.Errorf("invalid final stage config: %w", err)
 	}
 
-	if err := addIntegrations(&stageDef); err != nil {
+	if err := addIntegrations(def.Locks, &stageDef); err != nil {
 		return stageDef, err
 	}
 
-	if def.Infer == nil || *def.Infer == false {
-		return stageDef, nil
+	if def.Infer != nil && *def.Infer {
+		inferConfig(&stageDef)
 	}
-
-	if stageDef.Dev == false && *stageDef.FPM == true {
-		stageDef.Extensions.Add("apcu", "*")
-		stageDef.Extensions.Add("opcache", "*")
-	}
-	for name, constraint := range stageDef.PlatformReqs {
-		stageDef.Extensions.Add(name, constraint)
-	}
-
-	inferExtensions(&stageDef)
-	inferSystemPackages(&stageDef)
 
 	if !withLocks {
 		return stageDef, nil
@@ -544,7 +540,9 @@ func (def *Definition) ResolveStageDefinition(
 		return stageDef, xerrors.Errorf(
 			"no locks available for stage %q. Please update your lockfile", stageName)
 	}
-	stageDef.Locks = locks
+
+	stageDef.DefLocks = def.Locks
+	stageDef.StageLocks = locks
 
 	return stageDef, nil
 }
@@ -580,7 +578,6 @@ func extractMajMinVersion(versionString string) string {
 
 func mergeStages(base *Definition, stages ...DerivedStage) StageDefinition {
 	stageDef := StageDefinition{
-		BaseImage:      base.BaseImage,
 		Version:        base.Version,
 		MajMinVersion:  base.MajMinVersion,
 		Stage:          base.BaseStage.Copy(),
@@ -624,17 +621,11 @@ func reverseStages(stages []DerivedStage) []DerivedStage {
 	return reversed
 }
 
-var phpExtDirs = map[string]string{
-	"7.2": "/usr/local/lib/php/extensions/no-debug-non-zts-20170718/",
-	"7.3": "/usr/local/lib/php/extensions/no-debug-non-zts-20180731/",
-	"7.4": "/usr/local/lib/php/extensions/no-debug-non-zts-20190902/",
-}
-
-func addIntegrations(stageDef *StageDefinition) error {
+func addIntegrations(defLocks DefinitionLocks, stageDef *StageDefinition) error {
 	for _, integration := range stageDef.Integrations {
 		switch integration {
 		case "blackfire":
-			dest := path.Join(phpExtDirs[stageDef.MajMinVersion], "blackfire.so")
+			dest := path.Join(defLocks.ExtensionDir, "blackfire.so")
 			stageDef.ExternalFiles = append(stageDef.ExternalFiles, llbutils.ExternalFile{
 				URL:         "https://blackfire.io/api/v1/releases/probe/php/linux/amd64/72",
 				Compressed:  true,
@@ -697,6 +688,19 @@ var preinstalledExtensions = map[string]struct{}{
 	"xmlreader":  struct{}{},
 	"xmlwriter":  struct{}{},
 	"zlib":       struct{}{},
+}
+
+func inferConfig(stageDef *StageDefinition) {
+	if stageDef.Dev == false && *stageDef.FPM == true {
+		stageDef.Extensions.Add("apcu", "*")
+		stageDef.Extensions.Add("opcache", "*")
+	}
+	for name, constraint := range stageDef.PlatformReqs {
+		stageDef.Extensions.Add(name, constraint)
+	}
+
+	inferExtensions(stageDef)
+	inferSystemPackages(stageDef)
 }
 
 func inferExtensions(def *StageDefinition) {

@@ -1,6 +1,7 @@
 package nodejs
 
 import (
+	"fmt"
 	"sort"
 	"strings"
 	"time"
@@ -11,31 +12,23 @@ import (
 	"golang.org/x/xerrors"
 )
 
-var defaultBaseImages = map[string]string{
-	"10": "docker.io/library/node:10-buster-slim",
-	"12": "docker.io/library/node:12-buster-slim",
-	"13": "docker.io/library/node:13-buster-slim",
-}
-var supportedVersions = "10, 12, 13"
-
 func (h *NodeJSHandler) loadDefs(
 	buildOpts builddef.BuildOpts,
-) (Definition, StageDefinition, error) {
-	var def Definition
+) (StageDefinition, error) {
 	var stageDef StageDefinition
 
 	def, err := NewKind(buildOpts.Def)
 	if err != nil {
-		return def, stageDef, err
+		return stageDef, err
 	}
 
 	stageDef, err = def.ResolveStageDefinition(buildOpts.Stage, true)
 	if err != nil {
 		err = xerrors.Errorf("could not resolve stage %q: %w", buildOpts.Stage, err)
-		return def, stageDef, err
+		return stageDef, err
 	}
 
-	return def, stageDef, nil
+	return stageDef, nil
 }
 
 func defaultDefinition() Definition {
@@ -158,11 +151,7 @@ func NewKind(genericDef *builddef.BuildDef) (Definition, error) {
 	}
 
 	if def.BaseImage == "" {
-		baseImage, ok := defaultBaseImages[def.Version]
-		if !ok {
-			return def, xerrors.Errorf("no default base image defined for NodeJS v%s, you have to define it by yourself in your zbuildfile or use one of the supported versions: %s", def.Version, supportedVersions)
-		}
-		def.BaseImage = baseImage
+		def.BaseImage = fmt.Sprintf("docker.io/library/node:%s-buster-slim", def.Version)
 	}
 
 	return def, nil
@@ -359,11 +348,11 @@ func (base DerivedStageSet) Merge(overriding DerivedStageSet) DerivedStageSet {
 type StageDefinition struct {
 	Stage
 	Name       string
-	BaseImage  string
 	Version    string
 	Dev        *bool
 	IsFrontend bool
-	Locks      StageLocks
+	DefLocks   DefinitionLocks
+	StageLocks StageLocks
 }
 
 func (def *Definition) ResolveStageDefinition(
@@ -389,7 +378,8 @@ func (def *Definition) ResolveStageDefinition(
 			"no locks available for stage %q. Please update your lockfile", name)
 	}
 
-	stageDef.Locks = locks
+	stageDef.DefLocks = def.Locks
+	stageDef.StageLocks = locks
 
 	return stageDef, nil
 }
@@ -421,7 +411,6 @@ func (def *Definition) resolveStageChain(name string) ([]DerivedStage, error) {
 func mergeStages(base *Definition, stages ...DerivedStage) StageDefinition {
 	devMode := false
 	stageDef := StageDefinition{
-		BaseImage:  base.BaseImage,
 		Version:    base.Version,
 		Stage:      base.BaseStage.Copy(),
 		IsFrontend: base.IsFrontend,
