@@ -45,6 +45,11 @@ gen-diagrams: build install
 build-image: .validate-image-tag build
 	docker build -t akerouanton/zbuilder:$(IMAGE_TAG) -f Dockerfile.builder bin/
 
+.PHONY: build-and-push-helpers
+build-and-push-helpers: .validate-image-tag
+	docker build -t akerouanton/zbuild-git:$(IMAGE_TAG) -f helpers/git.Dockerfile helpers
+	docker push akerouanton/zbuild-git:$(IMAGE_TAG)
+
 .PHONY: push
 push: .validate-image-tag
 	docker push akerouanton/zbuilder:$(IMAGE_TAG)
