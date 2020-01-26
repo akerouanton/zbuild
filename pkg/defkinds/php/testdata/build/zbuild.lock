@@ -1,4 +1,4 @@
-base_image: docker.io/library/php:7.3-fpm-buster
+base_image: docker.io/library/php:7.3.13-fpm-buster
 extension_dir: /usr/local/lib/php/extensions/no-debug-non-zts-20180731
 stages:
   dev:
