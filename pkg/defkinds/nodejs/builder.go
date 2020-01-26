@@ -185,15 +185,19 @@ func (h *NodeJSHandler) yarnInstall(
 	state llb.State,
 	buildOpts builddef.BuildOpts,
 ) llb.State {
-	sourceContext := resolveSourceContext(stageDef, buildOpts)
-	packageSrc := llbutils.FromContext(sourceContext,
-		llb.IncludePatterns([]string{"package.json", "yarn.lock"}),
+	srcContext := resolveSourceContext(stageDef, buildOpts)
+	include := []string{
+		prefixContextPath(srcContext, "package.json"),
+		prefixContextPath(srcContext, "yarn.lock")}
+	srcState := llbutils.FromContext(srcContext,
+		llb.IncludePatterns(include),
 		llb.LocalUniqueID(buildOpts.LocalUniqueID),
 		llb.SessionID(buildOpts.SessionID),
 		llb.SharedKeyHint(SharedKeys.PackageFiles),
 		llb.WithCustomName("load package.json and yarn.lock from build context"))
-	state = llbutils.Copy(packageSrc, "package.json", state, "/app/", "1000:1000")
-	state = llbutils.Copy(packageSrc, "yarn.lock", state, "/app/", "1000:1000")
+
+	state = llbutils.Copy(srcState, include[0], state, "/app/", "1000:1000")
+	state = llbutils.Copy(srcState, include[1], state, "/app/", "1000:1000")
 
 	run := state.Run(
 		llbutils.Shell("yarn install --frozen-lockfile"),
@@ -211,15 +215,16 @@ func (h *NodeJSHandler) copySources(
 ) llb.State {
 	sourceContext := resolveSourceContext(stageDef, buildOpts)
 	srcState := llbutils.FromContext(sourceContext,
-		llb.IncludePatterns(includePatterns(stageDef)),
-		llb.ExcludePatterns(excludePatterns(stageDef)),
+		llb.IncludePatterns(includePatterns(sourceContext, stageDef)),
+		llb.ExcludePatterns(excludePatterns(sourceContext, stageDef)),
 		llb.LocalUniqueID(buildOpts.LocalUniqueID),
 		llb.SessionID(buildOpts.SessionID),
 		llb.SharedKeyHint(SharedKeys.BuildContext),
 		llb.WithCustomName("load build context"))
 
 	if sourceContext.Type == builddef.ContextTypeLocal {
-		return llbutils.Copy(srcState, "/", state, "/app", "1000:1000")
+		srcPath := prefixContextPath(sourceContext, "/")
+		return llbutils.Copy(srcState, srcPath, state, "/app", "1000:1000")
 	}
 
 	// Despite the IncludePatterns() above, the source state might also
@@ -227,8 +232,9 @@ func (h *NodeJSHandler) copySources(
 	// As such, we can't just copy the whole source state to the dest state
 	// in such case.
 	for _, srcfile := range stageDef.Sources {
-		destfile := path.Join("/app", srcfile)
-		state = llbutils.Copy(srcState, srcfile, state, destfile, "1000:1000")
+		srcPath := prefixContextPath(sourceContext, srcfile)
+		destPath := path.Join("/app", srcfile)
+		state = llbutils.Copy(srcState, srcPath, state, destPath, "1000:1000")
 	}
 
 	return state
@@ -248,7 +254,8 @@ func (h *NodeJSHandler) copyConfigFiles(
 		include = append(include, srcfile)
 	}
 
-	srcState := llbutils.FromContext(buildOpts.BuildContext,
+	srcContext := buildOpts.BuildContext
+	srcState := llbutils.FromContext(srcContext,
 		llb.IncludePatterns(include),
 		llb.LocalUniqueID(buildOpts.LocalUniqueID),
 		llb.SessionID(buildOpts.SessionID),
@@ -260,9 +267,10 @@ func (h *NodeJSHandler) copyConfigFiles(
 	// non-local. However, including precise patterns help buildkit determine
 	// if the cache is fresh (when using a local context). As such, we can't
 	// just copy the whole source state to the dest state.
-	for dest, srcfile := range stageDef.ConfigFiles {
-		destfile := path.Join("/app", dest)
-		state = llbutils.Copy(srcState, srcfile, state, destfile, "1000:1000")
+	for destfile, srcfile := range stageDef.ConfigFiles {
+		srcpath := prefixContextPath(srcContext, srcfile)
+		destpath := path.Join("/app", destfile)
+		state = llbutils.Copy(srcState, srcpath, state, destpath, "1000:1000")
 	}
 
 	return state
@@ -279,22 +287,32 @@ func resolveSourceContext(
 	return buildOpts.BuildContext
 }
 
-func excludePatterns(stageDef StageDefinition) []string {
+func excludePatterns(srcContext *builddef.Context, stageDef StageDefinition) []string {
 	excludes := []string{}
 	// Explicitly exclude stateful dirs to ensure they aren't included when
 	// they're in one of Sources
 	for _, dir := range stageDef.StatefulDirs {
-		excludes = append(excludes, dir)
+		dirpath := prefixContextPath(srcContext, dir)
+		excludes = append(excludes, dirpath)
 	}
 	return excludes
 }
 
-func includePatterns(stageDef StageDefinition) []string {
+func includePatterns(srcContext *builddef.Context, stageDef StageDefinition) []string {
 	includes := []string{}
-	for _, dir := range stageDef.Sources {
-		includes = append(includes, dir)
+	for _, srcpath := range stageDef.Sources {
+		fullpath := prefixContextPath(srcContext, srcpath)
+		includes = append(includes, fullpath)
 	}
 	return includes
+}
+
+func prefixContextPath(srcContext *builddef.Context, p string) string {
+	if srcContext.IsGitContext() && srcContext.Path != "" {
+		return path.Join("/", srcContext.Path, p)
+	}
+
+	return p
 }
 
 func (h *NodeJSHandler) build(

@@ -1,5 +1,6 @@
 base_image: docker.io/library/php:7.3.13-fpm-buster@sha256:db5bce28b6eabd8bd963cfd95131a01171acea9cff500447bb8d9e05afd34e4b
 source_context:
+  path: api
   reference: 5ecd2177087afbcce8f88ddfedbc7b95e738d961
   source: github.com/api-platform/demo
   type: git

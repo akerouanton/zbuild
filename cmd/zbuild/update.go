@@ -35,13 +35,18 @@ func newUpdateCmd() *cobra.Command {
 func HandleUpdateCmd(cmd *cobra.Command, args []string) {
 	configureLogger(cmd, updateFlags.logLevel)
 
+	buildctx, err := builddef.NewContext(updateFlags.context, "")
+	if err != nil {
+		logrus.Fatalf("%+v", err)
+	}
+	if !buildctx.IsLocalContext() {
+		logrus.Fatalf("Only local contexts are supported by zbuild update.")
+	}
+
 	buildOpts := builddef.BuildOpts{
 		File:         updateFlags.file,
 		LockFile:     builddef.LockFilepath(updateFlags.file),
-		BuildContext: builddef.NewContext(updateFlags.context, ""),
-	}
-	if !buildOpts.BuildContext.IsLocalContext() {
-		logrus.Fatalf("Only local contexts are supported by zbuild update.")
+		BuildContext: buildctx,
 	}
 
 	solver := newDockerSolver(buildOpts.BuildContext.Source)

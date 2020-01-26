@@ -168,7 +168,7 @@ func initBuildProdStageFromGitBasedBuildContextTC(t *testing.T, mockCtrl *gomock
 	raw := loadRawTestdata(t, "testdata/composer/composer-symfony4.4.lock")
 	solver.EXPECT().FromContext(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(1)
 	solver.EXPECT().ReadFile(
-		gomock.Any(), "composer.lock", gomock.Any(),
+		gomock.Any(), "/sub/dir/composer.lock", gomock.Any(),
 	).Return(raw, nil)
 
 	kindHandler := php.NewPHPHandler()
@@ -185,6 +185,9 @@ func initBuildProdStageFromGitBasedBuildContextTC(t *testing.T, mockCtrl *gomock
 			BuildContext: &builddef.Context{
 				Source: "git://github.com/some/repo",
 				Type:   builddef.ContextTypeGit,
+				GitContext: builddef.GitContext{
+					Path: "sub/dir",
+				},
 			},
 		},
 		expectedState: "testdata/build/from-git-context.json",
@@ -237,7 +240,7 @@ func initBuildProdStageFromGitBasedSourceContextTC(t *testing.T, mockCtrl *gomoc
 	raw := loadRawTestdata(t, "testdata/build/composer.lock")
 	solver.EXPECT().FromContext(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(1)
 	solver.EXPECT().ReadFile(
-		gomock.Any(), "composer.lock", gomock.Any(),
+		gomock.Any(), "/api/composer.lock", gomock.Any(),
 	).Return(raw, nil)
 
 	kindHandler := php.NewPHPHandler()

@@ -41,6 +41,7 @@ func (l DefinitionLocks) RawLocks() map[string]interface{} {
 }
 
 // StageLocks represents the version locks for a single stage.
+// @TODO: use builddef.VersionMap
 type StageLocks struct {
 	SystemPackages map[string]string `mapstructure:"system_packages"`
 	Extensions     map[string]string `mapstructure:"extensions"`

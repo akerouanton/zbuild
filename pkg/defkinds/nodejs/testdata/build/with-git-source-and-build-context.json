@@ -1,5 +1,26 @@
 [
   {
+    "RawOp": "GkcKGmdpdDovL2dpdGh1Yi5jb20vc29tZS9yZXBvEikKC2dpdC5mdWxsdXJsEhpnaXQ6Ly9naXRodWIuY29tL3NvbWUvcmVwb1oA",
+    "Op": {
+      "Op": {
+        "Source": {
+          "identifier": "git://github.com/some/repo",
+          "attrs": {
+            "git.fullurl": "git://github.com/some/repo"
+          }
+        }
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:0c9d4ca1b890151a6f9fec38a0c1e9832cbda4fe730dd5fed667bc21b9f0a2df",
+    "OpMetadata": {
+      "caps": {
+        "source.git": true,
+        "source.git.fullurl": true
+      }
+    }
+  },
+  {
     "RawOp": "CkkKR3NoYTI1Njo0Y2E3OGJiMTM4Yzk1NWVkZjA0M2Q0MmE1Mzc5MDhkMDczMjA5MmFjZGQzNDRjM2Q2ZDdmYzI0NTExZjVmZjFkIjESLxD///////////8BMiIKBC9hcHAQ6AMYASIKCgMQ6AcSAxDoByj///////////8BUg4KBWFtZDY0EgVsaW51eFoA",
     "Op": {
       "inputs": [
@@ -49,70 +70,6 @@
     "OpMetadata": {
       "description": {
         "llb.customname": "Mkdir /app"
-      },
-      "caps": {
-        "file.base": true
-      }
-    }
-  },
-  {
-    "RawOp": "CkkKR3NoYTI1NjpkODJhNzM3YzU2Y2Q1ZDM5MDQ4NzVlNmI2ZTJhMzczZWM5Y2JiNWNjZDg2ODU0ZmEyZTc4ZTliNjUxYTQyYTRlCkkKR3NoYTI1Njo3MTUxNzNjYTE5MmM2ZTViYTI1ZjVjMDNiNTgyNTA2ZDA1NGVmZWMyNzI3N2JjOTk1NjBhODgyODdiYzc0YTZiIk0SSxABIkcKBS8uZW52EhQvYXBwLy5lbnYucHJvZHVjdGlvbhoKCgMQ6AcSAxDoByD///////////8BKAEwAUABSAFY////////////AVIOCgVhbWQ2NBIFbGludXhaAA==",
-    "Op": {
-      "inputs": [
-        {
-          "digest": "sha256:d82a737c56cd5d3904875e6b6e2a373ec9cbb5ccd86854fa2e78e9b651a42a4e",
-          "index": 0
-        },
-        {
-          "digest": "sha256:715173ca192c6e5ba25f5c03b582506d054efec27277bc99560a88287bc74a6b",
-          "index": 0
-        }
-      ],
-      "Op": {
-        "File": {
-          "actions": [
-            {
-              "input": 0,
-              "secondaryInput": 1,
-              "output": 0,
-              "Action": {
-                "Copy": {
-                  "src": "/.env",
-                  "dest": "/app/.env.production",
-                  "owner": {
-                    "user": {
-                      "User": {
-                        "ByID": 1000
-                      }
-                    },
-                    "group": {
-                      "User": {
-                        "ByID": 1000
-                      }
-                    }
-                  },
-                  "mode": -1,
-                  "followSymlink": true,
-                  "dirCopyContents": true,
-                  "createDestPath": true,
-                  "allowWildcard": true,
-                  "timestamp": -1
-                }
-              }
-            }
-          ]
-        }
-      },
-      "platform": {
-        "Architecture": "amd64",
-        "OS": "linux"
-      },
-      "constraints": {}
-    },
-    "Digest": "sha256:0e774731a37f8f8696f9af34ae8e161d11fb970ca56a20a3be6957355785b8a7",
-    "OpMetadata": {
-      "description": {
-        "llb.customname": "Copy .env"
       },
       "caps": {
         "file.base": true
@@ -201,54 +158,6 @@
     "OpMetadata": {
       "caps": {
         "source.image": true
-      }
-    }
-  },
-  {
-    "RawOp": "GngKD2xvY2FsOi8vY29udGV4dBIgChRsb2NhbC5pbmNsdWRlcGF0dGVybhIIWyIuZW52Il0SHQoNbG9jYWwuc2Vzc2lvbhIMPFNFU1NJT04tSUQ+EiQKE2xvY2FsLnNoYXJlZGtleWhpbnQSDWJ1aWxkLWNvbnRleHRaAA==",
-    "Op": {
-      "Op": {
-        "Source": {
-          "identifier": "local://context",
-          "attrs": {
-            "local.includepattern": "[\".env\"]",
-            "local.session": "\u003cSESSION-ID\u003e",
-            "local.sharedkeyhint": "build-context"
-          }
-        }
-      },
-      "constraints": {}
-    },
-    "Digest": "sha256:715173ca192c6e5ba25f5c03b582506d054efec27277bc99560a88287bc74a6b",
-    "OpMetadata": {
-      "description": {
-        "llb.customname": "load config files"
-      },
-      "caps": {
-        "source.local": true,
-        "source.local.includepatterns": true,
-        "source.local.sessionid": true,
-        "source.local.sharedkeyhint": true
-      }
-    }
-  },
-  {
-    "RawOp": "CkkKR3NoYTI1NjowZTc3NDczMWEzN2Y4Zjg2OTZmOWFmMzRhZThlMTYxZDExZmI5NzBjYTU2YTIwYTNiZTY5NTczNTU3ODViOGE3",
-    "Op": {
-      "inputs": [
-        {
-          "digest": "sha256:0e774731a37f8f8696f9af34ae8e161d11fb970ca56a20a3be6957355785b8a7",
-          "index": 0
-        }
-      ],
-      "Op": null
-    },
-    "Digest": "sha256:7499ce7c7f5c77e5538c6d6144a8552214789ef46155499220edeedb30b0913e",
-    "OpMetadata": {
-      "caps": {
-        "constraints": true,
-        "meta.description": true,
-        "platform": true
       }
     }
   },
@@ -374,6 +283,90 @@
     "OpMetadata": {
       "description": {
         "llb.customname": "Copy /client/yarn.lock"
+      },
+      "caps": {
+        "file.base": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1NjpjYmVjNzNiOGUwZmZjN2RmYTJiMmNiNDIwNTk5ZDk1MzY5ZjcyMmIwMWU3NmVhZGYzZWQ4M2E1ZTM0MjhiYjky",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:cbec73b8e0ffc7dfa2b2cb420599d95369f722b01e76eadf3ed83a5e3428bb92",
+          "index": 0
+        }
+      ],
+      "Op": null
+    },
+    "Digest": "sha256:98163aac8ef52de73ecd3d36ab623601a9ad6bb9f4ea1d48776b8635f377ab6e",
+    "OpMetadata": {
+      "caps": {
+        "constraints": true,
+        "meta.description": true,
+        "platform": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1NjpkODJhNzM3YzU2Y2Q1ZDM5MDQ4NzVlNmI2ZTJhMzczZWM5Y2JiNWNjZDg2ODU0ZmEyZTc4ZTliNjUxYTQyYTRlCkkKR3NoYTI1NjowYzlkNGNhMWI4OTAxNTFhNmY5ZmVjMzhhMGMxZTk4MzJjYmRhNGZlNzMwZGQ1ZmVkNjY3YmMyMWI5ZjBhMmRmIlUSUxABIk8KDS9zdWIvZGlyLy5lbnYSFC9hcHAvLmVudi5wcm9kdWN0aW9uGgoKAxDoBxIDEOgHIP///////////wEoATABQAFIAVj///////////8BUg4KBWFtZDY0EgVsaW51eFoA",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:d82a737c56cd5d3904875e6b6e2a373ec9cbb5ccd86854fa2e78e9b651a42a4e",
+          "index": 0
+        },
+        {
+          "digest": "sha256:0c9d4ca1b890151a6f9fec38a0c1e9832cbda4fe730dd5fed667bc21b9f0a2df",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "File": {
+          "actions": [
+            {
+              "input": 0,
+              "secondaryInput": 1,
+              "output": 0,
+              "Action": {
+                "Copy": {
+                  "src": "/sub/dir/.env",
+                  "dest": "/app/.env.production",
+                  "owner": {
+                    "user": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    },
+                    "group": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    }
+                  },
+                  "mode": -1,
+                  "followSymlink": true,
+                  "dirCopyContents": true,
+                  "createDestPath": true,
+                  "allowWildcard": true,
+                  "timestamp": -1
+                }
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:cbec73b8e0ffc7dfa2b2cb420599d95369f722b01e76eadf3ed83a5e3428bb92",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Copy /sub/dir/.env"
       },
       "caps": {
         "file.base": true

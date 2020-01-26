@@ -32,12 +32,16 @@ func LoadComposerLock(
 		sourceContext = buildContext
 	}
 
+	include := []string{
+		prefixContextPath(sourceContext, "composer.json"),
+		prefixContextPath(sourceContext, "composer.lock"),
+	}
 	composerSrc := solver.FromContext(sourceContext,
-		llb.IncludePatterns([]string{"composer.json", "composer.lock"}),
+		llb.IncludePatterns(include),
 		llb.SharedKeyHint(SharedKeys.ComposerFiles),
 		llb.WithCustomName("load composer files from build context"))
 
-	lockdata, err := solver.ReadFile(ctx, "composer.lock", composerSrc)
+	lockdata, err := solver.ReadFile(ctx, include[1], composerSrc)
 	if xerrors.Is(err, statesolver.FileNotFound) {
 		return nil
 	} else if err != nil {
