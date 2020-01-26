@@ -96,7 +96,7 @@ func (h *PHPHandler) UpdateLocks(
 
 func (h *PHPHandler) resolveExtensionDir(ctx context.Context, image string) (string, error) {
 	buf, err := h.solver.ExecImage(ctx, image, []string{
-		"php", "-r", "echo ini_get('extension_dir');",
+		"/usr/bin/env php -r \"echo ini_get('extension_dir');\"",
 	})
 	if err != nil {
 		return "", xerrors.Errorf("fail to resolve extension dir from base image: %w", err)
