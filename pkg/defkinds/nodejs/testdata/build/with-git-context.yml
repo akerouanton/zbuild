@@ -1,0 +1,12 @@
+kind: nodejs
+version: 12
+
+source_context:
+  type: git
+  source: github.com/api-platform/demo
+
+sources:
+  - src/
+  - public/
+
+healthcheck: false

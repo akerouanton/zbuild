@@ -26,7 +26,7 @@ func (h *PHPHandler) loadDefs(
 	}
 
 	composerLockLoader := func(stageDef *StageDefinition) error {
-		return LoadComposerLock(ctx, h.solver, stageDef)
+		return LoadComposerLock(ctx, h.solver, stageDef, buildOpts.BuildContext)
 	}
 
 	stageDef, err = def.ResolveStageDefinition(buildOpts.Stage,

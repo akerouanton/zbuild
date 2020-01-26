@@ -4,6 +4,7 @@ import (
 	"archive/tar"
 	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -132,21 +133,58 @@ func (s DockerSolver) ReadFile(
 }
 
 func (s DockerSolver) FromContext(c *builddef.Context, _ ...llb.LocalOption) ReadFileOpt {
-	if !c.IsLocalContext() {
-		panic("DockerSolver.FromContext only supports local contexts.")
-	}
-
 	return func(ctx context.Context, filepath string) ([]byte, error) {
-		fullpath := path.Join(s.RootDir, filepath)
-		raw, err := ioutil.ReadFile(fullpath)
-		if os.IsNotExist(err) {
-			return raw, xerrors.Errorf("failed to read %s from build context: %w", filepath, FileNotFound)
-		} else if err != nil {
-			return raw, xerrors.Errorf("failed to read %s from build context: %w", filepath, err)
+		if c == nil {
+			return []byte{}, nil
 		}
 
-		return raw, nil
+		switch c.Type {
+		case builddef.ContextTypeLocal:
+			return s.readFromLocalContext(filepath)
+		case builddef.ContextTypeGit:
+			return s.readFromGitContext(ctx, c, filepath)
+		}
+
+		return []byte{}, xerrors.Errorf(
+			"context type %q is not supported", string(c.Type))
 	}
+}
+
+func (s DockerSolver) readFromLocalContext(filepath string) ([]byte, error) {
+	fullpath := path.Join(s.RootDir, filepath)
+	raw, err := ioutil.ReadFile(fullpath)
+	if os.IsNotExist(err) {
+		return raw, xerrors.Errorf("failed to read %s from build context: %w", filepath, FileNotFound)
+	} else if err != nil {
+		return raw, xerrors.Errorf("failed to read %s from build context: %w", filepath, err)
+	}
+
+	return raw, nil
+}
+
+func (s DockerSolver) readFromGitContext(
+	ctx context.Context,
+	c *builddef.Context,
+	filepath string,
+) ([]byte, error) {
+	repoURI := normalizeRepoURI(c)
+	sourceRef := sourceRefOrHead(c)
+	// git show fails when the filepath starts with a slash.
+	filepath = strings.TrimPrefix(filepath, "/")
+
+	outbuf, err := s.ExecImage(ctx, imageGit, []string{
+		fmt.Sprintf("git clone --depth 1 %s /tmp/repo 1>/dev/null 2>&1", repoURI),
+		"cd /tmp/repo",
+		fmt.Sprintf("git show %s:%s", sourceRef, filepath)})
+	if err != nil {
+		return []byte{}, xerrors.Errorf(
+			"failed to read file from git context: %w", err)
+	}
+
+	out := outbuf.Bytes()
+	logrus.Debugf("Reading %s from git context: %s", filepath, string(out))
+
+	return out, nil
 }
 
 func (s DockerSolver) FromImage(image string) ReadFileOpt {

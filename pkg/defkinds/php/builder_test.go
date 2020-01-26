@@ -228,11 +228,78 @@ func initBuildProdStageFromGitBasedBuildContextTC(t *testing.T, mockCtrl *gomock
 	}
 }
 
+func initBuildProdStageFromGitBasedSourceContextTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
+	genericDef := loadGenericDef(t, "testdata/build/with-git-based-source-context.yml")
+	genericDef.RawLocks = loadDefLocks(t, "testdata/build/with-git-based-source-context.lock")
+
+	solver := mocks.NewMockStateSolver(mockCtrl)
+
+	raw := loadRawTestdata(t, "testdata/build/composer.lock")
+	solver.EXPECT().FromContext(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(1)
+	solver.EXPECT().ReadFile(
+		gomock.Any(), "composer.lock", gomock.Any(),
+	).Return(raw, nil)
+
+	kindHandler := php.NewPHPHandler()
+	kindHandler.WithSolver(solver)
+
+	return buildTC{
+		handler: kindHandler,
+		client:  llbtest.NewMockClient(mockCtrl),
+		buildOpts: builddef.BuildOpts{
+			Def:           &genericDef,
+			Stage:         "prod",
+			SessionID:     "<SESSION-ID>",
+			LocalUniqueID: "x1htr02606a9rk8b0daewh9es",
+			BuildContext: &builddef.Context{
+				Source: "context",
+				Type:   builddef.ContextTypeLocal,
+			},
+		},
+		expectedState: "testdata/build/with-git-based-source-context.json",
+		expectedImage: &image.Image{
+			Image: specs.Image{
+				Architecture: "amd64",
+				OS:           "linux",
+				RootFS: specs.RootFS{
+					Type: "layers",
+				},
+			},
+			Config: image.ImageConfig{
+				ImageConfig: specs.ImageConfig{
+					User: "1000",
+					Env: []string{
+						"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+						"COMPOSER_HOME=/composer",
+						"PHP_VERSION=7.3.13",
+						"PHP_INI_DIR=/usr/local/etc/php",
+					},
+					Entrypoint: []string{"docker-php-entrypoint"},
+					Cmd:        []string{"php-fpm"},
+					WorkingDir: "/app",
+					StopSignal: "SIGQUIT",
+					Volumes:    map[string]struct{}{},
+					ExposedPorts: map[string]struct{}{
+						"9000/tcp": {},
+					},
+					Labels: map[string]string{
+						"io.zbuild": "true",
+					},
+				},
+				Healthcheck: &image.HealthConfig{
+					Test: []string{"NONE"},
+				},
+			},
+		},
+	}
+}
+
 func TestBuild(t *testing.T) {
 	testcases := map[string]func(*testing.T, *gomock.Controller) buildTC{
-		"build LLB DAG for dev stage":                   initBuildLLBForDevStageTC,
-		"build LLB DAG for prod stage":                  initBuildLLBForProdStageTC,
-		"build prod stage from git-based build context": initBuildProdStageFromGitBasedBuildContextTC,
+		"build LLB DAG for dev stage":                    initBuildLLBForDevStageTC,
+		"build LLB DAG for prod stage":                   initBuildLLBForProdStageTC,
+		"build prod stage from git-based build context":  initBuildProdStageFromGitBasedBuildContextTC,
+		"build prod stage from git-based source context": initBuildProdStageFromGitBasedSourceContextTC,
 	}
 
 	for tcname := range testcases {

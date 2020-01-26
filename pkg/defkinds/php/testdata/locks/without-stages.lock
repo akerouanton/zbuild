@@ -1,4 +1,5 @@
 base_image: docker.io/library/php:7.3-fpm-buster@sha256
+source_context: null
 stages:
   dev:
     extensions:

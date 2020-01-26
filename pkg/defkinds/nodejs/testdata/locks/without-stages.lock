@@ -1,4 +1,5 @@
 base: docker.io/library/node:12-buster-slim@sha256
+source_context: null
 stages:
   dev:
     system_packages:

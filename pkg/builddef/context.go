@@ -93,6 +93,14 @@ func (c *Context) IsValid() error {
 	return nil
 }
 
+func (c *Context) RawLocks() map[string]interface{} {
+	return map[string]interface{}{
+		"type":      c.Type,
+		"source":    c.Source,
+		"reference": c.Reference,
+	}
+}
+
 func (c *Context) IsGitContext() bool {
 	return c != nil && c.Type == ContextTypeGit
 }

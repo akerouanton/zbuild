@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"strings"
 
+	"github.com/NiR-/zbuild/pkg/builddef"
 	"github.com/NiR-/zbuild/pkg/statesolver"
 	"github.com/moby/buildkit/client/llb"
 	"golang.org/x/xerrors"
@@ -19,12 +20,19 @@ type composerLock struct {
 // packages and packages-dev (if stageDef is dev) to stageDef.LockedPackages.
 // Also it adds extensions listed in platform-reqs key to stageDef.PlatformReqs.
 // It returns nil if the composer.lock file couldn't be found.
+// @TODO: move to PHPHandler
 func LoadComposerLock(
 	ctx context.Context,
 	solver statesolver.StateSolver,
 	stageDef *StageDefinition,
+	buildContext *builddef.Context,
 ) error {
-	composerSrc := solver.FromContext(stageDef.DefLocks.SourceContext,
+	sourceContext := stageDef.DefLocks.SourceContext
+	if sourceContext == nil {
+		sourceContext = buildContext
+	}
+
+	composerSrc := solver.FromContext(sourceContext,
 		llb.IncludePatterns([]string{"composer.json", "composer.lock"}),
 		llb.SharedKeyHint(SharedKeys.ComposerFiles),
 		llb.WithCustomName("load composer files from build context"))
