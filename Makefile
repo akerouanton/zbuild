@@ -20,9 +20,8 @@ build:
 
 .PHONY: test
 test:
-	# $(GOTEST) -v -cover -coverprofile cover.out ./...
-	$(GOTEST) -v ./...
-	# go tool cover -o cover.html -html=cover.out
+	$(GOTEST) -v -cover -coverprofile cover.out ./...
+	go tool cover -o cover.html -html=cover.out
 
 .PHONY: gen-mocks
 gen-mocks:
