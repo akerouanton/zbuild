@@ -81,7 +81,7 @@ func initBuildLLBTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
 					},
 				},
 				Healthcheck: &image.HealthConfig{
-					Test:     []string{"CMD-SHELL", "test \"$(curl --fail http://127.0.0.1/_status)\" = \"pong\""},
+					Test:     []string{"CMD-SHELL", "test \"$(curl --fail http://127.0.0.1/_ping)\" = \"pong\""},
 					Interval: 10 * time.Second,
 					Timeout:  1 * time.Second,
 					Retries:  3,
@@ -142,7 +142,7 @@ func initBuildLLBFromGitContextTC(t *testing.T, mockCtrl *gomock.Controller) bui
 					},
 				},
 				Healthcheck: &image.HealthConfig{
-					Test:     []string{"CMD-SHELL", "test \"$(curl --fail http://127.0.0.1/_status)\" = \"pong\""},
+					Test:     []string{"CMD-SHELL", "test \"$(curl --fail http://127.0.0.1/_ping)\" = \"pong\""},
 					Interval: 10 * time.Second,
 					Timeout:  1 * time.Second,
 					Retries:  3,

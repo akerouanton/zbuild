@@ -105,12 +105,7 @@ func setImageMetadata(
 	img *image.Image,
 ) {
 	if def.Healthcheck.IsEnabled() {
-		img.Config.Healthcheck = &image.HealthConfig{
-			Test:     []string{"CMD-SHELL", "test \"$(curl --fail http://127.0.0.1/_status)\" = \"pong\""},
-			Interval: 10 * time.Second,
-			Timeout:  1 * time.Second,
-			Retries:  3,
-		}
+		img.Config.Healthcheck = def.Healthcheck.ToImageConfig()
 	}
 
 	// Use SIGSTOP to gracefully stop nginx

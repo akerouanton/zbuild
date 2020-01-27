@@ -72,7 +72,7 @@ config_file: nginx.conf
 Whether the image should have a preconfigured healthcheck. It automatically
 adds curl to the list of system packages to install but you still have to
 properly configure your webserver to expose a ping/pong healthcheck on
-`/_status` (the endpoint used is not configurable).
+`/_ping` (the endpoint used is not configurable).
 
 Example `nginx.conf`:
 
@@ -80,12 +80,11 @@ Example `nginx.conf`:
 server {
     # ...
 
-    location = /_status {
-        stub_status;
+    location = /_ping {
         access_log off;
-
         allow 127.0.0.1;
         deny all;
+        return 200 "pong";
     }
 }
 ```

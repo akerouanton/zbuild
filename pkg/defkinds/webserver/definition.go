@@ -20,7 +20,8 @@ func DefaultDefinition() Definition {
 
 var defaultHealthcheck = builddef.HealthcheckConfig{
 	HealthcheckHTTP: &builddef.HealthcheckHTTP{
-		Path: "/_status",
+		Path:     "/_ping",
+		Expected: "pong",
 	},
 	Type:     builddef.HealthcheckTypeHTTP,
 	Interval: 10 * time.Second,
