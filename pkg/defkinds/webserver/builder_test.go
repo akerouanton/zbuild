@@ -62,7 +62,6 @@ func initBuildLLBTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
 			},
 			Config: image.ImageConfig{
 				ImageConfig: specs.ImageConfig{
-					User: "1000",
 					Env: []string{
 						"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
 						"NGINX_VERSION=1.17.7",
@@ -124,7 +123,6 @@ func initBuildLLBFromGitContextTC(t *testing.T, mockCtrl *gomock.Controller) bui
 			},
 			Config: image.ImageConfig{
 				ImageConfig: specs.ImageConfig{
-					User: "1000",
 					Env: []string{
 						"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
 						"NGINX_VERSION=1.17.7",

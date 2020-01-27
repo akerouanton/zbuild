@@ -13,7 +13,7 @@ import (
 	"golang.org/x/xerrors"
 )
 
-var fileOwner = "1000"
+var fileOwner = "nginx"
 var SharedKeys = struct {
 	ConfigFile string
 }{
@@ -115,7 +115,6 @@ func setImageMetadata(
 
 	// Use SIGSTOP to gracefully stop nginx
 	img.Config.StopSignal = "SIGSTOP"
-	img.Config.User = "1000"
 	now := time.Now()
 	img.Created = &now
 }
