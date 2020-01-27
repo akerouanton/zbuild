@@ -23,6 +23,7 @@ type DefinitionLocks struct {
 func (l DefinitionLocks) RawLocks() map[string]interface{} {
 	lockdata := map[string]interface{}{
 		"base_image":     l.BaseImage,
+		"extension_dir":  l.ExtensionDir,
 		"source_context": nil,
 	}
 
