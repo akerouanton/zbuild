@@ -56,6 +56,70 @@
     }
   },
   {
+    "RawOp": "CkkKR3NoYTI1Njo3Yzg1N2Q0NjIzNmY0OTFjOThlODVlZjJjY2MzNTUzZGRkNjc0OWI0YjE3MTBkOTYyOWVjMzliNTgwOWU2YWE5CkkKR3NoYTI1Njo3MTUxNzNjYTE5MmM2ZTViYTI1ZjVjMDNiNTgyNTA2ZDA1NGVmZWMyNzI3N2JjOTk1NjBhODgyODdiYzc0YTZiIkISQBABIjwKBS8uZW52EgkvYXBwLy5lbnYaCgoDEOgHEgMQ6Acg////////////ASgBMAFAAUgBWP///////////wFSDgoFYW1kNjQSBWxpbnV4WgA=",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:7c857d46236f491c98e85ef2ccc3553ddd6749b4b1710d9629ec39b5809e6aa9",
+          "index": 0
+        },
+        {
+          "digest": "sha256:715173ca192c6e5ba25f5c03b582506d054efec27277bc99560a88287bc74a6b",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "File": {
+          "actions": [
+            {
+              "input": 0,
+              "secondaryInput": 1,
+              "output": 0,
+              "Action": {
+                "Copy": {
+                  "src": "/.env",
+                  "dest": "/app/.env",
+                  "owner": {
+                    "user": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    },
+                    "group": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    }
+                  },
+                  "mode": -1,
+                  "followSymlink": true,
+                  "dirCopyContents": true,
+                  "createDestPath": true,
+                  "allowWildcard": true,
+                  "timestamp": -1
+                }
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:36f13e63bed29fda3d72a20951d3dbe2df2b819a75d160cad6fbdcb2e781d252",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Copy .env"
+      },
+      "caps": {
+        "file.base": true
+      }
+    }
+  },
+  {
     "RawOp": "Gn4KfGRvY2tlci1pbWFnZTovL2RvY2tlci5pby9saWJyYXJ5L25vZGU6MTItYnVzdGVyLXNsaW1Ac2hhMjU2OjRkMTAxNmVlZmM0ZTZkYzUyYmE5YmU2NTUwZGNiMjVhNmUxODI2MTE3NTA3ZTY1ZWRhMzY1MGQ2ZWIxOWYwNDJSDgoFYW1kNjQSBWxpbnV4WgA=",
     "Op": {
       "Op": {
@@ -130,6 +194,34 @@
     }
   },
   {
+    "RawOp": "GngKD2xvY2FsOi8vY29udGV4dBIgChRsb2NhbC5pbmNsdWRlcGF0dGVybhIIWyIuZW52Il0SHQoNbG9jYWwuc2Vzc2lvbhIMPFNFU1NJT04tSUQ+EiQKE2xvY2FsLnNoYXJlZGtleWhpbnQSDWJ1aWxkLWNvbnRleHRaAA==",
+    "Op": {
+      "Op": {
+        "Source": {
+          "identifier": "local://context",
+          "attrs": {
+            "local.includepattern": "[\".env\"]",
+            "local.session": "\u003cSESSION-ID\u003e",
+            "local.sharedkeyhint": "build-context"
+          }
+        }
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:715173ca192c6e5ba25f5c03b582506d054efec27277bc99560a88287bc74a6b",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "load config files"
+      },
+      "caps": {
+        "source.local": true,
+        "source.local.includepatterns": true,
+        "source.local.sessionid": true,
+        "source.local.sharedkeyhint": true
+      }
+    }
+  },
+  {
     "RawOp": "CkkKR3NoYTI1Njo1Nzk3NmZjZmQxMzMzMDhiODE0MGEyMzBhNjRiMjAyOTQ1NDFkMzEzNWRmMTJjMGZjMzkzNjIzMTlmZDA2ZDU1CkkKR3NoYTI1NjplNjI1YjNlMGRmNmE4ZGVlZWNjMzg0MmJjMDFjZjI0N2NmODgyMmE3Y2E2MmMyMjc4NzljYTU3NGUxZThiNDMzIjkSNxABIjMKAS8SBC9hcHAaCgoDEOgHEgMQ6Acg////////////ASgBMAFAAUgBWP///////////wFSDgoFYW1kNjQSBWxpbnV4WgA=",
     "Op": {
       "inputs": [
@@ -194,26 +286,6 @@
     }
   },
   {
-    "RawOp": "CkkKR3NoYTI1Njo3Yzg1N2Q0NjIzNmY0OTFjOThlODVlZjJjY2MzNTUzZGRkNjc0OWI0YjE3MTBkOTYyOWVjMzliNTgwOWU2YWE5",
-    "Op": {
-      "inputs": [
-        {
-          "digest": "sha256:7c857d46236f491c98e85ef2ccc3553ddd6749b4b1710d9629ec39b5809e6aa9",
-          "index": 0
-        }
-      ],
-      "Op": null
-    },
-    "Digest": "sha256:7f93a4bdfd2bf077b3492dc052ca502f97bd3d6a399c14c0e0bf871acf96383c",
-    "OpMetadata": {
-      "caps": {
-        "constraints": true,
-        "meta.description": true,
-        "platform": true
-      }
-    }
-  },
-  {
     "RawOp": "CkkKR3NoYTI1NjowZDM2N2YxMGNlYzQ2MTBlMzA4MjFmMmMzYTg0Y2U2MTkzMWIyYjhhOWYzMzY2ZGQwMDY5MDM5YjViMjVkNDY3CkkKR3NoYTI1NjplNjI1YjNlMGRmNmE4ZGVlZWNjMzg0MmJjMDFjZjI0N2NmODgyMmE3Y2E2MmMyMjc4NzljYTU3NGUxZThiNDMzIkYSRBABIkAKDS9wYWNrYWdlLmpzb24SBS9hcHAvGgoKAxDoBxIDEOgHIP///////////wEoATABQAFIAVj///////////8BUg4KBWFtZDY0EgVsaW51eFoA",
     "Op": {
       "inputs": [
@@ -274,6 +346,26 @@
       },
       "caps": {
         "file.base": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1NjozNmYxM2U2M2JlZDI5ZmRhM2Q3MmEyMDk1MWQzZGJlMmRmMmI4MTlhNzVkMTYwY2FkNmZiZGNiMmU3ODFkMjUy",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:36f13e63bed29fda3d72a20951d3dbe2df2b819a75d160cad6fbdcb2e781d252",
+          "index": 0
+        }
+      ],
+      "Op": null
+    },
+    "Digest": "sha256:b215163811274c765453a3dcf01200b2820f2df00509a5d1a2e6ba275231e440",
+    "OpMetadata": {
+      "caps": {
+        "constraints": true,
+        "meta.description": true,
+        "platform": true
       }
     }
   },

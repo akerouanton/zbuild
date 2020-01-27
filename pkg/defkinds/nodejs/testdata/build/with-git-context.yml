@@ -9,4 +9,7 @@ sources:
   - src/
   - public/
 
+config_files:
+  .env: .env
+
 healthcheck: false

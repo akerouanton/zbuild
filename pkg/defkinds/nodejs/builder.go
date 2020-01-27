@@ -106,6 +106,7 @@ func (h *NodeJSHandler) buildNodeJS(
 	if *stageDef.Dev == false {
 		state = h.yarnInstall(stageDef, state, buildOpts)
 		state = h.copySources(stageDef, state, buildOpts)
+		state = h.copyConfigFiles(stageDef, state, buildOpts)
 		state = h.build(stageDef, state)
 	}
 
@@ -218,6 +219,40 @@ func (h *NodeJSHandler) copySources(
 		llb.WithCustomName("load build context"))
 
 	return llbutils.Copy(src, "/", state, "/app", "1000:1000")
+}
+
+func (h *NodeJSHandler) copyConfigFiles(
+	stageDef StageDefinition,
+	state llb.State,
+	buildOpts builddef.BuildOpts,
+) llb.State {
+	if len(stageDef.ConfigFiles) == 0 {
+		return state
+	}
+
+	include := []string{}
+	for _, srcfile := range stageDef.ConfigFiles {
+		include = append(include, srcfile)
+	}
+
+	srcState := llbutils.FromContext(buildOpts.BuildContext,
+		llb.IncludePatterns(include),
+		llb.LocalUniqueID(buildOpts.LocalUniqueID),
+		llb.SessionID(buildOpts.SessionID),
+		llb.SharedKeyHint(SharedKeys.BuildContext),
+		llb.WithCustomName("load config files"))
+
+	// Despite the IncludePatterns() above, the source state might also
+	// contain files that were not including, for instance if the conext is
+	// non-local. However, including precise patterns help buildkit determine
+	// if the cache is fresh (when using a local context). As such, we can't
+	// just copy the whole source state to the dest state.
+	for dest, srcfile := range stageDef.ConfigFiles {
+		destfile := path.Join("/app", dest)
+		state = llbutils.Copy(srcState, srcfile, state, destfile, "1000:1000")
+	}
+
+	return state
 }
 
 func resolveSourceContext(
