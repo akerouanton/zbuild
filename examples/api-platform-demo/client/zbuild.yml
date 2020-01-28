@@ -1,0 +1,25 @@
+# syntax=akerouanton/zbuilder:200126-30
+kind: nodejs
+version: 12
+
+frontend: true
+build_command: yarn build
+
+source_context:
+  type: git
+  source: github.com/api-platform/demo
+  path: client
+
+sources:
+  - src/
+  - public/
+
+config_files:
+  .env: .env
+
+webserver:
+  type: nginx
+  config_file: nginx.conf
+  assets:
+    - from: build/
+      to: /app/build

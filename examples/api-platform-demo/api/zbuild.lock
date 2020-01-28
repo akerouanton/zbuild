@@ -1,0 +1,58 @@
+base_image: docker.io/library/php:7.3-fpm-buster@sha256:851a0eba027503c335b832a5925ed245433903245c76fbe75e3dd17572d0db28
+extension_dir: /usr/local/lib/php/extensions/no-debug-non-zts-20180731
+source_context:
+  path: api
+  reference: 5ecd2177087afbcce8f88ddfedbc7b95e738d961
+  source: github.com/api-platform/demo
+  type: git
+stages:
+  consumer:
+    extensions:
+      apcu: 5.1.17
+      intl: '*'
+      opcache: '*'
+      pdo_pgsql: '*'
+      zip: '*'
+    system_packages:
+      git: 1:2.20.1-2+deb10u1
+      libicu-dev: 63.1-6
+      libpcre3-dev: 2:8.39-12
+      libpq-dev: 11.5-1+deb10u1
+      libxml2-dev: 2.9.4+dfsg1-7+b3
+      libzip-dev: 1.5.1-4
+      unzip: 6.0-23+deb10u1
+      zlib1g-dev: 1:1.2.11.dfsg-1
+  dev:
+    extensions:
+      intl: '*'
+      pdo_pgsql: '*'
+      zip: '*'
+    system_packages:
+      git: 1:2.20.1-2+deb10u1
+      libicu-dev: 63.1-6
+      libpcre3-dev: 2:8.39-12
+      libpq-dev: 11.5-1+deb10u1
+      libxml2-dev: 2.9.4+dfsg1-7+b3
+      libzip-dev: 1.5.1-4
+      unzip: 6.0-23+deb10u1
+      zlib1g-dev: 1:1.2.11.dfsg-1
+  prod:
+    extensions:
+      apcu: 5.1.17
+      intl: '*'
+      opcache: '*'
+      pdo_pgsql: '*'
+      zip: '*'
+    system_packages:
+      git: 1:2.20.1-2+deb10u1
+      libicu-dev: 63.1-6
+      libpcre3-dev: 2:8.39-12
+      libpq-dev: 11.5-1+deb10u1
+      libxml2-dev: 2.9.4+dfsg1-7+b3
+      libzip-dev: 1.5.1-4
+      unzip: 6.0-23+deb10u1
+      zlib1g-dev: 1:1.2.11.dfsg-1
+webserver:
+  base_image: docker.io/library/nginx:latest@sha256:70821e443be75ea38bdf52a974fd2271babd5875b2b1964f05025981c75a6717
+  system_packages:
+    curl: 7.64.0-4
