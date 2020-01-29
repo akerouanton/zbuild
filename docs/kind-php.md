@@ -20,7 +20,14 @@
   * [Stateful dirs - `<stateful_dirs>`](#stateful-dirs---stateful_dirs)
   * [Post install steps - `<post_install>`](#post-install-steps---post_install)
   * [Healthcheck - `<healthcheck>](#healthcheck---healthcheck)
-* [Example](#example)
+* [Full example](#full-example)
+
+A [full example](#full-example) is available at the end of this page, but you
+can also take a look at following examples:
+
+* [`symfony/demo`](/examples/symfony-demo/zbuild.yml)
+* [`api-platform/demo` - API](/examples/api-platform-demo/api/zbuild.yml)
+* [`laravel-backpack/demo`](/examples/laravel-backpack-demo/zbuild.yml)
 
 ## Multi-stages and dev builds
 
@@ -401,7 +408,7 @@ healthcheck:
 ping.path = /ping
 ```
 
-## Example
+## Full example
 
 ```yml
 # syntax=akerouanton/zbuilder:test3
