@@ -1,0 +1,42 @@
+base_image: docker.io/library/php:7.4-fpm-buster@sha256:d7b10a1c883c7ddbc59a8b8886bc5900e4c83a15891ec8a8e86cb2b60d070839
+extension_dir: /usr/local/lib/php/extensions/no-debug-non-zts-20190902
+source_context:
+  path: ""
+  reference: d94fcc81f81a72760a4ed759579afaf727d538f2
+  source: git://github.com/symfony/demo
+  type: git
+stages:
+  dev:
+    extensions:
+      intl: '*'
+      pdo_mysql: '*'
+      zip: '*'
+    system_packages:
+      git: 1:2.20.1-2+deb10u1
+      libicu-dev: 63.1-6
+      libpcre3-dev: 2:8.39-12
+      libsqlite3-dev: 3.27.2-3
+      libxml2-dev: 2.9.4+dfsg1-7+b3
+      libzip-dev: 1.5.1-4
+      unzip: 6.0-23+deb10u1
+      zlib1g-dev: 1:1.2.11.dfsg-1
+  prod:
+    extensions:
+      apcu: 5.1.18
+      intl: '*'
+      opcache: '*'
+      pdo_mysql: '*'
+      zip: '*'
+    system_packages:
+      git: 1:2.20.1-2+deb10u1
+      libicu-dev: 63.1-6
+      libpcre3-dev: 2:8.39-12
+      libsqlite3-dev: 3.27.2-3
+      libxml2-dev: 2.9.4+dfsg1-7+b3
+      libzip-dev: 1.5.1-4
+      unzip: 6.0-23+deb10u1
+      zlib1g-dev: 1:1.2.11.dfsg-1
+webserver:
+  base_image: docker.io/library/nginx:latest@sha256:70821e443be75ea38bdf52a974fd2271babd5875b2b1964f05025981c75a6717
+  system_packages:
+    curl: 7.64.0-4

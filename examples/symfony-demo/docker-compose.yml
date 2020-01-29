@@ -1,0 +1,21 @@
+version: '3.4'
+
+services:
+  php:
+    image: symfony-demo/php:latest
+    build:
+      dockerfile: zbuild.yml
+      context: .
+      target: prod
+    restart: on-failure
+    environment:
+      - APP_ENV=prod
+
+  nginx:
+    image: symfony-demo/nginx:latest
+    build:
+      dockerfile: zbuild.yml
+      context: .
+      target: webserver-prod
+    ports:
+      - "80:80"
