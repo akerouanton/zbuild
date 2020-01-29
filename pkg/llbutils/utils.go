@@ -8,6 +8,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/NiR-/zbuild/pkg/builddef"
 	"github.com/moby/buildkit/client/llb"
 	"github.com/moby/buildkit/client/llb/imagemetaresolver"
 	"github.com/moby/buildkit/frontend/gateway/client"
@@ -240,18 +241,16 @@ func CopyExternalFiles(state llb.State, externalFiles []ExternalFile) llb.State 
 	return state
 }
 
-func BuildContext(contextRef string, opts ...llb.LocalOption) llb.State {
-	if strings.HasPrefix(contextRef, "git://") {
-		return gitContext(contextRef)
+func FromContext(
+	context *builddef.Context,
+	opts ...llb.LocalOption,
+) llb.State {
+	switch context.Type {
+	case builddef.ContextTypeGit:
+		return llb.Git(context.Source, context.GitContext.Reference)
+	case builddef.ContextTypeLocal:
+		return llb.Local(context.Source, opts...)
 	}
-	return llb.Local(contextRef, opts...)
-}
 
-func gitContext(url string) llb.State {
-	parts := strings.SplitN(url, "#", 2)
-	ref := ""
-	if len(parts) == 2 {
-		ref = parts[1]
-	}
-	return llb.Git(parts[0], ref)
+	panic(fmt.Sprintf("Unsupported context type %q", string(context.Type)))
 }

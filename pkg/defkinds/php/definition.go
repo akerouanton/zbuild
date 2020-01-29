@@ -26,7 +26,7 @@ func (h *PHPHandler) loadDefs(
 	}
 
 	composerLockLoader := func(stageDef *StageDefinition) error {
-		return LoadComposerLock(ctx, h.solver, stageDef)
+		return LoadComposerLock(ctx, h.solver, stageDef, buildOpts.BuildContext)
 	}
 
 	stageDef, err = def.ResolveStageDefinition(buildOpts.Stage,
@@ -199,12 +199,18 @@ type Definition struct {
 	Infer         *bool           `mapstructure:"infer"`
 	Stages        DerivedStageSet `mapstructure:"stages"`
 
+	SourceContext *builddef.Context `mapstructure:"source_context"`
+
 	Locks DefinitionLocks `mapstructure:"-"`
 }
 
 func (def Definition) IsValid() error {
 	if def.Version != "" && def.BaseImage != "" {
 		return xerrors.Errorf("you can't specify version and base parameters at the same time")
+	}
+
+	if err := def.SourceContext.IsValid(); err != nil {
+		return err
 	}
 
 	allowedHCTypes := []string{"fcgi", "cmd"}
@@ -223,10 +229,11 @@ func (def Definition) IsValid() error {
 
 func (def Definition) Copy() Definition {
 	new := Definition{
-		BaseStage: def.BaseStage.Copy(),
-		BaseImage: def.BaseImage,
-		Version:   def.Version,
-		Stages:    def.Stages.Copy(),
+		BaseStage:     def.BaseStage.Copy(),
+		BaseImage:     def.BaseImage,
+		Version:       def.Version,
+		Stages:        def.Stages.Copy(),
+		SourceContext: def.SourceContext.Copy(),
 	}
 
 	if def.Infer != nil {
@@ -244,6 +251,7 @@ func (base Definition) Merge(overriding Definition) Definition {
 	new.Stages = new.Stages.Merge(overriding.Stages)
 	new.BaseImage = overriding.BaseImage
 	new.Version = overriding.Version
+	new.SourceContext = overriding.SourceContext.Copy()
 
 	if overriding.Infer != nil {
 		infer := *overriding.Infer
@@ -573,6 +581,9 @@ func (def *Definition) resolveStageChain(name string) ([]DerivedStage, error) {
 
 func extractMajMinVersion(versionString string) string {
 	segments := strings.SplitN(versionString, ".", 3)
+	if len(segments) == 1 {
+		return segments[0]
+	}
 	return fmt.Sprintf("%s.%s", segments[0], segments[1])
 }
 

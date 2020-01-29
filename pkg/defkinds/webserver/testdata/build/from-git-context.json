@@ -21,17 +21,17 @@
     }
   },
   {
-    "RawOp": "CkkKR3NoYTI1NjpmOTEwNmIxMDM4NDA0ZDY1OWU1ZmVmODEzOWUxMjRhNGE0ZTE3Y2UxNjBmMmQ1ZTdhYTAyZDA1MGJlOTA0MGRk",
+    "RawOp": "CkkKR3NoYTI1NjphN2RkNjM2ODY2ZjRlNmI5ODQ2MDU2ZDdmN2M1NjkzY2JjN2Y0NDgzNTM0YzA0ODY4Nzc4YTUxMjk0N2M4Mzcx",
     "Op": {
       "inputs": [
         {
-          "digest": "sha256:f9106b1038404d659e5fef8139e124a4a4e17ce160f2d5e7aa02d050be9040dd",
+          "digest": "sha256:a7dd636866f4e6b9846056d7f7c5693cbc7f4483534c04868778a512947c8371",
           "index": 0
         }
       ],
       "Op": null
     },
-    "Digest": "sha256:14390be9344ad9ab580d4562e5a890b6ba9cb3e98216285b3c49b129f70d9223",
+    "Digest": "sha256:2bd8ec297f3584c00c894deca0571f9c47601062d02bffe30fd43335c0cd3f5e",
     "OpMetadata": {
       "caps": {
         "constraints": true,
@@ -94,28 +94,7 @@
     }
   },
   {
-    "RawOp": "GncKdWRvY2tlci1pbWFnZTovL2RvY2tlci5pby9saWJyYXJ5L25naW54OmxhdGVzdEBzaGEyNTY6OGFhN2Y2YTk1ODVkOTA4YTYzZTVlNDE4ZGM1ZDE0YWU3NDY3ZDJlMzZlMWFiNGYwZDhmOWQwNTlhM2QwNzFjZVIOCgVhbWQ2NBIFbGludXhaAA==",
-    "Op": {
-      "Op": {
-        "Source": {
-          "identifier": "docker-image://docker.io/library/nginx:latest@sha256:8aa7f6a9585d908a63e5e418dc5d14ae7467d2e36e1ab4f0d8f9d059a3d071ce"
-        }
-      },
-      "platform": {
-        "Architecture": "amd64",
-        "OS": "linux"
-      },
-      "constraints": {}
-    },
-    "Digest": "sha256:f1d13bfbf3b80b36a28fad51285a26ab88e689e52b45df0a4e8cdb294db2194a",
-    "OpMetadata": {
-      "caps": {
-        "source.image": true
-      }
-    }
-  },
-  {
-    "RawOp": "CkkKR3NoYTI1Njo3ZTZiNWM3MTExMWM0MDgyOTAzZDc1MmNmNzlhYmRjZTAyZTBlMTI3N2ZkNGE5ZDJmYjA3NWM1YTAzMTNjNWZhCkkKR3NoYTI1NjowYzlkNGNhMWI4OTAxNTFhNmY5ZmVjMzhhMGMxZTk4MzJjYmRhNGZlNzMwZGQ1ZmVkNjY3YmMyMWI5ZjBhMmRmIlsSWRABIlUKEi9kb2NrZXIvbmdpbnguY29uZhIVL2V0Yy9uZ2lueC9uZ2lueC5jb25mGgoKAxDoBxIDEOgHIP///////////wEoATABQAFIAVj///////////8BUg4KBWFtZDY0EgVsaW51eFoA",
+    "RawOp": "CkkKR3NoYTI1Njo3ZTZiNWM3MTExMWM0MDgyOTAzZDc1MmNmNzlhYmRjZTAyZTBlMTI3N2ZkNGE5ZDJmYjA3NWM1YTAzMTNjNWZhCkkKR3NoYTI1NjowYzlkNGNhMWI4OTAxNTFhNmY5ZmVjMzhhMGMxZTk4MzJjYmRhNGZlNzMwZGQ1ZmVkNjY3YmMyMWI5ZjBhMmRmIlYSVBABIlAKEi9kb2NrZXIvbmdpbnguY29uZhIVL2V0Yy9uZ2lueC9uZ2lueC5jb25mGgUKAxDoByD///////////8BKAEwAUABSAFY////////////AVIOCgVhbWQ2NBIFbGludXhaAA==",
     "Op": {
       "inputs": [
         {
@@ -143,11 +122,6 @@
                       "User": {
                         "ByID": 1000
                       }
-                    },
-                    "group": {
-                      "User": {
-                        "ByID": 1000
-                      }
                     }
                   },
                   "mode": -1,
@@ -168,13 +142,34 @@
       },
       "constraints": {}
     },
-    "Digest": "sha256:f9106b1038404d659e5fef8139e124a4a4e17ce160f2d5e7aa02d050be9040dd",
+    "Digest": "sha256:a7dd636866f4e6b9846056d7f7c5693cbc7f4483534c04868778a512947c8371",
     "OpMetadata": {
       "description": {
         "llb.customname": "Copy ./docker/nginx.conf"
       },
       "caps": {
         "file.base": true
+      }
+    }
+  },
+  {
+    "RawOp": "GncKdWRvY2tlci1pbWFnZTovL2RvY2tlci5pby9saWJyYXJ5L25naW54OmxhdGVzdEBzaGEyNTY6OGFhN2Y2YTk1ODVkOTA4YTYzZTVlNDE4ZGM1ZDE0YWU3NDY3ZDJlMzZlMWFiNGYwZDhmOWQwNTlhM2QwNzFjZVIOCgVhbWQ2NBIFbGludXhaAA==",
+    "Op": {
+      "Op": {
+        "Source": {
+          "identifier": "docker-image://docker.io/library/nginx:latest@sha256:8aa7f6a9585d908a63e5e418dc5d14ae7467d2e36e1ab4f0d8f9d059a3d071ce"
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:f1d13bfbf3b80b36a28fad51285a26ab88e689e52b45df0a4e8cdb294db2194a",
+    "OpMetadata": {
+      "caps": {
+        "source.image": true
       }
     }
   }

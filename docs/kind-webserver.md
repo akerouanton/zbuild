@@ -22,7 +22,7 @@ healthcheck: <bool> # (default: true)
 assets: <assets>
 ```
 
-##### `webserver` - default: `nginx`
+##### `type` - default: `nginx`
 
 This parameter defines which webserver you want to use for this image. Only
 `nginx` is supported for now.

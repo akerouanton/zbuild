@@ -87,7 +87,7 @@ func NewKind(genericDef *builddef.BuildDef) (Definition, error) {
 		def.SystemPackages.Add("curl", "*")
 	}
 
-	return def, def.Validate()
+	return def, def.IsValid()
 }
 
 type Definition struct {
@@ -96,12 +96,13 @@ type Definition struct {
 	ConfigFile     *string                     `mapstructure:"config_file"`
 	Healthcheck    *builddef.HealthcheckConfig `mapstructure:"healthcheck"`
 	Assets         []AssetToCopy               `mapstructure:"assets"`
-	Locks          DefinitionLocks             `mapstructure:"-"`
+
+	Locks DefinitionLocks `mapstructure:"-"`
 }
 
-func (def Definition) Validate() error {
+func (def Definition) IsValid() error {
 	if def.Type.IsEmpty() {
-		return xerrors.New("webserver build manifest has no type nor base_image parameters.")
+		return xerrors.New("webserver definition has no type nor base_image parameters.")
 	}
 
 	if !def.Healthcheck.Type.IsValid([]string{"http", "cmd"}) {

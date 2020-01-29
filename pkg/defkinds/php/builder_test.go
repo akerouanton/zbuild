@@ -34,7 +34,7 @@ func initBuildLLBForDevStageTC(t *testing.T, mockCtrl *gomock.Controller) buildT
 	solver := mocks.NewMockStateSolver(mockCtrl)
 
 	raw := loadRawTestdata(t, "testdata/composer/composer-symfony4.4.lock")
-	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
+	solver.EXPECT().FromContext(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(1)
 	solver.EXPECT().ReadFile(
 		gomock.Any(), "composer.lock", gomock.Any(),
 	).Return(raw, nil)
@@ -50,7 +50,10 @@ func initBuildLLBForDevStageTC(t *testing.T, mockCtrl *gomock.Controller) buildT
 			Stage:         "dev",
 			SessionID:     "<SESSION-ID>",
 			LocalUniqueID: "x1htr02606a9rk8b0daewh9es",
-			ContextName:   "context",
+			BuildContext: &builddef.Context{
+				Source: "context",
+				Type:   builddef.ContextTypeLocal,
+			},
 		},
 		expectedState: "testdata/build/state-dev.json",
 		expectedImage: &image.Image{
@@ -94,7 +97,7 @@ func initBuildLLBForProdStageTC(t *testing.T, mockCtrl *gomock.Controller) build
 	solver := mocks.NewMockStateSolver(mockCtrl)
 
 	raw := loadRawTestdata(t, "testdata/composer/composer-symfony4.4.lock")
-	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
+	solver.EXPECT().FromContext(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(1)
 	solver.EXPECT().ReadFile(
 		gomock.Any(), "composer.lock", gomock.Any(),
 	).Return(raw, nil)
@@ -110,7 +113,10 @@ func initBuildLLBForProdStageTC(t *testing.T, mockCtrl *gomock.Controller) build
 			Stage:         "prod",
 			SessionID:     "<SESSION-ID>",
 			LocalUniqueID: "x1htr02606a9rk8b0daewh9es",
-			ContextName:   "context",
+			BuildContext: &builddef.Context{
+				Source: "context",
+				Type:   builddef.ContextTypeLocal,
+			},
 		},
 		expectedState: "testdata/build/state-prod.json",
 		expectedImage: &image.Image{
@@ -160,7 +166,7 @@ func initBuildProdStageFromGitBasedBuildContextTC(t *testing.T, mockCtrl *gomock
 	solver := mocks.NewMockStateSolver(mockCtrl)
 
 	raw := loadRawTestdata(t, "testdata/composer/composer-symfony4.4.lock")
-	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
+	solver.EXPECT().FromContext(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(1)
 	solver.EXPECT().ReadFile(
 		gomock.Any(), "composer.lock", gomock.Any(),
 	).Return(raw, nil)
@@ -176,7 +182,10 @@ func initBuildProdStageFromGitBasedBuildContextTC(t *testing.T, mockCtrl *gomock
 			Stage:         "prod",
 			SessionID:     "<SESSION-ID>",
 			LocalUniqueID: "x1htr02606a9rk8b0daewh9es",
-			ContextName:   "git://github.com/some/repo",
+			BuildContext: &builddef.Context{
+				Source: "git://github.com/some/repo",
+				Type:   builddef.ContextTypeGit,
+			},
 		},
 		expectedState: "testdata/build/from-git-context.json",
 		expectedImage: &image.Image{
@@ -219,11 +228,78 @@ func initBuildProdStageFromGitBasedBuildContextTC(t *testing.T, mockCtrl *gomock
 	}
 }
 
+func initBuildProdStageFromGitBasedSourceContextTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
+	genericDef := loadGenericDef(t, "testdata/build/with-git-based-source-context.yml")
+	genericDef.RawLocks = loadDefLocks(t, "testdata/build/with-git-based-source-context.lock")
+
+	solver := mocks.NewMockStateSolver(mockCtrl)
+
+	raw := loadRawTestdata(t, "testdata/build/composer.lock")
+	solver.EXPECT().FromContext(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(1)
+	solver.EXPECT().ReadFile(
+		gomock.Any(), "composer.lock", gomock.Any(),
+	).Return(raw, nil)
+
+	kindHandler := php.NewPHPHandler()
+	kindHandler.WithSolver(solver)
+
+	return buildTC{
+		handler: kindHandler,
+		client:  llbtest.NewMockClient(mockCtrl),
+		buildOpts: builddef.BuildOpts{
+			Def:           &genericDef,
+			Stage:         "prod",
+			SessionID:     "<SESSION-ID>",
+			LocalUniqueID: "x1htr02606a9rk8b0daewh9es",
+			BuildContext: &builddef.Context{
+				Source: "context",
+				Type:   builddef.ContextTypeLocal,
+			},
+		},
+		expectedState: "testdata/build/with-git-based-source-context.json",
+		expectedImage: &image.Image{
+			Image: specs.Image{
+				Architecture: "amd64",
+				OS:           "linux",
+				RootFS: specs.RootFS{
+					Type: "layers",
+				},
+			},
+			Config: image.ImageConfig{
+				ImageConfig: specs.ImageConfig{
+					User: "1000",
+					Env: []string{
+						"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+						"COMPOSER_HOME=/composer",
+						"PHP_VERSION=7.3.13",
+						"PHP_INI_DIR=/usr/local/etc/php",
+					},
+					Entrypoint: []string{"docker-php-entrypoint"},
+					Cmd:        []string{"php-fpm"},
+					WorkingDir: "/app",
+					StopSignal: "SIGQUIT",
+					Volumes:    map[string]struct{}{},
+					ExposedPorts: map[string]struct{}{
+						"9000/tcp": {},
+					},
+					Labels: map[string]string{
+						"io.zbuild": "true",
+					},
+				},
+				Healthcheck: &image.HealthConfig{
+					Test: []string{"NONE"},
+				},
+			},
+		},
+	}
+}
+
 func TestBuild(t *testing.T) {
 	testcases := map[string]func(*testing.T, *gomock.Controller) buildTC{
-		"build LLB DAG for dev stage":                   initBuildLLBForDevStageTC,
-		"build LLB DAG for prod stage":                  initBuildLLBForProdStageTC,
-		"build prod stage from git-based build context": initBuildProdStageFromGitBasedBuildContextTC,
+		"build LLB DAG for dev stage":                    initBuildLLBForDevStageTC,
+		"build LLB DAG for prod stage":                   initBuildLLBForProdStageTC,
+		"build prod stage from git-based build context":  initBuildProdStageFromGitBasedBuildContextTC,
+		"build prod stage from git-based source context": initBuildProdStageFromGitBasedSourceContextTC,
 	}
 
 	for tcname := range testcases {
@@ -287,7 +363,7 @@ func initDebugDevStageTC(t *testing.T, mockCtrl *gomock.Controller) debugConfigT
 	solver := mocks.NewMockStateSolver(mockCtrl)
 
 	raw := loadRawTestdata(t, "testdata/debug-config/composer.lock")
-	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
+	solver.EXPECT().FromContext(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(1)
 	solver.EXPECT().ReadFile(
 		gomock.Any(), "composer.lock", gomock.Any(),
 	).Return(raw, nil)
@@ -312,7 +388,7 @@ func initDebugProdStageTC(t *testing.T, mockCtrl *gomock.Controller) debugConfig
 	solver := mocks.NewMockStateSolver(mockCtrl)
 
 	raw := loadRawTestdata(t, "testdata/debug-config/composer.lock")
-	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
+	solver.EXPECT().FromContext(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(1)
 	solver.EXPECT().ReadFile(
 		gomock.Any(), "composer.lock", gomock.Any(),
 	).Return(raw, nil)

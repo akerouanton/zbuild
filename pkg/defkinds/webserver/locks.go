@@ -24,9 +24,9 @@ func (l DefinitionLocks) RawLocks() map[string]interface{} {
 func (h *WebserverHandler) UpdateLocks(
 	ctx context.Context,
 	pkgSolver pkgsolver.PackageSolver,
-	genericDef *builddef.BuildDef,
+	buildOpts builddef.BuildOpts,
 ) (builddef.Locks, error) {
-	def, err := NewKind(genericDef)
+	def, err := NewKind(buildOpts.Def)
 	if err != nil {
 		return nil, err
 	}

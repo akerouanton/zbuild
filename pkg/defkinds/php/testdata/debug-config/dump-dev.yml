@@ -218,6 +218,7 @@ deflocks:
   baseimage: docker.io/library/php:7.3-fpm-buster
   extensiondir: /usr/local/lib/php/extensions/no-debug-non-zts-20180731/
   stages: {}
+  sourcecontext: null
 stagelocks:
   systempackages:
     git: 1:2.20.1-2+deb10u1

@@ -4,12 +4,14 @@ import (
 	"archive/tar"
 	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
 	"path"
 	"strings"
 
+	"github.com/NiR-/zbuild/pkg/builddef"
 	"github.com/containerd/containerd/remotes"
 	"github.com/docker/distribution/reference"
 	"github.com/docker/docker/api/types"
@@ -44,7 +46,6 @@ func (s DockerSolver) ExecImage(
 		"-c", strcmd,
 	}
 
-	// @TODO: add a flag to DockerSolver to not pull images each and every time
 	err := s.pullImage(ctx, imageRef)
 	if err != nil {
 		return nil, xerrors.Errorf(
@@ -131,17 +132,59 @@ func (s DockerSolver) ReadFile(
 	return opt(ctx, filepath)
 }
 
-func (s DockerSolver) FromBuildContext(opts ...llb.LocalOption) ReadFileOpt {
+func (s DockerSolver) FromContext(c *builddef.Context, _ ...llb.LocalOption) ReadFileOpt {
 	return func(ctx context.Context, filepath string) ([]byte, error) {
-		fullpath := path.Join(s.RootDir, filepath)
-		raw, err := ioutil.ReadFile(fullpath)
-		if os.IsNotExist(err) {
-			return raw, xerrors.Errorf("failed to read %s from build context: %w", filepath, FileNotFound)
-		} else if err != nil {
-			return raw, xerrors.Errorf("failed to read %s from build context: %w", filepath, err)
+		if c == nil {
+			return []byte{}, nil
 		}
-		return raw, nil
+
+		switch c.Type {
+		case builddef.ContextTypeLocal:
+			return s.readFromLocalContext(filepath)
+		case builddef.ContextTypeGit:
+			return s.readFromGitContext(ctx, c, filepath)
+		}
+
+		return []byte{}, xerrors.Errorf(
+			"context type %q is not supported", string(c.Type))
 	}
+}
+
+func (s DockerSolver) readFromLocalContext(filepath string) ([]byte, error) {
+	fullpath := path.Join(s.RootDir, filepath)
+	raw, err := ioutil.ReadFile(fullpath)
+	if os.IsNotExist(err) {
+		return raw, xerrors.Errorf("failed to read %s from build context: %w", filepath, FileNotFound)
+	} else if err != nil {
+		return raw, xerrors.Errorf("failed to read %s from build context: %w", filepath, err)
+	}
+
+	return raw, nil
+}
+
+func (s DockerSolver) readFromGitContext(
+	ctx context.Context,
+	c *builddef.Context,
+	filepath string,
+) ([]byte, error) {
+	repoURI := normalizeRepoURI(c)
+	sourceRef := sourceRefOrHead(c)
+	// git show fails when the filepath starts with a slash.
+	filepath = strings.TrimPrefix(filepath, "/")
+
+	outbuf, err := s.ExecImage(ctx, imageGit, []string{
+		fmt.Sprintf("git clone --depth 1 %s /tmp/repo 1>/dev/null 2>&1", repoURI),
+		"cd /tmp/repo",
+		fmt.Sprintf("git show %s:%s", sourceRef, filepath)})
+	if err != nil {
+		return []byte{}, xerrors.Errorf(
+			"failed to read file from git context: %w", err)
+	}
+
+	out := outbuf.Bytes()
+	logrus.Debugf("Reading %s from git context: %s", filepath, string(out))
+
+	return out, nil
 }
 
 func (s DockerSolver) FromImage(image string) ReadFileOpt {
@@ -174,6 +217,8 @@ func (s DockerSolver) readFromContainer(
 	filepath string,
 ) ([]byte, error) {
 	var res []byte
+
+	logrus.Debugf("Reading file %s from container %s", filepath, cid)
 
 	r, _, err := s.Client.CopyFromContainer(ctx, cid, filepath)
 	if err != nil {
@@ -214,17 +259,27 @@ func (s DockerSolver) readFromContainer(
 
 func (s DockerSolver) pullImage(ctx context.Context, image string) error {
 	_, _, err := s.Client.ImageInspectWithRaw(ctx, image)
-	if client.IsErrNotFound(err) {
-		var r io.ReadCloser
-		r, err = s.Client.ImagePull(ctx, image, types.ImagePullOptions{
-			// @TODO: add support for authenticated registries/private images
-			Platform: "amd64",
-		})
-		if err == nil {
-			defer r.Close()
-			_, err = ioutil.ReadAll(r)
-		}
+	// Don't pull agin if the image already exists
+	if err == nil {
+		return nil
 	}
+	if !client.IsErrNotFound(err) {
+		return err
+	}
+
+	logrus.Debugf("Pulling %s", image)
+
+	var r io.ReadCloser
+	r, err = s.Client.ImagePull(ctx, image, types.ImagePullOptions{
+		// @TODO: add support for authenticated registries/private images
+		Platform: "amd64",
+	})
+	if err != nil {
+		return err
+	}
+	defer r.Close()
+
+	_, err = ioutil.ReadAll(r)
 	return err
 }
 
@@ -233,6 +288,8 @@ func (s DockerSolver) createContainer(
 	image string,
 	cmd []string,
 ) (string, error) {
+	logrus.Debugf("Creating container from image %s", image)
+
 	cfg := container.Config{
 		Image:  image,
 		Cmd:    cmd,
@@ -240,10 +297,12 @@ func (s DockerSolver) createContainer(
 	}
 	hostCfg := container.HostConfig{}
 	networkCfg := network.NetworkingConfig{}
+
 	resp, err := s.Client.ContainerCreate(ctx, &cfg, &hostCfg, &networkCfg, "")
 	if err != nil {
 		return "", xerrors.Errorf("could not create container: %w", err)
 	}
+
 	return resp.ID, nil
 }
 

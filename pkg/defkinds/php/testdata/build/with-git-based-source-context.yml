@@ -1,0 +1,19 @@
+kind: php
+fpm: true
+version: 7.3.13
+
+source_context:
+  type: git
+  source: github.com/api-platform/demo
+
+sources:
+  - bin/console
+  - config/
+  - fixtures/
+  - public/
+  - src/
+
+config_files:
+  php.ini: php.ini
+
+healthcheck: false

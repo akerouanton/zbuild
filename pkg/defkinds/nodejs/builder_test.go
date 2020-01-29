@@ -41,7 +41,10 @@ func initBuildLLBForDevStageTC(t *testing.T, mockCtrl *gomock.Controller) buildT
 			Stage:         "dev",
 			SessionID:     "<SESSION-ID>",
 			LocalUniqueID: "x1htr02606a9rk8b0daewh9es",
-			ContextName:   "context",
+			BuildContext: &builddef.Context{
+				Source: "context",
+				Type:   builddef.ContextTypeLocal,
+			},
 		},
 		expectedState: "testdata/build/state-dev.json",
 		expectedImage: &image.Image{
@@ -88,7 +91,10 @@ func initBuildLLBForWorkerStageTC(t *testing.T, mockCtrl *gomock.Controller) bui
 			Stage:         "worker",
 			SessionID:     "<SESSION-ID>",
 			LocalUniqueID: "x1htr02606a9rk8b0daewh9es",
-			ContextName:   "context",
+			BuildContext: &builddef.Context{
+				Source: "context",
+				Type:   builddef.ContextTypeLocal,
+			},
 		},
 		expectedState: "testdata/build/state-worker.json",
 		expectedImage: &image.Image{
@@ -124,10 +130,64 @@ func initBuildLLBForWorkerStageTC(t *testing.T, mockCtrl *gomock.Controller) bui
 	}
 }
 
+func initBuildLLBWithGitSourceContexTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
+	genericDef := loadBuildDef(t, "testdata/build/with-git-context.yml")
+	genericDef.RawLocks = loadDefLocks(t, "testdata/build/with-git-context.lock")
+
+	solver := mocks.NewMockStateSolver(mockCtrl)
+	kindHandler := nodejs.NodeJSHandler{}
+	kindHandler.WithSolver(solver)
+
+	return buildTC{
+		handler: &kindHandler,
+		client:  llbtest.NewMockClient(mockCtrl),
+		buildOpts: builddef.BuildOpts{
+			Def:           genericDef,
+			Stage:         "prod",
+			SessionID:     "<SESSION-ID>",
+			LocalUniqueID: "x1htr02606a9rk8b0daewh9es",
+			BuildContext: &builddef.Context{
+				Source: "context",
+				Type:   builddef.ContextTypeLocal,
+			},
+		},
+		expectedState: "testdata/build/with-git-context.json",
+		expectedImage: &image.Image{
+			Image: specs.Image{
+				Architecture: "amd64",
+				OS:           "linux",
+				RootFS: specs.RootFS{
+					Type: "layers",
+				},
+			},
+			Config: image.ImageConfig{
+				ImageConfig: specs.ImageConfig{
+					User: "1000",
+					Env: []string{
+						"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+						"NODE_ENV=production",
+					},
+					Entrypoint: []string{"docker-entrypoint.sh"},
+					Cmd:        []string{"node"},
+					Volumes:    map[string]struct{}{},
+					WorkingDir: "/app",
+					Labels: map[string]string{
+						"io.zbuild": "true",
+					},
+				},
+				Healthcheck: &image.HealthConfig{
+					Test: []string{"NONE"},
+				},
+			},
+		},
+	}
+}
+
 func TestBuild(t *testing.T) {
 	testcases := map[string]func(*testing.T, *gomock.Controller) buildTC{
-		"build LLB DAG for dev stage":    initBuildLLBForDevStageTC,
-		"build LLB DAG for worker stage": initBuildLLBForWorkerStageTC,
+		"build LLB DAG for dev stage":           initBuildLLBForDevStageTC,
+		"build LLB DAG for worker stage":        initBuildLLBForWorkerStageTC,
+		"build LLB DAG with git source context": initBuildLLBWithGitSourceContexTC,
 	}
 
 	for tcname := range testcases {
@@ -264,7 +324,10 @@ func TestDebugConfig(t *testing.T) {
 
 			expected := loadRawTestdata(t, tc.expected)
 			if string(expected) != string(raw) {
-				t.Fatalf("Expected: %s\nGot: %s", expected, string(raw))
+				tempfile := newTempFile(t)
+				writeTestdata(t, tempfile, string(raw))
+
+				t.Fatalf("Expected: <%s>\nGot: <%s>", tc.expected, tempfile)
 			}
 		})
 	}

@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"testing"
 
+	"github.com/NiR-/zbuild/pkg/builddef"
 	"github.com/NiR-/zbuild/pkg/defkinds/php"
 	"github.com/NiR-/zbuild/pkg/mocks"
 	"github.com/NiR-/zbuild/pkg/statesolver"
@@ -25,7 +26,7 @@ func initSuccessfullyLoadAndParseComposerLockTC(
 	mockCtrl *gomock.Controller,
 ) loadComposerLockTC {
 	solver := mocks.NewMockStateSolver(mockCtrl)
-	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
+	solver.EXPECT().FromContext(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(1)
 
 	raw := loadRawTestdata(t, "testdata/composer/valid/composer.lock")
 	solver.EXPECT().ReadFile(
@@ -57,7 +58,7 @@ func initSilentlyFailWhenComposerLockFileDoesNotExistTC(
 	mockCtrl *gomock.Controller,
 ) loadComposerLockTC {
 	solver := mocks.NewMockStateSolver(mockCtrl)
-	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
+	solver.EXPECT().FromContext(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(1)
 
 	solver.EXPECT().ReadFile(
 		gomock.Any(), "composer.lock", gomock.Any(),
@@ -81,7 +82,7 @@ func initFailToLoadBrokenComposerLockFileTC(
 	mockCtrl *gomock.Controller,
 ) loadComposerLockTC {
 	solver := mocks.NewMockStateSolver(mockCtrl)
-	solver.EXPECT().FromBuildContext(gomock.Any()).Times(1)
+	solver.EXPECT().FromContext(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(1)
 
 	raw := loadRawTestdata(t, "testdata/composer/broken/composer.lock")
 	solver.EXPECT().ReadFile(
@@ -119,7 +120,12 @@ func TestLoadComposerLock(t *testing.T) {
 			stage := tc.initial
 
 			ctx := context.Background()
-			err := php.LoadComposerLock(ctx, tc.solver, &stage)
+			buildContext := &builddef.Context{
+				Type:   builddef.ContextTypeLocal,
+				Source: "context",
+			}
+
+			err := php.LoadComposerLock(ctx, tc.solver, &stage, buildContext)
 			if tc.expectedErr != nil {
 				if err == nil || tc.expectedErr.Error() != err.Error() {
 					t.Fatalf("Expected error: %v\nGot: %v", tc.expectedErr, err)

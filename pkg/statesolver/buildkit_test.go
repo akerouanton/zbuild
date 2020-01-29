@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"testing"
 
+	"github.com/NiR-/zbuild/pkg/builddef"
 	"github.com/NiR-/zbuild/pkg/llbtest"
 	"github.com/NiR-/zbuild/pkg/statesolver"
 	"github.com/golang/mock/gomock"
@@ -46,7 +47,47 @@ func initFromBuildContextTC(t *testing.T, mockCtrl *gomock.Controller) buildkitR
 	}).Return([]byte(raw), nil)
 
 	solver := statesolver.NewBuildkitSolver(c)
-	opt := solver.FromBuildContext()
+	opt := solver.FromContext(&builddef.Context{
+		Type: builddef.ContextTypeLocal,
+	})
+
+	return buildkitReadFileTC{
+		solver:   solver,
+		opt:      opt,
+		filepath: "testdata/testfile",
+		expected: "some file content",
+	}
+}
+
+func initFromGitContextTC(t *testing.T, mockCtrl *gomock.Controller) buildkitReadFileTC {
+	contextRef := llbtest.NewMockReference(mockCtrl)
+	solved := &client.Result{
+		Refs: map[string]client.Reference{
+			"linux/amd64": contextRef,
+		},
+		Ref: contextRef,
+	}
+
+	c := llbtest.NewMockClient(mockCtrl)
+	c.EXPECT().BuildOpts().AnyTimes().Return(client.BuildOpts{
+		SessionID: "<SESSION-ID>",
+		Opts: map[string]string{
+			"contextkey": "some-context",
+		},
+	})
+	c.EXPECT().Solve(
+		gomock.Any(), gomock.Any(),
+	).Return(solved, nil)
+
+	raw := loadRawTestdata(t, "testdata/testfile")
+	contextRef.EXPECT().ReadFile(gomock.Any(), client.ReadRequest{
+		Filename: "testdata/testfile",
+	}).Return([]byte(raw), nil)
+
+	solver := statesolver.NewBuildkitSolver(c)
+	opt := solver.FromContext(&builddef.Context{
+		Type: builddef.ContextTypeLocal,
+	})
 
 	return buildkitReadFileTC{
 		solver:   solver,
@@ -79,7 +120,9 @@ func initFailToReadFileFromBuildContextTC(t *testing.T, mockCtrl *gomock.Control
 	}).Return([]byte{}, xerrors.New("file does not exist"))
 
 	solver := statesolver.NewBuildkitSolver(c)
-	opt := solver.FromBuildContext()
+	opt := solver.FromContext(&builddef.Context{
+		Type: builddef.ContextTypeLocal,
+	})
 
 	return buildkitReadFileTC{
 		solver:      solver,
@@ -181,6 +224,7 @@ func initFailToReadFromNonexistantImageTC(t *testing.T, mockCtrl *gomock.Control
 func TestBuildkitReadFile(t *testing.T) {
 	testcases := map[string]func(*testing.T, *gomock.Controller) buildkitReadFileTC{
 		"from build context":                         initFromBuildContextTC,
+		"from git context":                           initFromGitContextTC,
 		"fail to read file from build context":       initFailToReadFileFromBuildContextTC,
 		"from image":                                 initFromImageTC,
 		"fail to read a nonexistant file from image": initFailToReadNonexistantFileFromImageTC,

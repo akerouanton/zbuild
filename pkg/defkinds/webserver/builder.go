@@ -13,7 +13,7 @@ import (
 	"golang.org/x/xerrors"
 )
 
-var fileOwner = "1000:1000"
+var fileOwner = "1000"
 var SharedKeys = struct {
 	ConfigFile string
 }{
@@ -59,18 +59,18 @@ func (h *WebserverHandler) Build(
 	img = image.CloneMeta(baseImg)
 	img.Config.Labels[builddef.ZbuildLabel] = "true"
 
-	if buildOpts.Source == nil && len(def.Assets) > 0 {
+	if buildOpts.SourceState == nil && len(def.Assets) > 0 {
 		return state, img, xerrors.New("no source state to copy assets from has been provided")
 	}
 
 	state, err = llbutils.InstallSystemPackages(state, llbutils.APT, def.Locks.SystemPackages)
 
 	if def.ConfigFile != nil && *def.ConfigFile != "" {
-		state = h.copyConfigFile(state, def, buildOpts)
+		state = h.copyConfigFile(def, state, buildOpts)
 	}
 
 	for _, asset := range def.Assets {
-		state = llbutils.Copy(*buildOpts.Source, asset.From, state, asset.To, fileOwner)
+		state = llbutils.Copy(*buildOpts.SourceState, asset.From, state, asset.To, fileOwner)
 	}
 
 	setImageMetadata(def, state, img)
@@ -79,11 +79,11 @@ func (h *WebserverHandler) Build(
 }
 
 func (h *WebserverHandler) copyConfigFile(
-	state llb.State,
 	def Definition,
+	state llb.State,
 	buildOpts builddef.BuildOpts,
 ) llb.State {
-	configFileSrc := llbutils.BuildContext(buildOpts.ContextName,
+	configFileSrc := llbutils.FromContext(buildOpts.BuildContext,
 		llb.IncludePatterns([]string{*def.ConfigFile}),
 		llb.LocalUniqueID(buildOpts.LocalUniqueID),
 		llb.SessionID(buildOpts.SessionID),

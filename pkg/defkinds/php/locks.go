@@ -14,14 +14,20 @@ import (
 // DefinitionLocks defines version locks for system packages and PHP extensions used
 // by each stage.
 type DefinitionLocks struct {
-	BaseImage    string                `mapstructure:"base_image"`
-	ExtensionDir string                `mapstructure:"extension_dir"`
-	Stages       map[string]StageLocks `mapstructure:"stages"`
+	BaseImage     string                `mapstructure:"base_image"`
+	ExtensionDir  string                `mapstructure:"extension_dir"`
+	Stages        map[string]StageLocks `mapstructure:"stages"`
+	SourceContext *builddef.Context     `mapstructure:"source_context"`
 }
 
 func (l DefinitionLocks) RawLocks() map[string]interface{} {
 	lockdata := map[string]interface{}{
-		"base_image": l.BaseImage,
+		"base_image":     l.BaseImage,
+		"source_context": nil,
+	}
+
+	if l.SourceContext != nil {
+		lockdata["source_context"] = l.SourceContext.RawLocks()
 	}
 
 	stages := map[string]interface{}{}
@@ -49,9 +55,9 @@ func (l StageLocks) RawLocks() map[string]interface{} {
 func (h *PHPHandler) UpdateLocks(
 	ctx context.Context,
 	pkgSolver pkgsolver.PackageSolver,
-	genericDef *builddef.BuildDef,
+	buildOpts builddef.BuildOpts,
 ) (builddef.Locks, error) {
-	def, err := NewKind(genericDef)
+	def, err := NewKind(buildOpts.Def)
 	if err != nil {
 		return nil, err
 	}
@@ -75,11 +81,15 @@ func (h *PHPHandler) UpdateLocks(
 		return nil, err
 	}
 
-	stagesLocks, err := h.updateStagesLocks(ctx, pkgSolver, def, def.Locks)
+	def.Locks.SourceContext, err = h.lockSourceContext(ctx, def.SourceContext)
 	if err != nil {
-		return nil, err
+		return nil, xerrors.Errorf("failed to lock source context: %w", err)
 	}
-	def.Locks.Stages = stagesLocks
+
+	def.Locks.Stages, err = h.updateStagesLocks(ctx, pkgSolver, def, buildOpts)
+	if err != nil {
+		return nil, xerrors.Errorf("failed to update stages locks: %w", err)
+	}
 
 	return def.Locks, err
 }
@@ -100,11 +110,11 @@ func (h *PHPHandler) updateStagesLocks(
 	ctx context.Context,
 	pkgSolver pkgsolver.PackageSolver,
 	def Definition,
-	defLocks DefinitionLocks,
+	buildOpts builddef.BuildOpts,
 ) (map[string]StageLocks, error) {
 	locks := map[string]StageLocks{}
 	composerLockLoader := func(stageDef *StageDefinition) error {
-		return LoadComposerLock(ctx, h.solver, stageDef)
+		return LoadComposerLock(ctx, h.solver, stageDef, buildOpts.BuildContext)
 	}
 
 	for name := range def.Stages {
@@ -115,7 +125,7 @@ func (h *PHPHandler) updateStagesLocks(
 
 		stageLocks := StageLocks{}
 		stageLocks.SystemPackages, err = pkgSolver.ResolveVersions(
-			defLocks.BaseImage,
+			def.Locks.BaseImage,
 			stage.SystemPackages.Map())
 		if err != nil {
 			return nil, xerrors.Errorf("could not resolve systems package versions: %w", err)
@@ -167,4 +177,12 @@ func (h *PHPHandler) lockExtensions(extensions *builddef.VersionMap) (map[string
 	}
 
 	return resolved, nil
+}
+
+func (h *PHPHandler) lockSourceContext(ctx context.Context, c *builddef.Context) (*builddef.Context, error) {
+	locked, err := statesolver.LockContext(ctx, h.solver, c)
+	if err != nil {
+		return nil, err
+	}
+	return locked, nil
 }

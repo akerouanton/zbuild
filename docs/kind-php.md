@@ -6,6 +6,7 @@
 * [Locking](#locking)
 * [Assets and webserver](#assets-and-webserver)
 * [Syntax](#syntax)
+  * [Source context - `<source_context>`](#source-context--source-context)
   * [Derived stage - `<derived_stage>`](#derived-stage---derived_stage)
   * [Stage - `<stage>`](#stage---stage)
   * [External files - `<external_files>`](#external-files---external_files)
@@ -146,6 +147,8 @@ version: <string> # (required if base is empty)
 fpm: <bool> # (default: true)
 infer: <bool>  # (default: true)
 
+source_context: <context>
+
 <stage>
 
 stages:
@@ -165,6 +168,10 @@ You can define the `base` stage at the root of the definition. Subsequent
 stages defined in `stages` will then inherit parameters from the `base` stage.
 
 See a [full example below](#example).
+
+#### Source context - `<source_context>`
+
+See [here](generic-parameters.md#source-context--source-context).
 
 #### Derived stage - `<derived_stage>`
 
@@ -303,7 +310,7 @@ When merging parent stages, the whole map (if declared) erases parent values.
 #### Sources - `<sources>`
 
 This is the list of source files and directories you want to copy in the image.
-The paths have to be relative to the root of the build context.
+The paths have to be relative to the root of the source context.
 
 ```yaml
 source_dirs:

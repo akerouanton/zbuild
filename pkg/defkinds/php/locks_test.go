@@ -54,7 +54,7 @@ func initSuccessfullyUpdateLocksTC(t *testing.T, mockCtrl *gomock.Controller) up
 		gomock.Any(),
 	).Return(rawDebianOSRelease, nil)
 
-	solver.EXPECT().FromBuildContext(gomock.Any()).Times(2)
+	solver.EXPECT().FromContext(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(2)
 	solver.EXPECT().ReadFile(
 		gomock.Any(), "composer.lock", gomock.Any(),
 	).AnyTimes().Return([]byte{}, statesolver.FileNotFound)
@@ -165,7 +165,11 @@ func TestUpdateLocks(t *testing.T) {
 			var err error
 
 			ctx := context.Background()
-			locks, err = tc.handler.UpdateLocks(ctx, tc.pkgSolver, &genericDef)
+			buildOpts := builddef.BuildOpts{
+				Def: &genericDef,
+			}
+
+			locks, err = tc.handler.UpdateLocks(ctx, tc.pkgSolver, buildOpts)
 			if tc.expectedErr != nil {
 				if err == nil || err.Error() != tc.expectedErr.Error() {
 					t.Fatalf("Expected error: %v\nGot: %v", tc.expectedErr, err)

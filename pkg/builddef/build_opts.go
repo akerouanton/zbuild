@@ -10,16 +10,16 @@ import (
 // BuildOpts represents the parameters passed to specialized builders.
 // (see github.com/NiR-/zbuild/pkg/defkinds/)
 type BuildOpts struct {
-	Def       *BuildDef
-	Source    *llb.State
-	SessionID string
+	Def         *BuildDef
+	SourceState *llb.State
+	SessionID   string
 	// LocalUniqueID is useful mostly for test purpose, in order to use
 	// a predefine value and have stable op digests.
 	LocalUniqueID string
 	File          string
 	LockFile      string
 	Stage         string
-	ContextName   string
+	BuildContext  *Context
 }
 
 func NewBuildOpts(file, context, stage, sessionID string) BuildOpts {
@@ -31,11 +31,11 @@ func NewBuildOpts(file, context, stage, sessionID string) BuildOpts {
 	}
 
 	return BuildOpts{
-		File:        file,
-		LockFile:    LockFilepath(file),
-		ContextName: context,
-		Stage:       stage,
-		SessionID:   sessionID,
+		File:         file,
+		LockFile:     LockFilepath(file),
+		BuildContext: NewContext(context, ""),
+		Stage:        stage,
+		SessionID:    sessionID,
 	}
 }
 

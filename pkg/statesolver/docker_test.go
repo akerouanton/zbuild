@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/NiR-/zbuild/pkg/builddef"
 	"github.com/NiR-/zbuild/pkg/statesolver"
 	"github.com/containerd/containerd/remotes/docker"
 	"github.com/docker/docker/api/types"
@@ -86,7 +87,9 @@ func initFailToFetchFromNonexistantImageTC(t *testing.T, solver statesolver.Dock
 
 func initDockerReadFileFromBuildContextTC(t *testing.T, solver statesolver.DockerSolver) dockerReadFileTC {
 	return dockerReadFileTC{
-		opt:      solver.FromBuildContext(),
+		opt: solver.FromContext(&builddef.Context{
+			Type: builddef.ContextTypeLocal,
+		}),
 		path:     "testfile",
 		expected: string(loadRawTestdata(t, "testdata/testfile")),
 	}
@@ -94,7 +97,9 @@ func initDockerReadFileFromBuildContextTC(t *testing.T, solver statesolver.Docke
 
 func initFailToReadNonexistantFileFromBuildContextTC(t *testing.T, solver statesolver.DockerSolver) dockerReadFileTC {
 	return dockerReadFileTC{
-		opt:         solver.FromBuildContext(),
+		opt: solver.FromContext(&builddef.Context{
+			Type: builddef.ContextTypeLocal,
+		}),
 		path:        "nonexistant",
 		expectedErr: xerrors.Errorf("failed to read nonexistant from build context: %w", statesolver.FileNotFound),
 	}

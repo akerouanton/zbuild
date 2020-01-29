@@ -68,9 +68,9 @@ func buildOptsFromBuildkitOpts(c client.Client) builddef.BuildOpts {
 	}
 
 	if v, ok := opts[keyDockerContext]; ok {
-		buildOpts.ContextName = v
+		buildOpts.BuildContext = builddef.NewContext(v, "")
 	} else if v, ok := opts[keyContext]; ok {
-		buildOpts.ContextName = v
+		buildOpts.BuildContext = builddef.NewContext(v, "")
 	}
 
 	return buildOpts
@@ -118,7 +118,7 @@ func (b Builder) build(
 
 	if webserverStage {
 		buildOpts.Def = newBuildDefForWebserver(buildOpts.Def)
-		buildOpts.Source = &state
+		buildOpts.SourceState = &state
 		buildOpts.Stage = "webserver"
 
 		return b.build(ctx, solver, buildOpts)
@@ -232,16 +232,17 @@ func (b Builder) DumpConfig(
 
 func (b Builder) UpdateLockFile(
 	solver statesolver.StateSolver,
-	file string,
+	buildOpts builddef.BuildOpts,
 ) error {
+	var err error
 	ctx := context.Background()
-	buildOpts := builddef.NewBuildOpts(file, "", "", "")
-	def, err := defloader.Load(ctx, solver, buildOpts)
+
+	buildOpts.Def, err = defloader.Load(ctx, solver, buildOpts)
 	if err != nil {
 		return err
 	}
 
-	rawLocks, err := b.updateLocks(ctx, solver, def)
+	rawLocks, err := b.updateLocks(ctx, solver, buildOpts)
 	if err != nil {
 		return err
 	}
@@ -262,25 +263,25 @@ func (b Builder) UpdateLockFile(
 func (b Builder) updateLocks(
 	ctx context.Context,
 	solver statesolver.StateSolver,
-	def *builddef.BuildDef,
+	buildOpts builddef.BuildOpts,
 ) (map[string]interface{}, error) {
-	handler, err := b.findHandler(def.Kind, solver, false)
+	handler, err := b.findHandler(buildOpts.Def.Kind, solver, false)
 	if err != nil {
 		return nil, err
 	}
 
-	locks, err := handler.UpdateLocks(ctx, b.PkgSolver, def)
+	locks, err := handler.UpdateLocks(ctx, b.PkgSolver, buildOpts)
 	if err != nil {
 		return nil, err
 	}
 
 	rawLocks := locks.RawLocks()
-	if !b.Registry.EmbedWebserverDef(def.Kind) {
+	if !b.Registry.EmbedWebserverDef(buildOpts.Def.Kind) {
 		return rawLocks, nil
 	}
 
-	webserverDef := newBuildDefForWebserver(def)
-	rawLocks["webserver"], err = b.updateLocks(ctx, solver, webserverDef)
+	buildOpts.Def = newBuildDefForWebserver(buildOpts.Def)
+	rawLocks["webserver"], err = b.updateLocks(ctx, solver, buildOpts)
 	if err != nil {
 		return nil, err
 	}

@@ -245,6 +245,57 @@ func initParseRawDefinitionWithCustomHealthcheckTC() newDefinitionTC {
 	}
 }
 
+func initParseRawDefinitionWithCustomSourceContextTC() newDefinitionTC {
+	devStageDevMode := true
+	prodStageDevMode := false
+
+	return newDefinitionTC{
+		file: "testdata/def/with-source-context.yml",
+		expected: nodejs.Definition{
+			BaseStage: nodejs.Stage{
+				ExternalFiles:  []llbutils.ExternalFile{},
+				SystemPackages: &builddef.VersionMap{},
+				GlobalPackages: &builddef.VersionMap{},
+				ConfigFiles:    map[string]string{},
+				Sources:        []string{},
+				StatefulDirs:   []string{},
+				Healthcheck: &builddef.HealthcheckConfig{
+					HealthcheckHTTP: &builddef.HealthcheckHTTP{
+						Path:     "/ping",
+						Expected: "pong",
+					},
+					Type:     builddef.HealthcheckTypeHTTP,
+					Interval: 10 * time.Second,
+					Timeout:  1 * time.Second,
+					Retries:  3,
+				},
+			},
+			Version:    "12",
+			BaseImage:  "docker.io/library/node:12-buster-slim",
+			IsFrontend: false,
+			SourceContext: &builddef.Context{
+				Source: "github.com/api-platform/demo",
+				Type:   builddef.ContextTypeGit,
+				GitContext: builddef.GitContext{
+					Reference: "5ecd217",
+				},
+			},
+			Stages: nodejs.DerivedStageSet{
+				"dev": {
+					DeriveFrom: "base",
+					Dev:        &devStageDevMode,
+					Stage:      emptyStage(),
+				},
+				"prod": {
+					DeriveFrom: "base",
+					Dev:        &prodStageDevMode,
+					Stage:      emptyStage(),
+				},
+			},
+		},
+	}
+}
+
 func initFailToParseUnknownPropertiesTC() newDefinitionTC {
 	return newDefinitionTC{
 		file:        "testdata/def/invalid.yml",
@@ -269,6 +320,7 @@ func TestNewKind(t *testing.T) {
 		"with stages":                      initParseRawDefinitionWithStagesTC,
 		"with webserver":                   initParseRawDefinitionWithWebserverTC,
 		"with custom healthcheck":          initParseRawDefinitionWithCustomHealthcheckTC,
+		"with source context":              initParseRawDefinitionWithCustomSourceContextTC,
 		"fail to parse unknown properties": initFailToParseUnknownPropertiesTC,
 		"fail to load zbuildfile with both version and base image props": initFailWhenBothVersionAndBaseImageAreDefinedTC,
 	}

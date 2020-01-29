@@ -10,13 +10,20 @@ import (
 )
 
 type DefinitionLocks struct {
-	BaseImage string                `mapstructure:"base"`
-	Stages    map[string]StageLocks `mapstructure:"stages"`
+	BaseImage     string                `mapstructure:"base"`
+	Stages        map[string]StageLocks `mapstructure:"stages"`
+	SourceContext *builddef.Context     `mapstructure:"source_context"`
 }
 
+// @TODO: add a generic way to transform locks into rawlocks
 func (l DefinitionLocks) RawLocks() map[string]interface{} {
 	lockdata := map[string]interface{}{
-		"base": l.BaseImage,
+		"base":           l.BaseImage,
+		"source_context": nil,
+	}
+
+	if l.SourceContext != nil {
+		lockdata["source_context"] = l.SourceContext.RawLocks()
 	}
 
 	stages := map[string]interface{}{}
@@ -41,9 +48,9 @@ func (l StageLocks) RawLocks() map[string]interface{} {
 func (h *NodeJSHandler) UpdateLocks(
 	ctx context.Context,
 	pkgSolver pkgsolver.PackageSolver,
-	genericDef *builddef.BuildDef,
+	buildOpts builddef.BuildOpts,
 ) (builddef.Locks, error) {
-	def, err := NewKind(genericDef)
+	def, err := NewKind(buildOpts.Def)
 	if err != nil {
 		return nil, err
 	}
@@ -63,8 +70,15 @@ func (h *NodeJSHandler) UpdateLocks(
 		return nil, xerrors.Errorf("unsupported OS %q: only debian-based base images are supported", osrelease.Name)
 	}
 
-	stagesLocks, err := h.updateStagesLocks(ctx, pkgSolver, def)
-	def.Locks.Stages = stagesLocks
+	def.Locks.Stages, err = h.updateStagesLocks(ctx, pkgSolver, def)
+	if err != nil {
+		return nil, xerrors.Errorf("failed to update stages locks: %w", err)
+	}
+
+	def.Locks.SourceContext, err = h.lockSourceContext(ctx, def.SourceContext)
+	if err != nil {
+		return nil, xerrors.Errorf("failed to lock source context: %w", err)
+	}
 
 	return def.Locks, err
 }
@@ -94,4 +108,12 @@ func (h *NodeJSHandler) updateStagesLocks(
 	}
 
 	return locks, nil
+}
+
+func (h *NodeJSHandler) lockSourceContext(ctx context.Context, c *builddef.Context) (*builddef.Context, error) {
+	locked, err := statesolver.LockContext(ctx, h.solver, c)
+	if err != nil {
+		return nil, err
+	}
+	return locked, nil
 }

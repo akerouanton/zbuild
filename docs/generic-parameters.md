@@ -2,7 +2,8 @@
 
 Following parameters are common to many or all kinds of definition:
 
-* [External files - `<external_files`](#external-files---external_files)
+* [External files - `<external_files>`](#external-files---external_files)
+* [Source context - `<source_context>`](#source-context--source-context)
 * [System packages - `<system_packages>`](#system-packages---system_packages)
 * [Healthcheck - `<healthcheck>`](#healthcheck---healthcheck)
   * [`cmd` healthcheck](#cmd-healthcheck)
@@ -54,6 +55,39 @@ external_files:
     destination: /usr/local/lib/php/extensions/no-debug-non-zts-20190902/blackfire.so
     mode: 0644
 ```
+
+#### Source context - `<source_context>`
+
+`source_context` takes a `context` parameter which defines the context where
+`sources` are copied from. When left empty, the source context defaults to the
+current [build context](https://docs.docker.com/engine/reference/commandline/build/#extended-description).
+
+For instance, `docker build -f api.zbuild.yml .` uses the current working
+directory as the build context. As such, if `source_context` is left empty in
+the `api.zbuild.yml` file, the sources will be copied from the current working
+directory.
+
+Syntax:
+
+```yaml
+source_context:
+  type: git
+  source: <string>
+  reference: <string>
+```
+
+Example:
+
+```yaml
+source_context:
+  type: git
+  source: git://github.com/NiR-/zbuild
+  reference: v0.1
+```
+
+To ensure build consistency, when you provide a Git context, zbuild will
+resolve the reference to a specific hash. As such all the builds between
+two runs of `zbuild update`, will always use exactly the same commit.
 
 #### System Packages - `<system_packages>`
 

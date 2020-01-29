@@ -1,0 +1,9 @@
+kind: php
+
+source_context:
+  type: git
+  source: git://github.com/api-platform/demo
+  reference: 5ecd217
+
+sources:
+  - src/
