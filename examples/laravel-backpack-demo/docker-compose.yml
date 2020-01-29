@@ -1,0 +1,29 @@
+# syntax=akerouanton/zbuilder:200129-01
+version: '3.4'
+
+services:
+  php:
+    image: laravel-backpack-demo/php:latest
+    build:
+      dockerfile: zbuild.yml
+      context: .
+      target: prod
+    restart: on-failure
+    env_file: .env
+
+  nginx:
+    image: laravel-backpack-demo/nginx:latest
+    build:
+      dockerfile: zbuild.yml
+      context: .
+      target: webserver-prod
+    ports:
+      - "80:80"
+
+  db:
+    image: mysql:5.7
+    environment:
+      - MYSQL_USER=homestead
+      - MYSQL_PASSWORD=secret
+      - MYSQL_DATABASE=homestead
+      - MYSQL_ALLOW_EMPTY_PASSWORD=true
