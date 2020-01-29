@@ -3,6 +3,7 @@ package builddef
 import (
 	"fmt"
 	"reflect"
+	"strings"
 	"time"
 
 	"github.com/NiR-/zbuild/pkg/image"
@@ -113,7 +114,7 @@ func (hc HealthcheckHTTP) healthTest() []string {
 	// @TODO: unset http_proxy
 	cmd := fmt.Sprintf(
 		"test \"$(curl --fail http://127.0.0.1/%s)\" = \"%s\"",
-		hc.Path,
+		strings.TrimLeft(hc.Path, "/"),
 		hc.Expected)
 
 	return []string{"CMD-SHELL", cmd}

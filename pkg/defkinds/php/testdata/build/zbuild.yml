@@ -7,6 +7,9 @@ extensions:
   pdo_mysql: "*"
   soap: "*"
 
+sources:
+  - src/
+
 config_files:
   fpm.conf: "docker/app/fpm.conf"
   php.ini: "docker/app/php.ini"

@@ -179,20 +179,33 @@ func copyConfigFiles(
 }
 
 func copySourceFiles(
-	stage StageDefinition,
+	stageDef StageDefinition,
 	state llb.State,
 	buildOpts builddef.BuildOpts,
 ) llb.State {
-	sourceContext := resolveSourceContext(stage, buildOpts)
-	stateSrc := llbutils.FromContext(sourceContext,
-		llb.IncludePatterns(includePatterns(&stage)),
-		llb.ExcludePatterns(excludePatterns(&stage)),
+	sourceContext := resolveSourceContext(stageDef, buildOpts)
+	srcState := llbutils.FromContext(sourceContext,
+		llb.IncludePatterns(includePatterns(&stageDef)),
+		llb.ExcludePatterns(excludePatterns(&stageDef)),
 		llb.LocalUniqueID(buildOpts.LocalUniqueID),
 		llb.SessionID(buildOpts.SessionID),
 		llb.SharedKeyHint(SharedKeys.BuildContext),
 		llb.WithCustomName("load build context"))
 
-	return llbutils.Copy(stateSrc, "/", state, "/app/", "1000:1000")
+	if sourceContext.Type == builddef.ContextTypeLocal {
+		return llbutils.Copy(srcState, "/", state, "/app/", "1000:1000")
+	}
+
+	// Despite the IncludePatterns() above, the source state might also
+	// contain files that were not including if the conext is non-local.
+	// As such, we can't just copy the whole source state to the dest state
+	// in such case.
+	for _, srcfile := range stageDef.Sources {
+		destfile := path.Join("/app", srcfile)
+		state = llbutils.Copy(srcState, srcfile, state, destfile, "1000:1000")
+	}
+
+	return state
 }
 
 func resolveSourceContext(

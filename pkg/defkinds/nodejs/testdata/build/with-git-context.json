@@ -1,5 +1,69 @@
 [
   {
+    "RawOp": "CkkKR3NoYTI1NjpiYWE4Nzc2MzFiYWRjN2ExYjZkZDMwOGIzZGJlOWQ4ZTg2N2Q4MzY0NGRmOTZjMjdmMzM1NTVjYWEyNjEzZDYyCkkKR3NoYTI1NjplNjI1YjNlMGRmNmE4ZGVlZWNjMzg0MmJjMDFjZjI0N2NmODgyMmE3Y2E2MmMyMjc4NzljYTU3NGUxZThiNDMzIkYSRBABIkAKBy9wdWJsaWMSCy9hcHAvcHVibGljGgoKAxDoBxIDEOgHIP///////////wEoATABQAFIAVj///////////8BUg4KBWFtZDY0EgVsaW51eFoA",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:baa877631badc7a1b6dd308b3dbe9d8e867d83644df96c27f33555caa2613d62",
+          "index": 0
+        },
+        {
+          "digest": "sha256:e625b3e0df6a8deeecc3842bc01cf247cf8822a7ca62c227879ca574e1e8b433",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "File": {
+          "actions": [
+            {
+              "input": 0,
+              "secondaryInput": 1,
+              "output": 0,
+              "Action": {
+                "Copy": {
+                  "src": "/public",
+                  "dest": "/app/public",
+                  "owner": {
+                    "user": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    },
+                    "group": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    }
+                  },
+                  "mode": -1,
+                  "followSymlink": true,
+                  "dirCopyContents": true,
+                  "createDestPath": true,
+                  "allowWildcard": true,
+                  "timestamp": -1
+                }
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:0bd2ab19011924e5a8381707e8bb02ff9c924d464812bc9cc404e768c7de12ef",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Copy public/"
+      },
+      "caps": {
+        "file.base": true
+      }
+    }
+  },
+  {
     "RawOp": "CkkKR3NoYTI1Njo0Y2E3OGJiMTM4Yzk1NWVkZjA0M2Q0MmE1Mzc5MDhkMDczMjA5MmFjZGQzNDRjM2Q2ZDdmYzI0NTExZjVmZjFkIjESLxD///////////8BMiIKBC9hcHAQ6AMYASIKCgMQ6AcSAxDoByj///////////8BUg4KBWFtZDY0EgVsaW51eFoA",
     "Op": {
       "inputs": [
@@ -52,6 +116,26 @@
       },
       "caps": {
         "file.base": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1Njo1ODEzZTg4YmViMWQ3MmU4MzUxMjNiNWMwYzkwNzRiOWIyYjg4ZTdmMjA2NjBmNzM4MTAzZjFhY2Y1MWQxYmNi",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:5813e88beb1d72e835123b5c0c9074b9b2b88e7f20660f738103f1acf51d1bcb",
+          "index": 0
+        }
+      ],
+      "Op": null
+    },
+    "Digest": "sha256:2e4950acec444aa99dc1408ed1f10cf7c1e28b93ed94a68109844f325378d0dc",
+    "OpMetadata": {
+      "caps": {
+        "constraints": true,
+        "meta.description": true,
+        "platform": true
       }
     }
   },
@@ -130,15 +214,15 @@
     }
   },
   {
-    "RawOp": "CkkKR3NoYTI1Njo1Nzk3NmZjZmQxMzMzMDhiODE0MGEyMzBhNjRiMjAyOTQ1NDFkMzEzNWRmMTJjMGZjMzkzNjIzMTlmZDA2ZDU1CkkKR3NoYTI1NjplNjI1YjNlMGRmNmE4ZGVlZWNjMzg0MmJjMDFjZjI0N2NmODgyMmE3Y2E2MmMyMjc4NzljYTU3NGUxZThiNDMzIjkSNxABIjMKAS8SBC9hcHAaCgoDEOgHEgMQ6Acg////////////ASgBMAFAAUgBWP///////////wFSDgoFYW1kNjQSBWxpbnV4WgA=",
+    "RawOp": "CkkKR3NoYTI1NjowYmQyYWIxOTAxMTkyNGU1YTgzODE3MDdlOGJiMDJmZjljOTI0ZDQ2NDgxMmJjOWNjNDA0ZTc2OGM3ZGUxMmVmCkkKR3NoYTI1Njo3MTUxNzNjYTE5MmM2ZTViYTI1ZjVjMDNiNTgyNTA2ZDA1NGVmZWMyNzI3N2JjOTk1NjBhODgyODdiYzc0YTZiIkISQBABIjwKBS8uZW52EgkvYXBwLy5lbnYaCgoDEOgHEgMQ6Acg////////////ASgBMAFAAUgBWP///////////wFSDgoFYW1kNjQSBWxpbnV4WgA=",
     "Op": {
       "inputs": [
         {
-          "digest": "sha256:57976fcfd133308b8140a230a64b20294541d3135df12c0fc39362319fd06d55",
+          "digest": "sha256:0bd2ab19011924e5a8381707e8bb02ff9c924d464812bc9cc404e768c7de12ef",
           "index": 0
         },
         {
-          "digest": "sha256:e625b3e0df6a8deeecc3842bc01cf247cf8822a7ca62c227879ca574e1e8b433",
+          "digest": "sha256:715173ca192c6e5ba25f5c03b582506d054efec27277bc99560a88287bc74a6b",
           "index": 0
         }
       ],
@@ -151,8 +235,8 @@
               "output": 0,
               "Action": {
                 "Copy": {
-                  "src": "/",
-                  "dest": "/app",
+                  "src": "/.env",
+                  "dest": "/app/.env",
                   "owner": {
                     "user": {
                       "User": {
@@ -183,10 +267,10 @@
       },
       "constraints": {}
     },
-    "Digest": "sha256:7c857d46236f491c98e85ef2ccc3553ddd6749b4b1710d9629ec39b5809e6aa9",
+    "Digest": "sha256:5813e88beb1d72e835123b5c0c9074b9b2b88e7f20660f738103f1acf51d1bcb",
     "OpMetadata": {
       "description": {
-        "llb.customname": "Copy /"
+        "llb.customname": "Copy .env"
       },
       "caps": {
         "file.base": true
@@ -194,22 +278,30 @@
     }
   },
   {
-    "RawOp": "CkkKR3NoYTI1Njo3Yzg1N2Q0NjIzNmY0OTFjOThlODVlZjJjY2MzNTUzZGRkNjc0OWI0YjE3MTBkOTYyOWVjMzliNTgwOWU2YWE5",
+    "RawOp": "GngKD2xvY2FsOi8vY29udGV4dBIgChRsb2NhbC5pbmNsdWRlcGF0dGVybhIIWyIuZW52Il0SHQoNbG9jYWwuc2Vzc2lvbhIMPFNFU1NJT04tSUQ+EiQKE2xvY2FsLnNoYXJlZGtleWhpbnQSDWJ1aWxkLWNvbnRleHRaAA==",
     "Op": {
-      "inputs": [
-        {
-          "digest": "sha256:7c857d46236f491c98e85ef2ccc3553ddd6749b4b1710d9629ec39b5809e6aa9",
-          "index": 0
+      "Op": {
+        "Source": {
+          "identifier": "local://context",
+          "attrs": {
+            "local.includepattern": "[\".env\"]",
+            "local.session": "\u003cSESSION-ID\u003e",
+            "local.sharedkeyhint": "build-context"
+          }
         }
-      ],
-      "Op": null
+      },
+      "constraints": {}
     },
-    "Digest": "sha256:7f93a4bdfd2bf077b3492dc052ca502f97bd3d6a399c14c0e0bf871acf96383c",
+    "Digest": "sha256:715173ca192c6e5ba25f5c03b582506d054efec27277bc99560a88287bc74a6b",
     "OpMetadata": {
+      "description": {
+        "llb.customname": "load config files"
+      },
       "caps": {
-        "constraints": true,
-        "meta.description": true,
-        "platform": true
+        "source.local": true,
+        "source.local.includepatterns": true,
+        "source.local.sessionid": true,
+        "source.local.sharedkeyhint": true
       }
     }
   },
@@ -335,6 +427,70 @@
     "OpMetadata": {
       "description": {
         "llb.customname": "Copy yarn.lock"
+      },
+      "caps": {
+        "file.base": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1Njo1Nzk3NmZjZmQxMzMzMDhiODE0MGEyMzBhNjRiMjAyOTQ1NDFkMzEzNWRmMTJjMGZjMzkzNjIzMTlmZDA2ZDU1CkkKR3NoYTI1NjplNjI1YjNlMGRmNmE4ZGVlZWNjMzg0MmJjMDFjZjI0N2NmODgyMmE3Y2E2MmMyMjc4NzljYTU3NGUxZThiNDMzIkASPhABIjoKBC9zcmMSCC9hcHAvc3JjGgoKAxDoBxIDEOgHIP///////////wEoATABQAFIAVj///////////8BUg4KBWFtZDY0EgVsaW51eFoA",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:57976fcfd133308b8140a230a64b20294541d3135df12c0fc39362319fd06d55",
+          "index": 0
+        },
+        {
+          "digest": "sha256:e625b3e0df6a8deeecc3842bc01cf247cf8822a7ca62c227879ca574e1e8b433",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "File": {
+          "actions": [
+            {
+              "input": 0,
+              "secondaryInput": 1,
+              "output": 0,
+              "Action": {
+                "Copy": {
+                  "src": "/src",
+                  "dest": "/app/src",
+                  "owner": {
+                    "user": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    },
+                    "group": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    }
+                  },
+                  "mode": -1,
+                  "followSymlink": true,
+                  "dirCopyContents": true,
+                  "createDestPath": true,
+                  "allowWildcard": true,
+                  "timestamp": -1
+                }
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:baa877631badc7a1b6dd308b3dbe9d8e867d83644df96c27f33555caa2613d62",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Copy src/"
       },
       "caps": {
         "file.base": true

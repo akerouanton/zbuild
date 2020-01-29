@@ -28,7 +28,8 @@ func initSuccessfullyParseRawDefinitionTC() newDefinitionTC {
 			ConfigFile: &configFile,
 			Healthcheck: &builddef.HealthcheckConfig{
 				HealthcheckHTTP: &builddef.HealthcheckHTTP{
-					Path: "/_status",
+					Path:     "/_ping",
+					Expected: "pong",
 				},
 				Type:     builddef.HealthcheckTypeHTTP,
 				Interval: 10 * time.Second,
@@ -296,7 +297,7 @@ func TestDefinitionMerge(t *testing.T) {
 				return webserver.Definition{
 					Healthcheck: &builddef.HealthcheckConfig{
 						HealthcheckHTTP: &builddef.HealthcheckHTTP{
-							Path: "/_status",
+							Path: "/_ping",
 						},
 						Type:     builddef.HealthcheckTypeHTTP,
 						Interval: 10 * time.Second,

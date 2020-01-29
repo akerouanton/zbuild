@@ -1,25 +1,5 @@
 [
   {
-    "RawOp": "CkkKR3NoYTI1NjpjNWEwMzQ5ZDM3YzA3YTFkYmE5MTZjZTk4NWYyZmNiZTQxYmFjZjBkYWU0OWE1NzkwZDRjYzk4ZDVmMDBjOWU5",
-    "Op": {
-      "inputs": [
-        {
-          "digest": "sha256:c5a0349d37c07a1dba916ce985f2fcbe41bacf0dae49a5790d4cc98d5f00c9e9",
-          "index": 0
-        }
-      ],
-      "Op": null
-    },
-    "Digest": "sha256:68670181110df5e7077d769e28a15f5eb1bb2bda25e54565bed0f3d69f8390b0",
-    "OpMetadata": {
-      "caps": {
-        "constraints": true,
-        "meta.description": true,
-        "platform": true
-      }
-    }
-  },
-  {
     "RawOp": "CkkKR3NoYTI1NjpmMWQxM2JmYmYzYjgwYjM2YTI4ZmFkNTEyODVhMjZhYjg4ZTY4OWU1MmI0NWRmMGE0ZThjZGIyOTRkYjIxOTRhEo4CCoYCCgcvYmluL3NoCgItbwoHZXJyZXhpdAoCLWMKZWFwdC1nZXQgdXBkYXRlOyBhcHQtZ2V0IGluc3RhbGwgLXkgLS1uby1pbnN0YWxsLXJlY29tbWVuZHMgY3VybD03LjY0LjAtNDsgcm0gLXJmIC92YXIvbGliL2FwdC9saXN0cy8qEkFQQVRIPS91c3IvbG9jYWwvc2JpbjovdXNyL2xvY2FsL2JpbjovdXNyL3NiaW46L3Vzci9iaW46L3NiaW46L2JpbhIUTkdJTlhfVkVSU0lPTj0xLjE3LjcSEU5KU19WRVJTSU9OPTAuMy43EhRQS0dfUkVMRUFTRT0xfmJ1c3RlchoBLxIDGgEvUg4KBWFtZDY0EgVsaW51eFoA",
     "Op": {
       "inputs": [
@@ -101,7 +81,7 @@
     }
   },
   {
-    "RawOp": "CkkKR3NoYTI1Njo3ZTZiNWM3MTExMWM0MDgyOTAzZDc1MmNmNzlhYmRjZTAyZTBlMTI3N2ZkNGE5ZDJmYjA3NWM1YTAzMTNjNWZhCkkKR3NoYTI1Njo5N2RiNDY5Nzc3YzViOWJjOWY3MzA4MTQ0YmQ2OGNkY2M3N2ViNWRjNDJhZGU0NGNmNzk1ZDE3ZGIwNzk5NGFkIlYSVBABIlAKEi9kb2NrZXIvbmdpbnguY29uZhIVL2V0Yy9uZ2lueC9uZ2lueC5jb25mGgUKAxDoByD///////////8BKAEwAUABSAFY////////////AVIOCgVhbWQ2NBIFbGludXhaAA==",
+    "RawOp": "CkkKR3NoYTI1Njo3ZTZiNWM3MTExMWM0MDgyOTAzZDc1MmNmNzlhYmRjZTAyZTBlMTI3N2ZkNGE5ZDJmYjA3NWM1YTAzMTNjNWZhCkkKR3NoYTI1Njo5N2RiNDY5Nzc3YzViOWJjOWY3MzA4MTQ0YmQ2OGNkY2M3N2ViNWRjNDJhZGU0NGNmNzk1ZDE3ZGIwNzk5NGFkIlwSWhABIlYKEi9kb2NrZXIvbmdpbnguY29uZhIVL2V0Yy9uZ2lueC9uZ2lueC5jb25mGgsKCQoHCgVuZ2lueCD///////////8BKAEwAUABSAFY////////////AVIOCgVhbWQ2NBIFbGludXhaAA==",
     "Op": {
       "inputs": [
         {
@@ -127,7 +107,10 @@
                   "owner": {
                     "user": {
                       "User": {
-                        "ByID": 1000
+                        "ByName": {
+                          "name": "nginx",
+                          "input": 0
+                        }
                       }
                     }
                   },
@@ -149,13 +132,33 @@
       },
       "constraints": {}
     },
-    "Digest": "sha256:c5a0349d37c07a1dba916ce985f2fcbe41bacf0dae49a5790d4cc98d5f00c9e9",
+    "Digest": "sha256:be980d33cbe246ea7cee094ab71db3b561a81ec9052659e3ed24b400738d0fc1",
     "OpMetadata": {
       "description": {
         "llb.customname": "Copy ./docker/nginx.conf"
       },
       "caps": {
         "file.base": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1NjpiZTk4MGQzM2NiZTI0NmVhN2NlZTA5NGFiNzFkYjNiNTYxYTgxZWM5MDUyNjU5ZTNlZDI0YjQwMDczOGQwZmMx",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:be980d33cbe246ea7cee094ab71db3b561a81ec9052659e3ed24b400738d0fc1",
+          "index": 0
+        }
+      ],
+      "Op": null
+    },
+    "Digest": "sha256:cdceaaebfc1be076aa5a26ca08ffe0a5a32e0f1a9aa551fe5f4fa741849cda8b",
+    "OpMetadata": {
+      "caps": {
+        "constraints": true,
+        "meta.description": true,
+        "platform": true
       }
     }
   },
