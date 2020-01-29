@@ -10,7 +10,7 @@ zbuildfile) ;
 
 ## Syntax
 
-zbuildfiles with webserver types have following structure:
+zbuildfiles with webserver definitions have following structure:
 
 ```yaml
 kind: webserver
@@ -55,7 +55,8 @@ Example:
 $ tree .
 .
 ├── docker
-│   └── nginx.conf
+│   ├── nginx.conf
+│   └── ...
 ├── docker-compose.yml
 ├── zbuild.lock
 └── zbuild.yml
@@ -64,15 +65,36 @@ $ cat zbuild.yml
 # syntax=akerouanton/zbuilder:<tag>
 kind: webserver
 
-config_file: nginx.conf
+config_file: docker/nginx.conf
 ```
 
 ##### `healthcheck` - default: `true`
 
-Whether the image should have a preconfigured healthcheck. It automatically
-adds curl to the list of system packages to install but you still have to
-properly configure your webserver to expose a ping/pong healthcheck on
-`/_ping` (the endpoint used is not configurable).
+The `healthcheck` parameter can be used to preconfigure Docker healthcheck for
+this image. For nginx definitions, it's either of type `http` or `cmd`. See [here](generic-parameters.md#healthcheck)
+for more details about healthcheck parameter.
+
+`http` healthchecks are using `curl` and corresponding package is automatically
+added to your `system_packages`.
+
+The default healthcheck for nginx is:
+
+```yaml
+healthcheck:
+  type: http
+  interval: 10s
+  timeout: 1s
+  retries: 3
+  fcgi:
+    path: /_ping
+    expected: pong
+```
+
+You have to set following parameters in your `fpm.conf` file to use the default
+healthcheck:
+
+You still have to properly configure your webserver to expose a ping/pong healthcheck on
+`/_ping`.
 
 Example `nginx.conf`:
 
