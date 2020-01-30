@@ -353,6 +353,16 @@ func (base DerivedStageSet) Merge(overriding DerivedStageSet) DerivedStageSet {
 	return new
 }
 
+var (
+	pkgManagerNpm  = "npm"
+	pkgManagerYarn = "yarn"
+)
+
+// StageDefinition is the final structure representing the complete definition
+// of a stage. It's created by merging a stage with all its ancestors. It also
+// contains the locked data for itself and the root definition locks. As such,
+// all the data needed to build the LLB DAG for a stage are available from
+// there.
 type StageDefinition struct {
 	Stage
 	Name       string
@@ -361,6 +371,10 @@ type StageDefinition struct {
 	IsFrontend bool
 	DefLocks   DefinitionLocks
 	StageLocks StageLocks
+	// PackageManager is determined during the build process to let the
+	// nodejs builder use the right package manager based on which lock file
+	// is available (either package-lock.json or yarn.lock).
+	PackageManager string
 }
 
 func (def *Definition) ResolveStageDefinition(

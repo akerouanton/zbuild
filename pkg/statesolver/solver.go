@@ -21,6 +21,8 @@ type StateSolver interface {
 	// ref. It returns a byte buffer containing the command stdout. An error is
 	// returned if the executed command doesn't return an exit code = 0.
 	ExecImage(ctx context.Context, imageRef string, cmd []string) (*bytes.Buffer, error)
+	// FileExists check if the given filepath exists in the given context.
+	FileExists(ctx context.Context, filepath string, source *builddef.Context) (bool, error)
 	// ReadFile is the method to use to read a given file from either an image
 	// or a local source (see From methods). It returns the file content as a
 	// byte slice if it's found. If the path couldn't be found, it returns

@@ -68,6 +68,11 @@ func (h *NodeJSHandler) Build(
 		return state, img, err
 	}
 
+	stageDef.PackageManager, err = h.determinePackageManager(ctx, stageDef, buildOpts)
+	if err != nil {
+		return state, img, err
+	}
+
 	state, img, err = h.buildNodeJS(ctx, stageDef, buildOpts)
 	if err != nil {
 		err = xerrors.Errorf("could not build nodejs stage: %w", err)
@@ -104,7 +109,7 @@ func (h *NodeJSHandler) buildNodeJS(
 	state = h.globalPackagesInstall(state, stageDef.GlobalPackages.Map(), buildOpts)
 
 	if *stageDef.Dev == false {
-		state = h.yarnInstall(stageDef, state, buildOpts)
+		state = h.depsInstall(stageDef, state, buildOpts)
 		state = h.copySources(stageDef, state, buildOpts)
 		state = h.copyConfigFiles(stageDef, state, buildOpts)
 		state = h.build(stageDef, state)
@@ -179,31 +184,61 @@ func (h *NodeJSHandler) globalPackagesInstall(
 	return run.Root()
 }
 
-// @TODO: add npm support
-func (h *NodeJSHandler) yarnInstall(
+func (h *NodeJSHandler) determinePackageManager(
+	ctx context.Context,
+	stageDef StageDefinition,
+	buildOpts builddef.BuildOpts,
+) (string, error) {
+	srcContext := resolveSourceContext(stageDef, buildOpts)
+	packageLock, err := h.solver.FileExists(ctx, "package-lock.json", srcContext)
+	if err != nil {
+		return "", xerrors.Errorf("could not determine which package manager should be used: %w", err)
+	}
+
+	if packageLock {
+		return pkgManagerNpm, nil
+	}
+	return pkgManagerYarn, nil
+}
+
+func (h *NodeJSHandler) depsInstall(
 	stageDef StageDefinition,
 	state llb.State,
 	buildOpts builddef.BuildOpts,
 ) llb.State {
 	srcContext := resolveSourceContext(stageDef, buildOpts)
-	include := []string{
-		prefixContextPath(srcContext, "package.json"),
-		prefixContextPath(srcContext, "yarn.lock")}
+
+	var installCmd, installLabel string
+	include := make([]string, 2)
+	include[0] = prefixContextPath(srcContext, "package.json")
+
+	if stageDef.PackageManager == pkgManagerYarn {
+		include[1] = prefixContextPath(srcContext, "yarn.lock")
+		installCmd = "yarn install --frozen-lockfile"
+		installLabel = "Run yarn install"
+	} else {
+		include[1] = prefixContextPath(srcContext, "package-lock.json")
+		installCmd = "npm ci"
+		installLabel = "Run npm install"
+	}
+
+	copyLabel := fmt.Sprintf("load %s from build context",
+		strings.Join(include, " and "))
 	srcState := llbutils.FromContext(srcContext,
 		llb.IncludePatterns(include),
 		llb.LocalUniqueID(buildOpts.LocalUniqueID),
 		llb.SessionID(buildOpts.SessionID),
 		llb.SharedKeyHint(SharedKeys.PackageFiles),
-		llb.WithCustomName("load package.json and yarn.lock from build context"))
+		llb.WithCustomName(copyLabel))
 
 	state = llbutils.Copy(srcState, include[0], state, "/app/", "1000:1000")
 	state = llbutils.Copy(srcState, include[1], state, "/app/", "1000:1000")
 
 	run := state.Run(
-		llbutils.Shell("yarn install --frozen-lockfile"),
+		llbutils.Shell(installCmd),
 		llb.Dir(state.GetDir()),
 		llb.User("1000"),
-		llb.WithCustomName("Run yarn install"))
+		llb.WithCustomName(installLabel))
 
 	return run.Root()
 }

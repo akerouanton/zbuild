@@ -124,6 +124,30 @@ func (s DockerSolver) fetchContainerLogs(
 	return outbuf, errbuf, nil
 }
 
+func (s DockerSolver) FileExists(
+	ctx context.Context,
+	filepath string,
+	source *builddef.Context,
+) (bool, error) {
+	if source == nil {
+		return false, nil
+	}
+
+	// @TODO: implement a proper way to test if a file exists instead of reading it
+	_, err := s.ReadFile(ctx, filepath, s.FromContext(source))
+	found := err != FileNotFound
+
+	if source.Type == builddef.ContextTypeGit {
+		// @TODO: for now, ReadFile never returns FileNotFound when reading
+		// from a Git context. As such, we can only consider that the given
+		// file doesn't exist when it returns an error and thus we need to
+		// silent this error.
+		err = nil
+	}
+
+	return found, err
+}
+
 func (s DockerSolver) ReadFile(
 	ctx context.Context,
 	filepath string,
