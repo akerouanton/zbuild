@@ -1,0 +1,88 @@
+version: '3.4'
+
+services:
+  php:
+    image: api-platform/api-php:latest
+    build:
+      dockerfile: zbuild.yml
+      context: api
+      target: prod
+    restart: on-failure
+    env_file: api.env
+    environment:
+      # @TODO: check why this env var is not set by default on the image
+      - APP_ENV=prod
+    volumes:
+      - ./public.pem:/app/config/jwt/public.pem
+      - ./private.pem:/app/config/jwt/private.pem
+
+  consumer:
+    image: api-platform/api-consumer:latest
+    build:
+      dockerfile: zbuild.yml
+      context: api
+      target: consumer
+    restart: on-failure
+    env_file: api.env
+    environment:
+      # @TODO: check why this env var is not set by default on the image
+      - APP_ENV=prod
+
+  nginx:
+    image: api-platform/api-nginx:latest
+    build:
+      dockerfile: zbuild.yml
+      context: api
+      target: webserver-prod
+    ports:
+      - "8080:80"
+
+  db:
+    image: bitnami/postgresql:10
+    environment:
+      - POSTGRESQL_DATABASE=api
+      - POSTGRESQL_USERNAME=api-platform
+      - POSTGRESQL_PASSWORD=!ChangeMe!
+    volumes:
+      - db-data:/var/lib/postgresql/data:rw
+
+  mercure:
+    image: dunglas/mercure
+    environment:
+      - JWT_KEY=!InsecureChangeMe!
+      - ALLOW_ANONYMOUS=1
+      - CORS_ALLOWED_ORIGINS=*
+      - PUBLISH_ALLOWED_ORIGINS=http://localhost:1337,https://localhost:1338
+      - DEMO=1
+    ports:
+      - "1337:80"
+
+  client:
+    image: api-platform/client:latest
+    build:
+      dockerfile: zbuild.yml
+      context: client
+      target: webserver-prod
+    ports:
+      - "80:80"
+
+  admin:
+    image: api-platform/admin:latest
+    build:
+      dockerfile: zbuild.yml
+      context: admin
+      target: webserver-prod
+    ports:
+      - "81:80"
+
+  # @TODO: re-enable
+  # blackfire:
+  #   image: blackfire/blackfire
+  #   environment:
+  #     - BLACKFIRE_CLIENT_ID
+  #     - BLACKFIRE_CLIENT_TOKEN
+  #     - BLACKFIRE_SERVER_ID
+  #     - BLACKFIRE_SERVER_TOKEN
+
+volumes:
+  db-data: {}

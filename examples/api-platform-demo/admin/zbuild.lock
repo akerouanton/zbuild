@@ -1,0 +1,15 @@
+base: docker.io/library/node:12-buster-slim@sha256:4d1016eefc4e6dc52ba9be6550dcb25a6e1826117507e65eda3650d6eb19f042
+source_context:
+  path: admin
+  reference: 5ecd2177087afbcce8f88ddfedbc7b95e738d961
+  source: github.com/api-platform/demo
+  type: git
+stages:
+  dev:
+    system_packages: {}
+  prod:
+    system_packages: {}
+webserver:
+  base_image: docker.io/library/nginx:latest@sha256:70821e443be75ea38bdf52a974fd2271babd5875b2b1964f05025981c75a6717
+  system_packages:
+    curl: 7.64.0-4

@@ -1,0 +1,38 @@
+#!/bin/bash
+
+set -o errexit
+set -o nounset
+set -o pipefail
+[[ "${TRACE:-}" != "" ]] && set -o xtrace
+
+unset COMPOSE_FILE
+unset COMPOSE_PROJECT_NAME
+
+config=$(docker-compose config | yq .)
+services=$(echo "${config}" | jq -r '.services | keys[]')
+
+for service_name in ${services}; do
+	service=$(echo "${config}" | jq ".services[\"${service_name}\"]")
+    has_build_config=$(echo ${service} | jq -r 'has("build")')
+
+    if [[ "${has_build_config}" != "true" ]]; then
+        continue
+    fi
+
+	img=$(echo ${service} | jq -r '.image')
+	context=$(echo ${service} | jq -r '.build.context // "."')
+	dockerfile=$(echo ${service} | jq -r '.build.dockerfile // "Dockerfile"')
+	target=$(echo ${service} | jq -r '.build.target // ""')
+
+	echo "##########"
+	echo "Building stage ${target} from ${dockerfile} (context: ${context}):"
+	echo "##########"
+
+	build_args="-t ${img} -f ${dockerfile}"
+	if [[ "${target}" != "" ]]; then
+		build_args="${build_args} --target ${target}"
+	fi
+
+	cd ${context}
+	docker build ${build_args} .
+done

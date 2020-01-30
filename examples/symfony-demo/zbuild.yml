@@ -1,0 +1,34 @@
+# syntax=akerouanton/zbuilder:200129-01
+kind: php
+version: 7.4
+fpm: true
+healthcheck: false
+
+extensions:
+  pdo_mysql: '*'
+
+source_context:
+  type: git
+  source: git://github.com/symfony/demo
+
+sources:
+  - bin/console
+  - config/
+  - public/
+  - src/
+  - templates/
+  - translations/
+
+stateful_dirs:
+  - var/session/
+
+integrations:
+  - blackfire
+
+webserver:
+  type: nginx
+  healthcheck: true
+  config_file: nginx.conf
+  assets:
+    - from: /app/public
+      to: /app/public

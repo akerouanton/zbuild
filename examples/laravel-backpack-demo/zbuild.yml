@@ -1,0 +1,38 @@
+# syntax=akerouanton/zbuilder:200126-30
+kind: php
+version: 7.4
+fpm: true
+
+extensions:
+  pdo_mysql: "*"
+
+source_context:
+  type: git
+  source: git://github.com/Laravel-Backpack/Demo
+
+sources:
+  - app/
+  - bootstrap/app.php
+  - bootstrap/autoload.php
+  - config/
+  - database/
+  - public/
+  - resources/
+  - routes/
+  - artisan
+
+stateful_dirs:
+  - storage/app/public/
+  - storage/clockwork/public/
+  - storage/framework/public/
+  - storage/logs/public/
+
+post_install:
+  - echo '' > .env
+
+webserver:
+  type: nginx
+  config_file: nginx.conf
+  assets:
+    - from: public/
+      to: /app/public/
