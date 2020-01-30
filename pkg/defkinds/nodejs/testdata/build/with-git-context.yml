@@ -4,12 +4,14 @@ version: 12
 source_context:
   type: git
   source: github.com/api-platform/demo
+  path: client
 
 sources:
   - src/
   - public/
 
-config_files:
-  .env: .env
-
-healthcheck: false
+stages:
+  prod:
+    healthcheck: false
+    config_files:
+      .env.production: .env

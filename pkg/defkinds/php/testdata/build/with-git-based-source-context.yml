@@ -5,6 +5,7 @@ version: 7.3.13
 source_context:
   type: git
   source: github.com/api-platform/demo
+  path: api
 
 sources:
   - bin/console

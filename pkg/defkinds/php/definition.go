@@ -510,7 +510,7 @@ func (stageDef StageDefinition) IsValid() error {
 func (def *Definition) ResolveStageDefinition(
 	stageName string,
 	composerLockLoader func(*StageDefinition) error,
-	withLocks bool,
+	withStageLocks bool,
 ) (StageDefinition, error) {
 	var stageDef StageDefinition
 	stages, err := def.resolveStageChain(stageName)
@@ -520,6 +520,7 @@ func (def *Definition) ResolveStageDefinition(
 
 	stageDef = mergeStages(def, stages...)
 	stageDef.Name = stageName
+	stageDef.DefLocks = def.Locks
 
 	// @TODO: this should not be called here as composer.lock content
 	// won't change between stage resolution
@@ -539,7 +540,7 @@ func (def *Definition) ResolveStageDefinition(
 		inferConfig(&stageDef)
 	}
 
-	if !withLocks {
+	if !withStageLocks {
 		return stageDef, nil
 	}
 
@@ -548,8 +549,6 @@ func (def *Definition) ResolveStageDefinition(
 		return stageDef, xerrors.Errorf(
 			"no locks available for stage %q. Please update your lockfile", stageName)
 	}
-
-	stageDef.DefLocks = def.Locks
 	stageDef.StageLocks = locks
 
 	return stageDef, nil

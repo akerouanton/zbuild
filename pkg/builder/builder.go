@@ -52,7 +52,7 @@ func (b Builder) findHandler(
 	return handler, err
 }
 
-func buildOptsFromBuildkitOpts(c client.Client) builddef.BuildOpts {
+func buildOptsFromBuildkitOpts(c client.Client) (builddef.BuildOpts, error) {
 	sessionID := c.BuildOpts().SessionID
 	opts := c.BuildOpts().Opts
 
@@ -61,19 +61,22 @@ func buildOptsFromBuildkitOpts(c client.Client) builddef.BuildOpts {
 		file = v
 	}
 
-	buildOpts := builddef.NewBuildOpts(file, "context", "dev", sessionID)
+	buildOpts, err := builddef.NewBuildOpts(file, "context", "dev", sessionID)
+	if err != nil {
+		return buildOpts, err
+	}
 
 	if v, ok := opts[keyTarget]; ok {
 		buildOpts.Stage = v
 	}
 
 	if v, ok := opts[keyDockerContext]; ok {
-		buildOpts.BuildContext = builddef.NewContext(v, "")
+		buildOpts.BuildContext, err = builddef.NewContext(v, "")
 	} else if v, ok := opts[keyContext]; ok {
-		buildOpts.BuildContext = builddef.NewContext(v, "")
+		buildOpts.BuildContext, err = builddef.NewContext(v, "")
 	}
 
-	return buildOpts
+	return buildOpts, err
 }
 
 func (b Builder) Build(
@@ -81,7 +84,11 @@ func (b Builder) Build(
 	solver statesolver.StateSolver,
 	c client.Client,
 ) (*client.Result, error) {
-	buildOpts := buildOptsFromBuildkitOpts(c)
+	buildOpts, err := buildOptsFromBuildkitOpts(c)
+	if err != nil {
+		return nil, err
+	}
+
 	def, err := defloader.Load(ctx, solver, buildOpts)
 	if err != nil {
 		return nil, err
@@ -184,7 +191,12 @@ func (b Builder) Debug(
 	file,
 	stage string,
 ) (llb.State, error) {
-	buildOpts := builddef.NewBuildOpts(file, "", stage, "")
+	var state llb.State
+
+	buildOpts, err := builddef.NewBuildOpts(file, "", stage, "")
+	if err != nil {
+		return state, err
+	}
 
 	ctx := context.Background()
 	def, err := defloader.Load(ctx, solver, buildOpts)
@@ -193,7 +205,7 @@ func (b Builder) Debug(
 	}
 	buildOpts.Def = def
 
-	state, _, err := b.build(ctx, solver, buildOpts)
+	state, _, err = b.build(ctx, solver, buildOpts)
 	return state, err
 }
 
@@ -202,7 +214,10 @@ func (b Builder) DumpConfig(
 	file,
 	stage string,
 ) ([]byte, error) {
-	buildOpts := builddef.NewBuildOpts(file, "", stage, "")
+	buildOpts, err := builddef.NewBuildOpts(file, "", stage, "")
+	if err != nil {
+		return []byte{}, err
+	}
 
 	ctx := context.Background()
 	def, err := defloader.Load(ctx, solver, buildOpts)

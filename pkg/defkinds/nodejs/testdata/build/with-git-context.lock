@@ -1,5 +1,6 @@
 base: docker.io/library/node:12-buster-slim@sha256:4d1016eefc4e6dc52ba9be6550dcb25a6e1826117507e65eda3650d6eb19f042
 source_context:
+  path: client
   reference: 5ecd2177087afbcce8f88ddfedbc7b95e738d961
   source: github.com/api-platform/demo
   type: git

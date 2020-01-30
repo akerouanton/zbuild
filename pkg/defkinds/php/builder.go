@@ -143,36 +143,37 @@ func copyConfigFiles(
 	state llb.State,
 	buildOpts builddef.BuildOpts,
 ) llb.State {
-	configFiles := []string{}
+	buildctx := buildOpts.BuildContext
+	configFiles := make([]string, 0, 2)
+
+	iniFile := ""
 	if stage.ConfigFiles.IniFile != nil {
-		configFiles = append(configFiles, *stage.ConfigFiles.IniFile)
-	}
-	if stage.ConfigFiles.FPMConfigFile != nil {
-		configFiles = append(configFiles, *stage.ConfigFiles.FPMConfigFile)
+		iniFile = prefixContextPath(buildctx, *stage.ConfigFiles.IniFile)
+		configFiles = append(configFiles, iniFile)
 	}
 
-	sourceState := llbutils.FromContext(buildOpts.BuildContext,
+	fpmFile := ""
+	if stage.ConfigFiles.FPMConfigFile != nil {
+		fpmFile = prefixContextPath(buildctx, *stage.ConfigFiles.FPMConfigFile)
+		configFiles = append(configFiles, fpmFile)
+	}
+
+	sourceState := llbutils.FromContext(buildctx,
 		llb.IncludePatterns(configFiles),
 		llb.LocalUniqueID(buildOpts.LocalUniqueID),
 		llb.SessionID(buildOpts.SessionID),
 		llb.SharedKeyHint(SharedKeys.ConfigFiles),
 		llb.WithCustomName("load config files from build context"))
 
-	if stage.ConfigFiles.IniFile != nil {
+	if iniFile != "" {
 		state = llbutils.Copy(
-			sourceState,
-			*stage.ConfigFiles.IniFile,
-			state,
-			"/usr/local/etc/php/php.ini",
-			"1000:1000")
+			sourceState, iniFile,
+			state, "/usr/local/etc/php/php.ini", "1000:1000")
 	}
-	if stage.ConfigFiles.FPMConfigFile != nil {
+	if fpmFile != "" {
 		state = llbutils.Copy(
-			sourceState,
-			*stage.ConfigFiles.FPMConfigFile,
-			state,
-			"/usr/local/etc/php-fpm.conf",
-			"1000:1000")
+			sourceState, fpmFile,
+			state, "/usr/local/etc/php-fpm.conf", "1000:1000")
 	}
 
 	return state
@@ -185,15 +186,16 @@ func copySourceFiles(
 ) llb.State {
 	sourceContext := resolveSourceContext(stageDef, buildOpts)
 	srcState := llbutils.FromContext(sourceContext,
-		llb.IncludePatterns(includePatterns(&stageDef)),
-		llb.ExcludePatterns(excludePatterns(&stageDef)),
+		llb.IncludePatterns(includePatterns(sourceContext, &stageDef)),
+		llb.ExcludePatterns(excludePatterns(sourceContext, &stageDef)),
 		llb.LocalUniqueID(buildOpts.LocalUniqueID),
 		llb.SessionID(buildOpts.SessionID),
 		llb.SharedKeyHint(SharedKeys.BuildContext),
 		llb.WithCustomName("load build context"))
 
 	if sourceContext.Type == builddef.ContextTypeLocal {
-		return llbutils.Copy(srcState, "/", state, "/app/", "1000:1000")
+		srcPath := prefixContextPath(sourceContext, "/")
+		return llbutils.Copy(srcState, srcPath, state, "/app/", "1000:1000")
 	}
 
 	// Despite the IncludePatterns() above, the source state might also
@@ -201,8 +203,9 @@ func copySourceFiles(
 	// As such, we can't just copy the whole source state to the dest state
 	// in such case.
 	for _, srcfile := range stageDef.Sources {
-		destfile := path.Join("/app", srcfile)
-		state = llbutils.Copy(srcState, srcfile, state, destfile, "1000:1000")
+		srcPath := prefixContextPath(sourceContext, srcfile)
+		destPath := path.Join("/app", srcfile)
+		state = llbutils.Copy(srcState, srcPath, state, destPath, "1000:1000")
 	}
 
 	return state
@@ -215,7 +218,6 @@ func resolveSourceContext(
 	if stageDef.DefLocks.SourceContext != nil {
 		return stageDef.DefLocks.SourceContext
 	}
-
 	return buildOpts.BuildContext
 }
 
@@ -253,22 +255,32 @@ func setImageMetadata(
 	}
 }
 
-func excludePatterns(stage *StageDefinition) []string {
+func excludePatterns(srcContext *builddef.Context, stageDef *StageDefinition) []string {
 	excludes := []string{}
 	// Explicitly exclude stateful dirs to ensure they aren't included when
-	// they're in one of sourceDirs
-	for _, dir := range stage.StatefulDirs {
-		excludes = append(excludes, dir)
+	// they're in one of Sources
+	for _, dir := range stageDef.StatefulDirs {
+		dirpath := prefixContextPath(srcContext, dir)
+		excludes = append(excludes, dirpath)
 	}
 	return excludes
 }
 
-func includePatterns(stage *StageDefinition) []string {
+func includePatterns(srcContext *builddef.Context, stageDef *StageDefinition) []string {
 	includes := []string{}
-	for _, dir := range stage.Sources {
-		includes = append(includes, dir)
+	for _, srcpath := range stageDef.Sources {
+		fullpath := prefixContextPath(srcContext, srcpath)
+		includes = append(includes, fullpath)
 	}
 	return includes
+}
+
+func prefixContextPath(srcContext *builddef.Context, p string) string {
+	if srcContext.IsGitContext() && srcContext.Path != "" {
+		return path.Join("/", srcContext.Path, p)
+	}
+
+	return p
 }
 
 func getEnv(src llb.State, name string) string {
@@ -306,14 +318,20 @@ func composerInstall(
 	state llb.State,
 	buildOpts builddef.BuildOpts,
 ) llb.State {
-	sourceContext := resolveSourceContext(stageDef, buildOpts)
-	composerSrc := llbutils.FromContext(sourceContext,
-		llb.IncludePatterns([]string{"composer.json", "composer.lock"}),
+	srcContext := resolveSourceContext(stageDef, buildOpts)
+	// @TODO: test if composer.* can be used as an include pattern
+	include := []string{
+		prefixContextPath(srcContext, "composer.json"),
+		prefixContextPath(srcContext, "composer.lock")}
+	srcState := llbutils.FromContext(srcContext,
+		llb.IncludePatterns(include),
 		llb.LocalUniqueID(buildOpts.LocalUniqueID),
 		llb.SessionID(buildOpts.SessionID),
 		llb.SharedKeyHint(SharedKeys.ComposerFiles),
 		llb.WithCustomName("load composer files from build context"))
-	state = llbutils.Copy(composerSrc, "composer.*", state, "/app/", "1000:1000")
+
+	srcPath := prefixContextPath(srcContext, "composer.*")
+	state = llbutils.Copy(srcState, srcPath, state, "/app/", "1000:1000")
 
 	cmds := []string{
 		"composer install --no-dev --prefer-dist --no-scripts --no-autoloader",

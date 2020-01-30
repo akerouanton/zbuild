@@ -1,6 +1,7 @@
 package builddef
 
 import (
+	"net/url"
 	"strings"
 
 	"golang.org/x/xerrors"
@@ -28,32 +29,44 @@ func (ctype ContextType) IsValid() error {
 // "git://" followed by a repo URI or a local context name. It also takes an
 // optional contextType that can be used to force the type of the context (no
 // inference on the source format will be done).
-func NewContext(source string, contextType string) *Context {
+func NewContext(source string, contextType string) (*Context, error) {
 	if contextType == string(ContextTypeGit) ||
 		strings.HasPrefix(source, "git://") {
 		return newGitContext(source)
 	}
 
-	return &Context{
+	context := &Context{
 		Source: source,
 		Type:   ContextTypeLocal,
 	}
+	return context, nil
 }
 
-func newGitContext(url string) *Context {
-	parts := strings.SplitN(url, "#", 2)
-	ref := ""
-	if len(parts) == 2 {
-		ref = parts[1]
+func newGitContext(sourceURL string) (*Context, error) {
+	context := &Context{
+		Type: ContextTypeGit,
 	}
 
-	return &Context{
-		Source: parts[0],
-		Type:   ContextTypeGit,
-		GitContext: GitContext{
-			Reference: ref,
-		},
+	u, err := url.Parse(sourceURL)
+	if err != nil {
+		return nil, err
 	}
+
+	refAndPath := strings.SplitN(u.Fragment, ":", 2)
+	context.Reference = ""
+	context.Path = ""
+
+	if len(refAndPath[0]) > 0 {
+		context.Reference = refAndPath[0]
+	}
+	if len(refAndPath) == 2 {
+		context.Path = refAndPath[1]
+	}
+
+	u.Fragment = ""
+	context.Source = u.String()
+
+	return context, nil
 }
 
 type Context struct {
@@ -98,6 +111,7 @@ func (c *Context) RawLocks() map[string]interface{} {
 		"type":      c.Type,
 		"source":    c.Source,
 		"reference": c.Reference,
+		"path":      c.Path,
 	}
 }
 
@@ -109,7 +123,8 @@ func (c *Context) IsLocalContext() bool {
 	return c != nil && c.Type == ContextTypeLocal
 }
 
-// @TODO: add subdir parameter
 type GitContext struct {
 	Reference string
+	// Path contains the base root dir of the context in the git repo.
+	Path string
 }

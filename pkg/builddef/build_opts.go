@@ -22,7 +22,7 @@ type BuildOpts struct {
 	BuildContext  *Context
 }
 
-func NewBuildOpts(file, context, stage, sessionID string) BuildOpts {
+func NewBuildOpts(file, context, stage, sessionID string) (BuildOpts, error) {
 	if context == "" {
 		context = "context"
 	}
@@ -30,13 +30,17 @@ func NewBuildOpts(file, context, stage, sessionID string) BuildOpts {
 		sessionID = "<SESSION-ID>"
 	}
 
-	return BuildOpts{
-		File:         file,
-		LockFile:     LockFilepath(file),
-		BuildContext: NewContext(context, ""),
-		Stage:        stage,
-		SessionID:    sessionID,
+	opts := BuildOpts{
+		File:      file,
+		LockFile:  LockFilepath(file),
+		Stage:     stage,
+		SessionID: sessionID,
 	}
+
+	var err error
+	opts.BuildContext, err = NewContext(context, "")
+
+	return opts, err
 }
 
 func LockFilepath(ymlFile string) string {

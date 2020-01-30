@@ -491,6 +491,22 @@ func initSuccessfullyResolveDefaultDevStageTC(t *testing.T, mockCtrl *gomock.Con
 				Integrations: []string{"blackfire"},
 				PostInstall:  []string{"some more commands", "another one"},
 			},
+			DefLocks: php.DefinitionLocks{
+				ExtensionDir: "/usr/local/lib/php/extensions/no-debug-non-zts-20190902/",
+				Stages: map[string]php.StageLocks{
+					"dev": {
+						SystemPackages: map[string]string{
+							"git":        "1:2.1.4-2.1+deb8u7",
+							"libicu-dev": "52.1-8+deb8u7",
+						},
+						Extensions: map[string]string{
+							"intl":      "*",
+							"pdo_mysql": "*",
+							"soap":      "*",
+						},
+					},
+				},
+			},
 		},
 	}
 }
