@@ -117,6 +117,18 @@ func (s BuildkitSolver) readFromLLB(
 	return raw, nil
 }
 
+func (s BuildkitSolver) FileExists(
+	ctx context.Context,
+	filepath string,
+	source *builddef.Context,
+) (bool, error) {
+	_, err := s.ReadFile(ctx, filepath, s.FromContext(source))
+	if err == FileNotFound {
+		return false, nil
+	}
+	return true, err
+}
+
 func (s BuildkitSolver) ReadFile(ctx context.Context, filepath string, opt ReadFileOpt) ([]byte, error) {
 	return opt(ctx, filepath)
 }

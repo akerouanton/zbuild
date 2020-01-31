@@ -30,6 +30,10 @@ func initBuildLLBForDevStageTC(t *testing.T, mockCtrl *gomock.Controller) buildT
 	genericDef.RawLocks = loadDefLocks(t, "testdata/build/zbuild.lock")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
+	solver.EXPECT().
+		FileExists(gomock.Any(), "package-lock.json", gomock.Any()).
+		Return(false, nil)
+
 	kindHandler := nodejs.NodeJSHandler{}
 	kindHandler.WithSolver(solver)
 
@@ -80,6 +84,10 @@ func initBuildLLBForProdStageTC(t *testing.T, mockCtrl *gomock.Controller) build
 	genericDef.RawLocks = loadDefLocks(t, "testdata/build/frontend.lock")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
+	solver.EXPECT().
+		FileExists(gomock.Any(), "package-lock.json", gomock.Any()).
+		Return(false, nil)
+
 	kindHandler := nodejs.NodeJSHandler{}
 	kindHandler.WithSolver(solver)
 
@@ -130,6 +138,10 @@ func initBuildLLBForWorkerStageTC(t *testing.T, mockCtrl *gomock.Controller) bui
 	genericDef.RawLocks = loadDefLocks(t, "testdata/build/zbuild.lock")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
+	solver.EXPECT().
+		FileExists(gomock.Any(), "package-lock.json", gomock.Any()).
+		Return(false, nil)
+
 	kindHandler := nodejs.NodeJSHandler{}
 	kindHandler.WithSolver(solver)
 
@@ -185,6 +197,10 @@ func initBuildLLBWithGitBuildContextTC(t *testing.T, mockCtrl *gomock.Controller
 	genericDef.RawLocks = loadDefLocks(t, "testdata/build/zbuild.lock")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
+	solver.EXPECT().
+		FileExists(gomock.Any(), "package-lock.json", gomock.Any()).
+		Return(false, nil)
+
 	kindHandler := nodejs.NodeJSHandler{}
 	kindHandler.WithSolver(solver)
 
@@ -241,6 +257,10 @@ func initBuildLLBWithGitSourceContextTC(t *testing.T, mockCtrl *gomock.Controlle
 	genericDef.RawLocks = loadDefLocks(t, "testdata/build/with-git-context.lock")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
+	solver.EXPECT().
+		FileExists(gomock.Any(), "package-lock.json", gomock.Any()).
+		Return(false, nil)
+
 	kindHandler := nodejs.NodeJSHandler{}
 	kindHandler.WithSolver(solver)
 
@@ -294,6 +314,10 @@ func initBuildLLBWithGitBuildAndSourceContextTC(t *testing.T, mockCtrl *gomock.C
 	genericDef.RawLocks = loadDefLocks(t, "testdata/build/with-git-context.lock")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
+	solver.EXPECT().
+		FileExists(gomock.Any(), "package-lock.json", gomock.Any()).
+		Return(false, nil)
+
 	kindHandler := nodejs.NodeJSHandler{}
 	kindHandler.WithSolver(solver)
 
@@ -345,6 +369,60 @@ func initBuildLLBWithGitBuildAndSourceContextTC(t *testing.T, mockCtrl *gomock.C
 	}
 }
 
+func initBuildLLBForNpmBasedProjectTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
+	genericDef := loadBuildDef(t, "testdata/build/frontend.yml")
+	genericDef.RawLocks = loadDefLocks(t, "testdata/build/frontend.lock")
+
+	solver := mocks.NewMockStateSolver(mockCtrl)
+	solver.EXPECT().
+		FileExists(gomock.Any(), "package-lock.json", gomock.Any()).
+		Return(true, nil)
+
+	kindHandler := nodejs.NodeJSHandler{}
+	kindHandler.WithSolver(solver)
+
+	return buildTC{
+		handler: &kindHandler,
+		client:  llbtest.NewMockClient(mockCtrl),
+		buildOpts: builddef.BuildOpts{
+			Def:           genericDef,
+			Stage:         "prod",
+			SessionID:     "<SESSION-ID>",
+			LocalUniqueID: "x1htr02606a9rk8b0daewh9es",
+			BuildContext: &builddef.Context{
+				Source: "context",
+				Type:   builddef.ContextTypeLocal,
+			},
+		},
+		expectedState: "testdata/build/state-prod-with-npm.json",
+		expectedImage: &image.Image{
+			Image: specs.Image{
+				Architecture: "amd64",
+				OS:           "linux",
+				RootFS: specs.RootFS{
+					Type: "layers",
+				},
+			},
+			Config: image.ImageConfig{
+				ImageConfig: specs.ImageConfig{
+					User: "1000",
+					Env: []string{
+						"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+						"NODE_ENV=production",
+					},
+					Entrypoint: []string{"docker-entrypoint.sh"},
+					Cmd:        []string{"node"},
+					Volumes:    map[string]struct{}{},
+					WorkingDir: "/app",
+					Labels: map[string]string{
+						"io.zbuild": "true",
+					},
+				},
+			},
+		},
+	}
+}
+
 func TestBuild(t *testing.T) {
 	testcases := map[string]func(*testing.T, *gomock.Controller) buildTC{
 		"build LLB DAG for dev stage":                     initBuildLLBForDevStageTC,
@@ -352,6 +430,7 @@ func TestBuild(t *testing.T) {
 		"build LLB DAG with git build context":            initBuildLLBWithGitBuildContextTC,
 		"build LLB DAG with git source context":           initBuildLLBWithGitSourceContextTC,
 		"build LLB DAG with git build and source context": initBuildLLBWithGitBuildAndSourceContextTC,
+		"build LLB DAG for npm-based project":             initBuildLLBForNpmBasedProjectTC,
 	}
 
 	for tcname := range testcases {

@@ -50,6 +50,19 @@ func (mr *MockStateSolverMockRecorder) ExecImage(arg0, arg1, arg2 interface{}) *
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExecImage", reflect.TypeOf((*MockStateSolver)(nil).ExecImage), arg0, arg1, arg2)
 }
 
+// FileExists mocks base method
+func (m *MockStateSolver) FileExists(arg0 context.Context, arg1 string, arg2 *builddef.Context) (bool, error) {
+	ret := m.ctrl.Call(m, "FileExists", arg0, arg1, arg2)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FileExists indicates an expected call of FileExists
+func (mr *MockStateSolverMockRecorder) FileExists(arg0, arg1, arg2 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FileExists", reflect.TypeOf((*MockStateSolver)(nil).FileExists), arg0, arg1, arg2)
+}
+
 // FromContext mocks base method
 func (m *MockStateSolver) FromContext(arg0 *builddef.Context, arg1 ...llb.LocalOption) statesolver.ReadFileOpt {
 	varargs := []interface{}{arg0}
