@@ -1,0 +1,18 @@
+# syntax=akerouanton/zbuilder:200131-02
+kind: nodejs
+version: lts
+
+source_context:
+  type: git
+  source: git://github.com/sveltejs/realworld
+
+sources:
+  - src/
+  - static/
+  - rollup.config.js
+
+build_command: npm run build
+
+stages:
+  prod:
+    command: ["npm", "start"]
