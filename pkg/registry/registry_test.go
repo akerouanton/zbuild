@@ -82,7 +82,11 @@ func (h mockKindHandler) Build(ctx context.Context, opts builddef.BuildOpts) (ll
 	return state, h.builtImage, nil
 }
 
-func (h mockKindHandler) UpdateLocks(ctx context.Context, pkgSolver pkgsolver.PackageSolver, genericDef *builddef.BuildDef) (builddef.Locks, error) {
+func (h mockKindHandler) UpdateLocks(
+	ctx context.Context,
+	pkgSolvers pkgsolver.PackageSolversMap,
+	genericDef *builddef.BuildDef,
+) (builddef.Locks, error) {
 	return mockLocks{}, nil
 }
 

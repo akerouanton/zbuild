@@ -19,6 +19,7 @@ func NewAPTSolver(solver statesolver.StateSolver) *APTSolver {
 }
 
 func (s *APTSolver) ResolveVersions(
+	ctx context.Context,
 	imageRef string,
 	pkgs map[string]string,
 ) (map[string]string, error) {
@@ -40,7 +41,6 @@ func (s *APTSolver) ResolveVersions(
 		return resolved, nil
 	}
 
-	ctx := context.Background()
 	cmd = []string{
 		"apt-get update 1>/dev/null 2>&1",
 		strings.Join(cmd, " "),
@@ -50,13 +50,13 @@ func (s *APTSolver) ResolveVersions(
 		return resolved, err
 	}
 
-	resolved = s.parseAPTCacheMadison(outbuf, resolved)
+	resolved = parseAPTCacheMadison(outbuf, resolved)
 	err = checkMissingPackages(pkgs, resolved)
 
 	return resolved, err
 }
 
-func (s *APTSolver) parseAPTCacheMadison(
+func parseAPTCacheMadison(
 	buf *bytes.Buffer,
 	res map[string]string,
 ) map[string]string {

@@ -47,7 +47,7 @@ func (l StageLocks) RawLocks() map[string]interface{} {
 
 func (h *NodeJSHandler) UpdateLocks(
 	ctx context.Context,
-	pkgSolver pkgsolver.PackageSolver,
+	pkgSolvers pkgsolver.PackageSolversMap,
 	buildOpts builddef.BuildOpts,
 ) (builddef.Locks, error) {
 	def, err := NewKind(buildOpts.Def)
@@ -70,6 +70,7 @@ func (h *NodeJSHandler) UpdateLocks(
 		return nil, xerrors.Errorf("unsupported OS %q: only debian-based base images are supported", osrelease.Name)
 	}
 
+	pkgSolver := pkgSolvers.New(pkgsolver.APT, h.solver)
 	def.Locks.Stages, err = h.updateStagesLocks(ctx, pkgSolver, def)
 	if err != nil {
 		return nil, xerrors.Errorf("failed to update stages locks: %w", err)
@@ -97,9 +98,8 @@ func (h *NodeJSHandler) updateStagesLocks(
 		}
 
 		stageLocks := StageLocks{}
-		stageLocks.SystemPackages, err = pkgSolver.ResolveVersions(
-			def.Locks.BaseImage,
-			stage.SystemPackages.Map())
+		stageLocks.SystemPackages, err = pkgSolver.ResolveVersions(ctx,
+			def.Locks.BaseImage, stage.SystemPackages.Map())
 		if err != nil {
 			return nil, xerrors.Errorf("could not resolve versions of system packages to install: %w", err)
 		}

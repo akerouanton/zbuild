@@ -50,10 +50,9 @@ func HandleUpdateCmd(cmd *cobra.Command, args []string) {
 	}
 
 	solver := newDockerSolver(buildOpts.BuildContext.Source)
-	pkgSolver := pkgsolver.NewAPTSolver(solver)
 	b := builder.Builder{
-		Registry:  registry.Registry,
-		PkgSolver: pkgSolver,
+		Registry:   registry.Registry,
+		PkgSolvers: pkgsolver.DefaultPackageSolversMap,
 	}
 
 	if err := b.UpdateLockFile(solver, buildOpts); err != nil {

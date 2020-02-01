@@ -23,7 +23,7 @@ type KindHandler interface {
 	// DAG representing the build steps and the metadata of the final image, or
 	// an error if something goes wrong during the build.
 	Build(context.Context, builddef.BuildOpts) (llb.State, *image.Image, error)
-	UpdateLocks(context.Context, pkgsolver.PackageSolver, builddef.BuildOpts) (builddef.Locks, error)
+	UpdateLocks(context.Context, pkgsolver.PackageSolversMap, builddef.BuildOpts) (builddef.Locks, error)
 	// DebugConfig loads and parses its kind definition based on parameters in
 	// the BuildOpts, like Build() method does. It returns the end struct used
 	// to build a given stage, after all merge and inference operations

@@ -23,7 +23,7 @@ func (l DefinitionLocks) RawLocks() map[string]interface{} {
 
 func (h *WebserverHandler) UpdateLocks(
 	ctx context.Context,
-	pkgSolver pkgsolver.PackageSolver,
+	pkgSolvers pkgsolver.PackageSolversMap,
 	buildOpts builddef.BuildOpts,
 ) (builddef.Locks, error) {
 	def, err := NewKind(buildOpts.Def)
@@ -46,9 +46,9 @@ func (h *WebserverHandler) UpdateLocks(
 		return nil, xerrors.Errorf("unsupported OS %s: only debian-based images are supported", osrelease.Name)
 	}
 
-	def.Locks.SystemPackages, err = pkgSolver.ResolveVersions(
-		def.Locks.BaseImage,
-		def.SystemPackages.Map())
+	pkgSolver := pkgSolvers.New(pkgsolver.APT, h.solver)
+	def.Locks.SystemPackages, err = pkgSolver.ResolveVersions(ctx,
+		def.Locks.BaseImage, def.SystemPackages.Map())
 	if err != nil {
 		return nil, xerrors.Errorf("could not resolve system packages: %w", err)
 	}

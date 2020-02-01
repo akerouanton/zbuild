@@ -1,6 +1,7 @@
 package pkgsolver_test
 
 import (
+	"context"
 	"errors"
 	"testing"
 
@@ -33,13 +34,14 @@ func TestAPKResolveVersions(t *testing.T) {
 		t.Run(tcname, func(t *testing.T) {
 			t.Parallel()
 
+			ctx := context.Background()
 			solver := statesolver.DockerSolver{
 				Client:  c,
 				Labels:  map[string]string{},
 				RootDir: "testdata",
 			}
 			pkgSolver := pkgsolver.NewAPKSolver(solver)
-			_, err := pkgSolver.ResolveVersions(tc.imageRef, tc.toResolve)
+			_, err := pkgSolver.ResolveVersions(ctx, tc.imageRef, tc.toResolve)
 
 			if tc.expectedErr != nil {
 				if err == nil || err.Error() != tc.expectedErr.Error() {
