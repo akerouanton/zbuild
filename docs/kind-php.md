@@ -71,7 +71,7 @@ enabled ;
 * Add extensions requirements from your `composer.json` and `composer.lock`
 files ;
 * Add `zip` extension (as it's required by composer) ;
-* Add `libpcre3-dev`, `unzip` and `git` system packages ;
+* Add `unzip` and `git` system packages ;
 * Add known system packages requirements for the native extensions to install ;
 
 ## Build process

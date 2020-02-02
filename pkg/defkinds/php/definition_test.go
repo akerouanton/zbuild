@@ -542,11 +542,10 @@ func initSuccessfullyResolveWorkerStageTC(t *testing.T, mockCtrl *gomock.Control
 			Stage: php.Stage{
 				ExternalFiles: []llbutils.ExternalFile{},
 				SystemPackages: &builddef.VersionMap{
-					"zlib1g-dev":   "*",
-					"unzip":        "*",
-					"git":          "*",
-					"libpcre3-dev": "*",
-					"libzip-dev":   "*",
+					"zlib1g-dev": "*",
+					"unzip":      "*",
+					"git":        "*",
+					"libzip-dev": "*",
 				},
 				FPM:     &isNotFPM,
 				Command: &workerCmd,
@@ -619,7 +618,6 @@ func initRemoveDefaultExtensionsTC(t *testing.T, mockCtrl *gomock.Controller) re
 					"zlib1g-dev":    "*",
 					"unzip":         "*",
 					"git":           "*",
-					"libpcre3-dev":  "*",
 					"libsodium-dev": "*",
 					"libzip-dev":    "*",
 				},
@@ -677,11 +675,10 @@ func initPreservePredefinedExtensionConstraintsTC(t *testing.T, mockCtrl *gomock
 			Stage: php.Stage{
 				ExternalFiles: []llbutils.ExternalFile{},
 				SystemPackages: &builddef.VersionMap{
-					"zlib1g-dev":   "*",
-					"unzip":        "*",
-					"git":          "*",
-					"libpcre3-dev": "*",
-					"libzip-dev":   "*",
+					"zlib1g-dev": "*",
+					"unzip":      "*",
+					"git":        "*",
+					"libzip-dev": "*",
 				},
 				FPM: &fpm,
 				Extensions: &builddef.VersionMap{

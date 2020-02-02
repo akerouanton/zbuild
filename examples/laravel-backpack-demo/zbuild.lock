@@ -12,7 +12,6 @@ stages:
       zip: '*'
     system_packages:
       git: 1:2.20.1-2+deb10u1
-      libpcre3-dev: 2:8.39-12
       libssl-dev: 1.1.1d-0+deb10u2
       libxml2-dev: 2.9.4+dfsg1-7+b3
       libzip-dev: 1.5.1-4
@@ -26,7 +25,6 @@ stages:
       zip: '*'
     system_packages:
       git: 1:2.20.1-2+deb10u1
-      libpcre3-dev: 2:8.39-12
       libxml2-dev: 2.9.4+dfsg1-7+b3
       libzip-dev: 1.5.1-4
       unzip: 6.0-23+deb10u1
