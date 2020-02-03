@@ -15,6 +15,7 @@ import (
 // by each stage.
 type DefinitionLocks struct {
 	BaseImage     string                `mapstructure:"base_image"`
+	OSRelease     builddef.OSRelease    `mapstructure:"osrelease"`
 	ExtensionDir  string                `mapstructure:"extension_dir"`
 	Stages        map[string]StageLocks `mapstructure:"stages"`
 	SourceContext *builddef.Context     `mapstructure:"source_context"`
@@ -24,6 +25,7 @@ func (l DefinitionLocks) RawLocks() map[string]interface{} {
 	lockdata := map[string]interface{}{
 		"base_image":     l.BaseImage,
 		"extension_dir":  l.ExtensionDir,
+		"osrelease":      l.OSRelease,
 		"source_context": nil,
 	}
 
@@ -74,8 +76,15 @@ func (h *PHPHandler) UpdateLocks(
 	if err != nil {
 		return nil, xerrors.Errorf("could not resolve OS details from base image: %w", err)
 	}
-	if osrelease.Name != "debian" {
-		return nil, xerrors.Errorf("unsupported OS %q: only debian-based base images are supported", osrelease.Name)
+	def.Locks.OSRelease = osrelease
+
+	var pkgSolverType pkgsolver.SolverType
+	if osrelease.Name == "debian" {
+		pkgSolverType = pkgsolver.APT
+	} else if osrelease.Name == "alpine" {
+		pkgSolverType = pkgsolver.APK
+	} else {
+		return nil, xerrors.Errorf("unsupported OS %q: only debian-based and alpine-based base images are supported", osrelease.Name)
 	}
 
 	def.Locks.ExtensionDir, err = h.resolveExtensionDir(ctx, def.Locks.BaseImage)
@@ -88,7 +97,7 @@ func (h *PHPHandler) UpdateLocks(
 		return nil, xerrors.Errorf("failed to lock source context: %w", err)
 	}
 
-	pkgSolver := pkgSolvers.New(pkgsolver.APT, h.solver)
+	pkgSolver := pkgSolvers.New(pkgSolverType, h.solver)
 	def.Locks.Stages, err = h.updateStagesLocks(ctx, pkgSolver, def, buildOpts)
 	if err != nil {
 		return nil, xerrors.Errorf("failed to update stages locks: %w", err)

@@ -1,0 +1,62 @@
+[
+  {
+    "RawOp": "CkkKR3NoYTI1NjpiN2RmYjAzZDBlMjI2YTJkZGY4MzFlMDI5ODZjMGQxMjVlN2RlODhiMzVhMGNkYWM2MGIzNDIzODMxNDcyYjc0",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:b7dfb03d0e226a2ddf831e02986c0d125e7de88b35a0cdac60b3423831472b74",
+          "index": 0
+        }
+      ],
+      "Op": null
+    },
+    "Digest": "sha256:2e4f44137f959ea8f431ba67bd1e1f4baab5463052367b8e081839d56594da94",
+    "OpMetadata": {
+      "caps": {
+        "constraints": true,
+        "meta.description": true,
+        "platform": true
+      }
+    }
+  },
+  {
+    "RawOp": "EsYCCrMCCgcvYmluL3NoCgItbwoHZXJyZXhpdAoCLWMKkwJjdXJsIC1mIC1vIC91c3IvbG9jYWwvc2Jpbi9ub3RwZWNsIGh0dHBzOi8vc3RvcmFnZS5nb29nbGVhcGlzLmNvbS9ub3RwZWNsL25vdHBlY2w7IGNobW9kICt4IC91c3IvbG9jYWwvc2Jpbi9ub3RwZWNsOyBhcGsgYWRkIC0tbm8tY2FjaGUgLS12aXJ0dWFsPS5waHBpemUgJFBIUElaRV9ERVBTOyBub3RwZWNsIGluc3RhbGwgbWVtY2FjaGVkOyBkb2NrZXItcGhwLWV4dC1lbmFibGUgbWVtY2FjaGVkOyBhcGsgZGVsIC5waHBpemU7IHJtIC1yZiAvdXNyL2xvY2FsL3NiaW4vbm90cGVjbBoBLxIOCP///////////wEaAS9SDgoFYW1kNjQSBWxpbnV4WgA=",
+    "Op": {
+      "Op": {
+        "Exec": {
+          "meta": {
+            "args": [
+              "/bin/sh",
+              "-o",
+              "errexit",
+              "-c",
+              "curl -f -o /usr/local/sbin/notpecl https://storage.googleapis.com/notpecl/notpecl; chmod +x /usr/local/sbin/notpecl; apk add --no-cache --virtual=.phpize $PHPIZE_DEPS; notpecl install memcached; docker-php-ext-enable memcached; apk del .phpize; rm -rf /usr/local/sbin/notpecl"
+            ],
+            "cwd": "/"
+          },
+          "mounts": [
+            {
+              "input": -1,
+              "dest": "/",
+              "output": 0
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:b7dfb03d0e226a2ddf831e02986c0d125e7de88b35a0cdac60b3423831472b74",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Install PHP extensions (memcached)"
+      },
+      "caps": {
+        "exec.meta.base": true
+      }
+    }
+  }
+]

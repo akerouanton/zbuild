@@ -1,0 +1,30 @@
+base_image: docker.io/library/php:7.4.2-fpm-alpine@sha256:2f8cd58527382276c6556beba6ff49f0a56fc5690d6907e4dba4b3384ac7f564
+extension_dir: /usr/local/lib/php/extensions/no-debug-non-zts-20190902
+osrelease:
+  name: alpine
+  versionname: ""
+  versionid: 3.11.3
+source_context: null
+stages:
+  dev:
+    extensions:
+      zip: '*'
+    system_packages:
+      git: 2.24.1-r0
+      libxml2-dev: 2.9.10-r1
+      libzip-dev: 1.5.2-r0
+      unzip: 6.0-r4
+  prod:
+    extensions:
+      apcu: 5.1.18
+      opcache: '*'
+      zip: '*'
+    system_packages:
+      git: 2.24.1-r0
+      libxml2-dev: 2.9.10-r1
+      libzip-dev: 1.5.2-r0
+      unzip: 6.0-r4
+webserver:
+  base_image: docker.io/library/nginx:latest@sha256:dbc01bf019acd03f85521f0cf291e239ffc3452adfc8505931ebf0d15c043f48
+  system_packages:
+    curl: 7.64.0-4

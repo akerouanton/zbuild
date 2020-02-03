@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/NiR-/zbuild/pkg/builddef"
 	"github.com/NiR-/zbuild/pkg/mocks"
 	"github.com/NiR-/zbuild/pkg/statesolver"
 	"github.com/go-test/deep"
@@ -14,7 +15,7 @@ func TestResolveImageOS(t *testing.T) {
 	testcases := map[string]struct {
 		imageRef string
 		file     []byte
-		expected statesolver.OSRelease
+		expected builddef.OSRelease
 	}{
 		"successfully parse an os-release file": {
 			imageRef: "debian:buster-20191118-slim",
@@ -28,7 +29,7 @@ ID=debian
 HOME_URL="https://www.debian.org/"
 SUPPORT_URL="https://www.debian.org/support"
 BUG_REPORT_URL="https://bugs.debian.org/"`),
-			expected: statesolver.OSRelease{
+			expected: builddef.OSRelease{
 				Name:        "debian",
 				VersionName: "stretch",
 				VersionID:   "9",

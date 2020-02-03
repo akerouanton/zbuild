@@ -384,6 +384,61 @@ func initFailToParseUnknownPropertiesTC() newDefinitionTC {
 	}
 }
 
+func initAlpineWithoutBaseImageTC() newDefinitionTC {
+	file := "testdata/def/empty.yml"
+
+	isFPM := true
+	isDev := true
+	isNotDev := false
+	inferMode := true
+
+	devStage := emptyStage()
+	prodStage := emptyStage()
+
+	return newDefinitionTC{
+		file: file,
+		expected: php.Definition{
+			BaseStage: php.Stage{
+				ExternalFiles:  []llbutils.ExternalFile{},
+				SystemPackages: &builddef.VersionMap{},
+				FPM:            &isFPM,
+				Extensions:     &builddef.VersionMap{},
+				GlobalDeps:     &builddef.VersionMap{},
+				ConfigFiles:    php.PHPConfigFiles{},
+				ComposerDumpFlags: &php.ComposerDumpFlags{
+					APCU:                  false,
+					ClassmapAuthoritative: true,
+				},
+				Sources:      []string{},
+				Integrations: []string{},
+				StatefulDirs: []string{},
+				Healthcheck: &builddef.HealthcheckConfig{
+					Type: builddef.HealthcheckTypeDisabled,
+				},
+				PostInstall: []string{},
+			},
+			Version:       "7.4.0",
+			Alpine:        true,
+			BaseImage:     "docker.io/library/php:7.4.0-fpm-alpine",
+			MajMinVersion: "7.4",
+			Infer:         &inferMode,
+			Stages: map[string]php.DerivedStage{
+				"dev": {
+					DeriveFrom: "base",
+					Dev:        &isDev,
+					Stage:      devStage,
+				},
+				"prod": {
+					DeriveFrom: "base",
+					Dev:        &isNotDev,
+					Stage:      prodStage,
+				},
+			},
+			Locks: php.DefinitionLocks{},
+		},
+	}
+}
+
 func TestNewKind(t *testing.T) {
 	if *flagTestdata {
 		return
@@ -396,6 +451,7 @@ func TestNewKind(t *testing.T) {
 		"with custom fcgi healthcheck":     initParseRawDefinitionWithCustomFCGIHealthcheckTC,
 		"with source context":              initParseRawDefinitionWithCustomSourceContextTC,
 		"fail to parse unknown properties": initFailToParseUnknownPropertiesTC,
+		"alpine without base image":        initAlpineWithoutBaseImageTC,
 	}
 
 	for tcname := range testcases {
@@ -432,6 +488,7 @@ type resolveStageTC struct {
 	file               string
 	lockFile           string
 	stage              string
+	osrelease          builddef.OSRelease
 	composerLockLoader func(*php.StageDefinition) error
 	expected           php.StageDefinition
 	expectedErr        error
@@ -449,6 +506,9 @@ func initSuccessfullyResolveDefaultDevStageTC(t *testing.T, mockCtrl *gomock.Con
 		file:     file,
 		lockFile: lockFile,
 		stage:    "dev",
+		osrelease: builddef.OSRelease{
+			Name: "debian",
+		},
 		composerLockLoader: func(stageDef *php.StageDefinition) error {
 			return nil
 		},
@@ -493,6 +553,9 @@ func initSuccessfullyResolveDefaultDevStageTC(t *testing.T, mockCtrl *gomock.Con
 			},
 			DefLocks: php.DefinitionLocks{
 				ExtensionDir: "/usr/local/lib/php/extensions/no-debug-non-zts-20190902/",
+				OSRelease: builddef.OSRelease{
+					Name: "debian",
+				},
 				Stages: map[string]php.StageLocks{
 					"dev": {
 						SystemPackages: map[string]string{
@@ -519,6 +582,9 @@ func initSuccessfullyResolveWorkerStageTC(t *testing.T, mockCtrl *gomock.Control
 		file:     "testdata/def/worker.yml",
 		lockFile: "",
 		stage:    "prod",
+		osrelease: builddef.OSRelease{
+			Name: "debian",
+		},
 		composerLockLoader: mockComposerLockLoader(
 			map[string]string{
 				"clue/stream-filter": "v1.4.0",
@@ -563,6 +629,11 @@ func initSuccessfullyResolveWorkerStageTC(t *testing.T, mockCtrl *gomock.Control
 				StatefulDirs: []string{},
 				PostInstall:  []string{},
 			},
+			DefLocks: php.DefinitionLocks{
+				OSRelease: builddef.OSRelease{
+					Name: "debian",
+				},
+			},
 		},
 	}
 }
@@ -574,9 +645,12 @@ func initFailToResolveUnknownStageTC(t *testing.T, mockCtrl *gomock.Controller) 
 	composerLockLoader := mockComposerLockLoader(map[string]string{}, map[string]string{})
 
 	return resolveStageTC{
-		file:               file,
-		lockFile:           lockFile,
-		stage:              "foo",
+		file:     file,
+		lockFile: lockFile,
+		stage:    "foo",
+		osrelease: builddef.OSRelease{
+			Name: "debian",
+		},
 		composerLockLoader: composerLockLoader,
 		expectedErr:        errors.New(`stage "foo" not found`),
 	}
@@ -586,9 +660,12 @@ func initFailToResolveStageWithCyclicDepsTC(t *testing.T, mockCtrl *gomock.Contr
 	composerLockLoader := mockComposerLockLoader(map[string]string{}, map[string]string{})
 
 	return resolveStageTC{
-		file:               "testdata/def/cyclic-stage-deps.yml",
-		lockFile:           "",
-		stage:              "dev",
+		file:     "testdata/def/cyclic-stage-deps.yml",
+		lockFile: "",
+		stage:    "dev",
+		osrelease: builddef.OSRelease{
+			Name: "debian",
+		},
 		composerLockLoader: composerLockLoader,
 		expectedErr:        errors.New(`there's a cyclic dependency between "dev" and itself`),
 	}
@@ -600,9 +677,12 @@ func initRemoveDefaultExtensionsTC(t *testing.T, mockCtrl *gomock.Controller) re
 	composerLockLoader := mockComposerLockLoader(map[string]string{}, map[string]string{})
 
 	return resolveStageTC{
-		file:               "testdata/def/remove-default-exts.yml",
-		lockFile:           "",
-		stage:              "dev",
+		file:     "testdata/def/remove-default-exts.yml",
+		lockFile: "",
+		stage:    "dev",
+		osrelease: builddef.OSRelease{
+			Name: "debian",
+		},
 		composerLockLoader: composerLockLoader,
 		expected: php.StageDefinition{
 			Name:           "dev",
@@ -643,6 +723,11 @@ func initRemoveDefaultExtensionsTC(t *testing.T, mockCtrl *gomock.Controller) re
 				StatefulDirs: []string{},
 				PostInstall:  []string{},
 			},
+			DefLocks: php.DefinitionLocks{
+				OSRelease: builddef.OSRelease{
+					Name: "debian",
+				},
+			},
 		},
 	}
 }
@@ -656,6 +741,9 @@ func initPreservePredefinedExtensionConstraintsTC(t *testing.T, mockCtrl *gomock
 		file:     "testdata/def/with-predefined-extension.yml",
 		lockFile: "",
 		stage:    "dev",
+		osrelease: builddef.OSRelease{
+			Name: "debian",
+		},
 		composerLockLoader: mockComposerLockLoader(
 			map[string]string{},
 			map[string]string{
@@ -695,6 +783,11 @@ func initPreservePredefinedExtensionConstraintsTC(t *testing.T, mockCtrl *gomock
 				StatefulDirs: []string{},
 				PostInstall:  []string{},
 			},
+			DefLocks: php.DefinitionLocks{
+				OSRelease: builddef.OSRelease{
+					Name: "debian",
+				},
+			},
 		},
 	}
 }
@@ -703,11 +796,75 @@ func initFailWhenComposerFlagsAreInvalidTC(t *testing.T, _ *gomock.Controller) r
 	composerLockLoader := mockComposerLockLoader(map[string]string{}, map[string]string{})
 
 	return resolveStageTC{
-		file:               "testdata/def/invalid-composer-flags.yml",
-		lockFile:           "",
-		stage:              "dev",
+		file:     "testdata/def/invalid-composer-flags.yml",
+		lockFile: "",
+		stage:    "dev",
+		osrelease: builddef.OSRelease{
+			Name: "debian",
+		},
 		composerLockLoader: composerLockLoader,
 		expectedErr:        errors.New(`invalid final stage config: you can't use both --apcu and --classmap-authoritative flags. See https://getcomposer.org/doc/articles/autoloader-optimization.md`),
+	}
+}
+
+func initInferAlpinePackagesRequiredByExtsTC(t *testing.T, mockCtrl *gomock.Controller) resolveStageTC {
+	fpmMode := true
+
+	return resolveStageTC{
+		file:     "testdata/def/alpine.yml",
+		lockFile: "",
+		stage:    "prod",
+		osrelease: builddef.OSRelease{
+			Name: "alpine",
+		},
+		composerLockLoader: mockComposerLockLoader(
+			map[string]string{},
+			map[string]string{},
+		),
+		expected: php.StageDefinition{
+			Name:           "prod",
+			Version:        "7.4",
+			MajMinVersion:  "7.4",
+			Infer:          true,
+			Dev:            false,
+			LockedPackages: map[string]string{},
+			PlatformReqs:   map[string]string{},
+			Stage: php.Stage{
+				FPM:           &fpmMode,
+				ExternalFiles: []llbutils.ExternalFile{},
+				SystemPackages: &builddef.VersionMap{
+					"git":            "*",
+					"icu-dev":        "*",
+					"libzip-dev":     "*",
+					"postgresql-dev": "*",
+					"unzip":          "*",
+				},
+				Extensions: &builddef.VersionMap{
+					"apcu":      "*",
+					"intl":      "*",
+					"opcache":   "*",
+					"pdo_pgsql": "*",
+					"zip":       "*",
+				},
+				GlobalDeps: &builddef.VersionMap{},
+				ComposerDumpFlags: &php.ComposerDumpFlags{
+					APCU:                  false,
+					ClassmapAuthoritative: true,
+				},
+				Sources:      []string{},
+				Integrations: []string{},
+				StatefulDirs: []string{},
+				PostInstall:  []string{},
+				Healthcheck: &builddef.HealthcheckConfig{
+					Type: builddef.HealthcheckTypeDisabled,
+				},
+			},
+			DefLocks: php.DefinitionLocks{
+				OSRelease: builddef.OSRelease{
+					Name: "alpine",
+				},
+			},
+		},
 	}
 }
 
@@ -724,6 +881,7 @@ func TestResolveStageDefinition(t *testing.T) {
 		"fail when composer flags are invalid":      initFailWhenComposerFlagsAreInvalidTC,
 		"remove default extensions":                 initRemoveDefaultExtensionsTC,
 		"preserve predefined extension constraints": initPreservePredefinedExtensionConstraintsTC,
+		"infer alpine packages required by exts":    initInferAlpinePackagesRequiredByExtsTC,
 	}
 
 	for tcname := range testcases {
@@ -746,6 +904,7 @@ func TestResolveStageDefinition(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
+			def.Locks.OSRelease = tc.osrelease
 
 			stageDef, err := def.ResolveStageDefinition(tc.stage, tc.composerLockLoader, false)
 			if tc.expectedErr != nil {
@@ -957,6 +1116,42 @@ func TestMergeDefinition(t *testing.T) {
 			expected: func() php.Definition {
 				return php.Definition{
 					Version:   "7.4",
+					BaseStage: emptyStage(),
+					Stages:    php.DerivedStageSet{},
+				}
+			},
+		},
+		"merge alpine with base": {
+			base: func() php.Definition {
+				return php.Definition{
+					Alpine: true,
+				}
+			},
+			overriding: func() php.Definition {
+				return php.Definition{
+					Alpine: false,
+				}
+			},
+			expected: func() php.Definition {
+				return php.Definition{
+					Alpine:    false,
+					BaseStage: emptyStage(),
+					Stages:    php.DerivedStageSet{},
+				}
+			},
+		},
+		"merge alpine without base": {
+			base: func() php.Definition {
+				return php.Definition{}
+			},
+			overriding: func() php.Definition {
+				return php.Definition{
+					Alpine: true,
+				}
+			},
+			expected: func() php.Definition {
+				return php.Definition{
+					Alpine:    true,
 					BaseStage: emptyStage(),
 					Stages:    php.DerivedStageSet{},
 				}
