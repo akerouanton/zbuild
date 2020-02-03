@@ -1,4 +1,8 @@
-base: docker.io/library/node:12-buster-slim@sha256:4d1016eefc4e6dc52ba9be6550dcb25a6e1826117507e65eda3650d6eb19f042
+base: docker.io/library/node:12-alpine@sha256:1dd4309479f031295f3dfb61cf3afc3efeb1a991b012e105d1a95efc038b72f6
+osrelease:
+  name: alpine
+  versionname: ""
+  versionid: 3.11.3
 source_context:
   path: admin
   reference: 5ecd2177087afbcce8f88ddfedbc7b95e738d961
@@ -10,6 +14,6 @@ stages:
   prod:
     system_packages: {}
 webserver:
-  base_image: docker.io/library/nginx:latest@sha256:70821e443be75ea38bdf52a974fd2271babd5875b2b1964f05025981c75a6717
+  base_image: docker.io/library/nginx:latest@sha256:ad5552c786f128e389a0263104ae39f3d3c7895579d45ae716f528185b36bc6f
   system_packages:
     curl: 7.64.0-4

@@ -1,16 +1,19 @@
-# syntax=akerouanton/zbuilder:200126-30
+# syntax=akerouanton/zbuilder:200208-04
 kind: nodejs
 version: 12
-# @TODO: uncomment once alpine support has been added
-#alpine: true
+alpine: true
+
+frontend: true
+build_command: yarn build
 
 source_context:
   type: git
   source: github.com/api-platform/demo
   path: admin
 
-frontend: true
-build_command: yarn build
+sources:
+  - src/
+  - public/
 
 config_files:
   .env.production: .env
