@@ -1,0 +1,13 @@
+base: docker.io/library/node:12-alpine@sha256
+osrelease:
+  name: alpine
+  versionname: ""
+  versionid: 3.10.3
+source_context: null
+stages:
+  dev:
+    system_packages:
+      libsass-dev: libsass-dev-version
+  prod:
+    system_packages:
+      libsass-dev: libsass-dev-version

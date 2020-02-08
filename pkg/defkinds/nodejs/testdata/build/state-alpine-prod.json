@@ -1,0 +1,450 @@
+[
+  {
+    "RawOp": "CkkKR3NoYTI1Njo5ODRhMjIyMThlOWE0MDViYTI3NTdjMTg5M2FiNzA1ZGUzNjRjZDMzMWI0ZGM3MTMxMjQ5ZTJhMmE3YmQ5YmUw",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:984a22218e9a405ba2757c1893ab705de364cd331b4dc7131249e2a2a7bd9be0",
+          "index": 0
+        }
+      ],
+      "Op": null
+    },
+    "Digest": "sha256:2b983ea2d58b029f550de8b7956aa8d180c41bcc06b3ee9ecd516aecebb5078e",
+    "OpMetadata": {
+      "caps": {
+        "constraints": true,
+        "meta.description": true,
+        "platform": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1Njo2MzJiMTA1YWRjYzJlMmRkNjg1YjMyNTFlNzMxZjU5NzdiZWU4NDgyNjEyY2Y2M2ZmYmI5ZmFhZTY1ZDBiMmQ3IjESLxD///////////8BMiIKBC9hcHAQ6AMYASIKCgMQ6AcSAxDoByj///////////8BUg4KBWFtZDY0EgVsaW51eFoA",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:632b105adcc2e2dd685b3251e731f5977bee8482612cf63ffbb9faae65d0b2d7",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "File": {
+          "actions": [
+            {
+              "input": 0,
+              "secondaryInput": -1,
+              "output": 0,
+              "Action": {
+                "Mkdir": {
+                  "path": "/app",
+                  "mode": 488,
+                  "makeParents": true,
+                  "owner": {
+                    "user": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    },
+                    "group": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    }
+                  },
+                  "timestamp": -1
+                }
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:38e44d62e7241770644f543a940b432f2fb31b3402533c9d24654788fd4e9ec2",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Mkdir /app"
+      },
+      "caps": {
+        "file.base": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1NjpjNjY0YWZmODgxOTkwNjg0MzRiOGJmYjgxZjRkNjk0YWEyZGNjOGU5NTIxM2QxOTdjODdmNTlmZDY0NDMwZTUwErwBCrQBCgcvYmluL3NoCgItbwoHZXJyZXhpdAoCLWMKJ2FwayBhZGQgLS1uby1jYWNoZSBsaWJzYXNzLWRldj0zLjYuMy1yMRJBUEFUSD0vdXNyL2xvY2FsL3NiaW46L3Vzci9sb2NhbC9iaW46L3Vzci9zYmluOi91c3IvYmluOi9zYmluOi9iaW4SFE5PREVfVkVSU0lPTj0xMi4xNC4xEhNZQVJOX1ZFUlNJT049MS4yMS4xGgEvEgMaAS9SDgoFYW1kNjQSBWxpbnV4WgA=",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:c664aff88199068434b8bfb81f4d694aa2dcc8e95213d197c87f59fd64430e50",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "Exec": {
+          "meta": {
+            "args": [
+              "/bin/sh",
+              "-o",
+              "errexit",
+              "-c",
+              "apk add --no-cache libsass-dev=3.6.3-r1"
+            ],
+            "env": [
+              "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+              "NODE_VERSION=12.14.1",
+              "YARN_VERSION=1.21.1"
+            ],
+            "cwd": "/"
+          },
+          "mounts": [
+            {
+              "input": 0,
+              "dest": "/",
+              "output": 0
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:632b105adcc2e2dd685b3251e731f5977bee8482612cf63ffbb9faae65d0b2d7",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Install system packages (libsass-dev=3.6.3-r1)"
+      },
+      "caps": {
+        "exec.meta.base": true,
+        "exec.mount.bind": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1NjplMTk5MDAxMzMxNGYwOWUzNWMyYWNkNTc2ZWUxNGIzZmMzNTM0YjAyNWM3ZWUxMWVjZGE3OTdlNWM5ZWQzZGNkCkkKR3NoYTI1Njo5YjJhMDlmYWQ2Mzk5YWEwOTRiZjU3ODBlNTA5MzI5OTA1MjE4YzExODc4NjMyODBlZmMzYTdjMzk1ODQ0OTg5IkMSQRABIj0KCi95YXJuLmxvY2sSBS9hcHAvGgoKAxDoBxIDEOgHIP///////////wEoATABQAFIAVj///////////8BUg4KBWFtZDY0EgVsaW51eFoA",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:e1990013314f09e35c2acd576ee14b3fc3534b025c7ee11ecda797e5c9ed3dcd",
+          "index": 0
+        },
+        {
+          "digest": "sha256:9b2a09fad6399aa094bf5780e509329905218c1187863280efc3a7c395844989",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "File": {
+          "actions": [
+            {
+              "input": 0,
+              "secondaryInput": 1,
+              "output": 0,
+              "Action": {
+                "Copy": {
+                  "src": "/yarn.lock",
+                  "dest": "/app/",
+                  "owner": {
+                    "user": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    },
+                    "group": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    }
+                  },
+                  "mode": -1,
+                  "followSymlink": true,
+                  "dirCopyContents": true,
+                  "createDestPath": true,
+                  "allowWildcard": true,
+                  "timestamp": -1
+                }
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:7fa1ad8a8aa03ca75f5ef2db75f5337e4c138f4c0eb5804e6fe4a7d809f174d3",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Copy yarn.lock"
+      },
+      "caps": {
+        "file.base": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1Njo3ZmExYWQ4YThhYTAzY2E3NWY1ZWYyZGI3NWY1MzM3ZTRjMTM4ZjRjMGViNTgwNGU2ZmU0YTdkODA5ZjE3NGQzErwBCrQBCgcvYmluL3NoCgItbwoHZXJyZXhpdAoCLWMKHnlhcm4gaW5zdGFsbCAtLWZyb3plbi1sb2NrZmlsZRJBUEFUSD0vdXNyL2xvY2FsL3NiaW46L3Vzci9sb2NhbC9iaW46L3Vzci9zYmluOi91c3IvYmluOi9zYmluOi9iaW4SFE5PREVfVkVSU0lPTj0xMi4xNC4xEhNZQVJOX1ZFUlNJT049MS4yMS4xGgQvYXBwIgQxMDAwEgMaAS9SDgoFYW1kNjQSBWxpbnV4WgA=",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:7fa1ad8a8aa03ca75f5ef2db75f5337e4c138f4c0eb5804e6fe4a7d809f174d3",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "Exec": {
+          "meta": {
+            "args": [
+              "/bin/sh",
+              "-o",
+              "errexit",
+              "-c",
+              "yarn install --frozen-lockfile"
+            ],
+            "env": [
+              "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+              "NODE_VERSION=12.14.1",
+              "YARN_VERSION=1.21.1"
+            ],
+            "cwd": "/app",
+            "user": "1000"
+          },
+          "mounts": [
+            {
+              "input": 0,
+              "dest": "/",
+              "output": 0
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:8479565d6905288a88c92359c22d84e6725bf2931dd1be9c7ce6093f50a7eae7",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Run yarn install"
+      },
+      "caps": {
+        "exec.meta.base": true,
+        "exec.mount.bind": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1Njo4NDc5NTY1ZDY5MDUyODhhODhjOTIzNTljMjJkODRlNjcyNWJmMjkzMWRkMWJlOWM3Y2U2MDkzZjUwYTdlYWU3CkkKR3NoYTI1Njo5YjUxZTNhZDg2NmE1MWZjMWZiNzZlMmFkYTI0ZDNhZTgwNzQxOTkyNzllMjY1NTZkZDNhYzdkZmJlMTdkOWU2IjkSNxABIjMKAS8SBC9hcHAaCgoDEOgHEgMQ6Acg////////////ASgBMAFAAUgBWP///////////wFSDgoFYW1kNjQSBWxpbnV4WgA=",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:8479565d6905288a88c92359c22d84e6725bf2931dd1be9c7ce6093f50a7eae7",
+          "index": 0
+        },
+        {
+          "digest": "sha256:9b51e3ad866a51fc1fb76e2ada24d3ae8074199279e26556dd3ac7dfbe17d9e6",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "File": {
+          "actions": [
+            {
+              "input": 0,
+              "secondaryInput": 1,
+              "output": 0,
+              "Action": {
+                "Copy": {
+                  "src": "/",
+                  "dest": "/app",
+                  "owner": {
+                    "user": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    },
+                    "group": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    }
+                  },
+                  "mode": -1,
+                  "followSymlink": true,
+                  "dirCopyContents": true,
+                  "createDestPath": true,
+                  "allowWildcard": true,
+                  "timestamp": -1
+                }
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:984a22218e9a405ba2757c1893ab705de364cd331b4dc7131249e2a2a7bd9be0",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Copy /"
+      },
+      "caps": {
+        "file.base": true
+      }
+    }
+  },
+  {
+    "RawOp": "GowBCg9sb2NhbDovL2NvbnRleHQSNAoUbG9jYWwuaW5jbHVkZXBhdHRlcm4SHFsicGFja2FnZS5qc29uIiwieWFybi5sb2NrIl0SHQoNbG9jYWwuc2Vzc2lvbhIMPFNFU1NJT04tSUQ+EiQKE2xvY2FsLnNoYXJlZGtleWhpbnQSDXBhY2thZ2UtZmlsZXNaAA==",
+    "Op": {
+      "Op": {
+        "Source": {
+          "identifier": "local://context",
+          "attrs": {
+            "local.includepattern": "[\"package.json\",\"yarn.lock\"]",
+            "local.session": "\u003cSESSION-ID\u003e",
+            "local.sharedkeyhint": "package-files"
+          }
+        }
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:9b2a09fad6399aa094bf5780e509329905218c1187863280efc3a7c395844989",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "load package.json and yarn.lock from build context"
+      },
+      "caps": {
+        "source.local": true,
+        "source.local.includepatterns": true,
+        "source.local.sessionid": true,
+        "source.local.sharedkeyhint": true
+      }
+    }
+  },
+  {
+    "RawOp": "GlYKD2xvY2FsOi8vY29udGV4dBIdCg1sb2NhbC5zZXNzaW9uEgw8U0VTU0lPTi1JRD4SJAoTbG9jYWwuc2hhcmVka2V5aGludBINYnVpbGQtY29udGV4dFoA",
+    "Op": {
+      "Op": {
+        "Source": {
+          "identifier": "local://context",
+          "attrs": {
+            "local.session": "\u003cSESSION-ID\u003e",
+            "local.sharedkeyhint": "build-context"
+          }
+        }
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:9b51e3ad866a51fc1fb76e2ada24d3ae8074199279e26556dd3ac7dfbe17d9e6",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "load build context"
+      },
+      "caps": {
+        "source.local": true,
+        "source.local.sessionid": true,
+        "source.local.sharedkeyhint": true
+      }
+    }
+  },
+  {
+    "RawOp": "GnkKd2RvY2tlci1pbWFnZTovL2RvY2tlci5pby9saWJyYXJ5L25vZGU6MTItYWxwaW5lQHNoYTI1NjoxZGQ0MzA5NDc5ZjAzMTI5NWYzZGZiNjFjZjNhZmMzZWZlYjFhOTkxYjAxMmUxMDVkMWE5NWVmYzAzOGI3MmY2Ug4KBWFtZDY0EgVsaW51eFoA",
+    "Op": {
+      "Op": {
+        "Source": {
+          "identifier": "docker-image://docker.io/library/node:12-alpine@sha256:1dd4309479f031295f3dfb61cf3afc3efeb1a991b012e105d1a95efc038b72f6"
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:c664aff88199068434b8bfb81f4d694aa2dcc8e95213d197c87f59fd64430e50",
+    "OpMetadata": {
+      "caps": {
+        "source.image": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1NjozOGU0NGQ2MmU3MjQxNzcwNjQ0ZjU0M2E5NDBiNDMyZjJmYjMxYjM0MDI1MzNjOWQyNDY1NDc4OGZkNGU5ZWMyCkkKR3NoYTI1Njo5YjJhMDlmYWQ2Mzk5YWEwOTRiZjU3ODBlNTA5MzI5OTA1MjE4YzExODc4NjMyODBlZmMzYTdjMzk1ODQ0OTg5IkYSRBABIkAKDS9wYWNrYWdlLmpzb24SBS9hcHAvGgoKAxDoBxIDEOgHIP///////////wEoATABQAFIAVj///////////8BUg4KBWFtZDY0EgVsaW51eFoA",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:38e44d62e7241770644f543a940b432f2fb31b3402533c9d24654788fd4e9ec2",
+          "index": 0
+        },
+        {
+          "digest": "sha256:9b2a09fad6399aa094bf5780e509329905218c1187863280efc3a7c395844989",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "File": {
+          "actions": [
+            {
+              "input": 0,
+              "secondaryInput": 1,
+              "output": 0,
+              "Action": {
+                "Copy": {
+                  "src": "/package.json",
+                  "dest": "/app/",
+                  "owner": {
+                    "user": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    },
+                    "group": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    }
+                  },
+                  "mode": -1,
+                  "followSymlink": true,
+                  "dirCopyContents": true,
+                  "createDestPath": true,
+                  "allowWildcard": true,
+                  "timestamp": -1
+                }
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:e1990013314f09e35c2acd576ee14b3fc3534b025c7ee11ecda797e5c9ed3dcd",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Copy package.json"
+      },
+      "caps": {
+        "file.base": true
+      }
+    }
+  }
+]

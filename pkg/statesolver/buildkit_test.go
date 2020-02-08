@@ -97,7 +97,7 @@ func initFromGitContextTC(t *testing.T, mockCtrl *gomock.Controller) buildkitRea
 	}
 }
 
-func initFailToReadFileFromBuildContextTC(t *testing.T, mockCtrl *gomock.Controller) buildkitReadFileTC {
+func initFailToReadFileFromContextTC(t *testing.T, mockCtrl *gomock.Controller) buildkitReadFileTC {
 	contextRef := llbtest.NewMockReference(mockCtrl)
 	solved := &client.Result{
 		Refs: map[string]client.Reference{
@@ -117,7 +117,7 @@ func initFailToReadFileFromBuildContextTC(t *testing.T, mockCtrl *gomock.Control
 
 	contextRef.EXPECT().ReadFile(gomock.Any(), client.ReadRequest{
 		Filename: "/foo",
-	}).Return([]byte{}, xerrors.New("file does not exist"))
+	}).Return([]byte{}, xerrors.New("no such file or directory"))
 
 	solver := statesolver.NewBuildkitSolver(c)
 	opt := solver.FromContext(&builddef.Context{
@@ -128,7 +128,7 @@ func initFailToReadFileFromBuildContextTC(t *testing.T, mockCtrl *gomock.Control
 		solver:      solver,
 		opt:         opt,
 		filepath:    "/foo",
-		expectedErr: xerrors.Errorf("failed to read /foo from build context: %w", statesolver.FileNotFound),
+		expectedErr: xerrors.Errorf("failed to read /foo from context: %w", statesolver.FileNotFound),
 	}
 }
 
@@ -196,7 +196,7 @@ func initFailToReadNonexistantFileFromImageTC(t *testing.T, mockCtrl *gomock.Con
 		solver:      solver,
 		opt:         opt,
 		filepath:    "/foo",
-		expectedErr: xerrors.Errorf("failed to read /foo from docker.io/library/debian:buster: file not found"),
+		expectedErr: xerrors.Errorf("failed to read /foo from docker.io/library/debian:buster: file does not exist"),
 	}
 }
 
@@ -225,7 +225,7 @@ func TestBuildkitReadFile(t *testing.T) {
 	testcases := map[string]func(*testing.T, *gomock.Controller) buildkitReadFileTC{
 		"from build context":                         initFromBuildContextTC,
 		"from git context":                           initFromGitContextTC,
-		"fail to read file from build context":       initFailToReadFileFromBuildContextTC,
+		"fail to read file from context":             initFailToReadFileFromContextTC,
 		"from image":                                 initFromImageTC,
 		"fail to read a nonexistant file from image": initFailToReadNonexistantFileFromImageTC,
 		"fail to read from nonexistant image":        initFailToReadFromNonexistantImageTC,
@@ -328,7 +328,7 @@ func initBuildkitReportErrorWhenResultFileDoesntExistTC(mockCtrl *gomock.Control
 		Times(1).
 		Return(solved, nil)
 
-	err := xerrors.New("file does not exist")
+	err := xerrors.New("no such file or directory")
 	srcRef.EXPECT().ReadFile(gomock.Any(), client.ReadRequest{
 		Filename: "/tmp/result",
 	}).Times(1).Return([]byte{}, err)

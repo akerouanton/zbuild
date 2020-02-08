@@ -1,4 +1,8 @@
 base: docker.io/library/node:12-buster-slim@sha256
+osrelease:
+  name: debian
+  versionname: buster
+  versionid: "10"
 source_context: null
 stages:
   dev:

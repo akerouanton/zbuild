@@ -1,6 +1,0 @@
-base: docker.io/library/node:12-buster-slim
-stages:
-  dev:
-    system_packages: {}
-  prod:
-    system_packages: {}

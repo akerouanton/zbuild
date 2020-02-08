@@ -1,8 +1,0 @@
-kind: nodejs
-version: 12
-frontend: true
-
-webserver:
-  type: nginx
-  config_file: nginx.conf
-  healthcheck: true

@@ -151,10 +151,19 @@ func NewKind(genericDef *builddef.BuildDef) (Definition, error) {
 	}
 
 	if def.BaseImage == "" {
-		def.BaseImage = fmt.Sprintf("docker.io/library/node:%s-buster-slim", def.Version)
+		def.BaseImage = defaultBaseImage(def)
 	}
 
 	return def, nil
+}
+
+func defaultBaseImage(def Definition) string {
+	flavor := "buster-slim"
+	if def.Alpine {
+		flavor = "alpine"
+	}
+
+	return fmt.Sprintf("docker.io/library/node:%s-%s", def.Version, flavor)
 }
 
 type Definition struct {
@@ -162,6 +171,7 @@ type Definition struct {
 
 	BaseImage string          `mapstructure:"base"`
 	Version   string          `mapstructure:"version"`
+	Alpine    bool            `mapstructure:"alpine"`
 	Stages    DerivedStageSet `mapstructure:"stages"`
 	// @TODO: move to Stage?
 	IsFrontend bool `mapstructure:"frontend"`
@@ -196,6 +206,7 @@ func (d Definition) Copy() Definition {
 		BaseStage:     d.BaseStage.Copy(),
 		BaseImage:     d.BaseImage,
 		Version:       d.Version,
+		Alpine:        d.Alpine,
 		Stages:        d.Stages.Copy(),
 		IsFrontend:    d.IsFrontend,
 		SourceContext: d.SourceContext.Copy(),
@@ -211,6 +222,7 @@ func (base Definition) Merge(overriding Definition) Definition {
 	new.Stages = new.Stages.Merge(overriding.Stages)
 	new.BaseImage = overriding.BaseImage
 	new.Version = overriding.Version
+	new.Alpine = overriding.Alpine
 	new.IsFrontend = overriding.IsFrontend
 	new.SourceContext = overriding.SourceContext.Copy()
 

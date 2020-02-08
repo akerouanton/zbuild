@@ -2,6 +2,7 @@ package pkgsolver
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/NiR-/zbuild/pkg/statesolver"
@@ -43,7 +44,10 @@ func (pkgSolvers PackageSolversMap) New(
 	solverType SolverType,
 	solver statesolver.StateSolver,
 ) PackageSolver {
-	factory := pkgSolvers[solverType]
+	factory, ok := pkgSolvers[solverType]
+	if !ok {
+		panic(fmt.Sprintf("No package solver %q found.", solverType))
+	}
 	return factory(solver)
 }
 

@@ -79,7 +79,7 @@ func (s BuildkitSolver) FromContext(
 	return func(ctx context.Context, filepath string) ([]byte, error) {
 		raw, err := s.readFromLLB(ctx, src, filepath)
 		if err != nil {
-			return raw, xerrors.Errorf("failed to read %s from build context: %w", filepath, err)
+			return raw, xerrors.Errorf("failed to read %s from context: %w", filepath, err)
 		}
 
 		return raw, nil
@@ -123,7 +123,7 @@ func (s BuildkitSolver) FileExists(
 	source *builddef.Context,
 ) (bool, error) {
 	_, err := s.ReadFile(ctx, filepath, s.FromContext(source))
-	if err == FileNotFound {
+	if xerrors.Is(err, FileNotFound) {
 		return false, nil
 	}
 	return true, err

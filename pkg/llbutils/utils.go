@@ -62,7 +62,7 @@ func ReadFile(ctx context.Context, ref client.Reference, filepath string) ([]byt
 	content, err := ref.ReadFile(ctx, client.ReadRequest{
 		Filename: filepath,
 	})
-	if err != nil && strings.Contains(err.Error(), "file does not exist") {
+	if err != nil && strings.Contains(err.Error(), "no such file or directory") {
 		return []byte{}, false, nil
 	} else if err != nil {
 		return []byte{}, false, err
