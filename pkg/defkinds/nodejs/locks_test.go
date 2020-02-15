@@ -11,6 +11,7 @@ import (
 	"github.com/NiR-/zbuild/pkg/defkinds/nodejs"
 	"github.com/NiR-/zbuild/pkg/mocks"
 	"github.com/NiR-/zbuild/pkg/pkgsolver"
+	"github.com/NiR-/zbuild/pkg/statesolver"
 	"github.com/golang/mock/gomock"
 	"gopkg.in/yaml.v2"
 )
@@ -18,9 +19,9 @@ import (
 var flagTestdata = flag.Bool("testdata", false, "Use this flag to (re)generate testdata (dumps of LLB states and lockfiles)")
 
 type updateLocksTC struct {
-	file      string
-	handler   *nodejs.NodeJSHandler
-	pkgSolver pkgsolver.PackageSolver
+	file       string
+	handler    *nodejs.NodeJSHandler
+	pkgSolvers pkgsolver.PackageSolversMap
 	// expected is the path to a lock file in testdata/ folder
 	expected    string
 	expectedErr error
@@ -51,6 +52,7 @@ func initSuccessfullyUpdateLocksTC(t *testing.T, mockCtrl *gomock.Controller) up
 
 	pkgSolver := mocks.NewMockPackageSolver(mockCtrl)
 	pkgSolver.EXPECT().ResolveVersions(
+		gomock.Any(),
 		"docker.io/library/node:12-buster-slim@sha256",
 		map[string]string{"curl": "*"},
 	).AnyTimes().Return(map[string]string{
@@ -61,10 +63,14 @@ func initSuccessfullyUpdateLocksTC(t *testing.T, mockCtrl *gomock.Controller) up
 	h.WithSolver(solver)
 
 	return updateLocksTC{
-		file:      "testdata/locks/without-stages.yml",
-		handler:   &h,
-		pkgSolver: pkgSolver,
-		expected:  "testdata/locks/without-stages.lock",
+		file:    "testdata/locks/without-stages.yml",
+		handler: &h,
+		pkgSolvers: pkgsolver.PackageSolversMap{
+			pkgsolver.APT: func(statesolver.StateSolver) pkgsolver.PackageSolver {
+				return pkgSolver
+			},
+		},
+		expected: "testdata/locks/without-stages.lock",
 	}
 }
 
@@ -93,9 +99,14 @@ func failToUpdateLocksForAlpineBaseImageTC(t *testing.T, mockCtrl *gomock.Contro
 	h.WithSolver(solver)
 
 	return updateLocksTC{
-		file:        "testdata/locks/alpine.yml",
-		handler:     &h,
-		pkgSolver:   mocks.NewMockPackageSolver(mockCtrl),
+		file:    "testdata/locks/alpine.yml",
+		handler: &h,
+		pkgSolvers: pkgsolver.PackageSolversMap{
+
+			pkgsolver.APT: func(statesolver.StateSolver) pkgsolver.PackageSolver {
+				return mocks.NewMockPackageSolver(mockCtrl)
+			},
+		},
 		expectedErr: errors.New("unsupported OS \"alpine\": only debian-based base images are supported"),
 	}
 }
@@ -127,7 +138,7 @@ func TestUpdateLocks(t *testing.T) {
 				Def: genericDef,
 			}
 
-			locks, err = tc.handler.UpdateLocks(ctx, tc.pkgSolver, buildOpts)
+			locks, err = tc.handler.UpdateLocks(ctx, tc.pkgSolvers, buildOpts)
 			if tc.expectedErr != nil {
 				if err == nil || err.Error() != tc.expectedErr.Error() {
 					t.Fatalf("Expected error: %v\nGot: %v", tc.expectedErr, err)

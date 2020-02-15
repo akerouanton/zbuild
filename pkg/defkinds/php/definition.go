@@ -724,9 +724,6 @@ func inferExtensions(def *StageDefinition) {
 }
 
 func inferSystemPackages(def *StageDefinition) {
-	// Add libpcre by default, as most frameworks/CMSes are using regexp
-	def.SystemPackages.Add("libpcre3-dev", "*")
-
 	for _, ext := range def.Extensions.Names() {
 		deps, ok := extensionsDeps[ext]
 		if !ok {

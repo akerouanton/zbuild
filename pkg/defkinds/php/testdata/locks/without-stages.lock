@@ -14,7 +14,6 @@ stages:
     system_packages:
       git: git-version
       libicu-dev: libicu-dev-version
-      libpcre3-dev: libpcre3-dev-version
       libssl-dev: libssl-dev-version
       libxml2-dev: libxml2-dev-version
       libzip-dev: libzip-dev-version
@@ -35,7 +34,6 @@ stages:
     system_packages:
       git: git-version
       libicu-dev: libicu-dev-version
-      libpcre3-dev: libpcre3-dev-version
       libssl-dev: libssl-dev-version
       libxml2-dev: libxml2-dev-version
       libzip-dev: libzip-dev-version

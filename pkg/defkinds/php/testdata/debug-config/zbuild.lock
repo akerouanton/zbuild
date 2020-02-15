@@ -5,7 +5,6 @@ stages:
     system_packages:
       git: 1:2.20.1-2+deb10u1
       libicu-dev: 63.1-6
-      libpcre3-dev: 2:8.39-12
       libpq-dev: 11.5-1+deb10u1
       libxml2-dev: 2.9.4+dfsg1-7+b3
       libzip-dev: 1.5.1-4
@@ -20,7 +19,6 @@ stages:
     system_packages:
       git: 1:2.20.1-2+deb10u1
       libicu-dev: 63.1-6
-      libpcre3-dev: 2:8.39-12
       libpq-dev: 11.5-1+deb10u1
       libxml2-dev: 2.9.4+dfsg1-7+b3
       libzip-dev: 1.5.1-4

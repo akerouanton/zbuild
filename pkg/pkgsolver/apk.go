@@ -13,13 +13,14 @@ type APKSolver struct {
 	solver statesolver.StateSolver
 }
 
-func NewAPKSolver(solver statesolver.StateSolver) *APKSolver {
+func NewAPKSolver(solver statesolver.StateSolver) PackageSolver {
 	return &APKSolver{
 		solver: solver,
 	}
 }
 
 func (s *APKSolver) ResolveVersions(
+	ctx context.Context,
 	imageRef string,
 	pkgs map[string]string,
 ) (map[string]string, error) {
@@ -45,7 +46,6 @@ func (s *APKSolver) ResolveVersions(
 	cmd[3] = "--description"
 	cmd = append(cmd, toResolve...)
 
-	ctx := context.Background()
 	outbuf, err := s.solver.ExecImage(ctx, imageRef, []string{
 		strings.Join(cmd, " "),
 	})
@@ -55,18 +55,19 @@ func (s *APKSolver) ResolveVersions(
 		return resolved, err
 	}
 
-	resolved = s.parseAPKInfo(outbuf, toResolve, resolved)
+	resolved = parseAPKInfo(outbuf, toResolve, resolved)
 	err = checkMissingPackages(pkgs, resolved)
 
 	return resolved, err
 }
 
-func (s *APKSolver) parseAPKInfo(
+func parseAPKInfo(
 	buf *bytes.Buffer,
 	pkgNames []string,
 	res map[string]string,
 ) map[string]string {
-	exp, err := s.buildDescriptionRegexp(pkgNames)
+	expstr := "(" + strings.Join(pkgNames, "|") + ")-([^ ]+) description:"
+	exp, err := regexp.Compile(expstr)
 	if err != nil {
 		return res
 	}
@@ -83,9 +84,4 @@ func (s *APKSolver) parseAPKInfo(
 	}
 
 	return res
-}
-
-func (s APKSolver) buildDescriptionRegexp(pkgNames []string) (*regexp.Regexp, error) {
-	expstr := "(" + strings.Join(pkgNames, "|") + ")-([^ ]+) description:"
-	return regexp.Compile(expstr)
 }

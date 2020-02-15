@@ -8,6 +8,7 @@ import (
 	"github.com/NiR-/zbuild/pkg/defkinds/webserver"
 	"github.com/NiR-/zbuild/pkg/mocks"
 	"github.com/NiR-/zbuild/pkg/pkgsolver"
+	"github.com/NiR-/zbuild/pkg/statesolver"
 	"github.com/golang/mock/gomock"
 	"gopkg.in/yaml.v2"
 )
@@ -15,7 +16,7 @@ import (
 type updateLocksTC struct {
 	deffile     string
 	handler     *webserver.WebserverHandler
-	pkgSolver   pkgsolver.PackageSolver
+	pkgSolvers  pkgsolver.PackageSolversMap
 	expected    string
 	expectedErr error
 }
@@ -45,6 +46,7 @@ func initSuccessfullyUpdateLocksTC(t *testing.T, mockCtrl *gomock.Controller) up
 
 	pkgSolver := mocks.NewMockPackageSolver(mockCtrl)
 	pkgSolver.EXPECT().ResolveVersions(
+		gomock.Any(),
 		"docker.io/library/nginx:latest@sha256",
 		map[string]string{"curl": "*"},
 	).Times(1).Return(map[string]string{
@@ -55,10 +57,14 @@ func initSuccessfullyUpdateLocksTC(t *testing.T, mockCtrl *gomock.Controller) up
 	h.WithSolver(solver)
 
 	return updateLocksTC{
-		deffile:   "testdata/locks/definition.yml",
-		handler:   h,
-		pkgSolver: pkgSolver,
-		expected:  "testdata/locks/definition.lock",
+		deffile: "testdata/locks/definition.yml",
+		handler: h,
+		pkgSolvers: pkgsolver.PackageSolversMap{
+			pkgsolver.APT: func(statesolver.StateSolver) pkgsolver.PackageSolver {
+				return pkgSolver
+			},
+		},
+		expected: "testdata/locks/definition.lock",
 	}
 }
 
@@ -92,7 +98,7 @@ func TestUpdateLocks(t *testing.T) {
 				Def: &genericDef,
 			}
 
-			locks, err = tc.handler.UpdateLocks(ctx, tc.pkgSolver, buildOpts)
+			locks, err = tc.handler.UpdateLocks(ctx, tc.pkgSolvers, buildOpts)
 			if tc.expectedErr != nil {
 				if err == nil || err.Error() != tc.expectedErr.Error() {
 					t.Fatalf("Expected error: %v\nGot: %v", tc.expectedErr, err)

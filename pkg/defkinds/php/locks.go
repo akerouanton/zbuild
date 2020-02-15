@@ -56,7 +56,7 @@ func (l StageLocks) RawLocks() map[string]interface{} {
 
 func (h *PHPHandler) UpdateLocks(
 	ctx context.Context,
-	pkgSolver pkgsolver.PackageSolver,
+	pkgSolvers pkgsolver.PackageSolversMap,
 	buildOpts builddef.BuildOpts,
 ) (builddef.Locks, error) {
 	def, err := NewKind(buildOpts.Def)
@@ -88,6 +88,7 @@ func (h *PHPHandler) UpdateLocks(
 		return nil, xerrors.Errorf("failed to lock source context: %w", err)
 	}
 
+	pkgSolver := pkgSolvers.New(pkgsolver.APT, h.solver)
 	def.Locks.Stages, err = h.updateStagesLocks(ctx, pkgSolver, def, buildOpts)
 	if err != nil {
 		return nil, xerrors.Errorf("failed to update stages locks: %w", err)
@@ -126,9 +127,8 @@ func (h *PHPHandler) updateStagesLocks(
 		}
 
 		stageLocks := StageLocks{}
-		stageLocks.SystemPackages, err = pkgSolver.ResolveVersions(
-			def.Locks.BaseImage,
-			stage.SystemPackages.Map())
+		stageLocks.SystemPackages, err = pkgSolver.ResolveVersions(ctx,
+			def.Locks.BaseImage, stage.SystemPackages.Map())
 		if err != nil {
 			return nil, xerrors.Errorf("could not resolve systems package versions: %w", err)
 		}

@@ -5,6 +5,7 @@
 package mocks
 
 import (
+	context "context"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 )
@@ -33,14 +34,14 @@ func (m *MockPackageSolver) EXPECT() *MockPackageSolverMockRecorder {
 }
 
 // ResolveVersions mocks base method
-func (m *MockPackageSolver) ResolveVersions(arg0 string, arg1 map[string]string) (map[string]string, error) {
-	ret := m.ctrl.Call(m, "ResolveVersions", arg0, arg1)
+func (m *MockPackageSolver) ResolveVersions(arg0 context.Context, arg1 string, arg2 map[string]string) (map[string]string, error) {
+	ret := m.ctrl.Call(m, "ResolveVersions", arg0, arg1, arg2)
 	ret0, _ := ret[0].(map[string]string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ResolveVersions indicates an expected call of ResolveVersions
-func (mr *MockPackageSolverMockRecorder) ResolveVersions(arg0, arg1 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResolveVersions", reflect.TypeOf((*MockPackageSolver)(nil).ResolveVersions), arg0, arg1)
+func (mr *MockPackageSolverMockRecorder) ResolveVersions(arg0, arg1, arg2 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResolveVersions", reflect.TypeOf((*MockPackageSolver)(nil).ResolveVersions), arg0, arg1, arg2)
 }

@@ -30,8 +30,8 @@ const (
 )
 
 type Builder struct {
-	Registry  *registry.KindRegistry
-	PkgSolver pkgsolver.PackageSolver
+	Registry   *registry.KindRegistry
+	PkgSolvers pkgsolver.PackageSolversMap
 }
 
 func (b Builder) findHandler(
@@ -285,7 +285,7 @@ func (b Builder) updateLocks(
 		return nil, err
 	}
 
-	locks, err := handler.UpdateLocks(ctx, b.PkgSolver, buildOpts)
+	locks, err := handler.UpdateLocks(ctx, b.PkgSolvers, buildOpts)
 	if err != nil {
 		return nil, err
 	}

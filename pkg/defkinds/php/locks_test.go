@@ -19,9 +19,9 @@ import (
 
 type updateLocksTC struct {
 	// deffile is a path to a yaml file containing a php build definition
-	deffile   string
-	handler   *php.PHPHandler
-	pkgSolver pkgsolver.PackageSolver
+	deffile    string
+	handler    *php.PHPHandler
+	pkgSolvers pkgsolver.PackageSolversMap
 	// expected is the path to a lock file in testdata/ folder
 	expected    string
 	expectedErr error
@@ -61,28 +61,27 @@ func initSuccessfullyUpdateLocksTC(t *testing.T, mockCtrl *gomock.Controller) up
 
 	pkgSolver := mocks.NewMockPackageSolver(mockCtrl)
 	pkgSolver.EXPECT().ResolveVersions(
+		gomock.Any(),
 		"docker.io/library/php:7.3-fpm-buster@sha256",
 		map[string]string{
-			"git":          "*",
-			"libicu-dev":   "*",
-			"libpcre3-dev": "*",
-			"libssl-dev":   "*",
-			"libxml2-dev":  "*",
-			"libzip-dev":   "*",
-			"openssl":      "*",
-			"unzip":        "*",
-			"zlib1g-dev":   "*",
+			"git":         "*",
+			"libicu-dev":  "*",
+			"libssl-dev":  "*",
+			"libxml2-dev": "*",
+			"libzip-dev":  "*",
+			"openssl":     "*",
+			"unzip":       "*",
+			"zlib1g-dev":  "*",
 		},
 	).AnyTimes().Return(map[string]string{
-		"git":          "git-version",
-		"libicu-dev":   "libicu-dev-version",
-		"libpcre3-dev": "libpcre3-dev-version",
-		"libssl-dev":   "libssl-dev-version",
-		"libxml2-dev":  "libxml2-dev-version",
-		"libzip-dev":   "libzip-dev-version",
-		"openssl":      "openssl-version",
-		"unzip":        "unzip-version",
-		"zlib1g-dev":   "zlib1g-dev-version",
+		"git":         "git-version",
+		"libicu-dev":  "libicu-dev-version",
+		"libssl-dev":  "libssl-dev-version",
+		"libxml2-dev": "libxml2-dev-version",
+		"libzip-dev":  "libzip-dev-version",
+		"openssl":     "openssl-version",
+		"unzip":       "unzip-version",
+		"zlib1g-dev":  "zlib1g-dev-version",
 	}, nil)
 
 	h := php.NewPHPHandler()
@@ -102,10 +101,14 @@ func initSuccessfullyUpdateLocksTC(t *testing.T, mockCtrl *gomock.Controller) up
 	h.WithSolver(solver)
 
 	return updateLocksTC{
-		deffile:   "testdata/locks/without-stages.yml",
-		handler:   h,
-		pkgSolver: pkgSolver,
-		expected:  "testdata/locks/without-stages.lock",
+		deffile: "testdata/locks/without-stages.yml",
+		handler: h,
+		pkgSolvers: pkgsolver.PackageSolversMap{
+			pkgsolver.APT: func(statesolver.StateSolver) pkgsolver.PackageSolver {
+				return pkgSolver
+			},
+		},
+		expected: "testdata/locks/without-stages.lock",
 	}
 }
 
@@ -137,7 +140,7 @@ func failToUpdateLocksForAlpineBaseImageTC(t *testing.T, mockCtrl *gomock.Contro
 	return updateLocksTC{
 		deffile:     "testdata/locks/without-stages.yml",
 		handler:     kindHandler,
-		pkgSolver:   mocks.NewMockPackageSolver(mockCtrl),
+		pkgSolvers:  pkgsolver.PackageSolversMap{},
 		expectedErr: xerrors.New("unsupported OS \"alpine\": only debian-based base images are supported"),
 	}
 }
@@ -169,7 +172,7 @@ func TestUpdateLocks(t *testing.T) {
 				Def: &genericDef,
 			}
 
-			locks, err = tc.handler.UpdateLocks(ctx, tc.pkgSolver, buildOpts)
+			locks, err = tc.handler.UpdateLocks(ctx, tc.pkgSolvers, buildOpts)
 			if tc.expectedErr != nil {
 				if err == nil || err.Error() != tc.expectedErr.Error() {
 					t.Fatalf("Expected error: %v\nGot: %v", tc.expectedErr, err)

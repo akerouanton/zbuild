@@ -1,4 +1,4 @@
-base: docker.io/library/node:12-buster-slim
+base: docker.io/library/node:12.14.1-buster-slim
 stages:
   dev:
     system_packages: {}
