@@ -427,6 +427,7 @@ func TestBuild(t *testing.T) {
 	testcases := map[string]func(*testing.T, *gomock.Controller) buildTC{
 		"build LLB DAG for dev stage":                     initBuildLLBForDevStageTC,
 		"build LLB DAG for worker stage":                  initBuildLLBForWorkerStageTC,
+		"build LLB DAG for prod stage":                    initBuildLLBForProdStageTC,
 		"build LLB DAG with git build context":            initBuildLLBWithGitBuildContextTC,
 		"build LLB DAG with git source context":           initBuildLLBWithGitSourceContextTC,
 		"build LLB DAG with git build and source context": initBuildLLBWithGitBuildAndSourceContextTC,
