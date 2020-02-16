@@ -18,6 +18,10 @@ build:
 	$(GO_BUILD_STATIC) -o bin/zbuild ./cmd/zbuild
 	$(GO_BUILD_STATIC) -o bin/zbuilder ./cmd/zbuilder
 
+.PHONY: lint
+lint:
+	docker run --rm -v $$(pwd):/app -w /app golangci/golangci-lint:v1.23.6 golangci-lint run -v
+
 .PHONY: test
 test:
 	$(GOTEST) -v -cover -coverprofile cover.out ./...
