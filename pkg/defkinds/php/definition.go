@@ -496,7 +496,7 @@ type StageDefinition struct {
 }
 
 func (stageDef StageDefinition) IsValid() error {
-	if *stageDef.FPM == false && stageDef.Command == nil {
+	if !*stageDef.FPM && stageDef.Command == nil {
 		return xerrors.New("FPM mode is disabled but no command was provided")
 	}
 
@@ -607,10 +607,10 @@ func mergeStages(base *Definition, stages ...DerivedStage) StageDefinition {
 		}
 	}
 
-	if *stageDef.FPM == false {
+	if !*stageDef.FPM {
 		stageDef.ConfigFiles.FPMConfigFile = nil
 	}
-	if stageDef.Dev || stageDef.FPM == nil || *stageDef.FPM == false {
+	if stageDef.Dev || stageDef.FPM == nil || !*stageDef.FPM {
 		stageDef.Healthcheck = nil
 	}
 
@@ -701,7 +701,7 @@ var preinstalledExtensions = map[string]struct{}{
 }
 
 func inferConfig(stageDef *StageDefinition) {
-	if stageDef.Dev == false && *stageDef.FPM == true {
+	if !stageDef.Dev && *stageDef.FPM {
 		stageDef.Extensions.Add("apcu", "*")
 		stageDef.Extensions.Add("opcache", "*")
 	}

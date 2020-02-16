@@ -81,5 +81,5 @@ func HandleDebugLLBCmd(cmd *cobra.Command, args []string) {
 	if err != nil {
 		logrus.Fatalf("%+v", err)
 	}
-	llb.WriteTo(out, os.Stdout)
+	llb.WriteTo(out, os.Stdout) //nolint:errcheck
 }

@@ -80,7 +80,7 @@ func configureLogger(cmd *cobra.Command, level string) {
 	parsed, err := logrus.ParseLevel(level)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "ERROR: Invalid log level %q.", level)
-		cmd.Usage()
+		cmd.Usage() //nolint:errcheck
 		os.Exit(1)
 	}
 

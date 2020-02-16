@@ -164,7 +164,7 @@ func TestUpdateLocks(t *testing.T) {
 			expectedRaw := string(loadRawTestdata(t, tc.expected))
 			if expectedRaw != string(rawLocks) {
 				tempfile := newTempFile(t)
-				ioutil.WriteFile(tempfile, rawLocks, 0640)
+				ioutil.WriteFile(tempfile, rawLocks, 0640) //nolint:errcheck
 
 				t.Fatalf("Expected: <%s>\nGot: <%s>", tc.expected, tempfile)
 			}

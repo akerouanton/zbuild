@@ -299,7 +299,7 @@ func globalComposerInstall(state llb.State, globalDeps map[string]string) llb.St
 		deps = append(deps, dep)
 	}
 
-	cmds := make([]string, 2, 2)
+	cmds := make([]string, 2)
 	cmds[0] = fmt.Sprintf("composer global require --prefer-dist --classmap-authoritative %s",
 		strings.Join(deps, " "))
 	cmds[1] = "composer clear-cache"
