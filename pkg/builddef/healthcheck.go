@@ -176,7 +176,7 @@ func DecodeBoolToHealthcheck(
 		}
 
 		val := data.(bool)
-		if val == true {
+		if val {
 			return defaultHealthcheck, nil
 		}
 

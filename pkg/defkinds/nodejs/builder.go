@@ -108,7 +108,7 @@ func (h *NodeJSHandler) buildNodeJS(
 
 	state = h.globalPackagesInstall(state, stageDef.GlobalPackages.Map(), buildOpts)
 
-	if *stageDef.Dev == false {
+	if !*stageDef.Dev {
 		state = h.depsInstall(stageDef, state, buildOpts)
 		state = h.copySources(stageDef, state, buildOpts)
 		state = h.copyConfigFiles(stageDef, state, buildOpts)
@@ -135,7 +135,7 @@ func setImageMetadata(stageDef StageDefinition, state llb.State, img *image.Imag
 	}
 
 	nodeEnv := "development"
-	if *stageDef.Dev == false {
+	if !*stageDef.Dev {
 		nodeEnv = "production"
 	}
 

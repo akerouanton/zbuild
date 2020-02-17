@@ -70,5 +70,5 @@ func HandleLLBGraphCmd(cmd *cobra.Command, args []string) {
 	if err != nil {
 		logrus.Fatalf("%+v", err)
 	}
-	ioutil.WriteFile(llbgraphFlags.output, []byte(rawGraph), 0640)
+	ioutil.WriteFile(llbgraphFlags.output, []byte(rawGraph), 0640) //nolint:errcheck
 }

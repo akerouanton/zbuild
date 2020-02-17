@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# This script is used during TravisCI builds to check if generated files are
+# up-to-date, otherwise builds fail.
+
+make gen-testdata
+make gen-diagrams
+make gen-mocks
+
+if [ "$(git diff | wc -l)" -ne 0 ]; then
+    echo "Looks like some generated files aren't up-to-date. Please run following commands to update them:"
+    echo '* `make gen-testdata`'
+    echo '* `make gen-diagrams`'
+    echo '* `make gen-mocks`'
+    echo ''
+    echo '`git status` output:'
+    git status
+    exit 1
+fi

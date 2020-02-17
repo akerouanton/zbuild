@@ -7,9 +7,13 @@ services:
   - docker
 
 env:
-  - GO111MODULE=on
+  - GO111MODULE=on GO_BUILD="go build"
+
+before_install:
+  - go install github.com/golang/mock/mockgen
 
 script:
+  - ./tools/check-generated-files
   - make test
 
 cache:

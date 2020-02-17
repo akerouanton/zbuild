@@ -1,95 +1,10 @@
 [
   {
-    "RawOp": "GjYKNGRvY2tlci1pbWFnZTovL2RvY2tlci5pby9saWJyYXJ5L25vZGU6MTItYnVzdGVyLXNsaW1SDgoFYW1kNjQSBWxpbnV4WgA=",
-    "Op": {
-      "Op": {
-        "Source": {
-          "identifier": "docker-image://docker.io/library/node:12-buster-slim"
-        }
-      },
-      "platform": {
-        "Architecture": "amd64",
-        "OS": "linux"
-      },
-      "constraints": {}
-    },
-    "Digest": "sha256:0057b79fe77376a86d1c78fec5c2ba56dd79c7a43999708faa926e59b8076528",
-    "OpMetadata": {
-      "caps": {
-        "source.image": true
-      }
-    }
-  },
-  {
-    "RawOp": "CkkKR3NoYTI1NjpjMmNkYzAwYzI1MWYzNDJmNjEzZmM3NTQzZjY1YmYzMWFiNDNjZmIzYzlkOTc3OTJjZWYzNzc5YzQzOGQyYzI2CkkKR3NoYTI1NjpkN2E4OWZlZGQxNWQwNzdmOTM3YzliNjhhMzkyZDgyYzg3NmI5NmFjMmZkY2RiZDU4NTc2MWZkZDU3MmE5OTRjIjkSNxABIjMKAS8SBC9hcHAaCgoDEOgHEgMQ6Acg////////////ASgBMAFAAUgBWP///////////wFSDgoFYW1kNjQSBWxpbnV4WgA=",
+    "RawOp": "CkkKR3NoYTI1Njo1ZmFiZGQzZDMzNDA3NGVlOGVmNWMwNTU4NTRmMzcyMDExZmJjNWI2NDYwOTM4NGU0MjQwM2VkN2Q5M2JlYTU1CkkKR3NoYTI1Njo3MTUxNzNjYTE5MmM2ZTViYTI1ZjVjMDNiNTgyNTA2ZDA1NGVmZWMyNzI3N2JjOTk1NjBhODgyODdiYzc0YTZiIkcSRRABIkEKBS8uZW52Eg4vYXBwLy5lbnYucHJvZBoKCgMQ6AcSAxDoByD///////////8BKAEwAUABSAFY////////////AVIOCgVhbWQ2NBIFbGludXhaAA==",
     "Op": {
       "inputs": [
         {
-          "digest": "sha256:c2cdc00c251f342f613fc7543f65bf31ab43cfb3c9d97792cef3779c438d2c26",
-          "index": 0
-        },
-        {
-          "digest": "sha256:d7a89fedd15d077f937c9b68a392d82c876b96ac2fdcdbd585761fdd572a994c",
-          "index": 0
-        }
-      ],
-      "Op": {
-        "File": {
-          "actions": [
-            {
-              "input": 0,
-              "secondaryInput": 1,
-              "output": 0,
-              "Action": {
-                "Copy": {
-                  "src": "/",
-                  "dest": "/app",
-                  "owner": {
-                    "user": {
-                      "User": {
-                        "ByID": 1000
-                      }
-                    },
-                    "group": {
-                      "User": {
-                        "ByID": 1000
-                      }
-                    }
-                  },
-                  "mode": -1,
-                  "followSymlink": true,
-                  "dirCopyContents": true,
-                  "createDestPath": true,
-                  "allowWildcard": true,
-                  "timestamp": -1
-                }
-              }
-            }
-          ]
-        }
-      },
-      "platform": {
-        "Architecture": "amd64",
-        "OS": "linux"
-      },
-      "constraints": {}
-    },
-    "Digest": "sha256:027ea490ee2272163bc9814071e21b40889a239e9abfd62eb8c50ac65e008f39",
-    "OpMetadata": {
-      "description": {
-        "llb.customname": "Copy /"
-      },
-      "caps": {
-        "file.base": true
-      }
-    }
-  },
-  {
-    "RawOp": "CkkKR3NoYTI1NjowMjdlYTQ5MGVlMjI3MjE2M2JjOTgxNDA3MWUyMWI0MDg4OWEyMzllOWFiZmQ2MmViOGM1MGFjNjVlMDA4ZjM5CkkKR3NoYTI1Njo3MTUxNzNjYTE5MmM2ZTViYTI1ZjVjMDNiNTgyNTA2ZDA1NGVmZWMyNzI3N2JjOTk1NjBhODgyODdiYzc0YTZiIkcSRRABIkEKBS8uZW52Eg4vYXBwLy5lbnYucHJvZBoKCgMQ6AcSAxDoByD///////////8BKAEwAUABSAFY////////////AVIOCgVhbWQ2NBIFbGludXhaAA==",
-    "Op": {
-      "inputs": [
-        {
-          "digest": "sha256:027ea490ee2272163bc9814071e21b40889a239e9abfd62eb8c50ac65e008f39",
+          "digest": "sha256:5fabdd3d334074ee8ef5c055854f372011fbc5b64609384e42403ed7d93bea55",
           "index": 0
         },
         {
@@ -138,7 +53,7 @@
       },
       "constraints": {}
     },
-    "Digest": "sha256:438b9d8ee03e91d5bd815264b8b99f0cd3a8670736e6e79eca747ff5f862713a",
+    "Digest": "sha256:420852c7d21ef2d186ccede3419fc6a988e1483d998f3f9b4bac83e6aac1641e",
     "OpMetadata": {
       "description": {
         "llb.customname": "Copy .env"
@@ -149,15 +64,15 @@
     }
   },
   {
-    "RawOp": "CkkKR3NoYTI1NjpiNDRkYWI4MTBlM2M3MDJhY2I5ZmY5OGIxZWZjNGIzMDFjZmM0YzBiNTI0NGIwNGQ1MjNiOGI2YmU4NjU1MDg4CkkKR3NoYTI1Njo5YjJhMDlmYWQ2Mzk5YWEwOTRiZjU3ODBlNTA5MzI5OTA1MjE4YzExODc4NjMyODBlZmMzYTdjMzk1ODQ0OTg5IkYSRBABIkAKDS9wYWNrYWdlLmpzb24SBS9hcHAvGgoKAxDoBxIDEOgHIP///////////wEoATABQAFIAVj///////////8BUg4KBWFtZDY0EgVsaW51eFoA",
+    "RawOp": "CkkKR3NoYTI1Njo3ODgyNThhM2E4MzdmYjk4YmQ3NTZhZDQ3YTFjYzU0ZTIyZTcwOTc3ZjY2MDI0NjRhOTRkYWVkNzU3NTg2NzM2CkkKR3NoYTI1NjpkN2E4OWZlZGQxNWQwNzdmOTM3YzliNjhhMzkyZDgyYzg3NmI5NmFjMmZkY2RiZDU4NTc2MWZkZDU3MmE5OTRjIjkSNxABIjMKAS8SBC9hcHAaCgoDEOgHEgMQ6Acg////////////ASgBMAFAAUgBWP///////////wFSDgoFYW1kNjQSBWxpbnV4WgA=",
     "Op": {
       "inputs": [
         {
-          "digest": "sha256:b44dab810e3c702acb9ff98b1efc4b301cfc4c0b5244b04d523b8b6be8655088",
+          "digest": "sha256:788258a3a837fb98bd756ad47a1cc54e22e70977f6602464a94daed757586736",
           "index": 0
         },
         {
-          "digest": "sha256:9b2a09fad6399aa094bf5780e509329905218c1187863280efc3a7c395844989",
+          "digest": "sha256:d7a89fedd15d077f937c9b68a392d82c876b96ac2fdcdbd585761fdd572a994c",
           "index": 0
         }
       ],
@@ -170,8 +85,8 @@
               "output": 0,
               "Action": {
                 "Copy": {
-                  "src": "/package.json",
-                  "dest": "/app/",
+                  "src": "/",
+                  "dest": "/app",
                   "owner": {
                     "user": {
                       "User": {
@@ -202,13 +117,54 @@
       },
       "constraints": {}
     },
-    "Digest": "sha256:5cbe67efba158931418f35afdf83bf734b5e9d83782c5713b34e8fb5b08e7356",
+    "Digest": "sha256:5fabdd3d334074ee8ef5c055854f372011fbc5b64609384e42403ed7d93bea55",
     "OpMetadata": {
       "description": {
-        "llb.customname": "Copy package.json"
+        "llb.customname": "Copy /"
       },
       "caps": {
         "file.base": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1Njo0MjA4NTJjN2QyMWVmMmQxODZjY2VkZTM0MTlmYzZhOTg4ZTE0ODNkOTk4ZjNmOWI0YmFjODNlNmFhYzE2NDFl",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:420852c7d21ef2d186ccede3419fc6a988e1483d998f3f9b4bac83e6aac1641e",
+          "index": 0
+        }
+      ],
+      "Op": null
+    },
+    "Digest": "sha256:6a46fe22253c33f9e59773b2642f646dbec36b3dd4d2641af6cadf783ce8d72c",
+    "OpMetadata": {
+      "caps": {
+        "constraints": true,
+        "meta.description": true,
+        "platform": true
+      }
+    }
+  },
+  {
+    "RawOp": "GjsKOWRvY2tlci1pbWFnZTovL2RvY2tlci5pby9saWJyYXJ5L25vZGU6MTIuMTQuMS1idXN0ZXItc2xpbVIOCgVhbWQ2NBIFbGludXhaAA==",
+    "Op": {
+      "Op": {
+        "Source": {
+          "identifier": "docker-image://docker.io/library/node:12.14.1-buster-slim"
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:705d841637c7bf4eab15f8f9cd45d3098176643e437f8c64406815dee3fd645d",
+    "OpMetadata": {
+      "caps": {
+        "source.image": true
       }
     }
   },
@@ -241,95 +197,11 @@
     }
   },
   {
-    "RawOp": "GowBCg9sb2NhbDovL2NvbnRleHQSNAoUbG9jYWwuaW5jbHVkZXBhdHRlcm4SHFsicGFja2FnZS5qc29uIiwieWFybi5sb2NrIl0SHQoNbG9jYWwuc2Vzc2lvbhIMPFNFU1NJT04tSUQ+EiQKE2xvY2FsLnNoYXJlZGtleWhpbnQSDXBhY2thZ2UtZmlsZXNaAA==",
-    "Op": {
-      "Op": {
-        "Source": {
-          "identifier": "local://context",
-          "attrs": {
-            "local.includepattern": "[\"package.json\",\"yarn.lock\"]",
-            "local.session": "\u003cSESSION-ID\u003e",
-            "local.sharedkeyhint": "package-files"
-          }
-        }
-      },
-      "constraints": {}
-    },
-    "Digest": "sha256:9b2a09fad6399aa094bf5780e509329905218c1187863280efc3a7c395844989",
-    "OpMetadata": {
-      "description": {
-        "llb.customname": "load package.json and yarn.lock from build context"
-      },
-      "caps": {
-        "source.local": true,
-        "source.local.includepatterns": true,
-        "source.local.sessionid": true,
-        "source.local.sharedkeyhint": true
-      }
-    }
-  },
-  {
-    "RawOp": "CkkKR3NoYTI1NjowMDU3Yjc5ZmU3NzM3NmE4NmQxYzc4ZmVjNWMyYmE1NmRkNzljN2E0Mzk5OTcwOGZhYTkyNmU1OWI4MDc2NTI4IjESLxD///////////8BMiIKBC9hcHAQ6AMYASIKCgMQ6AcSAxDoByj///////////8BUg4KBWFtZDY0EgVsaW51eFoA",
+    "RawOp": "CkkKR3NoYTI1Njo4ODA3ZDljZTc4MjY5ZjQ0OTk1OWNjNzRhOGYyNjI0YzE2MTQwM2YyZDBlNTFhY2M1MmY0MzM3NDM5MWJiMzA5ErwBCrQBCgcvYmluL3NoCgItbwoHZXJyZXhpdAoCLWMKHnlhcm4gaW5zdGFsbCAtLWZyb3plbi1sb2NrZmlsZRJBUEFUSD0vdXNyL2xvY2FsL3NiaW46L3Vzci9sb2NhbC9iaW46L3Vzci9zYmluOi91c3IvYmluOi9zYmluOi9iaW4SFE5PREVfVkVSU0lPTj0xMi4xNC4xEhNZQVJOX1ZFUlNJT049MS4yMS4xGgQvYXBwIgQxMDAwEgMaAS9SDgoFYW1kNjQSBWxpbnV4WgA=",
     "Op": {
       "inputs": [
         {
-          "digest": "sha256:0057b79fe77376a86d1c78fec5c2ba56dd79c7a43999708faa926e59b8076528",
-          "index": 0
-        }
-      ],
-      "Op": {
-        "File": {
-          "actions": [
-            {
-              "input": 0,
-              "secondaryInput": -1,
-              "output": 0,
-              "Action": {
-                "Mkdir": {
-                  "path": "/app",
-                  "mode": 488,
-                  "makeParents": true,
-                  "owner": {
-                    "user": {
-                      "User": {
-                        "ByID": 1000
-                      }
-                    },
-                    "group": {
-                      "User": {
-                        "ByID": 1000
-                      }
-                    }
-                  },
-                  "timestamp": -1
-                }
-              }
-            }
-          ]
-        }
-      },
-      "platform": {
-        "Architecture": "amd64",
-        "OS": "linux"
-      },
-      "constraints": {}
-    },
-    "Digest": "sha256:b44dab810e3c702acb9ff98b1efc4b301cfc4c0b5244b04d523b8b6be8655088",
-    "OpMetadata": {
-      "description": {
-        "llb.customname": "Mkdir /app"
-      },
-      "caps": {
-        "file.base": true
-      }
-    }
-  },
-  {
-    "RawOp": "CkkKR3NoYTI1NjpmNGYyY2VmYTdlNjJiZDczMjk5NjlmODAzNzI1YjFmZTYxZTQwZDcwZTkxZDI0M2I2NjcxN2IyYzM3NTgzZjc1EskBCsEBCgcvYmluL3NoCgItbwoHZXJyZXhpdAoCLWMKK3lhcm4gaW5zdGFsbCAtLXByb2R1Y3Rpb24gLS1mcm96ZW4tbG9ja2ZpbGUSQVBBVEg9L3Vzci9sb2NhbC9zYmluOi91c3IvbG9jYWwvYmluOi91c3Ivc2JpbjovdXNyL2Jpbjovc2JpbjovYmluEhROT0RFX1ZFUlNJT049MTIuMTQuMRITWUFSTl9WRVJTSU9OPTEuMjEuMRoEL2FwcCIEMTAwMBIDGgEvUg4KBWFtZDY0EgVsaW51eFoA",
-    "Op": {
-      "inputs": [
-        {
-          "digest": "sha256:f4f2cefa7e62bd7329969f803725b1fe61e40d70e91d243b66717b2c37583f75",
+          "digest": "sha256:8807d9ce78269f449959cc74a8f2624c161403f2d0e51acc52f43374391bb309",
           "index": 0
         }
       ],
@@ -341,7 +213,7 @@
               "-o",
               "errexit",
               "-c",
-              "yarn install --production --frozen-lockfile"
+              "yarn install --frozen-lockfile"
             ],
             "env": [
               "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
@@ -366,7 +238,7 @@
       },
       "constraints": {}
     },
-    "Digest": "sha256:c2cdc00c251f342f613fc7543f65bf31ab43cfb3c9d97792cef3779c438d2c26",
+    "Digest": "sha256:788258a3a837fb98bd756ad47a1cc54e22e70977f6602464a94daed757586736",
     "OpMetadata": {
       "description": {
         "llb.customname": "Run yarn install"
@@ -378,59 +250,11 @@
     }
   },
   {
-    "RawOp": "CkkKR3NoYTI1Njo0MzhiOWQ4ZWUwM2U5MWQ1YmQ4MTUyNjRiOGI5OWYwY2QzYTg2NzA3MzZlNmU3OWVjYTc0N2ZmNWY4NjI3MTNh",
+    "RawOp": "CkkKR3NoYTI1NjpjOGNmYmUyMTY5NTBmYTJhNGU1NTAwZTBmMjExMWI2N2ZmNzE2NDZmMjg5MDMyZTVjYTRhM2I5MDczMTQzMDAzCkkKR3NoYTI1Njo5YjJhMDlmYWQ2Mzk5YWEwOTRiZjU3ODBlNTA5MzI5OTA1MjE4YzExODc4NjMyODBlZmMzYTdjMzk1ODQ0OTg5IkMSQRABIj0KCi95YXJuLmxvY2sSBS9hcHAvGgoKAxDoBxIDEOgHIP///////////wEoATABQAFIAVj///////////8BUg4KBWFtZDY0EgVsaW51eFoA",
     "Op": {
       "inputs": [
         {
-          "digest": "sha256:438b9d8ee03e91d5bd815264b8b99f0cd3a8670736e6e79eca747ff5f862713a",
-          "index": 0
-        }
-      ],
-      "Op": null
-    },
-    "Digest": "sha256:c501317d8b67980ecb781e69190f62a4ac5a5d1aa8b43efd9dbeb9cd4709b751",
-    "OpMetadata": {
-      "caps": {
-        "constraints": true,
-        "meta.description": true,
-        "platform": true
-      }
-    }
-  },
-  {
-    "RawOp": "GngKD2xvY2FsOi8vY29udGV4dBIgChRsb2NhbC5pbmNsdWRlcGF0dGVybhIIWyJzcmMvIl0SHQoNbG9jYWwuc2Vzc2lvbhIMPFNFU1NJT04tSUQ+EiQKE2xvY2FsLnNoYXJlZGtleWhpbnQSDWJ1aWxkLWNvbnRleHRaAA==",
-    "Op": {
-      "Op": {
-        "Source": {
-          "identifier": "local://context",
-          "attrs": {
-            "local.includepattern": "[\"src/\"]",
-            "local.session": "\u003cSESSION-ID\u003e",
-            "local.sharedkeyhint": "build-context"
-          }
-        }
-      },
-      "constraints": {}
-    },
-    "Digest": "sha256:d7a89fedd15d077f937c9b68a392d82c876b96ac2fdcdbd585761fdd572a994c",
-    "OpMetadata": {
-      "description": {
-        "llb.customname": "load build context"
-      },
-      "caps": {
-        "source.local": true,
-        "source.local.includepatterns": true,
-        "source.local.sessionid": true,
-        "source.local.sharedkeyhint": true
-      }
-    }
-  },
-  {
-    "RawOp": "CkkKR3NoYTI1Njo1Y2JlNjdlZmJhMTU4OTMxNDE4ZjM1YWZkZjgzYmY3MzRiNWU5ZDgzNzgyYzU3MTNiMzRlOGZiNWIwOGU3MzU2CkkKR3NoYTI1Njo5YjJhMDlmYWQ2Mzk5YWEwOTRiZjU3ODBlNTA5MzI5OTA1MjE4YzExODc4NjMyODBlZmMzYTdjMzk1ODQ0OTg5IkMSQRABIj0KCi95YXJuLmxvY2sSBS9hcHAvGgoKAxDoBxIDEOgHIP///////////wEoATABQAFIAVj///////////8BUg4KBWFtZDY0EgVsaW51eFoA",
-    "Op": {
-      "inputs": [
-        {
-          "digest": "sha256:5cbe67efba158931418f35afdf83bf734b5e9d83782c5713b34e8fb5b08e7356",
+          "digest": "sha256:c8cfbe216950fa2a4e5500e0f2111b67ff71646f289032e5ca4a3b9073143003",
           "index": 0
         },
         {
@@ -479,13 +303,189 @@
       },
       "constraints": {}
     },
-    "Digest": "sha256:f4f2cefa7e62bd7329969f803725b1fe61e40d70e91d243b66717b2c37583f75",
+    "Digest": "sha256:8807d9ce78269f449959cc74a8f2624c161403f2d0e51acc52f43374391bb309",
     "OpMetadata": {
       "description": {
         "llb.customname": "Copy yarn.lock"
       },
       "caps": {
         "file.base": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1Njo3MDVkODQxNjM3YzdiZjRlYWIxNWY4ZjljZDQ1ZDMwOTgxNzY2NDNlNDM3ZjhjNjQ0MDY4MTVkZWUzZmQ2NDVkIjESLxD///////////8BMiIKBC9hcHAQ6AMYASIKCgMQ6AcSAxDoByj///////////8BUg4KBWFtZDY0EgVsaW51eFoA",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:705d841637c7bf4eab15f8f9cd45d3098176643e437f8c64406815dee3fd645d",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "File": {
+          "actions": [
+            {
+              "input": 0,
+              "secondaryInput": -1,
+              "output": 0,
+              "Action": {
+                "Mkdir": {
+                  "path": "/app",
+                  "mode": 488,
+                  "makeParents": true,
+                  "owner": {
+                    "user": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    },
+                    "group": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    }
+                  },
+                  "timestamp": -1
+                }
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:890c6cc1e8cc41daec5df6ef4eee243494e7ef21373f0ce0e6ed32ef068698b4",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Mkdir /app"
+      },
+      "caps": {
+        "file.base": true
+      }
+    }
+  },
+  {
+    "RawOp": "GowBCg9sb2NhbDovL2NvbnRleHQSNAoUbG9jYWwuaW5jbHVkZXBhdHRlcm4SHFsicGFja2FnZS5qc29uIiwieWFybi5sb2NrIl0SHQoNbG9jYWwuc2Vzc2lvbhIMPFNFU1NJT04tSUQ+EiQKE2xvY2FsLnNoYXJlZGtleWhpbnQSDXBhY2thZ2UtZmlsZXNaAA==",
+    "Op": {
+      "Op": {
+        "Source": {
+          "identifier": "local://context",
+          "attrs": {
+            "local.includepattern": "[\"package.json\",\"yarn.lock\"]",
+            "local.session": "\u003cSESSION-ID\u003e",
+            "local.sharedkeyhint": "package-files"
+          }
+        }
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:9b2a09fad6399aa094bf5780e509329905218c1187863280efc3a7c395844989",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "load package.json and yarn.lock from build context"
+      },
+      "caps": {
+        "source.local": true,
+        "source.local.includepatterns": true,
+        "source.local.sessionid": true,
+        "source.local.sharedkeyhint": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1Njo4OTBjNmNjMWU4Y2M0MWRhZWM1ZGY2ZWY0ZWVlMjQzNDk0ZTdlZjIxMzczZjBjZTBlNmVkMzJlZjA2ODY5OGI0CkkKR3NoYTI1Njo5YjJhMDlmYWQ2Mzk5YWEwOTRiZjU3ODBlNTA5MzI5OTA1MjE4YzExODc4NjMyODBlZmMzYTdjMzk1ODQ0OTg5IkYSRBABIkAKDS9wYWNrYWdlLmpzb24SBS9hcHAvGgoKAxDoBxIDEOgHIP///////////wEoATABQAFIAVj///////////8BUg4KBWFtZDY0EgVsaW51eFoA",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:890c6cc1e8cc41daec5df6ef4eee243494e7ef21373f0ce0e6ed32ef068698b4",
+          "index": 0
+        },
+        {
+          "digest": "sha256:9b2a09fad6399aa094bf5780e509329905218c1187863280efc3a7c395844989",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "File": {
+          "actions": [
+            {
+              "input": 0,
+              "secondaryInput": 1,
+              "output": 0,
+              "Action": {
+                "Copy": {
+                  "src": "/package.json",
+                  "dest": "/app/",
+                  "owner": {
+                    "user": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    },
+                    "group": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    }
+                  },
+                  "mode": -1,
+                  "followSymlink": true,
+                  "dirCopyContents": true,
+                  "createDestPath": true,
+                  "allowWildcard": true,
+                  "timestamp": -1
+                }
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:c8cfbe216950fa2a4e5500e0f2111b67ff71646f289032e5ca4a3b9073143003",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Copy package.json"
+      },
+      "caps": {
+        "file.base": true
+      }
+    }
+  },
+  {
+    "RawOp": "GngKD2xvY2FsOi8vY29udGV4dBIgChRsb2NhbC5pbmNsdWRlcGF0dGVybhIIWyJzcmMvIl0SHQoNbG9jYWwuc2Vzc2lvbhIMPFNFU1NJT04tSUQ+EiQKE2xvY2FsLnNoYXJlZGtleWhpbnQSDWJ1aWxkLWNvbnRleHRaAA==",
+    "Op": {
+      "Op": {
+        "Source": {
+          "identifier": "local://context",
+          "attrs": {
+            "local.includepattern": "[\"src/\"]",
+            "local.session": "\u003cSESSION-ID\u003e",
+            "local.sharedkeyhint": "build-context"
+          }
+        }
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:d7a89fedd15d077f937c9b68a392d82c876b96ac2fdcdbd585761fdd572a994c",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "load build context"
+      },
+      "caps": {
+        "source.local": true,
+        "source.local.includepatterns": true,
+        "source.local.sessionid": true,
+        "source.local.sharedkeyhint": true
       }
     }
   }

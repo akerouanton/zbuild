@@ -64,6 +64,9 @@ func (h *WebserverHandler) Build(
 	}
 
 	state, err = llbutils.InstallSystemPackages(state, llbutils.APT, def.Locks.SystemPackages)
+	if err != nil {
+		return state, img, xerrors.Errorf("failed to add \"install system pacakges\" steps: %w", err)
+	}
 
 	if def.ConfigFile != nil && *def.ConfigFile != "" {
 		state = h.copyConfigFile(def, state, buildOpts)
