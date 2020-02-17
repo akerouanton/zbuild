@@ -108,12 +108,19 @@ func (h *PHPHandler) buildPHP(
 
 	composer := llbutils.ImageSource(defaultComposerImageTag, false)
 	state = llbutils.Copy(composer, "/usr/bin/composer", state, "/usr/bin/composer", "")
-	state, err = llbutils.InstallSystemPackages(state, llbutils.APT, stage.StageLocks.SystemPackages)
+
+	pkgManager := llbutils.APT
+	if stage.DefLocks.OSRelease.Name == "alpine" {
+		pkgManager = llbutils.APK
+	}
+
+	state, err = llbutils.InstallSystemPackages(state, pkgManager,
+		stage.StageLocks.SystemPackages)
 	if err != nil {
 		return state, img, xerrors.Errorf("failed to add \"install system pacakges\" steps: %w", err)
 	}
 
-	state = InstallExtensions(state, stage.MajMinVersion, stage.StageLocks.Extensions)
+	state = InstallExtensions(state, stage)
 	state = llbutils.CopyExternalFiles(state, stage.ExternalFiles)
 
 	state = llbutils.Mkdir(state, "1000:1000", "/app", "/composer")

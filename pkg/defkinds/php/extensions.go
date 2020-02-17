@@ -82,49 +82,215 @@ var coreExts = map[string]bool{
 	"zip":          true,
 }
 
-var extensionsDeps = map[string]map[string]string{
-	"bz2":          {"libbz2-dev": "*"},
-	"curl":         {"libcurl4-openssl-dev": "*"},
-	"dom":          {"libxml2-dev": "*"},
-	"enchant":      {"libenchant-dev": "*"},
-	"ffi":          {"libffi-dev": "*"},
-	"ftp":          {"libssl-dev": "*"},
-	"gd":           {"libpng-dev": "*"},
-	"gd.freetype":  {"libfreetype6-dev": "*"},
-	"gd.jpeg":      {"libjpeg-dev": "*"},
-	"gd.webp":      {"libwebp-dev": "*"},
-	"gmp":          {"libgmp-dev": "*"},
-	"imap":         {"libc-client-dev": "*", "libkrb5-dev": "*"},
-	"interbase":    {}, // @TODO: could not find needed dependencies
-	"intl":         {"libicu-dev": "*"},
-	"ldap":         {"libldap2-dev": "*"},
-	"mcrypt":       {"libmcrypt-dev": "*"},
-	"oci8":         {}, // @TODO
-	"odbc":         {}, // @TODO
-	"pdo_dblib":    {}, // @TODO
-	"pdo_firebird": {}, // @TODO
-	"pdo_oci":      {}, // @TODO
-	"pdo_odbc":     {}, // @TODO
-	"pdo_pgsql":    {"libpq-dev": "*"},
-	"pdo_sqlite":   {"libsqlite3-dev": "*"},
-	"pgsql":        {"libpq-dev": "*"},
-	"phar":         {"libssl-dev": "*"},
-	"pspell":       {"libpspell-dev": "*"},
-	"readline":     {"libedit-dev": "*"},
-	"recode":       {"librecode-dev": "*"},
-	"simplexml":    {"libxml2-dev": "*"},
-	"snmp":         {"libsnmp-dev": "*"},
-	"soap":         {"libxml2-dev": "*"},
-	"sodium":       {"libsodium-dev": "*"},
-	"sockets":      {"libssl-dev": "*", "openssl": "*"},
-	"tidy":         {"libtidy-dev": "*"},
-	"wddx":         {"libxml2-dev": "*"},
-	"xml":          {"libxml2-dev": "*"},
-	"xmlreader":    {}, // @TODO: this extension seems broken (bad include statement)
-	"xmlrpc":       {"libxml2-dev": "*"},
-	"xmlwriter":    {"libxml2-dev": "*"},
-	"xsl":          {"libxslt1-dev": "*"},
-	"zip":          {"libzip-dev": "*", "zlib1g-dev": "*"},
+var extensionsDeps = map[string]map[string]map[string]string{
+	// Native extensions
+	"bz2": {
+		"alpine": {"bzip2-dev": "*"},
+		"debian": {"libbz2-dev": "*"},
+	},
+	"curl": { // @TODO: remove - this extension is preinstalled
+		"alpine": {"curl-dev": "*"},
+		"debian": {"libcurl4-openssl-dev": "*"},
+	},
+	"dom": { // @TODO: enabled by default?
+		"alpine": {"libxml2-dev": "*"},
+		"debian": {"libxml2-dev": "*"},
+	},
+	"enchant": {
+		"alpine": {"enchant-dev": "*"},
+		"debian": {"libenchant-dev": "*"},
+	},
+	"ffi": {
+		"alpine": {"libffi-dev": "*"},
+		"debian": {"libffi-dev": "*"},
+	},
+	"ftp": {
+		"alpine": {"openssl-dev": "*"},
+		"debian": {"libssl-dev": "*"},
+	},
+	"gd": {
+		"alpine": {"libpng-dev": "*", "zlib-dev": "*"},
+		"debian": {"libpng-dev": "*"},
+	},
+	"gd.freetype": {
+		"alpine": {"freetype-dev": "*"},
+		"debian": {"libfreetype6-dev": "*"},
+	},
+	"gd.jpeg": {
+		"alpine": {"libjpeg-turbo-dev": "*"},
+		"debian": {"libjpeg-dev": "*"},
+	},
+	"gd.webp": {
+		"alpine": {"libwebp-dev": "*"},
+		"debian": {"libwebp-dev": "*"},
+	},
+	"gmp": {
+		"alpine": {"gmp-dev": "*"},
+		"debian": {"libgmp-dev": "*"},
+	},
+	"imap": {
+		"alpine": {"imap-dev": "*"},
+		"debian": {"libc-client-dev": "*", "libkrb5-dev": "*"},
+	},
+	"interbase": { // @TODO: remove
+		"alpine": {}, // @TODO: could not find needed dependencies
+		"debian": {}, // @TODO: could not find needed dependencies
+	},
+	"intl": {
+		"alpine": {"icu-dev": "*"},
+		"debian": {"libicu-dev": "*"},
+	},
+	"ldap": {
+		"alpine": {"openldap-dev": "*"},
+		"debian": {"libldap2-dev": "*"},
+	},
+	"mcrypt": { // @TODO: removed from latest 7.4/7.3/7.2 images
+		"debian": {"libmcrypt-dev": "*"},
+	},
+	"oci8": {
+		"alpine": {}, // @TODO
+		"debian": {}, // @TODO
+	},
+	"odbc": {
+		"alpine": {}, // @TODO
+		"debian": {}, // @TODO
+	},
+	"pdo_dblib": {
+		"alpine": {}, // @TODO
+		"debian": {}, // @TODO
+	},
+	"pdo_firebird": {
+		"alpine": {}, // @TODO
+		"debian": {}, // @TODO
+	},
+	"pdo_oci": {
+		"alpine": {}, // @TODO
+		"debian": {}, // @TODO
+	},
+	"pdo_odbc": {
+		"alpine": {}, // @TODO
+		"debian": {}, // @TODO
+	},
+	"pdo_pgsql": {
+		"alpine": {"postgresql-dev": "*"},
+		"debian": {"libpq-dev": "*"},
+	},
+	"pdo_sqlite": {
+		"alpine": {"sqlite-dev": "*"},
+		"debian": {"libsqlite3-dev": "*"},
+	},
+	"pgsql": {
+		"alpine": {"postgresql-dev": "*"},
+		"debian": {"libpq-dev": "*"},
+	},
+	"phar": {
+		"alpine": {"openssl-dev": "*"},
+		"debian": {"libssl-dev": "*"},
+	},
+	"pspell": {
+		"alpine": {"aspell-dev": "*"},
+		"debian": {"libpspell-dev": "*"},
+	},
+	"readline": {
+		"alpine": {"libedit-dev": "*"},
+		"debian": {"libedit-dev": "*"},
+	},
+	"recode": { // @TODO: removed from php7.4
+		"alpine": {"recode-dev": "*"},
+		"debian": {"librecode-dev": "*"},
+	},
+	"simplexml": {
+		"alpine": {"libxml2-dev": "*"},
+		"debian": {"libxml2-dev": "*"},
+	},
+	"snmp": {
+		"alpine": {"net-snmp-dev": "*"},
+		"debian": {"libsnmp-dev": "*"},
+	},
+	"soap": {
+		"alpine": {"libxml2-dev": "*"},
+		"debian": {"libxml2-dev": "*"},
+	},
+	"sodium": {
+		"alpine": {"libsodium-dev": "*"},
+		"debian": {"libsodium-dev": "*"},
+	},
+	"sockets": {
+		"alpine": {"openssl-dev": "*"},
+		"debian": {"libssl-dev": "*", "openssl": "*"},
+	},
+	"tidy": {
+		"alpine": {"tidyhtml-dev": "*"},
+		"debian": {"libtidy-dev": "*"},
+	},
+	"wddx": { // @TODO: removed from 7.4
+		"alpine": {"libxml2-dev": "*"},
+		"debian": {"libxml2-dev": "*"},
+	},
+	"xml": {
+		"alpine": {"libxml2-dev": "*"},
+		"debian": {"libxml2-dev": "*"},
+	},
+	"xmlreader": {
+		"alpine": {"libxml2-dev": "*"},
+		"debian": {"libxml2-dev": "*"},
+	},
+	"xmlrpc": {
+		"alpine": {"libxml2-dev": "*"},
+		"debian": {"libxml2-dev": "*"},
+	},
+	"xmlwriter": {
+		"alpine": {"libxml2-dev": "*"},
+		"debian": {"libxml2-dev": "*"},
+	},
+	"xsl": {
+		"alpine": {"libxslt-dev": "*"},
+		"debian": {"libxslt1-dev": "*"},
+	},
+	"zip": {
+		"alpine": {"libzip-dev": "*"},
+		"debian": {"libzip-dev": "*", "zlib1g-dev": "*"},
+	},
+
+	// PECL Extensions
+	"imagick": {
+		"alpine": {"imagemagick6-dev": "*"},
+		"debian": {"libmagick++-6.q16-dev": "*"},
+	},
+	"redis": {
+		// This ext needs no deps
+		"alpine": {},
+		"debian": {},
+	},
+	"memcache": {
+		"alpine": {"zlib-dev": "*"},
+		"debian": {"zlib1g-dev": "*"},
+	},
+	"memcached": {
+		"alpine": {"libmemcached-dev": "*", "zlib-dev": "*"},
+		"debian": {"libmemcached-dev": "*", "zlib1g-dev": "*"},
+	},
+	"mongodb": {
+		// This ext needs no deps
+		"alpine": {},
+		"debian": {},
+	},
+	"amqp": {
+		"alpine": {"rabbitmq-c-dev": "*"},
+		"debian": {"librabbitmq-dev": "*"},
+	},
+	"couchbase": {
+		"alpine": {"libcouchbase-dev": "*"},
+		"debian": {}, // @TODO: no libcouchbase available
+	},
+	"rdkafka": {
+		"alpine": {"librdkafka-dev": "*"},
+		"debian": {"librdkafka-dev": "*"},
+	},
+	"zookeeper": {
+		"alpine": {}, // libzookeeper-dev is not available on Alpine.
+		"debian": {"libzookeeper-mt-dev": "*"},
+	},
 }
 
 func filterExtensions(extensions map[string]string, filterFunc func(string) bool) map[string]string {
@@ -197,17 +363,17 @@ func getPeclExtensionSpecs(extensions map[string]string) []string {
 	return specs
 }
 
-// InstallExtensions takes a PHP version (with only major and minor components)
-// and a map of extensions to install as keys and version constraints as
-// values.
-// It splits the set of extensions into core extensions and community
+// InstallExtensions adds a step to the given LLB state to isntall PHP
+// extensions for a given StageDefinition. It uses the locked extensions
+// available in the StageLocks. The same state is returned if no extensions
+// are locked.
+//
+// The set of extensions is splitted into core extensions and community
 // extensions. The former are installed using docker-php-ext-install whereas
 // ther latter are installed using notpecl (a replacement for pecl). It takes
 // care of deleting downloaded/unpacked files after installing extensions.
-//
-// This function returns a new llb.State with an llb.ExecState added to the LLB
-// DAG. The same state is returned if no extensions were provided.
-func InstallExtensions(state llb.State, majMinVersion string, extensions map[string]string) llb.State {
+func InstallExtensions(state llb.State, stageDef StageDefinition) llb.State {
+	extensions := stageDef.StageLocks.Extensions
 	if len(extensions) == 0 {
 		return state
 	}
@@ -219,22 +385,36 @@ func InstallExtensions(state llb.State, majMinVersion string, extensions map[str
 	if len(coreExtensions) > 0 {
 		coreExtensionNames := getExtensionNames(coreExtensions)
 		coreExtensionSpecs := getCoreExtensionSpecs(coreExtensions)
-		cmds = append(cmds, configureExtensionBuilds(coreExtensionNames)...)
+
+		cmds = append(cmds, configureExtBuilds(stageDef, coreExtensionNames)...)
 		cmds = append(cmds,
 			"docker-php-ext-install -j\"$(nproc)\" "+strings.Join(coreExtensionSpecs, " "))
-		if version.Compare(majMinVersion, "7.3", ">=") {
+
+		if version.Compare(stageDef.MajMinVersion, "7.3", ">=") {
 			cmds = append(cmds, "docker-php-source delete")
 		}
 	}
 	if len(peclExtensions) > 0 {
 		peclExtensionNames := getExtensionNames(peclExtensions)
 		peclExtensionSpecs := getPeclExtensionSpecs(peclExtensions)
+
 		cmds = append(cmds,
 			"curl -f -o /usr/local/sbin/notpecl https://storage.googleapis.com/notpecl/notpecl",
-			"chmod +x /usr/local/sbin/notpecl",
+			"chmod +x /usr/local/sbin/notpecl")
+
+		isAlpine := stageDef.DefLocks.OSRelease.Name == "alpine"
+		if isAlpine {
+			cmds = append(cmds, "apk add --no-cache --virtual=.phpize $PHPIZE_DEPS")
+		}
+
+		cmds = append(cmds,
 			"notpecl install "+strings.Join(peclExtensionSpecs, " "),
-			"docker-php-ext-enable "+strings.Join(peclExtensionNames, " "),
-			"rm -rf /usr/local/sbin/notpecl")
+			"docker-php-ext-enable "+strings.Join(peclExtensionNames, " "))
+
+		if isAlpine {
+			cmds = append(cmds, "apk del .phpize")
+		}
+		cmds = append(cmds, "rm -rf /usr/local/sbin/notpecl")
 	}
 
 	extensionNames := getExtensionNames(extensions)
@@ -245,14 +425,41 @@ func InstallExtensions(state llb.State, majMinVersion string, extensions map[str
 	return exec.Root()
 }
 
-var extConfigureParams = map[string][]string{
-	"gd.freetype": {"--with-freetype-dir"},
-	"gd.jpeg":     {"--with-jpeg-dir"},
-	"gd.webp":     {"--with-webp-dir"},
-	"imap":        {"--with-imap-ssl", "--with-kerberos"},
+// This holds the list of flags to pass to docker-php-ext-configure. Note
+// that gd has multiple entries, each alias can be specified in zbuildfiles
+// to enable a specific part of gd (each having a specific set of configure
+// flags and system package requirements.
+// The key "7.4" holds flags for php v7.4+, whereas th key "previous" holds
+// flags for v7.2 an v7.3.
+var extConfigureParams = map[string]map[string][]string{
+	"gd.freetype": {
+		"7.4":      {"--with-freetype"},
+		"previous": {"--with-freetype-dir"},
+	},
+	"gd.jpeg": {
+		"7.4":      {"--with-jpeg"},
+		"previous": {"--with-jpeg-dir"},
+	},
+	"gd.webp": {
+		"7.4":      {"--with-webp"},
+		"previous": {"--with-webp-dir"},
+	},
+	"imap": {
+		"7.4":      {"--with-imap-ssl", "--with-kerberos"},
+		"previous": {"--with-imap-ssl", "--with-kerberos"},
+	},
 }
 
-func configureExtensionBuilds(exts []string) []string {
+// configureExtBuilds returns a list of commands to execute to configure
+// extension builds using docker-php-ext-configure.
+func configureExtBuilds(stageDef StageDefinition, exts []string) []string {
+	paramsKey := "previous"
+	if version.Compare(stageDef.MajMinVersion, "v7.4", ">=") {
+		paramsKey = "7.4"
+	}
+
+	// Since gd has 3 aliases, we need to build the list of flags first
+	// to merge gd flags together.
 	configArgs := map[string]string{}
 	for _, ext := range exts {
 		params, ok := extConfigureParams[ext]
@@ -260,30 +467,21 @@ func configureExtensionBuilds(exts []string) []string {
 			continue
 		}
 
+		// The extension name is normalized such that config flags for gd are
+		// all merged together.
 		extName := normalizeExtName(ext)
 		if _, ok := configArgs[extName]; !ok {
 			configArgs[extName] = ""
 		}
 
-		configArgs[extName] = configArgs[extName] + " " + strings.Join(params, " ")
+		flags := strings.Join(params[paramsKey], " ")
+		configArgs[extName] = configArgs[extName] + " " + flags
 	}
 
 	cmds := []string{}
-	withGD := false
-	for _, ext := range exts {
-		extName := normalizeExtName(ext)
-		// Skip this extension if it's GD (or one if its alias) and it's
-		// already been added.
-		if extName == "gd" && withGD {
-			continue
-		}
-		if extName == "gd" {
-			withGD = true
-		}
-
-		args := strings.Trim(configArgs[extName], " ")
-		cmd := fmt.Sprintf("docker-php-ext-configure %s %s", extName, args)
-		cmds = append(cmds, cmd)
+	for extName, flags := range configArgs {
+		cmds = append(cmds, fmt.Sprintf("docker-php-ext-configure %s %s",
+			extName, strings.Trim(flags, " ")))
 	}
 
 	return cmds

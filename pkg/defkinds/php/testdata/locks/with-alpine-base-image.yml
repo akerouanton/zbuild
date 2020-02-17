@@ -1,0 +1,10 @@
+kind: php
+fpm: true
+version: 7.3
+alpine: true
+
+extensions:
+  intl: "*"
+  pdo_mysql: "*"
+  soap: "*"
+  redis: "~5.1.0"

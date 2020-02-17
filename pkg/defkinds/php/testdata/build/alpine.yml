@@ -1,0 +1,6 @@
+kind: php
+version: 7.4.2
+alpine: true
+
+fpm: true
+healthcheck: false

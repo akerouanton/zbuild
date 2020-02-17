@@ -13,7 +13,6 @@ import (
 	"github.com/NiR-/zbuild/pkg/pkgsolver"
 	"github.com/NiR-/zbuild/pkg/statesolver"
 	"github.com/golang/mock/gomock"
-	"golang.org/x/xerrors"
 	"gopkg.in/yaml.v2"
 )
 
@@ -37,7 +36,7 @@ HOME_URL="https://www.debian.org/"
 SUPPORT_URL="https://www.debian.org/support"
 BUG_REPORT_URL="https://bugs.debian.org/"`)
 
-func initSuccessfullyUpdateLocksTC(t *testing.T, mockCtrl *gomock.Controller) updateLocksTC {
+func initUpdateLocksWithDebianBaseImageTC(t *testing.T, mockCtrl *gomock.Controller) updateLocksTC {
 	solver := mocks.NewMockStateSolver(mockCtrl)
 	solver.EXPECT().ResolveImageRef(
 		gomock.Any(), "docker.io/library/php:7.3-fpm-buster",
@@ -120,35 +119,81 @@ HOME_URL="https://alpinelinux.org/"
 BUG_REPORT_URL="https://bugs.alpinelinux.org/"
 `)
 
-func failToUpdateLocksForAlpineBaseImageTC(t *testing.T, mockCtrl *gomock.Controller) updateLocksTC {
-	// @TODO: fix image tag used in this use case once alpine support is added
+func initUpdateLocksWithAlpineBaseImageTC(t *testing.T, mockCtrl *gomock.Controller) updateLocksTC {
 	solver := mocks.NewMockStateSolver(mockCtrl)
 	solver.EXPECT().ResolveImageRef(
-		gomock.Any(), "docker.io/library/php:7.3-fpm-buster",
-	).Return("docker.io/library/php:7.3-fpm-buster@sha256", nil)
+		gomock.Any(), "docker.io/library/php:7.3-fpm-alpine",
+	).Return("docker.io/library/php:7.3-fpm-alpine@sha256", nil)
 
-	solver.EXPECT().FromImage("docker.io/library/php:7.3-fpm-buster@sha256").Times(1)
+	solver.EXPECT().ExecImage(gomock.Any(), "docker.io/library/php:7.3-fpm-alpine@sha256", []string{
+		"/usr/bin/env php -r \"echo ini_get('extension_dir');\"",
+	}).Return(bytes.NewBufferString("/some/path"), nil)
+
+	solver.EXPECT().FromImage("docker.io/library/php:7.3-fpm-alpine@sha256").Times(1)
 	solver.EXPECT().ReadFile(
 		gomock.Any(),
 		"/etc/os-release",
 		gomock.Any(),
 	).Return(rawAlpineOSRelease, nil)
 
-	kindHandler := php.NewPHPHandler()
-	kindHandler.WithSolver(solver)
+	solver.EXPECT().FromContext(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(2)
+	solver.EXPECT().ReadFile(
+		gomock.Any(), "composer.lock", gomock.Any(),
+	).AnyTimes().Return([]byte{}, statesolver.FileNotFound)
+
+	pkgSolver := mocks.NewMockPackageSolver(mockCtrl)
+	pkgSolver.EXPECT().ResolveVersions(
+		gomock.Any(),
+		"docker.io/library/php:7.3-fpm-alpine@sha256",
+		map[string]string{
+			"git":         "*",
+			"icu-dev":     "*",
+			"openssl-dev": "*",
+			"libxml2-dev": "*",
+			"libzip-dev":  "*",
+			"unzip":       "*",
+		},
+	).AnyTimes().Return(map[string]string{
+		"git":         "git-version",
+		"icu-dev":     "icu-dev-version",
+		"openssl-dev": "libssl-dev-version",
+		"libxml2-dev": "libxml2-dev-version",
+		"libzip-dev":  "libzip-dev-version",
+		"unzip":       "unzip-version",
+	}, nil)
+
+	h := php.NewPHPHandler()
+	h.NotPecl = h.NotPecl.WithExtensionIndex(extindex.ExtIndex{
+		"apcu": extindex.ExtVersions{
+			"5.1.18": extindex.Stable,
+		},
+		"redis": extindex.ExtVersions{
+			"5.1.1": extindex.Beta,
+			"5.1.0": extindex.Stable,
+		},
+		"yaml": extindex.ExtVersions{
+			"1.0.0": extindex.Stable,
+			"1.1.0": extindex.Beta,
+		},
+	})
+	h.WithSolver(solver)
 
 	return updateLocksTC{
-		deffile:     "testdata/locks/without-stages.yml",
-		handler:     kindHandler,
-		pkgSolvers:  pkgsolver.PackageSolversMap{},
-		expectedErr: xerrors.New("unsupported OS \"alpine\": only debian-based base images are supported"),
+		deffile: "testdata/locks/with-alpine-base-image.yml",
+		handler: h,
+		pkgSolvers: pkgsolver.PackageSolversMap{
+			pkgsolver.APK: func(statesolver.StateSolver) pkgsolver.PackageSolver {
+				return pkgSolver
+			},
+		},
+		expected: "testdata/locks/with-alpine-base-image.lock",
 	}
 }
 
 func TestUpdateLocks(t *testing.T) {
 	testcases := map[string]func(*testing.T, *gomock.Controller) updateLocksTC{
-		"successfully update locks":                        initSuccessfullyUpdateLocksTC,
-		"fail to update locks for alpine based base image": failToUpdateLocksForAlpineBaseImageTC,
+		"with an alpine base image": initUpdateLocksWithAlpineBaseImageTC,
+		"with a debian base image":  initUpdateLocksWithDebianBaseImageTC,
 	}
 
 	for tcname := range testcases {

@@ -19,6 +19,7 @@ import (
 const (
 	// APT is the const used to install apt packages with InstallSystemPackages.
 	APT = "apt"
+	APK = "apk"
 )
 
 var (
@@ -137,17 +138,20 @@ func InstallSystemPackages(
 	sort.Strings(pkgNames)
 
 	packageSpecs := []string{}
+	for _, pkgName := range pkgNames {
+		packageSpecs = append(packageSpecs, pkgName+"="+locks[pkgName])
+	}
 
 	switch pkgMgr {
 	case APT:
-		for _, pkgName := range pkgNames {
-			packageSpecs = append(packageSpecs, pkgName+"="+locks[pkgName])
-		}
-
 		cmds = []string{
 			"apt-get update",
 			fmt.Sprintf("apt-get install -y --no-install-recommends %s", strings.Join(packageSpecs, " ")),
 			"rm -rf /var/lib/apt/lists/*",
+		}
+	case APK:
+		cmds = []string{
+			"apk add --no-cache " + strings.Join(packageSpecs, " "),
 		}
 	default:
 		return llb.State{}, UnsupportedPackageManager

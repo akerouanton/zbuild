@@ -9,12 +9,7 @@ stage:
     owner: ""
   systempackages:
     git: '*'
-    libicu-dev: '*'
-    libpq-dev: '*'
-    libxml2-dev: '*'
-    libzip-dev: '*'
     unzip: '*'
-    zlib1g-dev: '*'
   fpm: true
   command: null
   extensions:
@@ -215,6 +210,10 @@ platformreqs:
   xmlwriter: '*'
 deflocks:
   baseimage: docker.io/library/php:7.3-fpm-buster
+  osrelease:
+    name: ""
+    versionname: ""
+    versionid: ""
   extensiondir: /usr/local/lib/php/extensions/no-debug-non-zts-20180731/
   stages: {}
   sourcecontext: null

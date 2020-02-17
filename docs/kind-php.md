@@ -5,6 +5,7 @@
 * [Build process](#build-process)
 * [Locking](#locking)
 * [Assets and webserver](#assets-and-webserver)
+* [Custom base images](#custom-base-images)
 * [Syntax](#syntax)
   * [Source context - `<source_context>`](#source-context--source-context)
   * [Derived stage - `<derived_stage>`](#derived-stage---derived_stage)
@@ -72,7 +73,55 @@ enabled ;
 files ;
 * Add `zip` extension (as it's required by composer) ;
 * Add `unzip` and `git` system packages ;
-* Add known system packages requirements for the native extensions to install ;
+* Add known system packages requirements for extensions to install ;
+
+zbuild knowns the system packages required by following extensions:
+
+* bz2
+* enchant
+* ffi
+* ftp
+* gd
+* gmp
+* imap
+* intl
+* ldap
+* mcrypt
+* oci8
+* odbc
+* pdo_dblib
+* pdo_firebird
+* pdo_oci
+* pdo_odbc
+* pdo_pgsql
+* pdo_sqlite
+* pgsq
+* phar
+* pspell
+* readline
+* recode
+* simplexml
+* snmp
+* soap
+* sodium
+* sockets
+* tidy
+* wddx
+* xml
+* xmlreader
+* xmlrpc
+* xmlwriter
+* xsl
+* zip
+* imagick
+* redis
+* memcache
+* memcached
+* mongodb
+* amqp
+* couchbase
+* rdkafka
+* zookeeper
 
 ## Build process
 
@@ -141,6 +190,22 @@ webserver:
 
 For more details about webserver definition, see [here](kind-webserver.md).
 
+## Custom base images
+
+As exaplained below (see [here](#syntax)), you can either use official PHP
+images by specifying `version` parameter or define your own custom base image
+with `base` parameter. However, zbuild expects the base image to have following
+tools:
+
+* `docker-php-ext-install` ;
+* `docker-php-ext-configure` ;
+* `nproc` ;
+* `curl` ;
+
+If `docker-php-ext-install` isn't available but you installed PHP through the 
+package manager available in the base image, you can still use
+`system_packages` parameter to install the extensions you need.
+
 ## Syntax
 
 zbuild files with php kind have following structure:
@@ -163,13 +228,12 @@ stages:
 ```
 
 When the `version` parameter is provided, the base image is defined by this
-template: `docker.io/library/php:<version>-<fpm|cli>-buster`. A FPM base image
-is used when `fpm` is `true`, otherwise a `cli` image is used.
+template: `docker.io/library/php:<version>-<fpm|cli>-<alpine|buster>`.
 
 You can also provide your own `base` image. In that case, you don't need to 
-define `version` parameter. However, note that zbuild expects some tools 
-to exist in the base image. For instance, `extensions` parameter is based on
-`docker-php-ext-install` (see below for more details).
+define `version` and `alpine` parameters. However, note that zbuild expects
+some tools to exist in the base image. [See above](#custom-base-imagse) for a
+detailed list of what should be available in your base image.
 
 You can define the `base` stage at the root of the definition. Subsequent
 stages defined in `stages` will then inherit parameters from the `base` stage.
@@ -262,11 +326,11 @@ extensions:
 
 Note that zbuild expects `docker-php-ext-install` script to be present in the
 base image to install native extensions. Community extensions are installed
-using [notpecl](https://github.com/NiR-/notpecl).
+using [notpecl](https://github.com/NiR-/notpecl), which is installed (and
+removed) automatically.
 
-If `docker-php-ext-install` isn't available but you installed PHP through the 
-package manager available in the base image, you can still use
-`system_packages` parameter to install the extensions you need.
+This parameter supports both native and community extensions. Moreover, GD has
+3 aliases: `gd.freetype`, `gd.jpeg` and `gd.webp`.
 
 When merging extensions from parent stages, all the maps of extensions are
 merged together. You cannot remove/disable an extension from a parent stage.

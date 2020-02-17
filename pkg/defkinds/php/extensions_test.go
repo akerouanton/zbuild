@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"testing"
 
+	"github.com/NiR-/zbuild/pkg/builddef"
 	"github.com/NiR-/zbuild/pkg/defkinds/php"
 	"github.com/NiR-/zbuild/pkg/llbtest"
 	"github.com/go-test/deep"
@@ -12,39 +13,69 @@ import (
 )
 
 type installExtensionsTC struct {
-	majMinVersion string
-	extensions    map[string]string
-	testdata      string
+	stageDef php.StageDefinition
+	expected string
 }
 
 func initInstallGDWithAllFormatsTC(t *testing.T) installExtensionsTC {
 	return installExtensionsTC{
-		majMinVersion: "7.2",
-		extensions: map[string]string{
-			"gd":          "*",
-			"gd.freetype": "*",
-			"gd.jpeg":     "*",
-			"gd.webp":     "*",
+		expected: "testdata/extensions/gd-with-all-formats.json",
+		stageDef: php.StageDefinition{
+			MajMinVersion: "7.2",
+			StageLocks: php.StageLocks{
+				Extensions: map[string]string{
+					"gd":          "*",
+					"gd.freetype": "*",
+					"gd.jpeg":     "*",
+					"gd.webp":     "*",
+				},
+			},
 		},
-		testdata: "testdata/extensions/gd-with-all-formats.json",
 	}
 }
 
 func initInstallPeclExtensionsTC(t *testing.T) installExtensionsTC {
 	return installExtensionsTC{
-		majMinVersion: "7.3",
-		extensions: map[string]string{
-			"redis": "*",
+		expected: "testdata/extensions/pecl-extensions.json",
+		stageDef: php.StageDefinition{
+			MajMinVersion: "7.3",
+			StageLocks: php.StageLocks{
+				Extensions: map[string]string{
+					"redis": "*",
+				},
+			},
 		},
-		testdata: "testdata/extensions/pecl-extensions.json",
+	}
+}
+
+func initInstallPeclExtensionsOnAlpineTC(t *testing.T) installExtensionsTC {
+	return installExtensionsTC{
+		expected: "testdata/extensions/pecl-extensions-for-alpine.json",
+		stageDef: php.StageDefinition{
+			MajMinVersion: "7.3",
+			DefLocks: php.DefinitionLocks{
+				OSRelease: builddef.OSRelease{
+					Name: "alpine",
+				},
+			},
+			StageLocks: php.StageLocks{
+				Extensions: map[string]string{
+					"memcached": "*",
+				},
+			},
+		},
 	}
 }
 
 func initStateDontChangeWhenNoExtToInstallTC(t *testing.T) installExtensionsTC {
 	return installExtensionsTC{
-		majMinVersion: "7.3",
-		extensions:    map[string]string{},
-		testdata:      "testdata/extensions/skip-install.json",
+		expected: "testdata/extensions/skip-install.json",
+		stageDef: php.StageDefinition{
+			MajMinVersion: "7.3",
+			StageLocks: php.StageLocks{
+				Extensions: map[string]string{},
+			},
+		},
 	}
 }
 
@@ -52,9 +83,10 @@ var flagTestdata = flag.Bool("testdata", false, "Use this flag to (re)generate t
 
 func TestInstallExtensions(t *testing.T) {
 	testcases := map[string]func(t *testing.T) installExtensionsTC{
-		"successfully install gd extension with all supported formats": initInstallGDWithAllFormatsTC,
-		"successfully install pecl extensions":                         initInstallPeclExtensionsTC,
-		"llb.State don't change when there's no ext to install":        initStateDontChangeWhenNoExtToInstallTC,
+		"install gd extension with all supported formats":       initInstallGDWithAllFormatsTC,
+		"install pecl extensions":                               initInstallPeclExtensionsTC,
+		"install pecl extensions on alpine":                     initInstallPeclExtensionsOnAlpineTC,
+		"llb.State don't change when there's no ext to install": initStateDontChangeWhenNoExtToInstallTC,
 	}
 
 	for tcname := range testcases {
@@ -66,15 +98,15 @@ func TestInstallExtensions(t *testing.T) {
 			tc := tcinit(t)
 
 			state := llb.Scratch()
-			res := php.InstallExtensions(state, tc.majMinVersion, tc.extensions)
+			res := php.InstallExtensions(state, tc.stageDef)
 			jsonState := llbtest.StateToJSON(t, res)
 
 			if *flagTestdata {
-				writeTestdata(t, tc.testdata, jsonState)
+				writeTestdata(t, tc.expected, jsonState)
 				return
 			}
 
-			testdata := loadTestdata(t, tc.testdata)
+			testdata := loadTestdata(t, tc.expected)
 			if diff := deep.Equal(jsonState, testdata); diff != nil {
 				t.Fatal(diff)
 			}

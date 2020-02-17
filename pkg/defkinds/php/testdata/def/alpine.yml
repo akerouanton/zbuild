@@ -1,0 +1,10 @@
+kind: php
+version: 7.4
+alpine: true
+
+fpm: true
+healthcheck: false
+
+extensions:
+  intl: "*"
+  pdo_pgsql: "*"

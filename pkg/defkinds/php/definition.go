@@ -177,14 +177,24 @@ func NewKind(genericDef *builddef.BuildDef) (Definition, error) {
 	}
 
 	if def.BaseImage == "" && def.Version != "" {
-		if *def.BaseStage.FPM {
-			def.BaseImage = fmt.Sprintf("docker.io/library/php:%s-fpm-buster", def.Version)
-		} else {
-			def.BaseImage = fmt.Sprintf("docker.io/library/php:%s-cli-buster", def.Version)
-		}
+		def.BaseImage = defaultBaseImage(def)
 	}
 
 	return def, nil
+}
+
+func defaultBaseImage(def Definition) string {
+	distro := "buster"
+	if def.Alpine {
+		distro = "alpine"
+	}
+
+	flavor := "cli"
+	if *def.BaseStage.FPM {
+		flavor = "fpm"
+	}
+
+	return fmt.Sprintf("docker.io/library/php:%s-%s-%s", def.Version, flavor, distro)
 }
 
 // Definition holds the specialized config parameters for php images.
@@ -195,6 +205,7 @@ type Definition struct {
 
 	BaseImage     string          `mapstructure:"base"`
 	Version       string          `mapstructure:"version"`
+	Alpine        bool            `mapstructure:"alpine"`
 	MajMinVersion string          `mapstructure:"-"`
 	Infer         *bool           `mapstructure:"infer"`
 	Stages        DerivedStageSet `mapstructure:"stages"`
@@ -232,6 +243,7 @@ func (def Definition) Copy() Definition {
 		BaseStage:     def.BaseStage.Copy(),
 		BaseImage:     def.BaseImage,
 		Version:       def.Version,
+		Alpine:        def.Alpine,
 		Stages:        def.Stages.Copy(),
 		SourceContext: def.SourceContext.Copy(),
 	}
@@ -251,6 +263,7 @@ func (base Definition) Merge(overriding Definition) Definition {
 	new.Stages = new.Stages.Merge(overriding.Stages)
 	new.BaseImage = overriding.BaseImage
 	new.Version = overriding.Version
+	new.Alpine = overriding.Alpine
 	new.SourceContext = overriding.SourceContext.Copy()
 
 	if overriding.Infer != nil {
@@ -490,9 +503,11 @@ type StageDefinition struct {
 	Dev           bool
 	// LockedPackages is the set of packages found in composer.lock
 	LockedPackages map[string]string
-	PlatformReqs   map[string]string
-	DefLocks       DefinitionLocks
-	StageLocks     StageLocks
+	// PlatformReqs is the list of extension requirements extracted from
+	// composer.lock. See LoadComposerLock.
+	PlatformReqs map[string]string
+	DefLocks     DefinitionLocks
+	StageLocks   StageLocks
 }
 
 func (stageDef StageDefinition) IsValid() error {
@@ -723,19 +738,22 @@ func inferExtensions(def *StageDefinition) {
 	def.Extensions.Add("zip", "*")
 }
 
-func inferSystemPackages(def *StageDefinition) {
-	for _, ext := range def.Extensions.Names() {
+func inferSystemPackages(stageDef *StageDefinition) {
+	distro := stageDef.DefLocks.OSRelease.Name
+
+	for _, ext := range stageDef.Extensions.Names() {
 		deps, ok := extensionsDeps[ext]
 		if !ok {
 			continue
 		}
 
-		for name, ver := range deps {
-			def.SystemPackages.Add(name, ver)
+		for name, ver := range deps[distro] {
+			stageDef.SystemPackages.Add(name, ver)
 		}
 	}
 
-	// Add unzip and git packages as they're used by Composer
-	def.SystemPackages.Add("unzip", "*")
-	def.SystemPackages.Add("git", "*")
+	// Add unzip and git packages as they're used by Composer. Both packages
+	// are named the same on Alpine and debian.
+	stageDef.SystemPackages.Add("unzip", "*")
+	stageDef.SystemPackages.Add("git", "*")
 }
