@@ -21,7 +21,7 @@ require (
 	github.com/spf13/cobra v0.0.5
 	github.com/tonistiigi/fsutil v0.0.0-20190819224149-3d2716dd0a4d
 	golang.org/x/xerrors v0.0.0-20191011141410-1b5146add898
-	gopkg.in/yaml.v2 v2.2.2
+	gopkg.in/yaml.v2 v2.2.8
 )
 
 replace github.com/hashicorp/go-immutable-radix => github.com/tonistiigi/go-immutable-radix v0.0.0-20170803185627-826af9ccf0fe
