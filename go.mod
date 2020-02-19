@@ -9,7 +9,7 @@ require (
 	github.com/docker/distribution v2.7.1-0.20190205005809-0d3efadf0154+incompatible
 	github.com/docker/docker v1.14.0-0.20190319215453-e7b5f7dbe98c
 	github.com/go-test/deep v1.0.4
-	github.com/gogo/protobuf v1.2.0
+	github.com/gogo/protobuf v1.3.1
 	github.com/golang/mock v1.1.1
 	github.com/gorilla/mux v1.7.3 // indirect
 	github.com/mcuadros/go-version v0.0.0-20190830083331-035f6764e8d2
