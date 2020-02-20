@@ -1,6 +1,7 @@
-# syntax=akerouanton/zbuilder:200126-30
+# syntax=akerouanton/zbuilder:200203-01
 kind: php
 version: 7.3
+alpine: true
 # @TODO: check base + version
 # base: php:7.3-fpm-buster
 # base: php@sha256:db5bce28b6eabd8bd963cfd95131a01171acea9cff500447bb8d9e05afd34e4b

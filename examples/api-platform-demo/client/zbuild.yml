@@ -1,6 +1,7 @@
-# syntax=akerouanton/zbuilder:200126-30
+# syntax=akerouanton/zbuilder:200208-04
 kind: nodejs
 version: 12
+alpine: true
 
 frontend: true
 build_command: yarn build

@@ -3,16 +3,14 @@ osrelease:
   name: alpine
   versionname: ""
   versionid: 3.11.3
-source_context:
-  path: admin
-  reference: 5ecd2177087afbcce8f88ddfedbc7b95e738d961
-  source: github.com/api-platform/demo
-  type: git
+source_context: null
 stages:
   dev:
-    system_packages: {}
+    system_packages:
+      libsass-dev: 3.6.3-r1
   prod:
-    system_packages: {}
+    system_packages:
+      libsass-dev: 3.6.3-r1
 webserver:
   base_image: docker.io/library/nginx:latest@sha256:ad5552c786f128e389a0263104ae39f3d3c7895579d45ae716f528185b36bc6f
   system_packages:

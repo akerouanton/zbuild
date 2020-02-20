@@ -133,6 +133,8 @@ func (s DockerSolver) FileExists(
 		return false, nil
 	}
 
+	logrus.Debugf("Checking if file %s exists in %s context", filepath, source.Type)
+
 	// @TODO: implement a proper way to test if a file exists instead of reading it
 	_, err := s.ReadFile(ctx, filepath, s.FromContext(source))
 	found := err != FileNotFound
@@ -156,21 +158,26 @@ func (s DockerSolver) ReadFile(
 	return opt(ctx, filepath)
 }
 
-func (s DockerSolver) FromContext(c *builddef.Context, _ ...llb.LocalOption) ReadFileOpt {
+func (s DockerSolver) FromContext(
+	source *builddef.Context,
+	_ ...llb.LocalOption,
+) ReadFileOpt {
 	return func(ctx context.Context, filepath string) ([]byte, error) {
-		if c == nil {
+		if source == nil {
 			return []byte{}, nil
 		}
 
-		switch c.Type {
+		logrus.Debugf("Reading file %s from %s context", filepath, source.Type)
+
+		switch source.Type {
 		case builddef.ContextTypeLocal:
 			return s.readFromLocalContext(filepath)
 		case builddef.ContextTypeGit:
-			return s.readFromGitContext(ctx, c, filepath)
+			return s.readFromGitContext(ctx, source, filepath)
 		}
 
 		return []byte{}, xerrors.Errorf(
-			"context type %q is not supported", string(c.Type))
+			"context type %q is not supported", string(source.Type))
 	}
 }
 

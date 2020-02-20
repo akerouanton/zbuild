@@ -17,5 +17,6 @@ services:
       dockerfile: zbuild.yml
       context: .
       target: webserver-prod
+    restart: on-failure
     ports:
       - "80:80"

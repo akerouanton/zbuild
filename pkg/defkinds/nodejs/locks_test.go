@@ -2,7 +2,6 @@ package nodejs_test
 
 import (
 	"context"
-	"errors"
 	"flag"
 	"io/ioutil"
 	"testing"
@@ -37,7 +36,7 @@ HOME_URL="https://www.debian.org/"
 SUPPORT_URL="https://www.debian.org/support"
 BUG_REPORT_URL="https://bugs.debian.org/"`)
 
-func initSuccessfullyUpdateLocksTC(t *testing.T, mockCtrl *gomock.Controller) updateLocksTC {
+func initUpdateLocksForDebianTC(t *testing.T, mockCtrl *gomock.Controller) updateLocksTC {
 	solver := mocks.NewMockStateSolver(mockCtrl)
 	solver.EXPECT().ResolveImageRef(
 		gomock.Any(), "docker.io/library/node:12-buster-slim",
@@ -82,10 +81,10 @@ HOME_URL="https://alpinelinux.org/"
 BUG_REPORT_URL="https://bugs.alpinelinux.org/"
 `)
 
-func failToUpdateLocksForAlpineBaseImageTC(t *testing.T, mockCtrl *gomock.Controller) updateLocksTC {
+func initUpdateLocksForAlpineTC(t *testing.T, mockCtrl *gomock.Controller) updateLocksTC {
 	solver := mocks.NewMockStateSolver(mockCtrl)
 	solver.EXPECT().ResolveImageRef(
-		gomock.Any(), "node:12-alpine",
+		gomock.Any(), "docker.io/library/node:12-alpine",
 	).Return("docker.io/library/node:12-alpine@sha256", nil)
 
 	solver.EXPECT().FromImage("docker.io/library/node:12-alpine@sha256").Times(1)
@@ -95,6 +94,15 @@ func failToUpdateLocksForAlpineBaseImageTC(t *testing.T, mockCtrl *gomock.Contro
 		gomock.Any(),
 	).Return(rawAlpineOSRelease, nil)
 
+	pkgSolver := mocks.NewMockPackageSolver(mockCtrl)
+	pkgSolver.EXPECT().ResolveVersions(
+		gomock.Any(),
+		"docker.io/library/node:12-alpine@sha256",
+		map[string]string{"libsass-dev": "*"},
+	).AnyTimes().Return(map[string]string{
+		"libsass-dev": "libsass-dev-version",
+	}, nil)
+
 	h := nodejs.NodeJSHandler{}
 	h.WithSolver(solver)
 
@@ -102,19 +110,18 @@ func failToUpdateLocksForAlpineBaseImageTC(t *testing.T, mockCtrl *gomock.Contro
 		file:    "testdata/locks/alpine.yml",
 		handler: &h,
 		pkgSolvers: pkgsolver.PackageSolversMap{
-
-			pkgsolver.APT: func(statesolver.StateSolver) pkgsolver.PackageSolver {
-				return mocks.NewMockPackageSolver(mockCtrl)
+			pkgsolver.APK: func(statesolver.StateSolver) pkgsolver.PackageSolver {
+				return pkgSolver
 			},
 		},
-		expectedErr: errors.New("unsupported OS \"alpine\": only debian-based base images are supported"),
+		expected: "testdata/locks/alpine.lock",
 	}
 }
 
 func TestUpdateLocks(t *testing.T) {
 	testcases := map[string]func(*testing.T, *gomock.Controller) updateLocksTC{
-		"successfully update locks":                        initSuccessfullyUpdateLocksTC,
-		"fail to update locks for alpine based base image": failToUpdateLocksForAlpineBaseImageTC,
+		"update locks for debian base iamge": initUpdateLocksForDebianTC,
+		"update locks for alpine base iamge": initUpdateLocksForAlpineTC,
 	}
 
 	for tcname := range testcases {

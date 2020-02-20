@@ -18,6 +18,10 @@ dev: true
 isfrontend: true
 deflocks:
   baseimage: docker.io/library/node:12-buster-slim
+  osrelease:
+    name: ""
+    versionname: ""
+    versionid: ""
   stages: {}
   sourcecontext: null
 stagelocks:

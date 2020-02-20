@@ -11,6 +11,7 @@ import (
 
 type DefinitionLocks struct {
 	BaseImage     string                `mapstructure:"base"`
+	OSRelease     builddef.OSRelease    `mapstructure:"osrelease"`
 	Stages        map[string]StageLocks `mapstructure:"stages"`
 	SourceContext *builddef.Context     `mapstructure:"source_context"`
 }
@@ -19,6 +20,7 @@ type DefinitionLocks struct {
 func (l DefinitionLocks) RawLocks() map[string]interface{} {
 	lockdata := map[string]interface{}{
 		"base":           l.BaseImage,
+		"osrelease":      l.OSRelease,
 		"source_context": nil,
 	}
 
@@ -66,11 +68,18 @@ func (h *NodeJSHandler) UpdateLocks(
 	if err != nil {
 		return nil, xerrors.Errorf("could not resolve OS details from base image: %w", err)
 	}
-	if osrelease.Name != "debian" {
-		return nil, xerrors.Errorf("unsupported OS %q: only debian-based base images are supported", osrelease.Name)
+	def.Locks.OSRelease = osrelease
+
+	var pkgSolverType pkgsolver.SolverType
+	if osrelease.Name == "debian" {
+		pkgSolverType = pkgsolver.APT
+	} else if osrelease.Name == "alpine" {
+		pkgSolverType = pkgsolver.APK
+	} else {
+		return nil, xerrors.Errorf("unsupported OS %q: only debian-based and alpine-based base images are supported", osrelease.Name)
 	}
 
-	pkgSolver := pkgSolvers.New(pkgsolver.APT, h.solver)
+	pkgSolver := pkgSolvers.New(pkgSolverType, h.solver)
 	def.Locks.Stages, err = h.updateStagesLocks(ctx, pkgSolver, def)
 	if err != nil {
 		return nil, xerrors.Errorf("failed to update stages locks: %w", err)

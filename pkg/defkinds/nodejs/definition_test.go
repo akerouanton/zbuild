@@ -1227,6 +1227,44 @@ func initMergeIsFrontendWithoutBaseTC() mergeDefinitionTC {
 	}
 }
 
+func initMergeAlpineWithBaseTC() mergeDefinitionTC {
+	return mergeDefinitionTC{
+		base: func() nodejs.Definition {
+			return nodejs.Definition{
+				Alpine: true,
+			}
+		},
+		overriding: nodejs.Definition{
+			Alpine: false,
+		},
+		expected: func() nodejs.Definition {
+			return nodejs.Definition{
+				Alpine:    false,
+				BaseStage: emptyStage(),
+				Stages:    nodejs.DerivedStageSet{},
+			}
+		},
+	}
+}
+
+func initMergeAlpineWithoutBaseTC() mergeDefinitionTC {
+	return mergeDefinitionTC{
+		base: func() nodejs.Definition {
+			return nodejs.Definition{}
+		},
+		overriding: nodejs.Definition{
+			Alpine: true,
+		},
+		expected: func() nodejs.Definition {
+			return nodejs.Definition{
+				Alpine:    true,
+				BaseStage: emptyStage(),
+				Stages:    nodejs.DerivedStageSet{},
+			}
+		},
+	}
+}
+
 func TestDefinitionMerge(t *testing.T) {
 	testcases := map[string]func() mergeDefinitionTC{
 		"merge base stage with base":     initMergeBaseStageWithBaseTC,
@@ -1239,6 +1277,8 @@ func TestDefinitionMerge(t *testing.T) {
 		"merge stages without base":      initMergeStagesWithoutBaseTC,
 		"merge is frontend with base":    initMergeIsFrontendWithBaseTC,
 		"merge is frontend without base": initMergeIsFrontendWithoutBaseTC,
+		"merge alpine with base":         initMergeAlpineWithBaseTC,
+		"merge alpine without base":      initMergeAlpineWithoutBaseTC,
 	}
 
 	for tcname := range testcases {

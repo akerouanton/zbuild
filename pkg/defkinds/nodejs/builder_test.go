@@ -198,7 +198,7 @@ func initBuildLLBWithGitBuildContextTC(t *testing.T, mockCtrl *gomock.Controller
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
 	solver.EXPECT().
-		FileExists(gomock.Any(), "package-lock.json", gomock.Any()).
+		FileExists(gomock.Any(), "/sub/dir/package-lock.json", gomock.Any()).
 		Return(false, nil)
 
 	kindHandler := nodejs.NodeJSHandler{}
@@ -258,7 +258,7 @@ func initBuildLLBWithGitSourceContextTC(t *testing.T, mockCtrl *gomock.Controlle
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
 	solver.EXPECT().
-		FileExists(gomock.Any(), "package-lock.json", gomock.Any()).
+		FileExists(gomock.Any(), "/client/package-lock.json", gomock.Any()).
 		Return(false, nil)
 
 	kindHandler := nodejs.NodeJSHandler{}
@@ -315,7 +315,7 @@ func initBuildLLBWithGitBuildAndSourceContextTC(t *testing.T, mockCtrl *gomock.C
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
 	solver.EXPECT().
-		FileExists(gomock.Any(), "package-lock.json", gomock.Any()).
+		FileExists(gomock.Any(), "/client/package-lock.json", gomock.Any()).
 		Return(false, nil)
 
 	kindHandler := nodejs.NodeJSHandler{}
@@ -423,6 +423,60 @@ func initBuildLLBForNpmBasedProjectTC(t *testing.T, mockCtrl *gomock.Controller)
 	}
 }
 
+func initBuildLLBForAlpineBasedBaseImageTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
+	genericDef := loadBuildDef(t, "testdata/build/alpine.yml")
+	genericDef.RawLocks = loadDefLocks(t, "testdata/build/alpine.lock")
+
+	solver := mocks.NewMockStateSolver(mockCtrl)
+	solver.EXPECT().
+		FileExists(gomock.Any(), "package-lock.json", gomock.Any()).
+		Return(false, nil)
+
+	kindHandler := nodejs.NodeJSHandler{}
+	kindHandler.WithSolver(solver)
+
+	return buildTC{
+		handler: &kindHandler,
+		client:  llbtest.NewMockClient(mockCtrl),
+		buildOpts: builddef.BuildOpts{
+			Def:           genericDef,
+			Stage:         "prod",
+			SessionID:     "<SESSION-ID>",
+			LocalUniqueID: "x1htr02606a9rk8b0daewh9es",
+			BuildContext: &builddef.Context{
+				Source: "context",
+				Type:   builddef.ContextTypeLocal,
+			},
+		},
+		expectedState: "testdata/build/state-alpine-prod.json",
+		expectedImage: &image.Image{
+			Image: specs.Image{
+				Architecture: "amd64",
+				OS:           "linux",
+				RootFS: specs.RootFS{
+					Type: "layers",
+				},
+			},
+			Config: image.ImageConfig{
+				ImageConfig: specs.ImageConfig{
+					User: "1000",
+					Env: []string{
+						"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+						"NODE_ENV=production",
+					},
+					Entrypoint: []string{"docker-entrypoint.sh"},
+					Cmd:        []string{"node"},
+					Volumes:    map[string]struct{}{},
+					WorkingDir: "/app",
+					Labels: map[string]string{
+						"io.zbuild": "true",
+					},
+				},
+			},
+		},
+	}
+}
+
 func TestBuild(t *testing.T) {
 	testcases := map[string]func(*testing.T, *gomock.Controller) buildTC{
 		"build LLB DAG for dev stage":                     initBuildLLBForDevStageTC,
@@ -432,6 +486,7 @@ func TestBuild(t *testing.T) {
 		"build LLB DAG with git source context":           initBuildLLBWithGitSourceContextTC,
 		"build LLB DAG with git build and source context": initBuildLLBWithGitBuildAndSourceContextTC,
 		"build LLB DAG for npm-based project":             initBuildLLBForNpmBasedProjectTC,
+		"build LLB DAG for alpine-based base image":       initBuildLLBForAlpineBasedBaseImageTC,
 	}
 
 	for tcname := range testcases {
@@ -452,7 +507,9 @@ func TestBuild(t *testing.T) {
 			if *flagTestdata {
 				if tc.expectedState != "" {
 					writeTestdata(t, tc.expectedState, jsonState)
+					return
 				}
+				panic("This test has no expectedState defined.")
 			}
 
 			if tc.expectedErr != nil {

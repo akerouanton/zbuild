@@ -96,7 +96,13 @@ func (h *NodeJSHandler) buildNodeJS(
 	img := image.CloneMeta(baseImg)
 	img.Config.Labels[builddef.ZbuildLabel] = "true"
 
-	state, err = llbutils.InstallSystemPackages(state, llbutils.APT, stageDef.StageLocks.SystemPackages)
+	pkgManager := llbutils.APT
+	if stageDef.DefLocks.OSRelease.Name == "alpine" {
+		pkgManager = llbutils.APK
+	}
+
+	state, err = llbutils.InstallSystemPackages(state, pkgManager,
+		stageDef.StageLocks.SystemPackages)
 	if err != nil {
 		return state, img, xerrors.Errorf("failed to add \"install system pacakges\" steps: %w", err)
 	}
@@ -190,9 +196,10 @@ func (h *NodeJSHandler) determinePackageManager(
 	buildOpts builddef.BuildOpts,
 ) (string, error) {
 	srcContext := resolveSourceContext(stageDef, buildOpts)
-	packageLock, err := h.solver.FileExists(ctx, "package-lock.json", srcContext)
+	lockpath := prefixContextPath(srcContext, "package-lock.json")
+	packageLock, err := h.solver.FileExists(ctx, lockpath, srcContext)
 	if err != nil {
-		return "", xerrors.Errorf("could not determine which package manager should be used: %w", err)
+		return "", xerrors.Errorf("could not determine which package manager should be used (from %s context): %w", srcContext.Type, err)
 	}
 
 	if packageLock {

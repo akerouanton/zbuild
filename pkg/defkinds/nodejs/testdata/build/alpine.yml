@@ -2,5 +2,7 @@ kind: nodejs
 version: 12
 alpine: true
 
+frontend: true
+
 system_packages:
   libsass-dev: "*"
