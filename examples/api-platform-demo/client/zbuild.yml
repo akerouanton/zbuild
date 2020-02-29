@@ -1,4 +1,4 @@
-# syntax=akerouanton/zbuilder:200208-04
+# syntax=akerouanton/zbuilder:200229-01
 kind: nodejs
 version: 12
 alpine: true
@@ -20,6 +20,7 @@ config_files:
 
 webserver:
   type: nginx
+  alpine: true
   config_file: nginx.conf
   assets:
     - from: build/
