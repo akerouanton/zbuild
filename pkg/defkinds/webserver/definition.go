@@ -13,6 +13,8 @@ func DefaultDefinition() Definition {
 	healthcheck := defaultHealthcheck
 	return Definition{
 		Type:           WebserverType("nginx"),
+		Version:        "",
+		Alpine:         false,
 		SystemPackages: &builddef.VersionMap{},
 		Healthcheck:    &healthcheck,
 	}
@@ -93,6 +95,8 @@ func NewKind(genericDef *builddef.BuildDef) (Definition, error) {
 
 type Definition struct {
 	Type           WebserverType               `mapstructure:"type"`
+	Version        string                      `mapstructure:"version"`
+	Alpine         bool                        `mapstructure:"alpine"`
 	SystemPackages *builddef.VersionMap        `mapstructure:"system_packages"`
 	ConfigFile     *string                     `mapstructure:"config_file"`
 	Healthcheck    *builddef.HealthcheckConfig `mapstructure:"healthcheck"`
@@ -117,6 +121,8 @@ func (def Definition) IsValid() error {
 func (def Definition) Copy() Definition {
 	new := Definition{
 		Type:           def.Type,
+		Version:        def.Version,
+		Alpine:         def.Alpine,
 		SystemPackages: def.SystemPackages.Copy(),
 		Assets:         def.Assets,
 	}
@@ -135,6 +141,8 @@ func (def Definition) Copy() Definition {
 
 func (base Definition) Merge(overriding Definition) Definition {
 	new := base.Copy()
+	new.Version = overriding.Version
+	new.Alpine = overriding.Alpine
 	new.Assets = append(new.Assets, overriding.Assets...)
 	new.SystemPackages.Merge(overriding.SystemPackages)
 
@@ -172,10 +180,21 @@ func (t WebserverType) ConfigPath() string {
 	panic(fmt.Sprintf("Webserver type %q is not supported.", string(t)))
 }
 
-func (t WebserverType) BaseImage() string {
+func (t WebserverType) BaseImage(version string, alpine bool) string {
 	switch string(t) {
 	case "nginx":
-		return "docker.io/library/nginx:latest"
+		if version == "" && alpine {
+			return "docker.io/library/nginx:alpine"
+		}
+		if version == "" {
+			version = "latest"
+		}
+
+		baseImage := fmt.Sprintf("docker.io/library/nginx:%s", version)
+		if alpine {
+			baseImage += "-alpine"
+		}
+		return baseImage
 	}
 
 	panic(fmt.Sprintf("Webserver type %q is not supported.", string(t)))

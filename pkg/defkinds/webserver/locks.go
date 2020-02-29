@@ -10,13 +10,15 @@ import (
 )
 
 type DefinitionLocks struct {
-	BaseImage      string            `mapstructure:"base_image"`
-	SystemPackages map[string]string `mapstructure:"system_packages"`
+	BaseImage      string             `mapstructure:"base_image"`
+	OSRelease      builddef.OSRelease `mapstructure:"osrelease"`
+	SystemPackages map[string]string  `mapstructure:"system_packages"`
 }
 
 func (l DefinitionLocks) RawLocks() map[string]interface{} {
 	return map[string]interface{}{
 		"base_image":      l.BaseImage,
+		"osrelease":       l.OSRelease,
 		"system_packages": l.SystemPackages,
 	}
 }
@@ -32,21 +34,30 @@ func (h *WebserverHandler) UpdateLocks(
 	}
 
 	def.Locks = DefinitionLocks{}
-	def.Locks.BaseImage, err = h.solver.ResolveImageRef(ctx, def.Type.BaseImage())
+
+	baseImageRef := def.Type.BaseImage(def.Version, def.Alpine)
+	def.Locks.BaseImage, err = h.solver.ResolveImageRef(ctx, baseImageRef)
 	if err != nil {
 		return nil, xerrors.Errorf("could not resolve image %q: %w",
-			def.Type.BaseImage(), err)
+			baseImageRef, err)
 	}
 
 	osrelease, err := statesolver.ResolveImageOS(ctx, h.solver, def.Locks.BaseImage)
 	if err != nil {
 		return nil, xerrors.Errorf("could not resolve OS details from base image: %w", err)
 	}
-	if osrelease.Name != "debian" {
-		return nil, xerrors.Errorf("unsupported OS %s: only debian-based images are supported", osrelease.Name)
+	def.Locks.OSRelease = osrelease
+
+	var pkgSolverType pkgsolver.SolverType
+	if osrelease.Name == "debian" {
+		pkgSolverType = pkgsolver.APT
+	} else if osrelease.Name == "alpine" {
+		pkgSolverType = pkgsolver.APK
+	} else {
+		return nil, xerrors.Errorf("unsupported OS %s: only debian-based and alpine-based base images are supported", osrelease.Name)
 	}
 
-	pkgSolver := pkgSolvers.New(pkgsolver.APT, h.solver)
+	pkgSolver := pkgSolvers.New(pkgSolverType, h.solver)
 	def.Locks.SystemPackages, err = pkgSolver.ResolveVersions(ctx,
 		def.Locks.BaseImage, def.SystemPackages.Map())
 	if err != nil {

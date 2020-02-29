@@ -63,7 +63,13 @@ func (h *WebserverHandler) Build(
 		return state, img, xerrors.New("no source state to copy assets from has been provided")
 	}
 
-	state, err = llbutils.InstallSystemPackages(state, llbutils.APT, def.Locks.SystemPackages)
+	pkgManager := llbutils.APT
+	if def.Locks.OSRelease.Name == "alpine" {
+		pkgManager = llbutils.APK
+	}
+
+	state, err = llbutils.InstallSystemPackages(state, pkgManager,
+		def.Locks.SystemPackages)
 	if err != nil {
 		return state, img, xerrors.Errorf("failed to add \"install system pacakges\" steps: %w", err)
 	}

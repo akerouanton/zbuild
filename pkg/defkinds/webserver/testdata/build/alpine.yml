@@ -1,0 +1,6 @@
+kind: webserver
+type: nginx
+version: 1.17.7
+alpine: true
+
+healthcheck: false

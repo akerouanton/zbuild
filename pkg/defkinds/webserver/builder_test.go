@@ -178,10 +178,66 @@ func initFailToBuildWithAssetsWhenNoSourceInTheBuildOptsTC(t *testing.T, mockCtr
 	}
 }
 
+func initBuildLLBForAlpineBasedBaseImgeTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
+	genericDef := loadGenericDef(t, "testdata/build/alpine.yml")
+	genericDef.RawLocks = loadDefLocks(t, "testdata/build/alpine.lock")
+
+	solver := mocks.NewMockStateSolver(mockCtrl)
+	kindHandler := webserver.WebserverHandler{}
+	kindHandler.WithSolver(solver)
+
+	return buildTC{
+		handler: &kindHandler,
+		client:  llbtest.NewMockClient(mockCtrl),
+		buildOpts: builddef.BuildOpts{
+			Def:           &genericDef,
+			Stage:         "",
+			SessionID:     "<SESSION-ID>",
+			LocalUniqueID: "x1htr02606a9rk8b0daewh9es",
+			BuildContext: &builddef.Context{
+				Source: "context",
+				Type:   builddef.ContextTypeLocal,
+			},
+		},
+		expectedState: "testdata/build/alpine.json",
+		expectedImage: &image.Image{
+			Image: specs.Image{
+				Architecture: "amd64",
+				OS:           "linux",
+				RootFS: specs.RootFS{
+					Type: "layers",
+				},
+			},
+			Config: image.ImageConfig{
+				ImageConfig: specs.ImageConfig{
+					Env: []string{
+						"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+						"NGINX_VERSION=1.17.7",
+						"NJS_VERSION=0.3.7",
+						"PKG_RELEASE=1",
+					},
+					Entrypoint: []string{},
+					Cmd:        []string{"nginx", "-g", "daemon off;"},
+					StopSignal: "SIGSTOP",
+					Volumes:    map[string]struct{}{},
+					ExposedPorts: map[string]struct{}{
+						"80/tcp": {},
+					},
+					Labels: map[string]string{
+						"io.zbuild":  "true",
+						"maintainer": "NGINX Docker Maintainers <docker-maint@nginx.com>",
+					},
+				},
+			},
+		},
+	}
+}
+
 func TestBuild(t *testing.T) {
 	testcases := map[string]func(*testing.T, *gomock.Controller) buildTC{
-		"build LLB":                              initBuildLLBTC,
-		"build LLB from git-based build context": initBuildLLBFromGitContextTC,
+		"build LLB":                                                  initBuildLLBTC,
+		"build LLB from git-based build context":                     initBuildLLBFromGitContextTC,
+		"build LLB for alpine-based base image":                      initBuildLLBForAlpineBasedBaseImgeTC,
 		"fail to build with assets but without source in build opts": initFailToBuildWithAssetsWhenNoSourceInTheBuildOptsTC,
 	}
 
