@@ -30,7 +30,7 @@ type testCase struct {
 	expectedRes *client.Result
 }
 
-func TestBuilder(t *testing.T) {
+func TestBuilderBuild(t *testing.T) {
 	testcases := map[string]func(*testing.T, *gomock.Controller) testCase{
 		"build default stage and file":                              initBuildDefaultStageAndFileTC,
 		"build custom stage and file":                               initBuildCustomStageAndFileTC,
@@ -85,8 +85,8 @@ func initBuildDefaultStageAndFileTC(t *testing.T, mockCtrl *gomock.Controller) t
 		},
 	})
 
-	zbuildYml := loadRawTestdata(t, "testdata/zbuild.yml")
-	zbuildLock := loadRawTestdata(t, "testdata/zbuild.lock")
+	zbuildYml := loadRawTestdata(t, "testdata/build/zbuild.yml")
+	zbuildLock := loadRawTestdata(t, "testdata/build/zbuild.lock")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
 	solver.EXPECT().FromContext(gomock.Any(), gomock.Any()).Times(1)
@@ -156,8 +156,8 @@ func initBuildFromGitContextTC(t *testing.T, mockCtrl *gomock.Controller) testCa
 		},
 	})
 
-	zbuildYml := loadRawTestdata(t, "testdata/zbuild.yml")
-	zbuildLock := loadRawTestdata(t, "testdata/zbuild.lock")
+	zbuildYml := loadRawTestdata(t, "testdata/build/zbuild.yml")
+	zbuildLock := loadRawTestdata(t, "testdata/build/zbuild.lock")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
 	solver.EXPECT().FromContext(gomock.Any(), gomock.Any()).Times(1)
@@ -228,8 +228,8 @@ func initBuildCustomStageAndFileTC(t *testing.T, mockCtrl *gomock.Controller) te
 		},
 	})
 
-	zbuildYml := loadRawTestdata(t, "testdata/zbuild.yml")
-	zbuildLock := loadRawTestdata(t, "testdata/zbuild.lock")
+	zbuildYml := loadRawTestdata(t, "testdata/build/zbuild.yml")
+	zbuildLock := loadRawTestdata(t, "testdata/build/zbuild.lock")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
 	solver.EXPECT().FromContext(gomock.Any(), gomock.Any()).Times(1)
@@ -300,8 +300,8 @@ func initBuildWebserverStageTC(t *testing.T, mockCtrl *gomock.Controller) testCa
 		},
 	})
 
-	zbuildYml := loadRawTestdata(t, "testdata/zbuild.yml")
-	zbuildLock := loadRawTestdata(t, "testdata/zbuild.lock")
+	zbuildYml := loadRawTestdata(t, "testdata/build/zbuild.yml")
+	zbuildLock := loadRawTestdata(t, "testdata/build/zbuild.lock")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
 	solver.EXPECT().FromContext(gomock.Any(), gomock.Any()).Times(1)
@@ -405,7 +405,7 @@ func failToReadLockTC(t *testing.T, mockCtrl *gomock.Controller) testCase {
 		},
 	})
 
-	zbuildYml := loadRawTestdata(t, "testdata/zbuild.yml")
+	zbuildYml := loadRawTestdata(t, "testdata/build/zbuild.yml")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
 	solver.EXPECT().FromContext(gomock.Any(), gomock.Any()).Times(1)
@@ -475,8 +475,8 @@ func failToFindASutableKindHandlerTC(t *testing.T, mockCtrl *gomock.Controller) 
 		},
 	})
 
-	zbuildYml := loadRawTestdata(t, "testdata/zbuild.yml")
-	zbuildLock := loadRawTestdata(t, "testdata/zbuild.lock")
+	zbuildYml := loadRawTestdata(t, "testdata/build/zbuild.yml")
+	zbuildLock := loadRawTestdata(t, "testdata/build/zbuild.lock")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
 	solver.EXPECT().FromContext(gomock.Any(), gomock.Any()).Times(1)
@@ -510,8 +510,8 @@ func failWhenKindHandlerFailsTC(t *testing.T, mockCtrl *gomock.Controller) testC
 		},
 	})
 
-	zbuildYml := loadRawTestdata(t, "testdata/zbuild.yml")
-	zbuildLock := loadRawTestdata(t, "testdata/zbuild.lock")
+	zbuildYml := loadRawTestdata(t, "testdata/build/zbuild.yml")
+	zbuildLock := loadRawTestdata(t, "testdata/build/zbuild.lock")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
 	solver.EXPECT().FromContext(gomock.Any(), gomock.Any()).Times(1)
