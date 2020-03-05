@@ -11,11 +11,20 @@ import (
 )
 
 // ZbuildfileNotFound is an error returned when there's no zbuild.yml file
-// found in the local build context or on the filesystem.
+// found in the build context.
 var ZbuildfileNotFound = xerrors.New("zbuildfile not found")
 
-const SharedKeyZbuildfiles = "zbuildfiles"
+const sharedKeyZbuildfiles = "zbuildfiles"
 
+// Load uses a StateSolver to load a zbuildfile and its lockfile (as specified
+// by the BuildOpts). Since a StateSolver is used, this function can be called
+// either from a Buildkit builder (with no direct access to the filesystem) or
+// from a CLI binary.
+// ZbuildfileNotFound is returned when the zbuild file could not be found.
+// However, if the lockfile is not found, the BuildDef.RawLocks property is
+// left empty.
+// Also, this function doesn't check if the loaded RawLocks are out-of-sync
+// with the RawConfig, so it's the caller responsibility to do so.
 func Load(
 	ctx context.Context,
 	solver statesolver.StateSolver,
@@ -25,7 +34,7 @@ func Load(
 		llb.IncludePatterns([]string{buildOpts.File, buildOpts.LockFile}),
 		llb.LocalUniqueID(buildOpts.LocalUniqueID),
 		llb.SessionID(buildOpts.SessionID),
-		llb.SharedKeyHint(SharedKeyZbuildfiles),
+		llb.SharedKeyHint(sharedKeyZbuildfiles),
 		llb.WithCustomName("load zbuild config files from build context"))
 
 	ymlContent, err := solver.ReadFile(ctx, buildOpts.File, src)

@@ -48,6 +48,7 @@ func TestBuilderBuild(t *testing.T) {
 		"fail to read zbuild.yml file":         failToReadYmlTC,
 		"fail to find a suitable kind handler": failToFindASutableKindHandlerTC,
 		"fail when kind handler fails":         failWhenKindHandlerFailsTC,
+		"fail when lockfile is out-of-sync":    failWhenLockfileIsOutOfSyncTC,
 	}
 
 	for tcname := range testcases {
@@ -478,6 +479,37 @@ func failWhenKindHandlerFailsTC(t *testing.T, mockCtrl *gomock.Controller) build
 		solver:      solver,
 		registry:    registry,
 		expectedErr: errors.New("some build error"),
+	}
+}
+
+func failWhenLockfileIsOutOfSyncTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
+	c := llbtest.NewMockClient(mockCtrl)
+	c.EXPECT().BuildOpts().AnyTimes().Return(client.BuildOpts{
+		SessionID: "<SESSION-ID>",
+		Opts: map[string]string{
+			"context": "some-context-name",
+		},
+	})
+
+	zbuildYml := loadRawTestdata(t, "testdata/build/out-of-sync.yml")
+	zbuildLock := loadRawTestdata(t, "testdata/build/out-of-sync.lock")
+
+	solver := mocks.NewMockStateSolver(mockCtrl)
+	solver.EXPECT().FromContext(gomock.Any(), gomock.Any()).Times(1)
+
+	solver.EXPECT().ReadFile(
+		gomock.Any(), "zbuild.yml", gomock.Any(),
+	).Return(zbuildYml, nil)
+
+	solver.EXPECT().ReadFile(
+		gomock.Any(), "zbuild.lock", gomock.Any(),
+	).Return(zbuildLock, nil)
+
+	return buildTC{
+		client:      c,
+		solver:      solver,
+		registry:    registry.NewKindRegistry(),
+		expectedErr: builder.OutOfSyncLockfileError{},
 	}
 }
 

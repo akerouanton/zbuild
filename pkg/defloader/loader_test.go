@@ -55,9 +55,11 @@ func itLoadsConfigAndLockFilesTC(
 			RawConfig: map[string]interface{}{
 				"foo": "bar",
 			},
-			RawLocks: map[string]interface{}{
-				"foo": "bar",
-				"baz": "plop",
+			RawLocks: builddef.RawLocks{
+				Raw: map[string]interface{}{
+					"foo": "bar",
+					"baz": "plop",
+				},
 			},
 		},
 	}
@@ -99,7 +101,7 @@ func itLoadsConfigFileWithoutLockTC(
 			RawConfig: map[string]interface{}{
 				"bar": "baz",
 			},
-			RawLocks: nil,
+			RawLocks: builddef.RawLocks{},
 		},
 	}
 }

@@ -1,14 +1,43 @@
 package builddef
 
+import "github.com/mitchellh/hashstructure"
+
 var (
 	ZbuildLabel = "io.zbuild"
 )
 
-// BuildDef represents a service as declared in zbuild config file.
+// BuildDef is the generic data structure holding a generic build definition.
+// It's composed of a kind, the only generic property, and of a RawConfig,
+// which holds all the specialized properties (depending on the Kind). Also,
+// it contains the RawLocks associated with the RawConfig.
 type BuildDef struct {
-	Kind      string                 `yaml:"kind"`
-	RawConfig map[string]interface{} `yaml:",inline"`
-	RawLocks  map[string]interface{} `yaml:"-"`
+	// Kind property which represent the type of specialized build definition
+	// the RawConfig property is holding.
+	Kind string `yaml:"kind"`
+	// RawConfig is the map of properties used by that specific Kind of
+	// specialized build definition.
+	RawConfig map[string]interface{} `yaml:",inline" hash:"set"`
+	// RawLocks holds the map of locked properties used by that specific Kind
+	// of specialized build definition.
+	RawLocks RawLocks `yaml:"-" hash:"-"`
+}
+
+// Hash returns a FNV hash of the BuildDef struct. This is used to ensure that
+// the Locks aren't out-of-sync with the BuildDef.
+func (def BuildDef) Hash() uint64 {
+	hash, _ := hashstructure.Hash(def, nil)
+	return hash
+}
+
+// RawLocks holds the hash of the BuildDef these RawLocks are associated to,
+// as well as a raw map of all the locked properties.
+type RawLocks struct {
+	// DefHash is the hash of the BuildDef the last time the locks were
+	// generated. This is used to ensure that the lockfile is up-to-date with
+	// the BuildDef. It's the only generic lock property, extracted from the
+	// lockfile when loaded.
+	DefHash uint64                 `yaml:"defhash"`
+	Raw     map[string]interface{} `yaml:",inline"`
 }
 
 // Locks define a common interface implemented by all specialized Locks structs.
