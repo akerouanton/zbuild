@@ -7,6 +7,7 @@ import (
 	"github.com/NiR-/zbuild/pkg/registry"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/twpayne/go-vfs"
 )
 
 var updateFlags = struct {
@@ -53,6 +54,7 @@ func HandleUpdateCmd(cmd *cobra.Command, args []string) {
 	b := builder.Builder{
 		Registry:   registry.Registry,
 		PkgSolvers: pkgsolver.DefaultPackageSolversMap,
+		Filesystem: vfs.HostOSFS,
 	}
 
 	if err := b.UpdateLockFile(solver, buildOpts); err != nil {

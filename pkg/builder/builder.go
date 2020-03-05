@@ -1,10 +1,12 @@
+// builder package implements the generic zbuild Builder, which is responsible
+// of building specialized images from generic build definitions. It's also
+// responsible of other generic operations involving specialized kind handlers.
 package builder
 
 import (
 	"context"
 	"encoding/json"
 	"errors"
-	"io/ioutil"
 	"strings"
 
 	"github.com/NiR-/zbuild/pkg/builddef"
@@ -17,6 +19,7 @@ import (
 	"github.com/moby/buildkit/client/llb"
 	"github.com/moby/buildkit/exporter/containerimage/exptypes"
 	"github.com/moby/buildkit/frontend/gateway/client"
+	"github.com/twpayne/go-vfs"
 	"golang.org/x/xerrors"
 	"gopkg.in/yaml.v2"
 )
@@ -29,9 +32,15 @@ const (
 	keyFilename      = "filename"
 )
 
+// Builder takes a KindRegistry, which contains all the specialized handlers
+// supported by zbuild. It's used to execute generic operations for specialized
+// build definitions, by calling the appropriate kind handlers' methods.
+// It also contains a set of PackageSolvers and a filesystem abstrction, used
+// during locking.
 type Builder struct {
 	Registry   *registry.KindRegistry
 	PkgSolvers pkgsolver.PackageSolversMap
+	Filesystem vfs.FS
 }
 
 func (b Builder) findHandler(
@@ -267,7 +276,7 @@ func (b Builder) UpdateLockFile(
 		return err
 	}
 
-	err = ioutil.WriteFile(buildOpts.LockFile, buf, 0640)
+	err = b.Filesystem.WriteFile(buildOpts.LockFile, buf, 0640)
 	if err != nil {
 		return xerrors.Errorf("could not write %s: %w", buildOpts.LockFile, err)
 	}

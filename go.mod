@@ -20,6 +20,7 @@ require (
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/cobra v0.0.5
 	github.com/tonistiigi/fsutil v0.0.0-20190819224149-3d2716dd0a4d
+	github.com/twpayne/go-vfs v1.3.6
 	golang.org/x/xerrors v0.0.0-20191011141410-1b5146add898
 	gopkg.in/yaml.v2 v2.2.8
 )

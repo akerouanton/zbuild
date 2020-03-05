@@ -3,6 +3,7 @@ package builder_test
 import (
 	"context"
 	"errors"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"testing"
@@ -19,8 +20,12 @@ import (
 	"github.com/moby/buildkit/client/llb"
 	"github.com/moby/buildkit/frontend/gateway/client"
 	specs "github.com/opencontainers/image-spec/specs-go/v1"
+	"github.com/twpayne/go-vfs"
+	"github.com/twpayne/go-vfs/vfst"
 	"golang.org/x/xerrors"
 )
+
+var flagTestdata = flag.Bool("testdata", false, "Use this flag to (re)generate testdata (lockfiles)")
 
 type buildTC struct {
 	client      client.Client
@@ -31,6 +36,10 @@ type buildTC struct {
 }
 
 func TestBuilderBuild(t *testing.T) {
+	if *flagTestdata {
+		return
+	}
+
 	testcases := map[string]func(*testing.T, *gomock.Controller) buildTC{
 		"build default stage and file":         initBuildDefaultStageAndFileTC,
 		"build custom stage and file":          initBuildCustomStageAndFileTC,
@@ -500,4 +509,136 @@ func loadRawTestdata(t *testing.T, filepath string) []byte {
 		t.Fatal(err)
 	}
 	return buf
+}
+
+type updateLocksTC struct {
+	builder      builder.Builder
+	solver       statesolver.StateSolver
+	zbuildfile   string
+	lockfile     string
+	lockfileVfst string
+	expectedErr  error
+}
+
+func initUpdateLockfileTC(t *testing.T, mockCtrl *gomock.Controller) updateLocksTC {
+	zbuildfile := "testdata/lock/zbuild.yml"
+	lockfile := "testdata/lock/zbuild.lock"
+	lockfileVfst := lockfile
+	if !*flagTestdata {
+		lockfileVfst = "/" + lockfileVfst
+	}
+
+	solver := mocks.NewMockStateSolver(mockCtrl)
+	solver.EXPECT().FromContext(gomock.Any(), gomock.Any()).Times(1)
+
+	zbuildYml := loadRawTestdata(t, zbuildfile)
+	solver.EXPECT().ReadFile(
+		gomock.Any(), zbuildfile, gomock.Any(),
+	).Return(zbuildYml, nil)
+
+	zbuildLock := loadRawTestdata(t, lockfile)
+	solver.EXPECT().ReadFile(
+		gomock.Any(), lockfileVfst, gomock.Any(),
+	).Return(zbuildLock, nil)
+
+	registry := registry.NewKindRegistry()
+	handler := mocks.NewMockKindHandler(mockCtrl)
+	handler.EXPECT().WithSolver(gomock.Any())
+	registry.Register("webserver", handler, false)
+
+	locks := stubLocks{map[string]interface{}{
+		"foo": "bar",
+	}}
+	handler.EXPECT().UpdateLocks(
+		gomock.Any(), gomock.Any(), gomock.Any(),
+	).Return(locks, nil)
+
+	return updateLocksTC{
+		builder: builder.Builder{
+			Registry: registry,
+		},
+		solver:       solver,
+		zbuildfile:   zbuildfile,
+		lockfile:     lockfile,
+		lockfileVfst: lockfileVfst,
+	}
+}
+
+func TestBuilderUpdateLocks(t *testing.T) {
+	testcases := map[string]func(*testing.T, *gomock.Controller) updateLocksTC{
+		"update lockfile": initUpdateLockfileTC,
+	}
+
+	for tcname := range testcases {
+		tcinit := testcases[tcname]
+
+		t.Run(tcname, func(t *testing.T) {
+			t.Parallel()
+
+			mockCtrl := gomock.NewController(t)
+			defer mockCtrl.Finish()
+			tc := tcinit(t, mockCtrl)
+
+			var fs vfs.FS
+			var cleanup func()
+
+			// When tests are running with -testdata flag, a concrete
+			// filesystem implementation is used. As such, the lockfile is
+			// written by the Builder, instead of being handled here as it's
+			// done for other test functions.
+			if *flagTestdata {
+				fs = vfs.OSFS
+				cleanup = func() {}
+			} else {
+				var err error
+				fs, cleanup, err = vfst.NewTestFS(map[string]interface{}{
+					"/testdata/lock": &vfst.Dir{
+						Perm: 0777,
+						Entries: map[string]interface{}{
+							"zbuild.lock": "",
+						},
+					},
+				})
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+			tc.builder.Filesystem = fs
+			defer cleanup()
+
+			buildOpts := builddef.BuildOpts{
+				File:     tc.zbuildfile,
+				LockFile: tc.lockfileVfst,
+			}
+			err := tc.builder.UpdateLockFile(tc.solver, buildOpts)
+			if tc.expectedErr != nil {
+				if err.Error() != tc.expectedErr.Error() {
+					t.Fatalf("Expected err: %v\nGot: %v", tc.expectedErr, err)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("Unexpected error: %v", err)
+			}
+
+			if *flagTestdata {
+				return
+			}
+
+			vfst.RunTests(t, fs, "lockfile",
+				vfst.TestPath(tc.lockfileVfst,
+					vfst.TestContents(loadRawTestdata(t, tc.lockfile)),
+				),
+			)
+		})
+	}
+}
+
+// stubLocks implements builddef.RawLocks
+type stubLocks struct {
+	locks map[string]interface{}
+}
+
+func (l stubLocks) RawLocks() map[string]interface{} {
+	return l.locks
 }
