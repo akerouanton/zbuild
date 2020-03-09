@@ -13,6 +13,7 @@ require (
 	github.com/golang/mock v1.1.1
 	github.com/gorilla/mux v1.7.3 // indirect
 	github.com/mcuadros/go-version v0.0.0-20190830083331-035f6764e8d2
+	github.com/mitchellh/hashstructure v0.0.0-20170609045927-2bca23e0e452
 	github.com/mitchellh/mapstructure v1.1.2
 	github.com/moby/buildkit v0.6.2-0.20191002152821-f7042823e340
 	github.com/opencontainers/go-digest v1.0.0-rc1
@@ -20,6 +21,7 @@ require (
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/cobra v0.0.5
 	github.com/tonistiigi/fsutil v0.0.0-20190819224149-3d2716dd0a4d
+	github.com/twpayne/go-vfs v1.3.6
 	golang.org/x/xerrors v0.0.0-20191011141410-1b5146add898
 	gopkg.in/yaml.v2 v2.2.8
 )

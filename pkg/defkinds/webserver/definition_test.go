@@ -138,10 +138,10 @@ func loadBuildDef(t *testing.T, filepath string) *builddef.BuildDef {
 	return &def
 }
 
-func loadDefLocks(t *testing.T, filepath string) map[string]interface{} {
+func loadDefLocks(t *testing.T, filepath string) builddef.RawLocks {
 	raw := loadRawTestdata(t, filepath)
 
-	var locks map[string]interface{}
+	var locks builddef.RawLocks
 	if err := yaml.Unmarshal(raw, &locks); err != nil {
 		t.Fatal(err)
 	}

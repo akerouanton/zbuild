@@ -1,5 +1,5 @@
 kind: php
-version: 7.2.29
+version: 7.2.28
 
 extensions:
   intl: "*"

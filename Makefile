@@ -38,6 +38,7 @@ gen-mocks:
 
 .PHONY: gen-testdata
 gen-testdata:
+	@$(GOTEST) -v ./pkg/builder -testdata
 	@$(GOTEST) -v ./pkg/llbutils -testdata
 	@$(GOTEST) -v ./pkg/llbgraph -testdata
 	@$(GOTEST) -v ./pkg/defkinds/nodejs -testdata

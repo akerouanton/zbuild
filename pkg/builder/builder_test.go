@@ -3,6 +3,7 @@ package builder_test
 import (
 	"context"
 	"errors"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"testing"
@@ -19,10 +20,14 @@ import (
 	"github.com/moby/buildkit/client/llb"
 	"github.com/moby/buildkit/frontend/gateway/client"
 	specs "github.com/opencontainers/image-spec/specs-go/v1"
+	"github.com/twpayne/go-vfs"
+	"github.com/twpayne/go-vfs/vfst"
 	"golang.org/x/xerrors"
 )
 
-type testCase struct {
+var flagTestdata = flag.Bool("testdata", false, "Use this flag to (re)generate testdata (lockfiles)")
+
+type buildTC struct {
 	client      client.Client
 	solver      statesolver.StateSolver
 	registry    *registry.KindRegistry
@@ -30,16 +35,20 @@ type testCase struct {
 	expectedRes *client.Result
 }
 
-func TestBuilder(t *testing.T) {
-	testcases := map[string]func(*testing.T, *gomock.Controller) testCase{
-		"build default stage and file":                              initBuildDefaultStageAndFileTC,
-		"build custom stage and file":                               initBuildCustomStageAndFileTC,
-		"build from git context":                                    initBuildFromGitContextTC,
-		"build webserver stage":                                     initBuildWebserverStageTC,
-		"fail to read zbuild.yml file":                              failToReadYmlTC,
-		"failing to read zbuild.lock file doesn't prevent building": failToReadLockTC,
-		"fail to find a suitable kind handler":                      failToFindASutableKindHandlerTC,
-		"fail when kind handler fails":                              failWhenKindHandlerFailsTC,
+func TestBuilderBuild(t *testing.T) {
+	if *flagTestdata {
+		return
+	}
+
+	testcases := map[string]func(*testing.T, *gomock.Controller) buildTC{
+		"build default stage and file":         initBuildDefaultStageAndFileTC,
+		"build custom stage and file":          initBuildCustomStageAndFileTC,
+		"build from git context":               initBuildFromGitContextTC,
+		"build webserver stage":                initBuildWebserverStageTC,
+		"fail to read zbuild.yml file":         failToReadYmlTC,
+		"fail to find a suitable kind handler": failToFindASutableKindHandlerTC,
+		"fail when kind handler fails":         failWhenKindHandlerFailsTC,
+		"fail when lockfile is out-of-sync":    failWhenLockfileIsOutOfSyncTC,
 	}
 
 	for tcname := range testcases {
@@ -76,7 +85,7 @@ func TestBuilder(t *testing.T) {
 	}
 }
 
-func initBuildDefaultStageAndFileTC(t *testing.T, mockCtrl *gomock.Controller) testCase {
+func initBuildDefaultStageAndFileTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
 	c := llbtest.NewMockClient(mockCtrl)
 	c.EXPECT().BuildOpts().AnyTimes().Return(client.BuildOpts{
 		SessionID: "<SESSION-ID>",
@@ -85,8 +94,8 @@ func initBuildDefaultStageAndFileTC(t *testing.T, mockCtrl *gomock.Controller) t
 		},
 	})
 
-	zbuildYml := loadRawTestdata(t, "testdata/zbuild.yml")
-	zbuildLock := loadRawTestdata(t, "testdata/zbuild.lock")
+	zbuildYml := loadRawTestdata(t, "testdata/build/zbuild.yml")
+	zbuildLock := loadRawTestdata(t, "testdata/build/zbuild.lock")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
 	solver.EXPECT().FromContext(gomock.Any(), gomock.Any()).Times(1)
@@ -133,7 +142,7 @@ func initBuildDefaultStageAndFileTC(t *testing.T, mockCtrl *gomock.Controller) t
 	c.EXPECT().Solve(gomock.Any(), gomock.Any()).Return(resImg, nil)
 
 	imgConfig := `{"author":"zbuild","architecture":"","os":"","rootfs":{"type":"","diff_ids":null},"config":{}}`
-	return testCase{
+	return buildTC{
 		client:   c,
 		solver:   solver,
 		registry: registry,
@@ -147,7 +156,7 @@ func initBuildDefaultStageAndFileTC(t *testing.T, mockCtrl *gomock.Controller) t
 	}
 }
 
-func initBuildFromGitContextTC(t *testing.T, mockCtrl *gomock.Controller) testCase {
+func initBuildFromGitContextTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
 	c := llbtest.NewMockClient(mockCtrl)
 	c.EXPECT().BuildOpts().AnyTimes().Return(client.BuildOpts{
 		SessionID: "<SESSION-ID>",
@@ -156,8 +165,8 @@ func initBuildFromGitContextTC(t *testing.T, mockCtrl *gomock.Controller) testCa
 		},
 	})
 
-	zbuildYml := loadRawTestdata(t, "testdata/zbuild.yml")
-	zbuildLock := loadRawTestdata(t, "testdata/zbuild.lock")
+	zbuildYml := loadRawTestdata(t, "testdata/build/zbuild.yml")
+	zbuildLock := loadRawTestdata(t, "testdata/build/zbuild.lock")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
 	solver.EXPECT().FromContext(gomock.Any(), gomock.Any()).Times(1)
@@ -204,7 +213,7 @@ func initBuildFromGitContextTC(t *testing.T, mockCtrl *gomock.Controller) testCa
 	c.EXPECT().Solve(gomock.Any(), gomock.Any()).Return(resImg, nil)
 
 	imgConfig := `{"author":"zbuild","architecture":"","os":"","rootfs":{"type":"","diff_ids":null},"config":{}}`
-	return testCase{
+	return buildTC{
 		client:   c,
 		solver:   solver,
 		registry: registry,
@@ -218,7 +227,7 @@ func initBuildFromGitContextTC(t *testing.T, mockCtrl *gomock.Controller) testCa
 	}
 }
 
-func initBuildCustomStageAndFileTC(t *testing.T, mockCtrl *gomock.Controller) testCase {
+func initBuildCustomStageAndFileTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
 	c := llbtest.NewMockClient(mockCtrl)
 	c.EXPECT().BuildOpts().AnyTimes().Return(client.BuildOpts{
 		SessionID: "<SESSION-ID>",
@@ -228,8 +237,8 @@ func initBuildCustomStageAndFileTC(t *testing.T, mockCtrl *gomock.Controller) te
 		},
 	})
 
-	zbuildYml := loadRawTestdata(t, "testdata/zbuild.yml")
-	zbuildLock := loadRawTestdata(t, "testdata/zbuild.lock")
+	zbuildYml := loadRawTestdata(t, "testdata/build/zbuild.yml")
+	zbuildLock := loadRawTestdata(t, "testdata/build/zbuild.lock")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
 	solver.EXPECT().FromContext(gomock.Any(), gomock.Any()).Times(1)
@@ -276,7 +285,7 @@ func initBuildCustomStageAndFileTC(t *testing.T, mockCtrl *gomock.Controller) te
 	registry.Register("php", handler, false)
 
 	imgConfig := `{"author":"zbuild","architecture":"","os":"","rootfs":{"type":"","diff_ids":null},"config":{}}`
-	return testCase{
+	return buildTC{
 		client:   c,
 		solver:   solver,
 		registry: registry,
@@ -290,7 +299,7 @@ func initBuildCustomStageAndFileTC(t *testing.T, mockCtrl *gomock.Controller) te
 	}
 }
 
-func initBuildWebserverStageTC(t *testing.T, mockCtrl *gomock.Controller) testCase {
+func initBuildWebserverStageTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
 	c := llbtest.NewMockClient(mockCtrl)
 	c.EXPECT().BuildOpts().AnyTimes().Return(client.BuildOpts{
 		SessionID: "<SESSION-ID>",
@@ -300,8 +309,8 @@ func initBuildWebserverStageTC(t *testing.T, mockCtrl *gomock.Controller) testCa
 		},
 	})
 
-	zbuildYml := loadRawTestdata(t, "testdata/zbuild.yml")
-	zbuildLock := loadRawTestdata(t, "testdata/zbuild.lock")
+	zbuildYml := loadRawTestdata(t, "testdata/build/zbuild.yml")
+	zbuildLock := loadRawTestdata(t, "testdata/build/zbuild.lock")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
 	solver.EXPECT().FromContext(gomock.Any(), gomock.Any()).Times(1)
@@ -360,7 +369,7 @@ func initBuildWebserverStageTC(t *testing.T, mockCtrl *gomock.Controller) testCa
 	registry.Register("webserver", webHandler, false)
 
 	imgConfig := `{"author":"zbuild","architecture":"","os":"","rootfs":{"type":"","diff_ids":null},"config":{}}`
-	return testCase{
+	return buildTC{
 		client:   c,
 		solver:   solver,
 		registry: registry,
@@ -374,7 +383,7 @@ func initBuildWebserverStageTC(t *testing.T, mockCtrl *gomock.Controller) testCa
 	}
 }
 
-func failToReadYmlTC(t *testing.T, mockCtrl *gomock.Controller) testCase {
+func failToReadYmlTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
 	c := llbtest.NewMockClient(mockCtrl)
 	c.EXPECT().BuildOpts().AnyTimes().Return(client.BuildOpts{
 		SessionID: "<SESSION-ID>",
@@ -388,7 +397,7 @@ func failToReadYmlTC(t *testing.T, mockCtrl *gomock.Controller) testCase {
 		gomock.Any(), "zbuild.yml", gomock.Any(),
 	).Return([]byte{}, statesolver.FileNotFound)
 
-	return testCase{
+	return buildTC{
 		client:      c,
 		solver:      solver,
 		registry:    registry.NewKindRegistry(),
@@ -396,77 +405,7 @@ func failToReadYmlTC(t *testing.T, mockCtrl *gomock.Controller) testCase {
 	}
 }
 
-func failToReadLockTC(t *testing.T, mockCtrl *gomock.Controller) testCase {
-	c := llbtest.NewMockClient(mockCtrl)
-	c.EXPECT().BuildOpts().AnyTimes().Return(client.BuildOpts{
-		SessionID: "<SESSION-ID>",
-		Opts: map[string]string{
-			"contextkey": "some-context-name",
-		},
-	})
-
-	zbuildYml := loadRawTestdata(t, "testdata/zbuild.yml")
-
-	solver := mocks.NewMockStateSolver(mockCtrl)
-	solver.EXPECT().FromContext(gomock.Any(), gomock.Any()).Times(1)
-
-	solver.EXPECT().ReadFile(
-		gomock.Any(), "zbuild.yml", gomock.Any(),
-	).Return(zbuildYml, nil)
-
-	solver.EXPECT().ReadFile(
-		gomock.Any(), "zbuild.lock", gomock.Any(),
-	).Return([]byte{}, statesolver.FileNotFound)
-
-	ctx := context.TODO()
-	buildOpts := builddef.BuildOpts{
-		File:      "zbuild.yml",
-		LockFile:  "zbuild.lock",
-		Stage:     "dev",
-		SessionID: "<SESSION-ID>",
-		BuildContext: &builddef.Context{
-			Source: "some-context-name",
-			Type:   builddef.ContextTypeLocal,
-		},
-	}
-	state := llb.State{}
-	img := image.Image{
-		Image: specs.Image{
-			Author: "zbuild",
-		},
-	}
-	handler := mocks.NewMockKindHandler(mockCtrl)
-	handler.EXPECT().WithSolver(gomock.Any()).Times(1)
-	handler.EXPECT().Build(
-		ctx, MatchBuildOpts(buildOpts),
-	).Return(state, &img, nil)
-
-	registry := registry.NewKindRegistry()
-	registry.Register("php", handler, false)
-
-	refImage := llbtest.NewMockReference(mockCtrl)
-	resImg := &client.Result{
-		Refs: map[string]client.Reference{"linux/amd64": refImage},
-		Ref:  refImage,
-	}
-	c.EXPECT().Solve(gomock.Any(), gomock.Any()).Return(resImg, nil)
-
-	imgConfig := `{"author":"zbuild","architecture":"","os":"","rootfs":{"type":"","diff_ids":null},"config":{}}`
-	return testCase{
-		client:   c,
-		solver:   solver,
-		registry: registry,
-		expectedRes: &client.Result{
-			Refs: map[string]client.Reference{"linux/amd64": refImage},
-			Ref:  refImage,
-			Metadata: map[string][]byte{
-				"containerimage.config": []byte(imgConfig),
-			},
-		},
-	}
-}
-
-func failToFindASutableKindHandlerTC(t *testing.T, mockCtrl *gomock.Controller) testCase {
+func failToFindASutableKindHandlerTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
 	c := llbtest.NewMockClient(mockCtrl)
 	c.EXPECT().BuildOpts().AnyTimes().Return(client.BuildOpts{
 		SessionID: "<SESSION-ID>",
@@ -475,8 +414,8 @@ func failToFindASutableKindHandlerTC(t *testing.T, mockCtrl *gomock.Controller) 
 		},
 	})
 
-	zbuildYml := loadRawTestdata(t, "testdata/zbuild.yml")
-	zbuildLock := loadRawTestdata(t, "testdata/zbuild.lock")
+	zbuildYml := loadRawTestdata(t, "testdata/build/zbuild.yml")
+	zbuildLock := loadRawTestdata(t, "testdata/build/zbuild.lock")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
 	solver.EXPECT().FromContext(gomock.Any(), gomock.Any()).Times(1)
@@ -493,7 +432,7 @@ func failToFindASutableKindHandlerTC(t *testing.T, mockCtrl *gomock.Controller) 
 	registry := registry.NewKindRegistry()
 	registry.Register("notphp", handler, false)
 
-	return testCase{
+	return buildTC{
 		client:      c,
 		solver:      solver,
 		registry:    registry,
@@ -501,7 +440,7 @@ func failToFindASutableKindHandlerTC(t *testing.T, mockCtrl *gomock.Controller) 
 	}
 }
 
-func failWhenKindHandlerFailsTC(t *testing.T, mockCtrl *gomock.Controller) testCase {
+func failWhenKindHandlerFailsTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
 	c := llbtest.NewMockClient(mockCtrl)
 	c.EXPECT().BuildOpts().AnyTimes().Return(client.BuildOpts{
 		SessionID: "<SESSION-ID>",
@@ -510,8 +449,8 @@ func failWhenKindHandlerFailsTC(t *testing.T, mockCtrl *gomock.Controller) testC
 		},
 	})
 
-	zbuildYml := loadRawTestdata(t, "testdata/zbuild.yml")
-	zbuildLock := loadRawTestdata(t, "testdata/zbuild.lock")
+	zbuildYml := loadRawTestdata(t, "testdata/build/zbuild.yml")
+	zbuildLock := loadRawTestdata(t, "testdata/build/zbuild.lock")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
 	solver.EXPECT().FromContext(gomock.Any(), gomock.Any()).Times(1)
@@ -535,11 +474,42 @@ func failWhenKindHandlerFailsTC(t *testing.T, mockCtrl *gomock.Controller) testC
 	registry := registry.NewKindRegistry()
 	registry.Register("php", handler, false)
 
-	return testCase{
+	return buildTC{
 		client:      c,
 		solver:      solver,
 		registry:    registry,
 		expectedErr: errors.New("some build error"),
+	}
+}
+
+func failWhenLockfileIsOutOfSyncTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
+	c := llbtest.NewMockClient(mockCtrl)
+	c.EXPECT().BuildOpts().AnyTimes().Return(client.BuildOpts{
+		SessionID: "<SESSION-ID>",
+		Opts: map[string]string{
+			"context": "some-context-name",
+		},
+	})
+
+	zbuildYml := loadRawTestdata(t, "testdata/build/out-of-sync.yml")
+	zbuildLock := loadRawTestdata(t, "testdata/build/out-of-sync.lock")
+
+	solver := mocks.NewMockStateSolver(mockCtrl)
+	solver.EXPECT().FromContext(gomock.Any(), gomock.Any()).Times(1)
+
+	solver.EXPECT().ReadFile(
+		gomock.Any(), "zbuild.yml", gomock.Any(),
+	).Return(zbuildYml, nil)
+
+	solver.EXPECT().ReadFile(
+		gomock.Any(), "zbuild.lock", gomock.Any(),
+	).Return(zbuildLock, nil)
+
+	return buildTC{
+		client:      c,
+		solver:      solver,
+		registry:    registry.NewKindRegistry(),
+		expectedErr: builder.OutOfSyncLockfileError{},
 	}
 }
 
@@ -571,4 +541,136 @@ func loadRawTestdata(t *testing.T, filepath string) []byte {
 		t.Fatal(err)
 	}
 	return buf
+}
+
+type updateLocksTC struct {
+	builder      builder.Builder
+	solver       statesolver.StateSolver
+	zbuildfile   string
+	lockfile     string
+	lockfileVfst string
+	expectedErr  error
+}
+
+func initUpdateLockfileTC(t *testing.T, mockCtrl *gomock.Controller) updateLocksTC {
+	zbuildfile := "testdata/lock/zbuild.yml"
+	lockfile := "testdata/lock/zbuild.lock"
+	lockfileVfst := lockfile
+	if !*flagTestdata {
+		lockfileVfst = "/" + lockfileVfst
+	}
+
+	solver := mocks.NewMockStateSolver(mockCtrl)
+	solver.EXPECT().FromContext(gomock.Any(), gomock.Any()).Times(1)
+
+	zbuildYml := loadRawTestdata(t, zbuildfile)
+	solver.EXPECT().ReadFile(
+		gomock.Any(), zbuildfile, gomock.Any(),
+	).Return(zbuildYml, nil)
+
+	zbuildLock := loadRawTestdata(t, lockfile)
+	solver.EXPECT().ReadFile(
+		gomock.Any(), lockfileVfst, gomock.Any(),
+	).Return(zbuildLock, nil)
+
+	registry := registry.NewKindRegistry()
+	handler := mocks.NewMockKindHandler(mockCtrl)
+	handler.EXPECT().WithSolver(gomock.Any())
+	registry.Register("webserver", handler, false)
+
+	locks := stubLocks{map[string]interface{}{
+		"foo": "bar",
+	}}
+	handler.EXPECT().UpdateLocks(
+		gomock.Any(), gomock.Any(), gomock.Any(),
+	).Return(locks, nil)
+
+	return updateLocksTC{
+		builder: builder.Builder{
+			Registry: registry,
+		},
+		solver:       solver,
+		zbuildfile:   zbuildfile,
+		lockfile:     lockfile,
+		lockfileVfst: lockfileVfst,
+	}
+}
+
+func TestBuilderUpdateLocks(t *testing.T) {
+	testcases := map[string]func(*testing.T, *gomock.Controller) updateLocksTC{
+		"update lockfile": initUpdateLockfileTC,
+	}
+
+	for tcname := range testcases {
+		tcinit := testcases[tcname]
+
+		t.Run(tcname, func(t *testing.T) {
+			t.Parallel()
+
+			mockCtrl := gomock.NewController(t)
+			defer mockCtrl.Finish()
+			tc := tcinit(t, mockCtrl)
+
+			var fs vfs.FS
+			var cleanup func()
+
+			// When tests are running with -testdata flag, a concrete
+			// filesystem implementation is used. As such, the lockfile is
+			// written by the Builder, instead of being handled here as it's
+			// done for other test functions.
+			if *flagTestdata {
+				fs = vfs.OSFS
+				cleanup = func() {}
+			} else {
+				var err error
+				fs, cleanup, err = vfst.NewTestFS(map[string]interface{}{
+					"/testdata/lock": &vfst.Dir{
+						Perm: 0777,
+						Entries: map[string]interface{}{
+							"zbuild.lock": "",
+						},
+					},
+				})
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+			tc.builder.Filesystem = fs
+			defer cleanup()
+
+			buildOpts := builddef.BuildOpts{
+				File:     tc.zbuildfile,
+				LockFile: tc.lockfileVfst,
+			}
+			err := tc.builder.UpdateLockFile(tc.solver, buildOpts)
+			if tc.expectedErr != nil {
+				if err.Error() != tc.expectedErr.Error() {
+					t.Fatalf("Expected err: %v\nGot: %v", tc.expectedErr, err)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("Unexpected error: %v", err)
+			}
+
+			if *flagTestdata {
+				return
+			}
+
+			vfst.RunTests(t, fs, "lockfile",
+				vfst.TestPath(tc.lockfileVfst,
+					vfst.TestContents(loadRawTestdata(t, tc.lockfile)),
+				),
+			)
+		})
+	}
+}
+
+// stubLocks implements builddef.RawLocks
+type stubLocks struct {
+	locks map[string]interface{}
+}
+
+func (l stubLocks) RawLocks() map[string]interface{} {
+	return l.locks
 }

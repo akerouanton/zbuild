@@ -1,0 +1,39 @@
+base_image: docker.io/library/php:7.2.28-fpm-buster@sha256:2175b132c70b3651d8c905b68007cf06f97307d21793d01bef54b17af0dfa1c8
+defhash: 2808197596929273290
+extension_dir: /usr/local/lib/php/extensions/no-debug-non-zts-20170718
+osrelease:
+  name: debian
+  versionname: buster
+  versionid: "10"
+source_context: null
+stages:
+  dev:
+    extensions:
+      intl: '*'
+      zip: '*'
+    system_packages:
+      git: 1:2.20.1-2+deb10u1
+      libicu-dev: 63.1-6
+      libzip-dev: 1.5.1-4
+      unzip: 6.0-23+deb10u1
+      zlib1g-dev: 1:1.2.11.dfsg-1
+  prod:
+    extensions:
+      apcu: 5.1.18
+      intl: '*'
+      opcache: '*'
+      zip: '*'
+    system_packages:
+      git: 1:2.20.1-2+deb10u1
+      libicu-dev: 63.1-6
+      libzip-dev: 1.5.1-4
+      unzip: 6.0-23+deb10u1
+      zlib1g-dev: 1:1.2.11.dfsg-1
+webserver:
+  base_image: docker.io/library/nginx:latest@sha256:2539d4344dd18e1df02be842ffc435f8e1f699cfc55516e2cf2cb16b7a9aea0b
+  osrelease:
+    name: debian
+    versionname: buster
+    versionid: "10"
+  system_packages:
+    curl: 7.64.0-4+deb10u1

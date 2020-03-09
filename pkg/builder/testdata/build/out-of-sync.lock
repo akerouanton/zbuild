@@ -1,0 +1,8 @@
+base_image: docker.io/library/nginx:latest@sha256:380eb808e2a3b0dd954f92c1cae2f845e6558a15037efefcabc5b4e03d666d03
+defhash: 0
+osrelease:
+  name: debian
+  versionname: buster
+  versionid: "10"
+system_packages:
+  curl: 7.64.0-4+deb10u1

@@ -1,10 +1,12 @@
+// builder package implements the generic zbuild Builder, which is responsible
+// of building specialized images from generic build definitions. It's also
+// responsible of other generic operations involving specialized kind handlers.
 package builder
 
 import (
 	"context"
 	"encoding/json"
 	"errors"
-	"io/ioutil"
 	"strings"
 
 	"github.com/NiR-/zbuild/pkg/builddef"
@@ -17,6 +19,7 @@ import (
 	"github.com/moby/buildkit/client/llb"
 	"github.com/moby/buildkit/exporter/containerimage/exptypes"
 	"github.com/moby/buildkit/frontend/gateway/client"
+	"github.com/twpayne/go-vfs"
 	"golang.org/x/xerrors"
 	"gopkg.in/yaml.v2"
 )
@@ -29,9 +32,15 @@ const (
 	keyFilename      = "filename"
 )
 
+// Builder takes a KindRegistry, which contains all the specialized handlers
+// supported by zbuild. It's used to execute generic operations for specialized
+// build definitions, by calling the appropriate kind handlers' methods.
+// It also contains a set of PackageSolvers and a filesystem abstraction, used
+// during locking.
 type Builder struct {
 	Registry   *registry.KindRegistry
 	PkgSolvers pkgsolver.PackageSolversMap
+	Filesystem vfs.FS
 }
 
 func (b Builder) findHandler(
@@ -95,12 +104,30 @@ func (b Builder) Build(
 	}
 	buildOpts.Def = def
 
+	// At this point, the defloader loaded both the zbuildfile and its lockfile
+	// but it didn't check if the RawLocks are out-of-sync with the generic
+	// BuildDef. If it's the case (eg. a property in the zbuildfile has been
+	// added/removed/updated), an OutOfSyncLockfileError is returned to let the
+	// user know they should run `zbuild update` first.
+	if def.Hash() != def.RawLocks.DefHash {
+		return nil, OutOfSyncLockfileError{}
+	}
+
 	state, img, err := b.build(ctx, solver, buildOpts)
 	if err != nil {
 		return nil, err
 	}
 
 	return solveStateWithImage(ctx, c, state, img)
+}
+
+// OutOfSyncLockfileError is returned by Builder.Build() when the hash of the
+// original BuildDef used to generate the lockfile does not match the hash of
+// the current BuildDef.
+type OutOfSyncLockfileError struct{}
+
+func (err OutOfSyncLockfileError) Error() string {
+	return "your lockfile is out-of-sync with your definition file, please run `zbuild update`"
 }
 
 func (b Builder) build(
@@ -138,7 +165,9 @@ func newBuildDefForWebserver(parent *builddef.BuildDef) *builddef.BuildDef {
 	return &builddef.BuildDef{
 		Kind:      "webserver",
 		RawConfig: extractWebserverFromParent(parent.RawConfig),
-		RawLocks:  extractWebserverFromParent(parent.RawLocks),
+		RawLocks: builddef.RawLocks{
+			Raw: extractWebserverFromParent(parent.RawLocks.Raw),
+		},
 	}
 }
 
@@ -262,12 +291,19 @@ func (b Builder) UpdateLockFile(
 		return err
 	}
 
+	// The raw BuildDef (Kind + RawConfig) is hashed and the hash is added to
+	// the locked properties to be able to compare the hash of the BuildDef
+	// to the locked one later on, when loading both files. This is used to
+	// detect any changes on the BuildDef made without re-running
+	// `zbuild update`.
+	rawLocks["defhash"] = buildOpts.Def.Hash()
+
 	buf, err := yaml.Marshal(rawLocks)
 	if err != nil {
 		return err
 	}
 
-	err = ioutil.WriteFile(buildOpts.LockFile, buf, 0640)
+	err = b.Filesystem.WriteFile(buildOpts.LockFile, buf, 0640)
 	if err != nil {
 		return xerrors.Errorf("could not write %s: %w", buildOpts.LockFile, err)
 	}

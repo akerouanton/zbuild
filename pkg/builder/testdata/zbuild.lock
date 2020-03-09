@@ -1,4 +1,0 @@
-system_packages:
-  libicu-dev: "52.1-8+deb8u7"
-extensions:
-  intl: "*"

@@ -165,7 +165,7 @@ func NewKind(genericDef *builddef.BuildDef) (Definition, error) {
 		return def, err
 	}
 
-	def.Locks, err = decodeDefinitionLocks(genericDef.RawLocks)
+	def.Locks, err = decodeDefinitionLocks(genericDef.RawLocks.Raw)
 	if err != nil {
 		return def, err
 	}
