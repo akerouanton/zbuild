@@ -69,10 +69,6 @@ func initSuccessfullyUpdateLocksTC(t *testing.T, mockCtrl *gomock.Controller) up
 }
 
 func TestUpdateLocks(t *testing.T) {
-	if *flagTestdata {
-		return
-	}
-
 	testcases := map[string]func(*testing.T, *gomock.Controller) updateLocksTC{
 		"successfully update locks": initSuccessfullyUpdateLocksTC,
 	}
@@ -112,6 +108,11 @@ func TestUpdateLocks(t *testing.T) {
 			rawLocks, err = yaml.Marshal(locks.RawLocks())
 			if err != nil {
 				t.Fatal(err)
+			}
+
+			if *flagTestdata {
+				writeTestdata(t, tc.expected, string(rawLocks))
+				return
 			}
 
 			expectedRaw := loadRawTestdata(t, tc.expected)

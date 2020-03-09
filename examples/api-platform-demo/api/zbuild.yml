@@ -1,4 +1,4 @@
-# syntax=akerouanton/zbuilder:200203-01
+# syntax=akerouanton/zbuilder:200229-01
 kind: php
 version: 7.3
 alpine: true
@@ -54,6 +54,7 @@ stages:
 
 webserver:
   type: nginx
+  alpine: true
   config_file: nginx.conf
   assets:
     - from: public/

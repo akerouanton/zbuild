@@ -1,0 +1,42 @@
+[
+  {
+    "RawOp": "Gn4KfGRvY2tlci1pbWFnZTovL2RvY2tlci5pby9saWJyYXJ5L25naW54OjEuMTcuNy1hbHBpbmVAc2hhMjU2OjA4YTIzMDQyOWMyZDI3YjhhNTY2ODE2M2YzYzIwZTczZTZiYmE2YWFkNDc5NmFhZWE5MDM3MmZiYWViY2ExMjJSDgoFYW1kNjQSBWxpbnV4WgA=",
+    "Op": {
+      "Op": {
+        "Source": {
+          "identifier": "docker-image://docker.io/library/nginx:1.17.7-alpine@sha256:08a230429c2d27b8a5668163f3c20e73e6bba6aad4796aaea90372fbaebca122"
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:3027a1eb4dad10dd090ac1cba791af41547b52bbc08b88323cc2fb31bad52c09",
+    "OpMetadata": {
+      "caps": {
+        "source.image": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1NjozMDI3YTFlYjRkYWQxMGRkMDkwYWMxY2JhNzkxYWY0MTU0N2I1MmJiYzA4Yjg4MzIzY2MyZmIzMWJhZDUyYzA5",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:3027a1eb4dad10dd090ac1cba791af41547b52bbc08b88323cc2fb31bad52c09",
+          "index": 0
+        }
+      ],
+      "Op": null
+    },
+    "Digest": "sha256:958ea037dbd17c82201b6a88db5dc0630b960c30d513fded116613610400cde9",
+    "OpMetadata": {
+      "caps": {
+        "constraints": true,
+        "platform": true
+      }
+    }
+  }
+]

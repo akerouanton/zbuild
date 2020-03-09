@@ -1,0 +1,3 @@
+base_image: docker.io/library/nginx:alpine@sha256
+system_packages:
+  curl: 7.64.0-4

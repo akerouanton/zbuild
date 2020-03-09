@@ -21,10 +21,12 @@ type newDefinitionTC struct {
 func initSuccessfullyParseRawDefinitionTC() newDefinitionTC {
 	configFile := "./docker/nginx.conf"
 	return newDefinitionTC{
-		file:     "testdata/locks/definition.yml",
-		lockFile: "testdata/locks/definition.lock",
+		file:     "testdata/def/definition.yml",
+		lockFile: "testdata/def/definition.lock",
 		expected: webserver.Definition{
 			Type:       "nginx",
+			Version:    "latest",
+			Alpine:     true,
 			ConfigFile: &configFile,
 			Healthcheck: &builddef.HealthcheckConfig{
 				HealthcheckHTTP: &builddef.HealthcheckHTTP{
@@ -46,7 +48,7 @@ func initSuccessfullyParseRawDefinitionTC() newDefinitionTC {
 				},
 			},
 			Locks: webserver.DefinitionLocks{
-				BaseImage: "docker.io/library/nginx:latest@sha256",
+				BaseImage: "docker.io/library/nginx:alpine@sha256",
 				SystemPackages: map[string]string{
 					"curl": "7.64.0-4",
 				},
@@ -403,6 +405,40 @@ func TestDefinitionMerge(t *testing.T) {
 					Assets: []webserver.AssetToCopy{
 						{From: "web/", To: "web/"},
 					},
+					SystemPackages: &builddef.VersionMap{},
+				}
+			},
+		},
+		"merge version with base": {
+			base: func() webserver.Definition {
+				return webserver.Definition{
+					Version: "latest",
+				}
+			},
+			overriding: func() webserver.Definition {
+				return webserver.Definition{
+					Version: "1.17.8",
+				}
+			},
+			expected: func() webserver.Definition {
+				return webserver.Definition{
+					Version:        "1.17.8",
+					SystemPackages: &builddef.VersionMap{},
+				}
+			},
+		},
+		"merge version without base": {
+			base: func() webserver.Definition {
+				return webserver.Definition{}
+			},
+			overriding: func() webserver.Definition {
+				return webserver.Definition{
+					Version: "1.17.8",
+				}
+			},
+			expected: func() webserver.Definition {
+				return webserver.Definition{
+					Version:        "1.17.8",
 					SystemPackages: &builddef.VersionMap{},
 				}
 			},
