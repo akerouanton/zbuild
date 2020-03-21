@@ -4,7 +4,7 @@ go 1.12
 
 require (
 	github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78 // indirect
-	github.com/NiR-/notpecl v0.0.0-20191209012103-b55aaac8c3de
+	github.com/NiR-/notpecl v0.0.0-20200330122501-5974f6f2e95b
 	github.com/containerd/containerd v1.3.3
 	github.com/docker/distribution v2.7.1-0.20190205005809-0d3efadf0154+incompatible
 	github.com/docker/docker v1.14.0-0.20190319215453-e7b5f7dbe98c
@@ -19,7 +19,7 @@ require (
 	github.com/opencontainers/go-digest v1.0.0-rc1
 	github.com/opencontainers/image-spec v1.0.1
 	github.com/sirupsen/logrus v1.5.0
-	github.com/spf13/cobra v0.0.6
+	github.com/spf13/cobra v0.0.7
 	github.com/tonistiigi/fsutil v0.0.0-20190819224149-3d2716dd0a4d
 	github.com/twpayne/go-vfs v1.3.6
 	golang.org/x/xerrors v0.0.0-20191011141410-1b5146add898

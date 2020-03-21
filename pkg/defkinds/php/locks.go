@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	"github.com/NiR-/notpecl/extindex"
+	"github.com/NiR-/notpecl/peclapi"
 	"github.com/NiR-/zbuild/pkg/builddef"
 	"github.com/NiR-/zbuild/pkg/pkgsolver"
 	"github.com/NiR-/zbuild/pkg/statesolver"
@@ -174,12 +174,12 @@ func (h *PHPHandler) lockExtensions(extensions *builddef.VersionMap) (map[string
 		}
 
 		segments := strings.SplitN(constraint, "@", 2)
-		stability := extindex.Stable
+		stability := peclapi.Stable
 		if len(segments) == 2 {
-			stability = extindex.StabilityFromString(segments[1])
+			stability = peclapi.StabilityFromString(segments[1])
 		}
 
-		extVer, err := h.NotPecl.ResolveConstraint(ctx, extName, segments[0], stability)
+		extVer, err := h.pecl.ResolveConstraint(ctx, extName, segments[0], stability)
 		if err != nil {
 			return resolved, err
 		}

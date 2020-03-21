@@ -56,6 +56,9 @@ $ docker build -f zbuild.yml -t prod .
 
 ## How to work on this?
 
+Due to some bugs due to both `go mod` and `github.com/docker/docker`, currently
+this project cannot be build with Go 1.13 and upward.
+
 #### Debug LLB DAG
 
 ```bash
