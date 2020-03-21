@@ -2,7 +2,7 @@ version: '3.7'
 
 services:
   app:
-    image: svelte-realworld-example-app/app
+    image: svelte-realworld-example-app
     build:
       dockerfile: zbuild.yml
       context: .

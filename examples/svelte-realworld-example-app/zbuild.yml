@@ -1,4 +1,4 @@
-# syntax=akerouanton/zbuilder:200131-02
+# syntax=akerouanton/zbuilder:200321-03
 kind: nodejs
 version: lts
 
