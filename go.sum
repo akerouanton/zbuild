@@ -153,6 +153,8 @@ github.com/mitchellh/hashstructure v0.0.0-20170609045927-2bca23e0e452 h1:hOY53G+
 github.com/mitchellh/hashstructure v0.0.0-20170609045927-2bca23e0e452/go.mod h1:QjSHrPWS+BGUVBYkbTZWEnOh3G1DutKwClXU/ABz6AQ=
 github.com/mitchellh/mapstructure v1.1.2 h1:fmNYVwqnSfB9mZU6OS2O6GsXM+wcskZDuKQzvN1EDeE=
 github.com/mitchellh/mapstructure v1.1.2/go.mod h1:FVVH3fgwuzCH5S8UJGiWEs2h04kUh9fWfEaFds41c1Y=
+github.com/mitchellh/mapstructure v1.2.1 h1:pSevhhKCEjOuZHQWDBYAHxcimg60m1fGFj6atY7zAdE=
+github.com/mitchellh/mapstructure v1.2.1/go.mod h1:bFUtVrKA4DC2yAKiSyO/QUcy7e+RRV2QTWOzhPopBRo=
 github.com/moby/buildkit v0.6.2-0.20191002152821-f7042823e340 h1:8shPfjeQFhLwfeVkP7xbevvv/jFDmrqj5XunVg+r8B0=
 github.com/moby/buildkit v0.6.2-0.20191002152821-f7042823e340/go.mod h1:lapm8EHqO6basgr7u5alxI2goWkFXEddtexHvj1URqg=
 github.com/morikuni/aec v0.0.0-20170113033406-39771216ff4c h1:nXxl5PrvVm2L/wCy8dQu6DMTwH4oIuGN8GJDAlqDdVE=
