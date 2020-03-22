@@ -1,0 +1,27 @@
+# syntax=akerouanton/zbuilder:200321-03
+kind: nodejs
+version: lts
+alpine: true
+frontend: true
+
+source_context:
+  type: git
+  source: github.com/gothinkster/vue-realworld-example-app
+
+build_command: yarn run build
+
+sources:
+  - public/
+  - src/
+  - static/
+  - .eslintrc.js
+  - babel.config.js
+  - postcss.config.js
+
+webserver:
+  type: nginx
+  alpine: true
+  config_file: nginx.conf
+  assets:
+    - from: dist/
+      to: /app/dist
