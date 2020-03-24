@@ -1,0 +1,12 @@
+version: '3.7'
+
+services:
+  app:
+    image: elm-realworld-example-app
+    build:
+      dockerfile: zbuild.yml
+      context: .
+      target: webserver-prod
+    restart: on-failure
+    ports:
+      - 80:80

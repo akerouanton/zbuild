@@ -1,0 +1,24 @@
+base: docker.io/library/node:lts-alpine@sha256:bba77d0ca8820b43af898b3c50d4e8b68dc703ebbd958319af2f21f2d3c309f5
+defhash: 5739437649348197384
+osrelease:
+  name: alpine
+  versionname: ""
+  versionid: 3.11.3
+source_context:
+  path: ""
+  reference: cb32acd73c3d346d0064e7923049867d8ce67193
+  source: github.com/rtfeldman/elm-spa-example
+  type: git
+stages:
+  dev:
+    system_packages: {}
+  prod:
+    system_packages: {}
+webserver:
+  base_image: docker.io/library/nginx:alpine@sha256:abe5ce652eb78d9c793df34453fddde12bb4d93d9fbf2c363d0992726e4d2cad
+  osrelease:
+    name: alpine
+    versionname: ""
+    versionid: 3.10.4
+  system_packages:
+    curl: 7.66.0-r0
