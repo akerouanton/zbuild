@@ -284,3 +284,58 @@ func TestDockerResolveImageRef(t *testing.T) {
 		})
 	}
 }
+
+type dockerFileExistsTC struct {
+	filepath    string
+	source      *builddef.Context
+	expected    bool
+	expectedErr error
+}
+
+func TestDockerSolverFileExists(t *testing.T) {
+	testcases := map[string]dockerFileExistsTC{
+		"successfully check file exists": {
+			filepath: "testfile",
+			source: &builddef.Context{
+				Type: builddef.ContextTypeLocal,
+			},
+			expected: true,
+		},
+		"successfully check files does not exist": {
+			filepath: "does-not-exist",
+			source: &builddef.Context{
+				Type: builddef.ContextTypeLocal,
+			},
+			expected: false,
+		},
+	}
+
+	for tcname := range testcases {
+		tc := testcases[tcname]
+
+		t.Run(tcname, func(t *testing.T) {
+			t.Parallel()
+
+			solver := statesolver.DockerSolver{
+				Labels:  map[string]string{},
+				RootDir: "testdata",
+			}
+
+			ctx := context.Background()
+			exists, err := solver.FileExists(ctx, tc.filepath, tc.source)
+			if tc.expectedErr != nil {
+				if err == nil || err.Error() != tc.expectedErr.Error() {
+					t.Fatalf("Expected error: %v\nGot: %v", tc.expectedErr, err)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("Unexpected error: %v", err)
+			}
+
+			if tc.expected != exists {
+				t.Fatalf("Expected: %t - Got: %t", tc.expected, exists)
+			}
+		})
+	}
+}
