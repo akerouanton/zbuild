@@ -1,25 +1,5 @@
 [
   {
-    "RawOp": "CkkKR3NoYTI1NjoxYzJjOGUyMjI1NmM3MDFmMmI4OWU4NWE0OTc0MTk0NDk0YjUzYmRlMzdlMWU1MmUxNjU5ZGQyNDljYWY4OGVk",
-    "Op": {
-      "inputs": [
-        {
-          "digest": "sha256:1c2c8e22256c701f2b89e85a4974194494b53bde37e1e52e1659dd249caf88ed",
-          "index": 0
-        }
-      ],
-      "Op": null
-    },
-    "Digest": "sha256:00b35f066884abdc8f130bcb42f507f8a415c6bf65a1d5e1b13171836f5abc1b",
-    "OpMetadata": {
-      "caps": {
-        "constraints": true,
-        "meta.description": true,
-        "platform": true
-      }
-    }
-  },
-  {
     "RawOp": "GpQBCg9sb2NhbDovL2NvbnRleHQSPAoUbG9jYWwuaW5jbHVkZXBhdHRlcm4SJFsicGFja2FnZS5qc29uIiwicGFja2FnZS1sb2NrLmpzb24iXRIdCg1sb2NhbC5zZXNzaW9uEgw8U0VTU0lPTi1JRD4SJAoTbG9jYWwuc2hhcmVka2V5aGludBINcGFja2FnZS1maWxlc1oA",
     "Op": {
       "Op": {
@@ -108,6 +88,60 @@
       },
       "caps": {
         "file.base": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1NjoxYzJjOGUyMjI1NmM3MDFmMmI4OWU4NWE0OTc0MTk0NDk0YjUzYmRlMzdlMWU1MmUxNjU5ZGQyNDljYWY4OGVkEuwBCuQBCgcvYmluL3NoCgItbwoHZXJyZXhpdAoCLWMKDnlhcm4gcnVuIGJ1aWxkEhROT0RFX1ZFUlNJT049MTIuMTQuMRITWUFSTl9WRVJTSU9OPTEuMjEuMRITTk9ERV9FTlY9cHJvZHVjdGlvbhJsUEFUSD0vaG9tZS9ub2RlLy5ucG0vYmluLzovaG9tZS9ub2RlLy55YXJuL2Jpbi86L3Vzci9sb2NhbC9zYmluOi91c3IvbG9jYWwvYmluOi91c3Ivc2JpbjovdXNyL2Jpbjovc2JpbjovYmluGgQvYXBwIgQxMDAwEgMaAS9SDgoFYW1kNjQSBWxpbnV4WgA=",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:1c2c8e22256c701f2b89e85a4974194494b53bde37e1e52e1659dd249caf88ed",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "Exec": {
+          "meta": {
+            "args": [
+              "/bin/sh",
+              "-o",
+              "errexit",
+              "-c",
+              "yarn run build"
+            ],
+            "env": [
+              "NODE_VERSION=12.14.1",
+              "YARN_VERSION=1.21.1",
+              "NODE_ENV=production",
+              "PATH=/home/node/.npm/bin/:/home/node/.yarn/bin/:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+            ],
+            "cwd": "/app",
+            "user": "1000"
+          },
+          "mounts": [
+            {
+              "input": 0,
+              "dest": "/",
+              "output": 0
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:2b801e899fa2ea8c9220b7f8d5ad1e25d56e828eb463d919c1be086675446f5c",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Build"
+      },
+      "caps": {
+        "exec.meta.base": true,
+        "exec.mount.bind": true
       }
     }
   },
@@ -330,6 +364,26 @@
       },
       "caps": {
         "file.base": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1NjoyYjgwMWU4OTlmYTJlYThjOTIyMGI3ZjhkNWFkMWUyNWQ1NmU4MjhlYjQ2M2Q5MTljMWJlMDg2Njc1NDQ2ZjVj",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:2b801e899fa2ea8c9220b7f8d5ad1e25d56e828eb463d919c1be086675446f5c",
+          "index": 0
+        }
+      ],
+      "Op": null
+    },
+    "Digest": "sha256:91cd98f1154c09ca684d93d725831de6cf9750844080d857ffaf1f58dca19f36",
+    "OpMetadata": {
+      "caps": {
+        "constraints": true,
+        "meta.description": true,
+        "platform": true
       }
     }
   },

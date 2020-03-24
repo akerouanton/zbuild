@@ -79,7 +79,7 @@ func initBuildLLBForDevStageTC(t *testing.T, mockCtrl *gomock.Controller) buildT
 	}
 }
 
-func initBuildLLBForProdStageTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
+func initBuildLLBForProdFrontendStageTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
 	genericDef := loadBuildDef(t, "testdata/build/frontend.yml")
 	genericDef.RawLocks = loadDefLocks(t, "testdata/build/frontend.lock")
 
@@ -481,7 +481,7 @@ func TestBuild(t *testing.T) {
 	testcases := map[string]func(*testing.T, *gomock.Controller) buildTC{
 		"build LLB DAG for dev stage":                     initBuildLLBForDevStageTC,
 		"build LLB DAG for worker stage":                  initBuildLLBForWorkerStageTC,
-		"build LLB DAG for prod stage":                    initBuildLLBForProdStageTC,
+		"build LLB DAG for prod frontend stage":           initBuildLLBForProdFrontendStageTC,
 		"build LLB DAG with git build context":            initBuildLLBWithGitBuildContextTC,
 		"build LLB DAG with git source context":           initBuildLLBWithGitSourceContextTC,
 		"build LLB DAG with git build and source context": initBuildLLBWithGitBuildAndSourceContextTC,
