@@ -187,7 +187,13 @@ func (g *DotGraph) addOpExec(
 ) error {
 	opID := output.String() + "_exec"
 	description := getMetaDescription(meta)
-	attrs := op.Exec.GetMeta()
+	attrs := map[string]interface{}{
+		"Exec": op.Exec.GetMeta(),
+	}
+
+	if len(op.Exec.GetMounts()) > 0 {
+		attrs["Mounts"] = op.Exec.GetMounts()
+	}
 
 	opNodeID, err := g.addNodeOp(opID, "Op_Exec", description, attrs)
 	if err != nil {
