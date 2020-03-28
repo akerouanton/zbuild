@@ -247,7 +247,8 @@ func TestStateHelpers(t *testing.T) {
 		"InstallSystemPackages with APT and cache mounts but no layer caching": {
 			testdata: "testdata/install-apt-packages-with-cache-mounts-but-no-layer-caching.json",
 			init: func(t *testing.T) llb.State {
-				dest := llbutils.ImageSource("php:7.2", false)
+				dest := llbutils.SetupAPTCache(
+					llbutils.ImageSource("php:7.2", false))
 				locks := map[string]string{
 					"curl":            "curl-version",
 					"ca-certficiates": "ca-certificates-version",

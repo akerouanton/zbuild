@@ -98,13 +98,13 @@ func (h *PHPHandler) Build(
 
 func (h *PHPHandler) buildPHP(
 	ctx context.Context,
-	stage StageDefinition,
+	stageDef StageDefinition,
 	buildOpts builddef.BuildOpts,
 ) (llb.State, *image.Image, error) {
-	state := llbutils.ImageSource(stage.DefLocks.BaseImage, true)
-	baseImg, err := image.LoadMeta(ctx, stage.DefLocks.BaseImage)
+	state := llbutils.ImageSource(stageDef.DefLocks.BaseImage, true)
+	baseImg, err := image.LoadMeta(ctx, stageDef.DefLocks.BaseImage)
 	if err != nil {
-		return state, nil, xerrors.Errorf("failed to load %q metadata: %w", stage.DefLocks.BaseImage, err)
+		return state, nil, xerrors.Errorf("failed to load %q metadata: %w", stageDef.DefLocks.BaseImage, err)
 	}
 
 	img := image.CloneMeta(baseImg)
@@ -115,38 +115,42 @@ func (h *PHPHandler) buildPHP(
 		composer, "/usr/bin/composer", state, "/usr/bin/composer", "", buildOpts.IgnoreCache)
 
 	pkgManager := llbutils.APT
-	if stage.DefLocks.OSRelease.Name == "alpine" {
+	if stageDef.DefLocks.OSRelease.Name == "alpine" {
 		pkgManager = llbutils.APK
 	}
 
+	if buildOpts.WithCacheMounts && len(stageDef.StageLocks.SystemPackages) > 0 {
+		state = llbutils.SetupSystemPackagesCache(state, pkgManager)
+	}
+
 	state, err = llbutils.InstallSystemPackages(state, pkgManager,
-		stage.StageLocks.SystemPackages,
+		stageDef.StageLocks.SystemPackages,
 		llbutils.NewCachingStrategyFromBuildOpts(buildOpts))
 	if err != nil {
 		return state, img, xerrors.Errorf("failed to add \"install system pacakges\" steps: %w", err)
 	}
 
-	state = InstallExtensions(stage, state, buildOpts)
-	state = llbutils.CopyExternalFiles(state, stage.ExternalFiles)
+	state = InstallExtensions(stageDef, state, buildOpts)
+	state = llbutils.CopyExternalFiles(state, stageDef.ExternalFiles)
 
 	state = llbutils.Mkdir(state, "1000:1000", "/app", "/composer")
 	state = state.User("1000")
 	state = state.Dir("/app")
 	state = state.AddEnv("COMPOSER_HOME", "/composer")
 
-	state = copyConfigFiles(stage, state, buildOpts)
-	state = globalComposerInstall(stage, state, buildOpts)
+	state = copyConfigFiles(stageDef, state, buildOpts)
+	state = globalComposerInstall(stageDef, state, buildOpts)
 
-	if !stage.Dev {
-		state = composerInstall(stage, state, buildOpts)
-		state = copySourceFiles(stage, state, buildOpts)
-		state, err = postInstall(stage, state, buildOpts)
+	if !stageDef.Dev {
+		state = composerInstall(stageDef, state, buildOpts)
+		state = copySourceFiles(stageDef, state, buildOpts)
+		state, err = postInstall(stageDef, state, buildOpts)
 		if err != nil {
 			return state, img, err
 		}
 	}
 
-	setImageMetadata(stage, state, img)
+	setImageMetadata(stageDef, state, img)
 
 	return state, img, nil
 }

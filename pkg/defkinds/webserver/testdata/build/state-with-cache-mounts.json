@@ -1,14 +1,10 @@
 [
   {
-    "RawOp": "CkkKR3NoYTI1NjpmMWQxM2JmYmYzYjgwYjM2YTI4ZmFkNTEyODVhMjZhYjg4ZTY4OWU1MmI0NWRmMGE0ZThjZGIyOTRkYjIxOTRhCkkKR3NoYTI1Njo5OWY0YTNiODExNTljYTdmNWJhMDc3Njg5YmYzOTFhYmQ4OTViMDBmNWIxYzI1ZTI5ODE1YTIzYjBhY2NiYWY2EogDCvwBCgcvYmluL3NoCgItbwoHZXJyZXhpdAoCLWMKW2FwdC1nZXQgdXBkYXRlOyBhcHQtZ2V0IGluc3RhbGwgLXkgLS1uby1pbnN0YWxsLXJlY29tbWVuZHMgY3VybD03LjY0LjAtNDsgYXB0LWdldCBhdXRvY2xlYW4SQVBBVEg9L3Vzci9sb2NhbC9zYmluOi91c3IvbG9jYWwvYmluOi91c3Ivc2JpbjovdXNyL2Jpbjovc2JpbjovYmluEhROR0lOWF9WRVJTSU9OPTEuMTcuNxIRTkpTX1ZFUlNJT049MC4zLjcSFFBLR19SRUxFQVNFPTF+YnVzdGVyGgEvEgMaAS8SQggBEgYvY2FjaGUaDi92YXIvY2FjaGUvYXB0IP///////////wEwA6IBGAoWY2FjaGUtbnMvdmFyL2NhY2hlL2FwdBI+CAESBi9jYWNoZRoML3Zhci9saWIvYXB0IP///////////wEwA6IBFgoUY2FjaGUtbnMvdmFyL2xpYi9hcHRSDgoFYW1kNjQSBWxpbnV4WgA=",
+    "RawOp": "CkkKR3NoYTI1NjpmMWQxM2JmYmYzYjgwYjM2YTI4ZmFkNTEyODVhMjZhYjg4ZTY4OWU1MmI0NWRmMGE0ZThjZGIyOTRkYjIxOTRhEtYCCs4CCgcvYmluL3NoCgItbwoHZXJyZXhpdAoCLWMKrAFbIC1mIC9ldGMvYXB0L2FwdC5jb25mLmQvZG9ja2VyLWNsZWFuIF0gJiYgcm0gLWYgL2V0Yy9hcHQvYXB0LmNvbmYuZC9kb2NrZXItY2xlYW47IGVjaG8gJ0JpbmFyeTo6YXB0OjpBUFQ6OktlZXAtRG93bmxvYWRlZC1QYWNrYWdlcyAidHJ1ZSInID4gL2V0Yy9hcHQvYXB0LmNvbmYuZC9rZWVwLWNhY2hlEkFQQVRIPS91c3IvbG9jYWwvc2JpbjovdXNyL2xvY2FsL2JpbjovdXNyL3NiaW46L3Vzci9iaW46L3NiaW46L2JpbhIUTkdJTlhfVkVSU0lPTj0xLjE3LjcSEU5KU19WRVJTSU9OPTAuMy43EhRQS0dfUkVMRUFTRT0xfmJ1c3RlchoBLxIDGgEvUg4KBWFtZDY0EgVsaW51eFoA",
     "Op": {
       "inputs": [
         {
           "digest": "sha256:f1d13bfbf3b80b36a28fad51285a26ab88e689e52b45df0a4e8cdb294db2194a",
-          "index": 0
-        },
-        {
-          "digest": "sha256:99f4a3b81159ca7f5ba077689bf391abd895b00f5b1c25e29815a23b0accbaf6",
           "index": 0
         }
       ],
@@ -20,7 +16,7 @@
               "-o",
               "errexit",
               "-c",
-              "apt-get update; apt-get install -y --no-install-recommends curl=7.64.0-4; apt-get autoclean"
+              "[ -f /etc/apt/apt.conf.d/docker-clean ] \u0026\u0026 rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages \"true\"' \u003e /etc/apt/apt.conf.d/keep-cache"
             ],
             "env": [
               "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
@@ -35,26 +31,6 @@
               "input": 0,
               "dest": "/",
               "output": 0
-            },
-            {
-              "input": 1,
-              "selector": "/cache",
-              "dest": "/var/cache/apt",
-              "output": -1,
-              "mountType": 3,
-              "cacheOpt": {
-                "ID": "cache-ns/var/cache/apt"
-              }
-            },
-            {
-              "input": 1,
-              "selector": "/cache",
-              "dest": "/var/lib/apt",
-              "output": -1,
-              "mountType": 3,
-              "cacheOpt": {
-                "ID": "cache-ns/var/lib/apt"
-              }
             }
           ]
         }
@@ -65,46 +41,23 @@
       },
       "constraints": {}
     },
-    "Digest": "sha256:1379f9b7531fcd9a04f5bc8578b6d6ede96b51ad6d6cb210d7651d52ed751b6e",
+    "Digest": "sha256:25c550579f9c0d1be96f4bae06d2095b5a3417c2507c51aa4d8d16fda077a9bb",
     "OpMetadata": {
       "description": {
-        "llb.customname": "Install system packages (curl=7.64.0-4)"
+        "llb.customname": "Set up APT cache"
       },
       "caps": {
         "exec.meta.base": true,
-        "exec.mount.bind": true,
-        "exec.mount.cache": true,
-        "exec.mount.cache.sharing": true,
-        "exec.mount.selector": true
+        "exec.mount.bind": true
       }
     }
   },
   {
-    "RawOp": "CkkKR3NoYTI1Njo2M2I2MjgxZWM5NGZmNDg0ZWZkYzM1ZWM0NjFkY2Q0NzQxOGFkOGQ2ZWUxM2UwNTMzMzZmOGM0YjQ0YzQ5Y2M4",
+    "RawOp": "CkkKR3NoYTI1Njo5ZTJiOTk5MjcwNTMwODBmYTliN2VkYjhhNTRhOTQxNTQwMmI2ODIyY2EwMDQzZDkzYTNiYTI2OTRiNWJhMDYyCkkKR3NoYTI1Njo5N2RiNDY5Nzc3YzViOWJjOWY3MzA4MTQ0YmQ2OGNkY2M3N2ViNWRjNDJhZGU0NGNmNzk1ZDE3ZGIwNzk5NGFkIlwSWhABIlYKEi9kb2NrZXIvbmdpbnguY29uZhIVL2V0Yy9uZ2lueC9uZ2lueC5jb25mGgsKCQoHCgVuZ2lueCD///////////8BKAEwAUABSAFY////////////AVIOCgVhbWQ2NBIFbGludXhaAA==",
     "Op": {
       "inputs": [
         {
-          "digest": "sha256:63b6281ec94ff484efdc35ec461dcd47418ad8d6ee13e053336f8c4b44c49cc8",
-          "index": 0
-        }
-      ],
-      "Op": null
-    },
-    "Digest": "sha256:2198b3f5347bc527c698fee887eb10609c06d78e0aeb6f9226aa069c5c08ddc0",
-    "OpMetadata": {
-      "caps": {
-        "constraints": true,
-        "meta.description": true,
-        "platform": true
-      }
-    }
-  },
-  {
-    "RawOp": "CkkKR3NoYTI1NjoxMzc5ZjliNzUzMWZjZDlhMDRmNWJjODU3OGI2ZDZlZGU5NmI1MWFkNmQ2Y2IyMTBkNzY1MWQ1MmVkNzUxYjZlCkkKR3NoYTI1Njo5N2RiNDY5Nzc3YzViOWJjOWY3MzA4MTQ0YmQ2OGNkY2M3N2ViNWRjNDJhZGU0NGNmNzk1ZDE3ZGIwNzk5NGFkIlwSWhABIlYKEi9kb2NrZXIvbmdpbnguY29uZhIVL2V0Yy9uZ2lueC9uZ2lueC5jb25mGgsKCQoHCgVuZ2lueCD///////////8BKAEwAUABSAFY////////////AVIOCgVhbWQ2NBIFbGludXhaAA==",
-    "Op": {
-      "inputs": [
-        {
-          "digest": "sha256:1379f9b7531fcd9a04f5bc8578b6d6ede96b51ad6d6cb210d7651d52ed751b6e",
+          "digest": "sha256:9e2b99927053080fa9b7edb8a54a9415402b6822ca0043d93a3ba2694b5ba062",
           "index": 0
         },
         {
@@ -151,13 +104,33 @@
       },
       "constraints": {}
     },
-    "Digest": "sha256:63b6281ec94ff484efdc35ec461dcd47418ad8d6ee13e053336f8c4b44c49cc8",
+    "Digest": "sha256:48c9e7ea51ba92894ce8b0a5f472b0124778624df7e18f1ffc4a17b0102b60e8",
     "OpMetadata": {
       "description": {
         "llb.customname": "Copy ./docker/nginx.conf"
       },
       "caps": {
         "file.base": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1Njo0OGM5ZTdlYTUxYmE5Mjg5NGNlOGIwYTVmNDcyYjAxMjQ3Nzg2MjRkZjdlMThmMWZmYzRhMTdiMDEwMmI2MGU4",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:48c9e7ea51ba92894ce8b0a5f472b0124778624df7e18f1ffc4a17b0102b60e8",
+          "index": 0
+        }
+      ],
+      "Op": null
+    },
+    "Digest": "sha256:6ab2d72295e22aeda3605ab9ff4cae7f8cf4a5c63dba4f627c8c92a067591741",
+    "OpMetadata": {
+      "caps": {
+        "constraints": true,
+        "meta.description": true,
+        "platform": true
       }
     }
   },
@@ -231,6 +204,86 @@
       },
       "caps": {
         "file.base": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1NjoyNWM1NTA1NzlmOWMwZDFiZTk2ZjRiYWUwNmQyMDk1YjVhMzQxN2MyNTA3YzUxYWE0ZDhkMTZmZGEwNzdhOWJiCkkKR3NoYTI1Njo5OWY0YTNiODExNTljYTdmNWJhMDc3Njg5YmYzOTFhYmQ4OTViMDBmNWIxYzI1ZTI5ODE1YTIzYjBhY2NiYWY2EogDCvwBCgcvYmluL3NoCgItbwoHZXJyZXhpdAoCLWMKW2FwdC1nZXQgdXBkYXRlOyBhcHQtZ2V0IGluc3RhbGwgLXkgLS1uby1pbnN0YWxsLXJlY29tbWVuZHMgY3VybD03LjY0LjAtNDsgYXB0LWdldCBhdXRvY2xlYW4SQVBBVEg9L3Vzci9sb2NhbC9zYmluOi91c3IvbG9jYWwvYmluOi91c3Ivc2JpbjovdXNyL2Jpbjovc2JpbjovYmluEhROR0lOWF9WRVJTSU9OPTEuMTcuNxIRTkpTX1ZFUlNJT049MC4zLjcSFFBLR19SRUxFQVNFPTF+YnVzdGVyGgEvEgMaAS8SQggBEgYvY2FjaGUaDi92YXIvY2FjaGUvYXB0IP///////////wEwA6IBGAoWY2FjaGUtbnMvdmFyL2NhY2hlL2FwdBI+CAESBi9jYWNoZRoML3Zhci9saWIvYXB0IP///////////wEwA6IBFgoUY2FjaGUtbnMvdmFyL2xpYi9hcHRSDgoFYW1kNjQSBWxpbnV4WgA=",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:25c550579f9c0d1be96f4bae06d2095b5a3417c2507c51aa4d8d16fda077a9bb",
+          "index": 0
+        },
+        {
+          "digest": "sha256:99f4a3b81159ca7f5ba077689bf391abd895b00f5b1c25e29815a23b0accbaf6",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "Exec": {
+          "meta": {
+            "args": [
+              "/bin/sh",
+              "-o",
+              "errexit",
+              "-c",
+              "apt-get update; apt-get install -y --no-install-recommends curl=7.64.0-4; apt-get autoclean"
+            ],
+            "env": [
+              "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+              "NGINX_VERSION=1.17.7",
+              "NJS_VERSION=0.3.7",
+              "PKG_RELEASE=1~buster"
+            ],
+            "cwd": "/"
+          },
+          "mounts": [
+            {
+              "input": 0,
+              "dest": "/",
+              "output": 0
+            },
+            {
+              "input": 1,
+              "selector": "/cache",
+              "dest": "/var/cache/apt",
+              "output": -1,
+              "mountType": 3,
+              "cacheOpt": {
+                "ID": "cache-ns/var/cache/apt"
+              }
+            },
+            {
+              "input": 1,
+              "selector": "/cache",
+              "dest": "/var/lib/apt",
+              "output": -1,
+              "mountType": 3,
+              "cacheOpt": {
+                "ID": "cache-ns/var/lib/apt"
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:9e2b99927053080fa9b7edb8a54a9415402b6822ca0043d93a3ba2694b5ba062",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Install system packages (curl=7.64.0-4)"
+      },
+      "caps": {
+        "exec.meta.base": true,
+        "exec.mount.bind": true,
+        "exec.mount.cache": true,
+        "exec.mount.cache.sharing": true,
+        "exec.mount.selector": true
       }
     }
   },

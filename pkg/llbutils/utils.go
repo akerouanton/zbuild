@@ -251,6 +251,31 @@ func CacheMountOpt(pathToCache, cacheIDNamespace string, owner string) llb.RunOp
 		llb.SourcePath("/cache"))
 }
 
+func SetupSystemPackagesCache(state llb.State, pkgMgr string) llb.State {
+	switch pkgMgr {
+	case APT:
+		return SetupAPTCache(state)
+	case APK:
+		return state
+	}
+
+	panic(UnsupportedPackageManager)
+}
+
+// SetupAPTCache adds a Run operation to the given llb.State and returns the
+// new state. That Run operation remove the docker-clean APT config file and
+// replace it with a new config file that explicitly tells APT to keep
+// downloaded files.
+// This function has to be called before running InstallSystemPackages with
+// cache mounts enabled.
+func SetupAPTCache(state llb.State) llb.State {
+	return state.Run(
+		Shell("[ -f /etc/apt/apt.conf.d/docker-clean ] && rm -f /etc/apt/apt.conf.d/docker-clean",
+			"echo 'Binary::apt::APT::Keep-Downloaded-Packages \"true\"' > /etc/apt/apt.conf.d/keep-cache"),
+		llb.WithCustomName("Set up APT cache"),
+	).Root()
+}
+
 // ExternalFile represents a file that should be loaded through HTTP at build-time.
 type ExternalFile struct {
 	URL         string

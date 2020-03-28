@@ -68,6 +68,10 @@ func (h *WebserverHandler) Build(
 		pkgManager = llbutils.APK
 	}
 
+	if buildOpts.WithCacheMounts && len(def.Locks.SystemPackages) > 0 {
+		state = llbutils.SetupSystemPackagesCache(state, pkgManager)
+	}
+
 	state, err = llbutils.InstallSystemPackages(state, pkgManager,
 		def.Locks.SystemPackages,
 		llbutils.NewCachingStrategyFromBuildOpts(buildOpts))

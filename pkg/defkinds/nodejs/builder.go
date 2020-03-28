@@ -101,6 +101,10 @@ func (h *NodeJSHandler) buildNodeJS(
 		pkgManager = llbutils.APK
 	}
 
+	if buildOpts.WithCacheMounts && len(stageDef.StageLocks.SystemPackages) > 0 {
+		state = llbutils.SetupSystemPackagesCache(state, pkgManager)
+	}
+
 	state, err = llbutils.InstallSystemPackages(state, pkgManager,
 		stageDef.StageLocks.SystemPackages,
 		llbutils.NewCachingStrategyFromBuildOpts(buildOpts))
