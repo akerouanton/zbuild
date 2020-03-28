@@ -103,7 +103,7 @@ func (h *NodeJSHandler) buildNodeJS(
 
 	state, err = llbutils.InstallSystemPackages(state, pkgManager,
 		stageDef.StageLocks.SystemPackages,
-		buildOpts.IgnoreCache)
+		llbutils.NewCachingStrategyFromBuildOpts(buildOpts))
 	if err != nil {
 		return state, img, xerrors.Errorf("failed to add \"install system pacakges\" steps: %w", err)
 	}

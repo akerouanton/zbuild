@@ -1,0 +1,1209 @@
+[
+  {
+    "RawOp": "CkkKR3NoYTI1NjowYmZlODFjZjExNDk1NzMyOWVjN2Q1ZTZhMDllZjUwODJkYzdlN2I0YjgxZWFkNTE3YjYzODY4OTc5NmY1YTIwEtUJCs0JCgcvYmluL3NoCgItbwoHZXJyZXhpdAoCLWMKswJkb2NrZXItcGhwLWV4dC1pbnN0YWxsIC1qIiQobnByb2MpIiBpbnRsIG9wY2FjaGUgcGRvX215c3FsIHNvYXAgc29ja2V0cyB6aXA7IGRvY2tlci1waHAtc291cmNlIGRlbGV0ZTsgY3VybCAtZiAtbyAvdXNyL2xvY2FsL3NiaW4vbm90cGVjbCBodHRwczovL3N0b3JhZ2UuZ29vZ2xlYXBpcy5jb20vbm90cGVjbC9ub3RwZWNsOyBjaG1vZCAreCAvdXNyL2xvY2FsL3NiaW4vbm90cGVjbDsgbm90cGVjbCBpbnN0YWxsIGFwY3U6NS4xLjE4OyBkb2NrZXItcGhwLWV4dC1lbmFibGUgYXBjdTsgcm0gLXJmIC91c3IvbG9jYWwvc2Jpbi9ub3RwZWNsEkFQQVRIPS91c3IvbG9jYWwvc2JpbjovdXNyL2xvY2FsL2JpbjovdXNyL3NiaW46L3Vzci9iaW46L3NiaW46L2JpbhJYUEhQSVpFX0RFUFM9YXV0b2NvbmYgCQlkcGtnLWRldiAJCWZpbGUgCQlnKysgCQlnY2MgCQlsaWJjLWRldiAJCW1ha2UgCQlwa2ctY29uZmlnIAkJcmUyYxIeUEhQX0lOSV9ESVI9L3Vzci9sb2NhbC9ldGMvcGhwEmZQSFBfRVhUUkFfQ09ORklHVVJFX0FSR1M9LS1lbmFibGUtZnBtIC0td2l0aC1mcG0tdXNlcj13d3ctZGF0YSAtLXdpdGgtZnBtLWdyb3VwPXd3dy1kYXRhIC0tZGlzYWJsZS1jZ2kSXlBIUF9DRkxBR1M9LWZzdGFjay1wcm90ZWN0b3Itc3Ryb25nIC1mcGljIC1mcGllIC1PMiAtRF9MQVJHRUZJTEVfU09VUkNFIC1EX0ZJTEVfT0ZGU0VUX0JJVFM9NjQSYFBIUF9DUFBGTEFHUz0tZnN0YWNrLXByb3RlY3Rvci1zdHJvbmcgLWZwaWMgLWZwaWUgLU8yIC1EX0xBUkdFRklMRV9TT1VSQ0UgLURfRklMRV9PRkZTRVRfQklUUz02NBIuUEhQX0xERkxBR1M9LVdsLC1PMSAtV2wsLS1oYXNoLXN0eWxlPWJvdGggLXBpZRJaR1BHX0tFWVM9Q0JBRjY5RjE3M0EwRkVBNEI1MzdGNDcwRDY2Qzk1OTMxMThCQ0NCNiBGMzgyNTI4MjZBQ0Q5NTdFRjM4MEQzOUYyRjc5NTZCQzVEQTA0QjVEEhJQSFBfVkVSU0lPTj03LjMuMTMSQlBIUF9VUkw9aHR0cHM6Ly93d3cucGhwLm5ldC9nZXQvcGhwLTcuMy4xMy50YXIueHovZnJvbS90aGlzL21pcnJvchJKUEhQX0FTQ19VUkw9aHR0cHM6Ly93d3cucGhwLm5ldC9nZXQvcGhwLTcuMy4xMy50YXIueHouYXNjL2Zyb20vdGhpcy9taXJyb3ISS1BIUF9TSEEyNTY9NTdhYzU1ZmU0NDJkMmRhNjUwYWJlYjllNmZhMTYxYmQzYTk4YmE2NTI4YzAyOWYwNzZmOGJiYTQzZGQ1YzIyOBIIUEhQX01ENT0aDS92YXIvd3d3L2h0bWwSAxoBL1IOCgVhbWQ2NBIFbGludXhaAA==",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:0bfe81cf114957329ec7d5e6a09ef5082dc7e7b4b81ead517b638689796f5a20",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "Exec": {
+          "meta": {
+            "args": [
+              "/bin/sh",
+              "-o",
+              "errexit",
+              "-c",
+              "docker-php-ext-install -j\"$(nproc)\" intl opcache pdo_mysql soap sockets zip; docker-php-source delete; curl -f -o /usr/local/sbin/notpecl https://storage.googleapis.com/notpecl/notpecl; chmod +x /usr/local/sbin/notpecl; notpecl install apcu:5.1.18; docker-php-ext-enable apcu; rm -rf /usr/local/sbin/notpecl"
+            ],
+            "env": [
+              "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+              "PHPIZE_DEPS=autoconf \t\tdpkg-dev \t\tfile \t\tg++ \t\tgcc \t\tlibc-dev \t\tmake \t\tpkg-config \t\tre2c",
+              "PHP_INI_DIR=/usr/local/etc/php",
+              "PHP_EXTRA_CONFIGURE_ARGS=--enable-fpm --with-fpm-user=www-data --with-fpm-group=www-data --disable-cgi",
+              "PHP_CFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
+              "PHP_CPPFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
+              "PHP_LDFLAGS=-Wl,-O1 -Wl,--hash-style=both -pie",
+              "GPG_KEYS=CBAF69F173A0FEA4B537F470D66C9593118BCCB6 F38252826ACD957EF380D39F2F7956BC5DA04B5D",
+              "PHP_VERSION=7.3.13",
+              "PHP_URL=https://www.php.net/get/php-7.3.13.tar.xz/from/this/mirror",
+              "PHP_ASC_URL=https://www.php.net/get/php-7.3.13.tar.xz.asc/from/this/mirror",
+              "PHP_SHA256=57ac55fe442d2da650abeb9e6fa161bd3a98ba6528c029f076f8bba43dd5c228",
+              "PHP_MD5="
+            ],
+            "cwd": "/var/www/html"
+          },
+          "mounts": [
+            {
+              "input": 0,
+              "dest": "/",
+              "output": 0
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:04dca1392055b716263e385ca0fdcdadc9f4cb168b0b9ed92e2864a0ae01709e",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Install PHP extensions (apcu, intl, opcache, pdo_mysql, soap, sockets, zip)"
+      },
+      "caps": {
+        "exec.meta.base": true,
+        "exec.mount.bind": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1NjoyMWQzNDg4MDYzYTczZmMzOTNjZTc2NTI5ODdkYjZlNTE2YzY5ZjA4OTViYWFlMDQ0ZmUyZWNlNzQ4NTA1NmNhCkkKR3NoYTI1Njo5OWY0YTNiODExNTljYTdmNWJhMDc3Njg5YmYzOTFhYmQ4OTViMDBmNWIxYzI1ZTI5ODE1YTIzYjBhY2NiYWY2Es8KCsMJCgcvYmluL3NoCgItbwoHZXJyZXhpdAoCLWMKqQJhcHQtZ2V0IHVwZGF0ZTsgYXB0LWdldCBpbnN0YWxsIC15IC0tbm8taW5zdGFsbC1yZWNvbW1lbmRzIGdpdD0xOjIuMjAuMS0yK2RlYjEwdTEgbGliaWN1LWRldj02My4xLTYrZGViMTB1MSBsaWJqcGVnLWRldj0xOjEuNS4yLTIgbGlic3NsLWRldj0xLjEuMWQtMCtkZWIxMHUyIGxpYnhtbDItZGV2PTIuOS40K2Rmc2cxLTcrYjMgbGliemlwLWRldj0xLjUuMS00IG9wZW5zc2w9MS4xLjFkLTArZGViMTB1MiB1bnppcD02LjAtMjMrZGViMTB1MSB6bGliMWctZGV2PTE6MS4yLjExLmRmc2ctMTsgYXB0LWdldCBhdXRvY2xlYW4SQVBBVEg9L3Vzci9sb2NhbC9zYmluOi91c3IvbG9jYWwvYmluOi91c3Ivc2JpbjovdXNyL2Jpbjovc2JpbjovYmluElhQSFBJWkVfREVQUz1hdXRvY29uZiAJCWRwa2ctZGV2IAkJZmlsZSAJCWcrKyAJCWdjYyAJCWxpYmMtZGV2IAkJbWFrZSAJCXBrZy1jb25maWcgCQlyZTJjEh5QSFBfSU5JX0RJUj0vdXNyL2xvY2FsL2V0Yy9waHASZlBIUF9FWFRSQV9DT05GSUdVUkVfQVJHUz0tLWVuYWJsZS1mcG0gLS13aXRoLWZwbS11c2VyPXd3dy1kYXRhIC0td2l0aC1mcG0tZ3JvdXA9d3d3LWRhdGEgLS1kaXNhYmxlLWNnaRJeUEhQX0NGTEFHUz0tZnN0YWNrLXByb3RlY3Rvci1zdHJvbmcgLWZwaWMgLWZwaWUgLU8yIC1EX0xBUkdFRklMRV9TT1VSQ0UgLURfRklMRV9PRkZTRVRfQklUUz02NBJgUEhQX0NQUEZMQUdTPS1mc3RhY2stcHJvdGVjdG9yLXN0cm9uZyAtZnBpYyAtZnBpZSAtTzIgLURfTEFSR0VGSUxFX1NPVVJDRSAtRF9GSUxFX09GRlNFVF9CSVRTPTY0Ei5QSFBfTERGTEFHUz0tV2wsLU8xIC1XbCwtLWhhc2gtc3R5bGU9Ym90aCAtcGllElpHUEdfS0VZUz1DQkFGNjlGMTczQTBGRUE0QjUzN0Y0NzBENjZDOTU5MzExOEJDQ0I2IEYzODI1MjgyNkFDRDk1N0VGMzgwRDM5RjJGNzk1NkJDNURBMDRCNUQSElBIUF9WRVJTSU9OPTcuMy4xMxJCUEhQX1VSTD1odHRwczovL3d3dy5waHAubmV0L2dldC9waHAtNy4zLjEzLnRhci54ei9mcm9tL3RoaXMvbWlycm9yEkpQSFBfQVNDX1VSTD1odHRwczovL3d3dy5waHAubmV0L2dldC9waHAtNy4zLjEzLnRhci54ei5hc2MvZnJvbS90aGlzL21pcnJvchJLUEhQX1NIQTI1Nj01N2FjNTVmZTQ0MmQyZGE2NTBhYmViOWU2ZmExNjFiZDNhOThiYTY1MjhjMDI5ZjA3NmY4YmJhNDNkZDVjMjI4EghQSFBfTUQ1PRoNL3Zhci93d3cvaHRtbBIDGgEvEkIIARIGL2NhY2hlGg4vdmFyL2NhY2hlL2FwdCD///////////8BMAOiARgKFmNhY2hlLW5zL3Zhci9jYWNoZS9hcHQSPggBEgYvY2FjaGUaDC92YXIvbGliL2FwdCD///////////8BMAOiARYKFGNhY2hlLW5zL3Zhci9saWIvYXB0Ug4KBWFtZDY0EgVsaW51eFoA",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:21d3488063a73fc393ce7652987db6e516c69f0895baae044fe2ece7485056ca",
+          "index": 0
+        },
+        {
+          "digest": "sha256:99f4a3b81159ca7f5ba077689bf391abd895b00f5b1c25e29815a23b0accbaf6",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "Exec": {
+          "meta": {
+            "args": [
+              "/bin/sh",
+              "-o",
+              "errexit",
+              "-c",
+              "apt-get update; apt-get install -y --no-install-recommends git=1:2.20.1-2+deb10u1 libicu-dev=63.1-6+deb10u1 libjpeg-dev=1:1.5.2-2 libssl-dev=1.1.1d-0+deb10u2 libxml2-dev=2.9.4+dfsg1-7+b3 libzip-dev=1.5.1-4 openssl=1.1.1d-0+deb10u2 unzip=6.0-23+deb10u1 zlib1g-dev=1:1.2.11.dfsg-1; apt-get autoclean"
+            ],
+            "env": [
+              "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+              "PHPIZE_DEPS=autoconf \t\tdpkg-dev \t\tfile \t\tg++ \t\tgcc \t\tlibc-dev \t\tmake \t\tpkg-config \t\tre2c",
+              "PHP_INI_DIR=/usr/local/etc/php",
+              "PHP_EXTRA_CONFIGURE_ARGS=--enable-fpm --with-fpm-user=www-data --with-fpm-group=www-data --disable-cgi",
+              "PHP_CFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
+              "PHP_CPPFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
+              "PHP_LDFLAGS=-Wl,-O1 -Wl,--hash-style=both -pie",
+              "GPG_KEYS=CBAF69F173A0FEA4B537F470D66C9593118BCCB6 F38252826ACD957EF380D39F2F7956BC5DA04B5D",
+              "PHP_VERSION=7.3.13",
+              "PHP_URL=https://www.php.net/get/php-7.3.13.tar.xz/from/this/mirror",
+              "PHP_ASC_URL=https://www.php.net/get/php-7.3.13.tar.xz.asc/from/this/mirror",
+              "PHP_SHA256=57ac55fe442d2da650abeb9e6fa161bd3a98ba6528c029f076f8bba43dd5c228",
+              "PHP_MD5="
+            ],
+            "cwd": "/var/www/html"
+          },
+          "mounts": [
+            {
+              "input": 0,
+              "dest": "/",
+              "output": 0
+            },
+            {
+              "input": 1,
+              "selector": "/cache",
+              "dest": "/var/cache/apt",
+              "output": -1,
+              "mountType": 3,
+              "cacheOpt": {
+                "ID": "cache-ns/var/cache/apt"
+              }
+            },
+            {
+              "input": 1,
+              "selector": "/cache",
+              "dest": "/var/lib/apt",
+              "output": -1,
+              "mountType": 3,
+              "cacheOpt": {
+                "ID": "cache-ns/var/lib/apt"
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:0bfe81cf114957329ec7d5e6a09ef5082dc7e7b4b81ead517b638689796f5a20",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Install system packages (git=1:2.20.1-2+deb10u1, libicu-dev=63.1-6+deb10u1, libjpeg-dev=1:1.5.2-2, libssl-dev=1.1.1d-0+deb10u2, libxml2-dev=2.9.4+dfsg1-7+b3, libzip-dev=1.5.1-4, openssl=1.1.1d-0+deb10u2, unzip=6.0-23+deb10u1, zlib1g-dev=1:1.2.11.dfsg-1)"
+      },
+      "caps": {
+        "exec.meta.base": true,
+        "exec.mount.bind": true,
+        "exec.mount.cache": true,
+        "exec.mount.cache.sharing": true,
+        "exec.mount.selector": true
+      }
+    }
+  },
+  {
+    "RawOp": "GjgKNmRvY2tlci1pbWFnZTovL2RvY2tlci5pby9saWJyYXJ5L3BocDo3LjMuMTMtZnBtLWJ1c3RlclIOCgVhbWQ2NBIFbGludXhaAA==",
+    "Op": {
+      "Op": {
+        "Source": {
+          "identifier": "docker-image://docker.io/library/php:7.3.13-fpm-buster"
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:0ccff5e2cc69cc073fa8c596aa61454c9d0fb78a93285eae888eeb33e592f42e",
+    "OpMetadata": {
+      "caps": {
+        "source.image": true
+      }
+    }
+  },
+  {
+    "RawOp": "GpsBCg9sb2NhbDovL2NvbnRleHQSRAoUbG9jYWwuaW5jbHVkZXBhdHRlcm4SLFsiZG9ja2VyL2FwcC9waHAuaW5pIiwiZG9ja2VyL2FwcC9mcG0uY29uZiJdEh0KDWxvY2FsLnNlc3Npb24SDDxTRVNTSU9OLUlEPhIjChNsb2NhbC5zaGFyZWRrZXloaW50Egxjb25maWctZmlsZXNaAA==",
+    "Op": {
+      "Op": {
+        "Source": {
+          "identifier": "local://context",
+          "attrs": {
+            "local.includepattern": "[\"docker/app/php.ini\",\"docker/app/fpm.conf\"]",
+            "local.session": "\u003cSESSION-ID\u003e",
+            "local.sharedkeyhint": "config-files"
+          }
+        }
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:0e16c24b18eae2f2bcc40859484d8a0cfbc6ff4fe85d6a487fb1b3dc37ac88d2",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "load config files from build context"
+      },
+      "caps": {
+        "source.local": true,
+        "source.local.includepatterns": true,
+        "source.local.sessionid": true,
+        "source.local.sharedkeyhint": true
+      }
+    }
+  },
+  {
+    "RawOp": "GlYKPWh0dHBzOi8vYmxhY2tmaXJlLmlvL2FwaS92MS9yZWxlYXNlcy9wcm9iZS9waHAvbGludXgvYW1kNjQvNzISFQoNaHR0cC5maWxlbmFtZRIEL291dFoA",
+    "Op": {
+      "Op": {
+        "Source": {
+          "identifier": "https://blackfire.io/api/v1/releases/probe/php/linux/amd64/72",
+          "attrs": {
+            "http.filename": "/out"
+          }
+        }
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:1819ffb4e62e0725de26761fa5a3bceae25d49297ffe8c1da78ac107920e7fd1",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Download https://blackfire.io/api/v1/releases/probe/php/linux/amd64/72"
+      },
+      "caps": {
+        "source.http": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1NjowY2NmZjVlMmNjNjljYzA3M2ZhOGM1OTZhYTYxNDU0YzlkMGZiNzhhOTMyODVlYWU4ODhlZWIzM2U1OTJmNDJlCkkKR3NoYTI1Njo1NzY5ZTJmZmRlOGVjZThlMTQwZDY0MmRmYzQ1OTAxMWE5Yzg4ZmI2NmQ1ZWI5ZGY1ZDZkZmQwZWMxYTc5YWJmIkoSSBABIkQKES91c3IvYmluL2NvbXBvc2VyEhEvdXNyL2Jpbi9jb21wb3NlciD///////////8BKAEwAUABSAFY////////////AVIOCgVhbWQ2NBIFbGludXhaAA==",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:0ccff5e2cc69cc073fa8c596aa61454c9d0fb78a93285eae888eeb33e592f42e",
+          "index": 0
+        },
+        {
+          "digest": "sha256:5769e2ffde8ece8e140d642dfc459011a9c88fb66d5eb9df5d6dfd0ec1a79abf",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "File": {
+          "actions": [
+            {
+              "input": 0,
+              "secondaryInput": 1,
+              "output": 0,
+              "Action": {
+                "Copy": {
+                  "src": "/usr/bin/composer",
+                  "dest": "/usr/bin/composer",
+                  "mode": -1,
+                  "followSymlink": true,
+                  "dirCopyContents": true,
+                  "createDestPath": true,
+                  "allowWildcard": true,
+                  "timestamp": -1
+                }
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:21d3488063a73fc393ce7652987db6e516c69f0895baae044fe2ece7485056ca",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Copy /usr/bin/composer"
+      },
+      "caps": {
+        "file.base": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1NjpjYzg0NDVjMGVjOTE4YzE3OWRiMTlmNWEzZWM4YWIzYTVjNDc4YTA4N2IwYjlmN2I4NTdmZjEwODQwN2JhN2EwIjYSNBD///////////8BMicKCS9jb21wb3NlchDoAxgBIgoKAxDoBxIDEOgHKP///////////wFSDgoFYW1kNjQSBWxpbnV4WgA=",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:cc8445c0ec918c179db19f5a3ec8ab3a5c478a087b0b9f7b857ff108407ba7a0",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "File": {
+          "actions": [
+            {
+              "input": 0,
+              "secondaryInput": -1,
+              "output": 0,
+              "Action": {
+                "Mkdir": {
+                  "path": "/composer",
+                  "mode": 488,
+                  "makeParents": true,
+                  "owner": {
+                    "user": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    },
+                    "group": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    }
+                  },
+                  "timestamp": -1
+                }
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:42cee0af3be431e8edd40209731a7c52dfc7aec2d5f98c9ecd241d3de80bab94",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Mkdir /composer"
+      },
+      "caps": {
+        "file.base": true
+      }
+    }
+  },
+  {
+    "RawOp": "GjEKL2RvY2tlci1pbWFnZTovL2RvY2tlci5pby9saWJyYXJ5L2NvbXBvc2VyOjEuOS4wUg4KBWFtZDY0EgVsaW51eFoA",
+    "Op": {
+      "Op": {
+        "Source": {
+          "identifier": "docker-image://docker.io/library/composer:1.9.0"
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:5769e2ffde8ece8e140d642dfc459011a9c88fb66d5eb9df5d6dfd0ec1a79abf",
+    "OpMetadata": {
+      "caps": {
+        "source.image": true
+      }
+    }
+  },
+  {
+    "RawOp": "GpIBCg9sb2NhbDovL2NvbnRleHQSOQoUbG9jYWwuaW5jbHVkZXBhdHRlcm4SIVsiY29tcG9zZXIuanNvbiIsImNvbXBvc2VyLmxvY2siXRIdCg1sb2NhbC5zZXNzaW9uEgw8U0VTU0lPTi1JRD4SJQoTbG9jYWwuc2hhcmVka2V5aGludBIOY29tcG9zZXItZmlsZXNaAA==",
+    "Op": {
+      "Op": {
+        "Source": {
+          "identifier": "local://context",
+          "attrs": {
+            "local.includepattern": "[\"composer.json\",\"composer.lock\"]",
+            "local.session": "\u003cSESSION-ID\u003e",
+            "local.sharedkeyhint": "composer-files"
+          }
+        }
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:6c2ebeb5c8483c2d0cef692223fb140cc054ddaf43068f3d9915039ce221f180",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "load composer files from build context"
+      },
+      "caps": {
+        "source.local": true,
+        "source.local.includepatterns": true,
+        "source.local.sessionid": true,
+        "source.local.sharedkeyhint": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1NjpjZmQyMjk2ZWU4Njc2MTc4NWE2YzY0NGQyZTA2ZWQ1MzdhYmViYjlkNzVlZjA2NWRjMTc3YzNkMTM5NTA5YTNmEpEICokICgcvYmluL3NoCgItbwoHZXJyZXhpdAoCLWMKWmNvbXBvc2VyIGluc3RhbGwgLS1uby1kZXYgLS1wcmVmZXItZGlzdCAtLW5vLXNjcmlwdHMgLS1uby1hdXRvbG9hZGVyOyBjb21wb3NlciBjbGVhci1jYWNoZRJBUEFUSD0vdXNyL2xvY2FsL3NiaW46L3Vzci9sb2NhbC9iaW46L3Vzci9zYmluOi91c3IvYmluOi9zYmluOi9iaW4SWFBIUElaRV9ERVBTPWF1dG9jb25mIAkJZHBrZy1kZXYgCQlmaWxlIAkJZysrIAkJZ2NjIAkJbGliYy1kZXYgCQltYWtlIAkJcGtnLWNvbmZpZyAJCXJlMmMSHlBIUF9JTklfRElSPS91c3IvbG9jYWwvZXRjL3BocBJmUEhQX0VYVFJBX0NPTkZJR1VSRV9BUkdTPS0tZW5hYmxlLWZwbSAtLXdpdGgtZnBtLXVzZXI9d3d3LWRhdGEgLS13aXRoLWZwbS1ncm91cD13d3ctZGF0YSAtLWRpc2FibGUtY2dpEl5QSFBfQ0ZMQUdTPS1mc3RhY2stcHJvdGVjdG9yLXN0cm9uZyAtZnBpYyAtZnBpZSAtTzIgLURfTEFSR0VGSUxFX1NPVVJDRSAtRF9GSUxFX09GRlNFVF9CSVRTPTY0EmBQSFBfQ1BQRkxBR1M9LWZzdGFjay1wcm90ZWN0b3Itc3Ryb25nIC1mcGljIC1mcGllIC1PMiAtRF9MQVJHRUZJTEVfU09VUkNFIC1EX0ZJTEVfT0ZGU0VUX0JJVFM9NjQSLlBIUF9MREZMQUdTPS1XbCwtTzEgLVdsLC0taGFzaC1zdHlsZT1ib3RoIC1waWUSWkdQR19LRVlTPUNCQUY2OUYxNzNBMEZFQTRCNTM3RjQ3MEQ2NkM5NTkzMTE4QkNDQjYgRjM4MjUyODI2QUNEOTU3RUYzODBEMzlGMkY3OTU2QkM1REEwNEI1RBISUEhQX1ZFUlNJT049Ny4zLjEzEkJQSFBfVVJMPWh0dHBzOi8vd3d3LnBocC5uZXQvZ2V0L3BocC03LjMuMTMudGFyLnh6L2Zyb20vdGhpcy9taXJyb3ISSlBIUF9BU0NfVVJMPWh0dHBzOi8vd3d3LnBocC5uZXQvZ2V0L3BocC03LjMuMTMudGFyLnh6LmFzYy9mcm9tL3RoaXMvbWlycm9yEktQSFBfU0hBMjU2PTU3YWM1NWZlNDQyZDJkYTY1MGFiZWI5ZTZmYTE2MWJkM2E5OGJhNjUyOGMwMjlmMDc2ZjhiYmE0M2RkNWMyMjgSCFBIUF9NRDU9EhdDT01QT1NFUl9IT01FPS9jb21wb3NlchoEL2FwcCIEMTAwMBIDGgEvUg4KBWFtZDY0EgVsaW51eFoA",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:cfd2296ee86761785a6c644d2e06ed537abebb9d75ef065dc177c3d139509a3f",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "Exec": {
+          "meta": {
+            "args": [
+              "/bin/sh",
+              "-o",
+              "errexit",
+              "-c",
+              "composer install --no-dev --prefer-dist --no-scripts --no-autoloader; composer clear-cache"
+            ],
+            "env": [
+              "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+              "PHPIZE_DEPS=autoconf \t\tdpkg-dev \t\tfile \t\tg++ \t\tgcc \t\tlibc-dev \t\tmake \t\tpkg-config \t\tre2c",
+              "PHP_INI_DIR=/usr/local/etc/php",
+              "PHP_EXTRA_CONFIGURE_ARGS=--enable-fpm --with-fpm-user=www-data --with-fpm-group=www-data --disable-cgi",
+              "PHP_CFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
+              "PHP_CPPFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
+              "PHP_LDFLAGS=-Wl,-O1 -Wl,--hash-style=both -pie",
+              "GPG_KEYS=CBAF69F173A0FEA4B537F470D66C9593118BCCB6 F38252826ACD957EF380D39F2F7956BC5DA04B5D",
+              "PHP_VERSION=7.3.13",
+              "PHP_URL=https://www.php.net/get/php-7.3.13.tar.xz/from/this/mirror",
+              "PHP_ASC_URL=https://www.php.net/get/php-7.3.13.tar.xz.asc/from/this/mirror",
+              "PHP_SHA256=57ac55fe442d2da650abeb9e6fa161bd3a98ba6528c029f076f8bba43dd5c228",
+              "PHP_MD5=",
+              "COMPOSER_HOME=/composer"
+            ],
+            "cwd": "/app",
+            "user": "1000"
+          },
+          "mounts": [
+            {
+              "input": 0,
+              "dest": "/",
+              "output": 0
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:6dba488653a65ab0dd5e6cc44cd1bc51ae93808c2cca234ca1c219acdc673c9e",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Run composer install"
+      },
+      "caps": {
+        "exec.meta.base": true,
+        "exec.mount.bind": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1NjowNGRjYTEzOTIwNTViNzE2MjYzZTM4NWNhMGZkY2RhZGM5ZjRjYjE2OGIwYjllZDkyZTI4NjRhMGFlMDE3MDllCkkKR3NoYTI1Njo4MDZkMjY1OThmNmE2ZWYzOGM4OGZhYTFhMmYxOGZmYjM0YmFjMGUzZWJhNzkxMWQyODNkYmM2ZTdjZDZiZDhhIm0SaxABImcKCS91bnBhY2tlZBJEL3Vzci9sb2NhbC9saWIvcGhwL2V4dGVuc2lvbnMvbm8tZGVidWctbm9uLXp0cy0yMDE4MDczMS9ibGFja2ZpcmUuc28g6AMoATABQAFIAVj///////////8BUg4KBWFtZDY0EgVsaW51eFoA",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:04dca1392055b716263e385ca0fdcdadc9f4cb168b0b9ed92e2864a0ae01709e",
+          "index": 0
+        },
+        {
+          "digest": "sha256:806d26598f6a6ef38c88faa1a2f18ffb34bac0e3eba7911d283dbc6e7cd6bd8a",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "File": {
+          "actions": [
+            {
+              "input": 0,
+              "secondaryInput": 1,
+              "output": 0,
+              "Action": {
+                "Copy": {
+                  "src": "/unpacked",
+                  "dest": "/usr/local/lib/php/extensions/no-debug-non-zts-20180731/blackfire.so",
+                  "mode": 488,
+                  "followSymlink": true,
+                  "dirCopyContents": true,
+                  "createDestPath": true,
+                  "allowWildcard": true,
+                  "timestamp": -1
+                }
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:7a28f008601d1767473c4a3ef92aa7613a235c160a34e22f56056653a50e1a59",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Copy unpacked https://blackfire.io/api/v1/releases/probe/php/linux/amd64/72 to /usr/local/lib/php/extensions/no-debug-non-zts-20180731/blackfire.so"
+      },
+      "caps": {
+        "file.base": true
+      }
+    }
+  },
+  {
+    "RawOp": "GmYKTWh0dHBzOi8vZ2l0aHViLmNvbS9OaVItL2ZjZ2ktY2xpZW50L3JlbGVhc2VzL2Rvd25sb2FkL3YwLjEuMC9mY2dpLWNsaWVudC5waGFyEhUKDWh0dHAuZmlsZW5hbWUSBC9vdXRaAA==",
+    "Op": {
+      "Op": {
+        "Source": {
+          "identifier": "https://github.com/NiR-/fcgi-client/releases/download/v0.1.0/fcgi-client.phar",
+          "attrs": {
+            "http.filename": "/out"
+          }
+        }
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:7cffb793bd922ad76b496aa6cd853024e7fde645979b2124306af11575a7318e",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Download https://github.com/NiR-/fcgi-client/releases/download/v0.1.0/fcgi-client.phar"
+      },
+      "caps": {
+        "source.http": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1NjpjYmQ5MjUyNmNlNzdiMmEzMDc0OGY1OTY4YzBiYzA4MGFhZTUxNTY5ZGFiNWM4ZmEwMWJmNzkzZDQwZDYxNDlhIlISUAj///////////8BIkMKHC9kZWNvbXByZXNzZWQvYmxhY2tmaXJlLSouc28SCS91bnBhY2tlZCD///////////8BOAFIAVj///////////8BUg4KBWFtZDY0EgVsaW51eFoA",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:cbd92526ce77b2a30748f5968c0bc080aae51569dab5c8fa01bf793d40d6149a",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "File": {
+          "actions": [
+            {
+              "input": -1,
+              "secondaryInput": 0,
+              "output": 0,
+              "Action": {
+                "Copy": {
+                  "src": "/decompressed/blackfire-*.so",
+                  "dest": "/unpacked",
+                  "mode": -1,
+                  "attemptUnpackDockerCompatibility": true,
+                  "allowWildcard": true,
+                  "timestamp": -1
+                }
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:806d26598f6a6ef38c88faa1a2f18ffb34bac0e3eba7911d283dbc6e7cd6bd8a",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Unpack https://blackfire.io/api/v1/releases/probe/php/linux/amd64/72"
+      },
+      "caps": {
+        "file.base": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1Njo3YTI4ZjAwODYwMWQxNzY3NDczYzRhM2VmOTJhYTc2MTNhMjM1YzE2MGEzNGUyMmY1NjA1NjY1M2E1MGUxYTU5CkkKR3NoYTI1Njo3Y2ZmYjc5M2JkOTIyYWQ3NmI0OTZhYTZjZDg1MzAyNGU3ZmRlNjQ1OTc5YjIxMjQzMDZhZjExNTc1YTczMThlIkoSSBABIkQKBC9vdXQSGi91c3IvbG9jYWwvYmluL2ZjZ2ktY2xpZW50GgoKAxDoBxIDEOgHIOgDKAEwAUABSAFY////////////AVIOCgVhbWQ2NBIFbGludXhaAA==",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:7a28f008601d1767473c4a3ef92aa7613a235c160a34e22f56056653a50e1a59",
+          "index": 0
+        },
+        {
+          "digest": "sha256:7cffb793bd922ad76b496aa6cd853024e7fde645979b2124306af11575a7318e",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "File": {
+          "actions": [
+            {
+              "input": 0,
+              "secondaryInput": 1,
+              "output": 0,
+              "Action": {
+                "Copy": {
+                  "src": "/out",
+                  "dest": "/usr/local/bin/fcgi-client",
+                  "owner": {
+                    "user": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    },
+                    "group": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    }
+                  },
+                  "mode": 488,
+                  "followSymlink": true,
+                  "dirCopyContents": true,
+                  "createDestPath": true,
+                  "allowWildcard": true,
+                  "timestamp": -1
+                }
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:8284ac0eba841f8ab65acd187164b036968269832787d38d910f4fc4cb9ba0f8",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Copy https://github.com/NiR-/fcgi-client/releases/download/v0.1.0/fcgi-client.phar to /usr/local/bin/fcgi-client"
+      },
+      "caps": {
+        "file.base": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1NjpkMGYyYTVjZjY2NmFkY2Y1YjhiNDQzNzUyMGJmMDE4Y2IxMWEzMDJlMzIwYmEwZmJiMDI3YzU3YjlhZTc3ODdi",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:d0f2a5cf666adcf5b8b4437520bf018cb11a302e320ba0fbb027c57b9ae7787b",
+          "index": 0
+        }
+      ],
+      "Op": null
+    },
+    "Digest": "sha256:8fe126fdf12117bc18e5a89d30d6d7288009794033dacbcf0678de0866958b5e",
+    "OpMetadata": {
+      "caps": {
+        "constraints": true,
+        "meta.description": true,
+        "platform": true
+      }
+    }
+  },
+  {
+    "RawOp": "IjgSNgj///////////8BEP///////////wEyHgoGL2NhY2hlEOgDGAEiBAoCEAAo////////////AVIOCgVhbWQ2NBIFbGludXhaAA==",
+    "Op": {
+      "Op": {
+        "File": {
+          "actions": [
+            {
+              "input": -1,
+              "secondaryInput": -1,
+              "output": 0,
+              "Action": {
+                "Mkdir": {
+                  "path": "/cache",
+                  "mode": 488,
+                  "makeParents": true,
+                  "owner": {
+                    "user": {
+                      "User": {
+                        "ByID": 0
+                      }
+                    }
+                  },
+                  "timestamp": -1
+                }
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:99f4a3b81159ca7f5ba077689bf391abd895b00f5b1c25e29815a23b0accbaf6",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Mkdir /cache"
+      },
+      "caps": {
+        "file.base": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1NjpkNjFhYjI2MTk1NTRkZTY2MmMzODFhMTdiNzMxOTZlMzQyNTY1YjBmMGViMGQ5Njk3NjYyODhiMWZiZGJiZDM2CkkKR3NoYTI1NjowZTE2YzI0YjE4ZWFlMmYyYmNjNDA4NTk0ODRkOGEwY2ZiYzZmZjRmZTg1ZDZhNDg3ZmIxYjNkYzM3YWM4OGQyImMSYRABIl0KFC9kb2NrZXIvYXBwL2ZwbS5jb25mEhsvdXNyL2xvY2FsL2V0Yy9waHAtZnBtLmNvbmYaCgoDEOgHEgMQ6Acg////////////ASgBMAFAAUgBWP///////////wFSDgoFYW1kNjQSBWxpbnV4WgA=",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:d61ab2619554de662c381a17b73196e342565b0f0eb0d969766288b1fbdbbd36",
+          "index": 0
+        },
+        {
+          "digest": "sha256:0e16c24b18eae2f2bcc40859484d8a0cfbc6ff4fe85d6a487fb1b3dc37ac88d2",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "File": {
+          "actions": [
+            {
+              "input": 0,
+              "secondaryInput": 1,
+              "output": 0,
+              "Action": {
+                "Copy": {
+                  "src": "/docker/app/fpm.conf",
+                  "dest": "/usr/local/etc/php-fpm.conf",
+                  "owner": {
+                    "user": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    },
+                    "group": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    }
+                  },
+                  "mode": -1,
+                  "followSymlink": true,
+                  "dirCopyContents": true,
+                  "createDestPath": true,
+                  "allowWildcard": true,
+                  "timestamp": -1
+                }
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:a206cbe14f10a591eb3f84683f096138e6e7917cb49314b3d72bbbb0c939b2c6",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Copy docker/app/fpm.conf"
+      },
+      "caps": {
+        "file.base": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1NjphMjA2Y2JlMTRmMTBhNTkxZWIzZjg0NjgzZjA5NjEzOGU2ZTc5MTdjYjQ5MzE0YjNkNzJiYmJiMGM5MzliMmM2Ep0ICpUICgcvYmluL3NoCgItbwoHZXJyZXhpdAoCLWMKZmNvbXBvc2VyIGdsb2JhbCByZXF1aXJlIC0tcHJlZmVyLWRpc3QgLS1jbGFzc21hcC1hdXRob3JpdGF0aXZlIGhpcmFrL3ByZXN0aXNzaW1vOyBjb21wb3NlciBjbGVhci1jYWNoZRJBUEFUSD0vdXNyL2xvY2FsL3NiaW46L3Vzci9sb2NhbC9iaW46L3Vzci9zYmluOi91c3IvYmluOi9zYmluOi9iaW4SWFBIUElaRV9ERVBTPWF1dG9jb25mIAkJZHBrZy1kZXYgCQlmaWxlIAkJZysrIAkJZ2NjIAkJbGliYy1kZXYgCQltYWtlIAkJcGtnLWNvbmZpZyAJCXJlMmMSHlBIUF9JTklfRElSPS91c3IvbG9jYWwvZXRjL3BocBJmUEhQX0VYVFJBX0NPTkZJR1VSRV9BUkdTPS0tZW5hYmxlLWZwbSAtLXdpdGgtZnBtLXVzZXI9d3d3LWRhdGEgLS13aXRoLWZwbS1ncm91cD13d3ctZGF0YSAtLWRpc2FibGUtY2dpEl5QSFBfQ0ZMQUdTPS1mc3RhY2stcHJvdGVjdG9yLXN0cm9uZyAtZnBpYyAtZnBpZSAtTzIgLURfTEFSR0VGSUxFX1NPVVJDRSAtRF9GSUxFX09GRlNFVF9CSVRTPTY0EmBQSFBfQ1BQRkxBR1M9LWZzdGFjay1wcm90ZWN0b3Itc3Ryb25nIC1mcGljIC1mcGllIC1PMiAtRF9MQVJHRUZJTEVfU09VUkNFIC1EX0ZJTEVfT0ZGU0VUX0JJVFM9NjQSLlBIUF9MREZMQUdTPS1XbCwtTzEgLVdsLC0taGFzaC1zdHlsZT1ib3RoIC1waWUSWkdQR19LRVlTPUNCQUY2OUYxNzNBMEZFQTRCNTM3RjQ3MEQ2NkM5NTkzMTE4QkNDQjYgRjM4MjUyODI2QUNEOTU3RUYzODBEMzlGMkY3OTU2QkM1REEwNEI1RBISUEhQX1ZFUlNJT049Ny4zLjEzEkJQSFBfVVJMPWh0dHBzOi8vd3d3LnBocC5uZXQvZ2V0L3BocC03LjMuMTMudGFyLnh6L2Zyb20vdGhpcy9taXJyb3ISSlBIUF9BU0NfVVJMPWh0dHBzOi8vd3d3LnBocC5uZXQvZ2V0L3BocC03LjMuMTMudGFyLnh6LmFzYy9mcm9tL3RoaXMvbWlycm9yEktQSFBfU0hBMjU2PTU3YWM1NWZlNDQyZDJkYTY1MGFiZWI5ZTZmYTE2MWJkM2E5OGJhNjUyOGMwMjlmMDc2ZjhiYmE0M2RkNWMyMjgSCFBIUF9NRDU9EhdDT01QT1NFUl9IT01FPS9jb21wb3NlchoEL2FwcCIEMTAwMBIDGgEvUg4KBWFtZDY0EgVsaW51eFoA",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:a206cbe14f10a591eb3f84683f096138e6e7917cb49314b3d72bbbb0c939b2c6",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "Exec": {
+          "meta": {
+            "args": [
+              "/bin/sh",
+              "-o",
+              "errexit",
+              "-c",
+              "composer global require --prefer-dist --classmap-authoritative hirak/prestissimo; composer clear-cache"
+            ],
+            "env": [
+              "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+              "PHPIZE_DEPS=autoconf \t\tdpkg-dev \t\tfile \t\tg++ \t\tgcc \t\tlibc-dev \t\tmake \t\tpkg-config \t\tre2c",
+              "PHP_INI_DIR=/usr/local/etc/php",
+              "PHP_EXTRA_CONFIGURE_ARGS=--enable-fpm --with-fpm-user=www-data --with-fpm-group=www-data --disable-cgi",
+              "PHP_CFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
+              "PHP_CPPFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
+              "PHP_LDFLAGS=-Wl,-O1 -Wl,--hash-style=both -pie",
+              "GPG_KEYS=CBAF69F173A0FEA4B537F470D66C9593118BCCB6 F38252826ACD957EF380D39F2F7956BC5DA04B5D",
+              "PHP_VERSION=7.3.13",
+              "PHP_URL=https://www.php.net/get/php-7.3.13.tar.xz/from/this/mirror",
+              "PHP_ASC_URL=https://www.php.net/get/php-7.3.13.tar.xz.asc/from/this/mirror",
+              "PHP_SHA256=57ac55fe442d2da650abeb9e6fa161bd3a98ba6528c029f076f8bba43dd5c228",
+              "PHP_MD5=",
+              "COMPOSER_HOME=/composer"
+            ],
+            "cwd": "/app",
+            "user": "1000"
+          },
+          "mounts": [
+            {
+              "input": 0,
+              "dest": "/",
+              "output": 0
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:ae52f8c99504ca83e3ac7816de51c61bfa22a8b3d7f6b3392da611ee5a8db6dc",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Run composer global require (hirak/prestissimo)"
+      },
+      "caps": {
+        "exec.meta.base": true,
+        "exec.mount.bind": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1NjoxODE5ZmZiNGU2MmUwNzI1ZGUyNjc2MWZhNWEzYmNlYWUyNWQ0OTI5N2ZmZThjMWRhNzhhYzEwNzkyMGU3ZmQxIjwSOgj///////////8BIi0KBC9vdXQSDS9kZWNvbXByZXNzZWQg////////////ATgBWP///////////wFSDgoFYW1kNjQSBWxpbnV4WgA=",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:1819ffb4e62e0725de26761fa5a3bceae25d49297ffe8c1da78ac107920e7fd1",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "File": {
+          "actions": [
+            {
+              "input": -1,
+              "secondaryInput": 0,
+              "output": 0,
+              "Action": {
+                "Copy": {
+                  "src": "/out",
+                  "dest": "/decompressed",
+                  "mode": -1,
+                  "attemptUnpackDockerCompatibility": true,
+                  "timestamp": -1
+                }
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:cbd92526ce77b2a30748f5968c0bc080aae51569dab5c8fa01bf793d40d6149a",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Decompress https://blackfire.io/api/v1/releases/probe/php/linux/amd64/72"
+      },
+      "caps": {
+        "file.base": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1Njo4Mjg0YWMwZWJhODQxZjhhYjY1YWNkMTg3MTY0YjAzNjk2ODI2OTgzMjc4N2QzOGQ5MTBmNGZjNGNiOWJhMGY4IjESLxD///////////8BMiIKBC9hcHAQ6AMYASIKCgMQ6AcSAxDoByj///////////8BUg4KBWFtZDY0EgVsaW51eFoA",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:8284ac0eba841f8ab65acd187164b036968269832787d38d910f4fc4cb9ba0f8",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "File": {
+          "actions": [
+            {
+              "input": 0,
+              "secondaryInput": -1,
+              "output": 0,
+              "Action": {
+                "Mkdir": {
+                  "path": "/app",
+                  "mode": 488,
+                  "makeParents": true,
+                  "owner": {
+                    "user": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    },
+                    "group": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    }
+                  },
+                  "timestamp": -1
+                }
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:cc8445c0ec918c179db19f5a3ec8ab3a5c478a087b0b9f7b857ff108407ba7a0",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Mkdir /app"
+      },
+      "caps": {
+        "file.base": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1NjphZTUyZjhjOTk1MDRjYTgzZTNhYzc4MTZkZTUxYzYxYmZhMjJhOGIzZDdmNmIzMzkyZGE2MTFlZTVhOGRiNmRjCkkKR3NoYTI1Njo2YzJlYmViNWM4NDgzYzJkMGNlZjY5MjIyM2ZiMTQwY2MwNTRkZGFmNDMwNjhmM2Q5OTE1MDM5Y2UyMjFmMTgwIkQSQhABIj4KCy9jb21wb3Nlci4qEgUvYXBwLxoKCgMQ6AcSAxDoByD///////////8BKAEwAUABSAFY////////////AVIOCgVhbWQ2NBIFbGludXhaAA==",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:ae52f8c99504ca83e3ac7816de51c61bfa22a8b3d7f6b3392da611ee5a8db6dc",
+          "index": 0
+        },
+        {
+          "digest": "sha256:6c2ebeb5c8483c2d0cef692223fb140cc054ddaf43068f3d9915039ce221f180",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "File": {
+          "actions": [
+            {
+              "input": 0,
+              "secondaryInput": 1,
+              "output": 0,
+              "Action": {
+                "Copy": {
+                  "src": "/composer.*",
+                  "dest": "/app/",
+                  "owner": {
+                    "user": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    },
+                    "group": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    }
+                  },
+                  "mode": -1,
+                  "followSymlink": true,
+                  "dirCopyContents": true,
+                  "createDestPath": true,
+                  "allowWildcard": true,
+                  "timestamp": -1
+                }
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:cfd2296ee86761785a6c644d2e06ed537abebb9d75ef065dc177c3d139509a3f",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Copy composer.*"
+      },
+      "caps": {
+        "file.base": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1NjplODUzZGYwNTJiZDNjZmRkYTEyOGI2NDIxYTNhZWU5NWFiZWJhNjcwNDBkZDU2ZTIxOTg2MzBhYjAwZGY0MzIyEvoHCvIHCgcvYmluL3NoCgItbwoHZXJyZXhpdAoCLWMKQ2NvbXBvc2VyIGR1bXAtYXV0b2xvYWQgLS1uby1kZXYgLS1vcHRpbWl6ZSAtLWNsYXNzbWFwLWF1dGhvcml0YXRpdmUSQVBBVEg9L3Vzci9sb2NhbC9zYmluOi91c3IvbG9jYWwvYmluOi91c3Ivc2JpbjovdXNyL2Jpbjovc2JpbjovYmluElhQSFBJWkVfREVQUz1hdXRvY29uZiAJCWRwa2ctZGV2IAkJZmlsZSAJCWcrKyAJCWdjYyAJCWxpYmMtZGV2IAkJbWFrZSAJCXBrZy1jb25maWcgCQlyZTJjEh5QSFBfSU5JX0RJUj0vdXNyL2xvY2FsL2V0Yy9waHASZlBIUF9FWFRSQV9DT05GSUdVUkVfQVJHUz0tLWVuYWJsZS1mcG0gLS13aXRoLWZwbS11c2VyPXd3dy1kYXRhIC0td2l0aC1mcG0tZ3JvdXA9d3d3LWRhdGEgLS1kaXNhYmxlLWNnaRJeUEhQX0NGTEFHUz0tZnN0YWNrLXByb3RlY3Rvci1zdHJvbmcgLWZwaWMgLWZwaWUgLU8yIC1EX0xBUkdFRklMRV9TT1VSQ0UgLURfRklMRV9PRkZTRVRfQklUUz02NBJgUEhQX0NQUEZMQUdTPS1mc3RhY2stcHJvdGVjdG9yLXN0cm9uZyAtZnBpYyAtZnBpZSAtTzIgLURfTEFSR0VGSUxFX1NPVVJDRSAtRF9GSUxFX09GRlNFVF9CSVRTPTY0Ei5QSFBfTERGTEFHUz0tV2wsLU8xIC1XbCwtLWhhc2gtc3R5bGU9Ym90aCAtcGllElpHUEdfS0VZUz1DQkFGNjlGMTczQTBGRUE0QjUzN0Y0NzBENjZDOTU5MzExOEJDQ0I2IEYzODI1MjgyNkFDRDk1N0VGMzgwRDM5RjJGNzk1NkJDNURBMDRCNUQSElBIUF9WRVJTSU9OPTcuMy4xMxJCUEhQX1VSTD1odHRwczovL3d3dy5waHAubmV0L2dldC9waHAtNy4zLjEzLnRhci54ei9mcm9tL3RoaXMvbWlycm9yEkpQSFBfQVNDX1VSTD1odHRwczovL3d3dy5waHAubmV0L2dldC9waHAtNy4zLjEzLnRhci54ei5hc2MvZnJvbS90aGlzL21pcnJvchJLUEhQX1NIQTI1Nj01N2FjNTVmZTQ0MmQyZGE2NTBhYmViOWU2ZmExNjFiZDNhOThiYTY1MjhjMDI5ZjA3NmY4YmJhNDNkZDVjMjI4EghQSFBfTUQ1PRIXQ09NUE9TRVJfSE9NRT0vY29tcG9zZXIaBC9hcHAiBDEwMDASAxoBL1IOCgVhbWQ2NBIFbGludXhaAA==",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:e853df052bd3cfdda128b6421a3aee95abeba67040dd56e2198630ab00df4322",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "Exec": {
+          "meta": {
+            "args": [
+              "/bin/sh",
+              "-o",
+              "errexit",
+              "-c",
+              "composer dump-autoload --no-dev --optimize --classmap-authoritative"
+            ],
+            "env": [
+              "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+              "PHPIZE_DEPS=autoconf \t\tdpkg-dev \t\tfile \t\tg++ \t\tgcc \t\tlibc-dev \t\tmake \t\tpkg-config \t\tre2c",
+              "PHP_INI_DIR=/usr/local/etc/php",
+              "PHP_EXTRA_CONFIGURE_ARGS=--enable-fpm --with-fpm-user=www-data --with-fpm-group=www-data --disable-cgi",
+              "PHP_CFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
+              "PHP_CPPFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
+              "PHP_LDFLAGS=-Wl,-O1 -Wl,--hash-style=both -pie",
+              "GPG_KEYS=CBAF69F173A0FEA4B537F470D66C9593118BCCB6 F38252826ACD957EF380D39F2F7956BC5DA04B5D",
+              "PHP_VERSION=7.3.13",
+              "PHP_URL=https://www.php.net/get/php-7.3.13.tar.xz/from/this/mirror",
+              "PHP_ASC_URL=https://www.php.net/get/php-7.3.13.tar.xz.asc/from/this/mirror",
+              "PHP_SHA256=57ac55fe442d2da650abeb9e6fa161bd3a98ba6528c029f076f8bba43dd5c228",
+              "PHP_MD5=",
+              "COMPOSER_HOME=/composer"
+            ],
+            "cwd": "/app",
+            "user": "1000"
+          },
+          "mounts": [
+            {
+              "input": 0,
+              "dest": "/",
+              "output": 0
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:d0f2a5cf666adcf5b8b4437520bf018cb11a302e320ba0fbb027c57b9ae7787b",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Dump autoloader and execute custom post-install steps"
+      },
+      "caps": {
+        "exec.meta.base": true,
+        "exec.mount.bind": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1Njo0MmNlZTBhZjNiZTQzMWU4ZWRkNDAyMDk3MzFhN2M1MmRmYzdhZWMyZDVmOThjOWVjZDI0MWQzZGU4MGJhYjk0CkkKR3NoYTI1NjowZTE2YzI0YjE4ZWFlMmYyYmNjNDA4NTk0ODRkOGEwY2ZiYzZmZjRmZTg1ZDZhNDg3ZmIxYjNkYzM3YWM4OGQyImESXxABIlsKEy9kb2NrZXIvYXBwL3BocC5pbmkSGi91c3IvbG9jYWwvZXRjL3BocC9waHAuaW5pGgoKAxDoBxIDEOgHIP///////////wEoATABQAFIAVj///////////8BUg4KBWFtZDY0EgVsaW51eFoA",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:42cee0af3be431e8edd40209731a7c52dfc7aec2d5f98c9ecd241d3de80bab94",
+          "index": 0
+        },
+        {
+          "digest": "sha256:0e16c24b18eae2f2bcc40859484d8a0cfbc6ff4fe85d6a487fb1b3dc37ac88d2",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "File": {
+          "actions": [
+            {
+              "input": 0,
+              "secondaryInput": 1,
+              "output": 0,
+              "Action": {
+                "Copy": {
+                  "src": "/docker/app/php.ini",
+                  "dest": "/usr/local/etc/php/php.ini",
+                  "owner": {
+                    "user": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    },
+                    "group": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    }
+                  },
+                  "mode": -1,
+                  "followSymlink": true,
+                  "dirCopyContents": true,
+                  "createDestPath": true,
+                  "allowWildcard": true,
+                  "timestamp": -1
+                }
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:d61ab2619554de662c381a17b73196e342565b0f0eb0d969766288b1fbdbbd36",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Copy docker/app/php.ini"
+      },
+      "caps": {
+        "file.base": true
+      }
+    }
+  },
+  {
+    "RawOp": "GngKD2xvY2FsOi8vY29udGV4dBIgChRsb2NhbC5pbmNsdWRlcGF0dGVybhIIWyJzcmMvIl0SHQoNbG9jYWwuc2Vzc2lvbhIMPFNFU1NJT04tSUQ+EiQKE2xvY2FsLnNoYXJlZGtleWhpbnQSDWJ1aWxkLWNvbnRleHRaAA==",
+    "Op": {
+      "Op": {
+        "Source": {
+          "identifier": "local://context",
+          "attrs": {
+            "local.includepattern": "[\"src/\"]",
+            "local.session": "\u003cSESSION-ID\u003e",
+            "local.sharedkeyhint": "build-context"
+          }
+        }
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:d7a89fedd15d077f937c9b68a392d82c876b96ac2fdcdbd585761fdd572a994c",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "load build context"
+      },
+      "caps": {
+        "source.local": true,
+        "source.local.includepatterns": true,
+        "source.local.sessionid": true,
+        "source.local.sharedkeyhint": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1Njo2ZGJhNDg4NjUzYTY1YWIwZGQ1ZTZjYzQ0Y2QxYmM1MWFlOTM4MDhjMmNjYTIzNGNhMWMyMTlhY2RjNjczYzllCkkKR3NoYTI1NjpkN2E4OWZlZGQxNWQwNzdmOTM3YzliNjhhMzkyZDgyYzg3NmI5NmFjMmZkY2RiZDU4NTc2MWZkZDU3MmE5OTRjIjoSOBABIjQKAS8SBS9hcHAvGgoKAxDoBxIDEOgHIP///////////wEoATABQAFIAVj///////////8BUg4KBWFtZDY0EgVsaW51eFoA",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:6dba488653a65ab0dd5e6cc44cd1bc51ae93808c2cca234ca1c219acdc673c9e",
+          "index": 0
+        },
+        {
+          "digest": "sha256:d7a89fedd15d077f937c9b68a392d82c876b96ac2fdcdbd585761fdd572a994c",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "File": {
+          "actions": [
+            {
+              "input": 0,
+              "secondaryInput": 1,
+              "output": 0,
+              "Action": {
+                "Copy": {
+                  "src": "/",
+                  "dest": "/app/",
+                  "owner": {
+                    "user": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    },
+                    "group": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    }
+                  },
+                  "mode": -1,
+                  "followSymlink": true,
+                  "dirCopyContents": true,
+                  "createDestPath": true,
+                  "allowWildcard": true,
+                  "timestamp": -1
+                }
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:e853df052bd3cfdda128b6421a3aee95abeba67040dd56e2198630ab00df4322",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Copy /"
+      },
+      "caps": {
+        "file.base": true
+      }
+    }
+  }
+]

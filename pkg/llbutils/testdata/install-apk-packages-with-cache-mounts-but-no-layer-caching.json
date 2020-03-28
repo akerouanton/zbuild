@@ -1,0 +1,154 @@
+[
+  {
+    "RawOp": "CkkKR3NoYTI1NjpjMWFhZWU4YTM4YmE2ZGVjNjRkNWI4YzkxOWM3Y2Y2YmRkYzA0ZjBiZDE4NzYzNjc4MzQyZDMzYTI1YzA2ODQ0CkkKR3NoYTI1Njo5OWY0YTNiODExNTljYTdmNWJhMDc3Njg5YmYzOTFhYmQ4OTViMDBmNWIxYzI1ZTI5ODE1YTIzYjBhY2NiYWY2Et0BCpEBCgcvYmluL3NoCgItbwoHZXJyZXhpdAoCLWMKcmFwayBhZGQgY2EtY2VydGZpY2lhdGVzPWNhLWNlcnRpZmljYXRlcy12ZXJzaW9uIGN1cmw9Y3VybC12ZXJzaW9uIHpsaWIxZy1kZXY9emxpYjFnLWRldi12ZXJzaW9uOyBhcGsgY2FjaGUgLXYgc3luYxoBLxIDGgEvEkIIARIGL2NhY2hlGg4vZXRjL2Fway9jYWNoZSD///////////8BMAOiARgKFmNhY2hlLW5zL2V0Yy9hcGsvY2FjaGVSDgoFYW1kNjQSBWxpbnV4WgA=",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:c1aaee8a38ba6dec64d5b8c919c7cf6bddc04f0bd18763678342d33a25c06844",
+          "index": 0
+        },
+        {
+          "digest": "sha256:99f4a3b81159ca7f5ba077689bf391abd895b00f5b1c25e29815a23b0accbaf6",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "Exec": {
+          "meta": {
+            "args": [
+              "/bin/sh",
+              "-o",
+              "errexit",
+              "-c",
+              "apk add ca-certficiates=ca-certificates-version curl=curl-version zlib1g-dev=zlib1g-dev-version; apk cache -v sync"
+            ],
+            "cwd": "/"
+          },
+          "mounts": [
+            {
+              "input": 0,
+              "dest": "/",
+              "output": 0
+            },
+            {
+              "input": 1,
+              "selector": "/cache",
+              "dest": "/etc/apk/cache",
+              "output": -1,
+              "mountType": 3,
+              "cacheOpt": {
+                "ID": "cache-ns/etc/apk/cache"
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:879e282c0378412ecce7de12f29ad9bdbada7f8da2622bc9bfa1350c677657c5",
+    "OpMetadata": {
+      "ignore_cache": true,
+      "description": {
+        "llb.customname": "Install system packages (ca-certficiates=ca-certificates-version, curl=curl-version, zlib1g-dev=zlib1g-dev-version)"
+      },
+      "caps": {
+        "exec.meta.base": true,
+        "exec.mount.bind": true,
+        "exec.mount.cache": true,
+        "exec.mount.cache.sharing": true,
+        "exec.mount.selector": true
+      }
+    }
+  },
+  {
+    "RawOp": "IjgSNgj///////////8BEP///////////wEyHgoGL2NhY2hlEOgDGAEiBAoCEAAo////////////AVIOCgVhbWQ2NBIFbGludXhaAA==",
+    "Op": {
+      "Op": {
+        "File": {
+          "actions": [
+            {
+              "input": -1,
+              "secondaryInput": -1,
+              "output": 0,
+              "Action": {
+                "Mkdir": {
+                  "path": "/cache",
+                  "mode": 488,
+                  "makeParents": true,
+                  "owner": {
+                    "user": {
+                      "User": {
+                        "ByID": 0
+                      }
+                    }
+                  },
+                  "timestamp": -1
+                }
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:99f4a3b81159ca7f5ba077689bf391abd895b00f5b1c25e29815a23b0accbaf6",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Mkdir /cache"
+      },
+      "caps": {
+        "file.base": true
+      }
+    }
+  },
+  {
+    "RawOp": "GioKKGRvY2tlci1pbWFnZTovL2RvY2tlci5pby9saWJyYXJ5L3BocDo3LjJSDgoFYW1kNjQSBWxpbnV4WgA=",
+    "Op": {
+      "Op": {
+        "Source": {
+          "identifier": "docker-image://docker.io/library/php:7.2"
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:c1aaee8a38ba6dec64d5b8c919c7cf6bddc04f0bd18763678342d33a25c06844",
+    "OpMetadata": {
+      "caps": {
+        "source.image": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1Njo4NzllMjgyYzAzNzg0MTJlY2NlN2RlMTJmMjlhZDliZGJhZGE3ZjhkYTI2MjJiYzliZmExMzUwYzY3NzY1N2M1",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:879e282c0378412ecce7de12f29ad9bdbada7f8da2622bc9bfa1350c677657c5",
+          "index": 0
+        }
+      ],
+      "Op": null
+    },
+    "Digest": "sha256:f279e8208227b1f27ae348d8413695e546d9993bd79ef43fbdcd5d59a18eda43",
+    "OpMetadata": {
+      "caps": {
+        "constraints": true,
+        "meta.description": true,
+        "meta.ignorecache": true,
+        "platform": true
+      }
+    }
+  }
+]

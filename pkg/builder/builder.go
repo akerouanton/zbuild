@@ -31,6 +31,7 @@ const (
 	keyDockerContext = "contextkey"
 	keyFilename      = "filename"
 	keyNoCache       = "no-cache"
+	keyCacheNS       = "build-arg:BUILDKIT_CACHE_MOUNT_NS"
 )
 
 // Builder takes a KindRegistry, which contains all the specialized handlers
@@ -65,13 +66,14 @@ func (b Builder) findHandler(
 func buildOptsFromBuildkitOpts(c client.Client) (builddef.BuildOpts, error) {
 	sessionID := c.BuildOpts().SessionID
 	opts := c.BuildOpts().Opts
+	cacheIDNamespace := opts[keyCacheNS]
 
 	file := "zbuild.yml"
 	if v, ok := opts[keyFilename]; ok {
 		file = v
 	}
 
-	buildOpts, err := builddef.NewBuildOpts(file, "context", "dev", sessionID)
+	buildOpts, err := builddef.NewBuildOpts(file, "context", "dev", sessionID, cacheIDNamespace)
 	if err != nil {
 		return buildOpts, err
 	}
@@ -228,7 +230,7 @@ func (b Builder) Debug(
 ) (llb.State, error) {
 	var state llb.State
 
-	buildOpts, err := builddef.NewBuildOpts(file, "", stage, "")
+	buildOpts, err := builddef.NewBuildOpts(file, "", stage, "", "")
 	if err != nil {
 		return state, err
 	}
@@ -249,7 +251,7 @@ func (b Builder) DumpConfig(
 	file,
 	stage string,
 ) ([]byte, error) {
-	buildOpts, err := builddef.NewBuildOpts(file, "", stage, "")
+	buildOpts, err := builddef.NewBuildOpts(file, "", stage, "", "")
 	if err != nil {
 		return []byte{}, err
 	}

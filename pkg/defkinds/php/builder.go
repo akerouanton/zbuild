@@ -121,7 +121,7 @@ func (h *PHPHandler) buildPHP(
 
 	state, err = llbutils.InstallSystemPackages(state, pkgManager,
 		stage.StageLocks.SystemPackages,
-		buildOpts.IgnoreCache)
+		llbutils.NewCachingStrategyFromBuildOpts(buildOpts))
 	if err != nil {
 		return state, img, xerrors.Errorf("failed to add \"install system pacakges\" steps: %w", err)
 	}
