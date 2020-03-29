@@ -57,6 +57,15 @@ type Locks interface {
 // values.
 type VersionMap map[string]string
 
+// Len returns the number of versions in the map or 0 if the map is nil.
+func (set *VersionMap) Len() int {
+	if set == nil {
+		return 0
+	}
+
+	return len(*set)
+}
+
 func (set *VersionMap) Add(name, val string) {
 	if set == nil {
 		return

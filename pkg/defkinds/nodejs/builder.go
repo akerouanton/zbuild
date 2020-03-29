@@ -117,8 +117,7 @@ func (h *NodeJSHandler) buildNodeJS(
 	state = state.User("1000")
 	state = state.Dir("/app")
 
-	state = h.globalPackagesInstall(state, stageDef.GlobalPackages.Map(), buildOpts)
-
+	state = h.globalPackagesInstall(state, stageDef, buildOpts)
 	if !*stageDef.Dev {
 		state = h.depsInstall(stageDef, state, buildOpts)
 		state = h.copySources(stageDef, state, buildOpts)
@@ -171,26 +170,33 @@ func getEnv(src llb.State, name string) string {
 
 func (h *NodeJSHandler) globalPackagesInstall(
 	state llb.State,
-	globalPackages map[string]string,
+	stageDef StageDefinition,
 	buildOpts builddef.BuildOpts,
 ) llb.State {
-	if len(globalPackages) == 0 {
+	if stageDef.GlobalPackages.Len() == 0 {
 		return state
 	}
 
-	pkgs := make([]string, 0, len(globalPackages))
-	for pkg, constraint := range globalPackages {
+	pkgs := make([]string, 0, stageDef.GlobalPackages.Len())
+	for pkg, constraint := range stageDef.GlobalPackages.Map() {
 		if constraint != "" && constraint != "*" {
 			pkg += "@" + constraint
 		}
 		pkgs = append(pkgs, pkg)
 	}
 
-	cmd := fmt.Sprintf("yarn global add %s", strings.Join(pkgs, " "))
-	runOpts := []llb.RunOption{
-		llbutils.Shell(cmd),
-		llb.User("1000"),
-		llb.WithCustomNamef("Run %s", cmd)}
+	runOpts := []llb.RunOption{llb.User("1000")}
+	if stageDef.PackageManager == pkgManagerYarn {
+		runOpts = append(runOpts,
+			llbutils.Shell("yarn global add "+strings.Join(pkgs, " ")),
+			llb.WithCustomName("Run yarn global add"))
+	} else {
+		state = state.AddEnv("NPM_CONFIG_PREFIX", "/home/node/.npm")
+
+		runOpts = append(runOpts,
+			llbutils.Shell("npm install -g "+strings.Join(pkgs, " ")),
+			llb.WithCustomName("Run npm install"))
+	}
 
 	if buildOpts.IgnoreLayerCache {
 		runOpts = append(runOpts, llb.IgnoreCache)
