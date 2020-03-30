@@ -128,26 +128,6 @@
     }
   },
   {
-    "RawOp": "CkkKR3NoYTI1Njo0MjA4NTJjN2QyMWVmMmQxODZjY2VkZTM0MTlmYzZhOTg4ZTE0ODNkOTk4ZjNmOWI0YmFjODNlNmFhYzE2NDFl",
-    "Op": {
-      "inputs": [
-        {
-          "digest": "sha256:420852c7d21ef2d186ccede3419fc6a988e1483d998f3f9b4bac83e6aac1641e",
-          "index": 0
-        }
-      ],
-      "Op": null
-    },
-    "Digest": "sha256:6a46fe22253c33f9e59773b2642f646dbec36b3dd4d2641af6cadf783ce8d72c",
-    "OpMetadata": {
-      "caps": {
-        "constraints": true,
-        "meta.description": true,
-        "platform": true
-      }
-    }
-  },
-  {
     "RawOp": "GjsKOWRvY2tlci1pbWFnZTovL2RvY2tlci5pby9saWJyYXJ5L25vZGU6MTIuMTQuMS1idXN0ZXItc2xpbVIOCgVhbWQ2NBIFbGludXhaAA==",
     "Op": {
       "Op": {
@@ -370,6 +350,26 @@
     }
   },
   {
+    "RawOp": "CkkKR3NoYTI1NjplMzY4YTU4YzY2NDFjNTQ2ZWZmNGI4NmEzNzdiYjMwMjdjNmE4ZjE1NDU1YjA5ZTA0YTJjODljMDE2NGZiODg1",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:e368a58c6641c546eff4b86a377bb3027c6a8f15455b09e04a2c89c0164fb885",
+          "index": 0
+        }
+      ],
+      "Op": null
+    },
+    "Digest": "sha256:8c4d080a5e8b83ee26f2dd576557d311cb19176267468ae3feed288d2d7cabdf",
+    "OpMetadata": {
+      "caps": {
+        "constraints": true,
+        "meta.description": true,
+        "platform": true
+      }
+    }
+  },
+  {
     "RawOp": "GowBCg9sb2NhbDovL2NvbnRleHQSNAoUbG9jYWwuaW5jbHVkZXBhdHRlcm4SHFsicGFja2FnZS5qc29uIiwieWFybi5sb2NrIl0SHQoNbG9jYWwuc2Vzc2lvbhIMPFNFU1NJT04tSUQ+EiQKE2xvY2FsLnNoYXJlZGtleWhpbnQSDXBhY2thZ2UtZmlsZXNaAA==",
     "Op": {
       "Op": {
@@ -486,6 +486,60 @@
         "source.local.includepatterns": true,
         "source.local.sessionid": true,
         "source.local.sharedkeyhint": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1Njo0MjA4NTJjN2QyMWVmMmQxODZjY2VkZTM0MTlmYzZhOTg4ZTE0ODNkOTk4ZjNmOWI0YmFjODNlNmFhYzE2NDFlEuwBCuQBCgcvYmluL3NoCgItbwoHZXJyZXhpdAoCLWMKDnlhcm4gcnVuIGJ1aWxkEhROT0RFX1ZFUlNJT049MTIuMTQuMRITWUFSTl9WRVJTSU9OPTEuMjEuMRITTk9ERV9FTlY9cHJvZHVjdGlvbhJsUEFUSD0vaG9tZS9ub2RlLy5ucG0vYmluLzovaG9tZS9ub2RlLy55YXJuL2Jpbi86L3Vzci9sb2NhbC9zYmluOi91c3IvbG9jYWwvYmluOi91c3Ivc2JpbjovdXNyL2Jpbjovc2JpbjovYmluGgQvYXBwIgQxMDAwEgMaAS9SDgoFYW1kNjQSBWxpbnV4WgA=",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:420852c7d21ef2d186ccede3419fc6a988e1483d998f3f9b4bac83e6aac1641e",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "Exec": {
+          "meta": {
+            "args": [
+              "/bin/sh",
+              "-o",
+              "errexit",
+              "-c",
+              "yarn run build"
+            ],
+            "env": [
+              "NODE_VERSION=12.14.1",
+              "YARN_VERSION=1.21.1",
+              "NODE_ENV=production",
+              "PATH=/home/node/.npm/bin/:/home/node/.yarn/bin/:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+            ],
+            "cwd": "/app",
+            "user": "1000"
+          },
+          "mounts": [
+            {
+              "input": 0,
+              "dest": "/",
+              "output": 0
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:e368a58c6641c546eff4b86a377bb3027c6a8f15455b09e04a2c89c0164fb885",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Build"
+      },
+      "caps": {
+        "exec.meta.base": true,
+        "exec.mount.bind": true
       }
     }
   }

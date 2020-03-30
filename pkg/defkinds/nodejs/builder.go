@@ -181,7 +181,7 @@ func (h *NodeJSHandler) globalPackagesInstall(
 		pkgs = append(pkgs, pkg)
 	}
 
-	cmd := fmt.Sprintf("yarn add -g %s", strings.Join(pkgs, " "))
+	cmd := fmt.Sprintf("yarn global add %s", strings.Join(pkgs, " "))
 	run := state.Run(
 		llbutils.Shell(cmd),
 		llb.User("1000"),
@@ -365,10 +365,17 @@ func (h *NodeJSHandler) build(
 		return state
 	}
 
+	envPath := strings.Join([]string{
+		"/home/node/.npm/bin/",
+		"/home/node/.yarn/bin/",
+		getEnv(state, "PATH"),
+	}, ":")
+
 	run := state.Run(
 		llbutils.Shell(*stageDef.BuildCommand),
 		llb.Dir(state.GetDir()),
 		llb.AddEnv("NODE_ENV", "production"),
+		llb.AddEnv("PATH", envPath),
 		llb.WithCustomName("Build"))
 	return run.Root()
 }

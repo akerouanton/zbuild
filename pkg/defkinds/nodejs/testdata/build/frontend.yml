@@ -2,6 +2,8 @@ kind: nodejs
 version: 12
 frontend: true
 
+build_command: yarn run build
+
 sources:
   - src/
 
