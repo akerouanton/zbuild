@@ -14,6 +14,6 @@ if [ "$(git diff | wc -l)" -ne 0 ]; then
     echo '* `make gen-mocks`'
     echo ''
     echo '`git status` output:'
-    git status
+    git diff
     exit 1
 fi
