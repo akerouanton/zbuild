@@ -39,6 +39,7 @@ func (m *MockStateSolver) EXPECT() *MockStateSolverMockRecorder {
 
 // ExecImage mocks base method
 func (m *MockStateSolver) ExecImage(arg0 context.Context, arg1 string, arg2 []string) (*bytes.Buffer, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ExecImage", arg0, arg1, arg2)
 	ret0, _ := ret[0].(*bytes.Buffer)
 	ret1, _ := ret[1].(error)
@@ -47,11 +48,13 @@ func (m *MockStateSolver) ExecImage(arg0 context.Context, arg1 string, arg2 []st
 
 // ExecImage indicates an expected call of ExecImage
 func (mr *MockStateSolverMockRecorder) ExecImage(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExecImage", reflect.TypeOf((*MockStateSolver)(nil).ExecImage), arg0, arg1, arg2)
 }
 
 // FileExists mocks base method
 func (m *MockStateSolver) FileExists(arg0 context.Context, arg1 string, arg2 *builddef.Context) (bool, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FileExists", arg0, arg1, arg2)
 	ret0, _ := ret[0].(bool)
 	ret1, _ := ret[1].(error)
@@ -60,11 +63,13 @@ func (m *MockStateSolver) FileExists(arg0 context.Context, arg1 string, arg2 *bu
 
 // FileExists indicates an expected call of FileExists
 func (mr *MockStateSolverMockRecorder) FileExists(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FileExists", reflect.TypeOf((*MockStateSolver)(nil).FileExists), arg0, arg1, arg2)
 }
 
 // FromContext mocks base method
 func (m *MockStateSolver) FromContext(arg0 *builddef.Context, arg1 ...llb.LocalOption) statesolver.ReadFileOpt {
+	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0}
 	for _, a := range arg1 {
 		varargs = append(varargs, a)
@@ -76,12 +81,14 @@ func (m *MockStateSolver) FromContext(arg0 *builddef.Context, arg1 ...llb.LocalO
 
 // FromContext indicates an expected call of FromContext
 func (mr *MockStateSolverMockRecorder) FromContext(arg0 interface{}, arg1 ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0}, arg1...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FromContext", reflect.TypeOf((*MockStateSolver)(nil).FromContext), varargs...)
 }
 
 // FromImage mocks base method
 func (m *MockStateSolver) FromImage(arg0 string) statesolver.ReadFileOpt {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FromImage", arg0)
 	ret0, _ := ret[0].(statesolver.ReadFileOpt)
 	return ret0
@@ -89,11 +96,13 @@ func (m *MockStateSolver) FromImage(arg0 string) statesolver.ReadFileOpt {
 
 // FromImage indicates an expected call of FromImage
 func (mr *MockStateSolverMockRecorder) FromImage(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FromImage", reflect.TypeOf((*MockStateSolver)(nil).FromImage), arg0)
 }
 
 // ReadFile mocks base method
 func (m *MockStateSolver) ReadFile(arg0 context.Context, arg1 string, arg2 statesolver.ReadFileOpt) ([]byte, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ReadFile", arg0, arg1, arg2)
 	ret0, _ := ret[0].([]byte)
 	ret1, _ := ret[1].(error)
@@ -102,11 +111,13 @@ func (m *MockStateSolver) ReadFile(arg0 context.Context, arg1 string, arg2 state
 
 // ReadFile indicates an expected call of ReadFile
 func (mr *MockStateSolverMockRecorder) ReadFile(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReadFile", reflect.TypeOf((*MockStateSolver)(nil).ReadFile), arg0, arg1, arg2)
 }
 
 // ResolveImageRef mocks base method
 func (m *MockStateSolver) ResolveImageRef(arg0 context.Context, arg1 string) (string, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ResolveImageRef", arg0, arg1)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
@@ -115,5 +126,6 @@ func (m *MockStateSolver) ResolveImageRef(arg0 context.Context, arg1 string) (st
 
 // ResolveImageRef indicates an expected call of ResolveImageRef
 func (mr *MockStateSolverMockRecorder) ResolveImageRef(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResolveImageRef", reflect.TypeOf((*MockStateSolver)(nil).ResolveImageRef), arg0, arg1)
 }
