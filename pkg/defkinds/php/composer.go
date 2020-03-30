@@ -63,7 +63,11 @@ func parseComposerLock(lockdata []byte, isDev bool) (composerLock, error) {
 	parsed := struct {
 		Packages    []composerPkg
 		PackagesDev []composerPkg `json:"packages-dev"`
-		Platform    map[string]string
+		// Empty PHP associative arrays are represented as empty list when
+		// converted to JSON. As such, we can't type Platform as a
+		// map[string]string here, instead we try to convert it into a map
+		// below and ignore it if we can't as it means it's empty.
+		Platform interface{}
 	}{}
 
 	if err := json.Unmarshal(lockdata, &parsed); err != nil {
@@ -87,8 +91,21 @@ func parseComposerLock(lockdata []byte, isDev bool) (composerLock, error) {
 		}
 	}
 
-	lock.platformReqs = findExtRequirements(lock.platformReqs, parsed.Platform)
+	if p, ok := parsed.Platform.(map[string]interface{}); ok {
+		lock.platformReqs = findExtRequirements(lock.platformReqs, normalizePlatform(p))
+	}
+
 	return lock, nil
+}
+
+func normalizePlatform(p map[string]interface{}) map[string]string {
+	r := map[string]string{}
+
+	for k, v := range p {
+		r[k] = v.(string)
+	}
+
+	return r
 }
 
 type composerPkg struct {
