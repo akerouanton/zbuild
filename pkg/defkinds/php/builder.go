@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/NiR-/notpecl/backends"
+	"github.com/NiR-/notpecl/pecl"
 	"github.com/NiR-/zbuild/pkg/builddef"
 	"github.com/NiR-/zbuild/pkg/image"
 	"github.com/NiR-/zbuild/pkg/llbutils"
@@ -42,18 +42,22 @@ func RegisterKind(registry *registry.KindRegistry) {
 }
 
 type PHPHandler struct {
-	NotPecl backends.NotPeclBackend
-	solver  statesolver.StateSolver
+	pecl   pecl.Backend
+	solver statesolver.StateSolver
 }
 
 func NewPHPHandler() *PHPHandler {
 	return &PHPHandler{
-		NotPecl: backends.NewNotPeclBackend(),
+		pecl: pecl.New(),
 	}
 }
 
 func (h *PHPHandler) WithSolver(solver statesolver.StateSolver) {
 	h.solver = solver
+}
+
+func (h *PHPHandler) WithPeclBackend(pb pecl.Backend) {
+	h.pecl = pb
 }
 
 func (h *PHPHandler) DebugConfig(

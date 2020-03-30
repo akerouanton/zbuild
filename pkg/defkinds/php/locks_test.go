@@ -6,7 +6,8 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"github.com/NiR-/notpecl/extindex"
+	"github.com/NiR-/notpecl/peclapi"
+	"github.com/NiR-/notpecl/pecltest"
 	"github.com/NiR-/zbuild/pkg/builddef"
 	"github.com/NiR-/zbuild/pkg/defkinds/php"
 	"github.com/NiR-/zbuild/pkg/mocks"
@@ -83,20 +84,22 @@ func initUpdateLocksWithDebianBaseImageTC(t *testing.T, mockCtrl *gomock.Control
 		"zlib1g-dev":  "zlib1g-dev-version",
 	}, nil)
 
+	pb := pecltest.NewMockBackend(mockCtrl)
+	pb.EXPECT().
+		ResolveConstraint(gomock.Any(), "yaml", "~1.0", peclapi.Beta).
+		AnyTimes().
+		Return("1.1.0", nil)
+	pb.EXPECT().
+		ResolveConstraint(gomock.Any(), "apcu", "*", peclapi.Stable).
+		AnyTimes().
+		Return("5.1.18", nil)
+	pb.EXPECT().
+		ResolveConstraint(gomock.Any(), "redis", "~5.1.0", peclapi.Stable).
+		AnyTimes().
+		Return("5.1.0", nil)
+
 	h := php.NewPHPHandler()
-	h.NotPecl = h.NotPecl.WithExtensionIndex(extindex.ExtIndex{
-		"apcu": extindex.ExtVersions{
-			"5.1.18": extindex.Stable,
-		},
-		"redis": extindex.ExtVersions{
-			"5.1.1": extindex.Beta,
-			"5.1.0": extindex.Stable,
-		},
-		"yaml": extindex.ExtVersions{
-			"1.0.0": extindex.Stable,
-			"1.1.0": extindex.Beta,
-		},
-	})
+	h.WithPeclBackend(pb)
 	h.WithSolver(solver)
 
 	return updateLocksTC{
@@ -162,20 +165,22 @@ func initUpdateLocksWithAlpineBaseImageTC(t *testing.T, mockCtrl *gomock.Control
 		"unzip":       "unzip-version",
 	}, nil)
 
+	pb := pecltest.NewMockBackend(mockCtrl)
+	pb.EXPECT().
+		ResolveConstraint(gomock.Any(), "yaml", "~1.0", peclapi.Beta).
+		AnyTimes().
+		Return("1.1.0", nil)
+	pb.EXPECT().
+		ResolveConstraint(gomock.Any(), "apcu", "*", peclapi.Stable).
+		AnyTimes().
+		Return("5.1.18", nil)
+	pb.EXPECT().
+		ResolveConstraint(gomock.Any(), "redis", "~5.1.0", peclapi.Stable).
+		AnyTimes().
+		Return("5.1.0", nil)
+
 	h := php.NewPHPHandler()
-	h.NotPecl = h.NotPecl.WithExtensionIndex(extindex.ExtIndex{
-		"apcu": extindex.ExtVersions{
-			"5.1.18": extindex.Stable,
-		},
-		"redis": extindex.ExtVersions{
-			"5.1.1": extindex.Beta,
-			"5.1.0": extindex.Stable,
-		},
-		"yaml": extindex.ExtVersions{
-			"1.0.0": extindex.Stable,
-			"1.1.0": extindex.Beta,
-		},
-	})
+	h.WithPeclBackend(pb)
 	h.WithSolver(solver)
 
 	return updateLocksTC{
