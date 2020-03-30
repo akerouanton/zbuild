@@ -40,6 +40,7 @@ func (m *MockKindHandler) EXPECT() *MockKindHandlerMockRecorder {
 
 // Build mocks base method
 func (m *MockKindHandler) Build(arg0 context.Context, arg1 builddef.BuildOpts) (llb.State, *image.Image, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Build", arg0, arg1)
 	ret0, _ := ret[0].(llb.State)
 	ret1, _ := ret[1].(*image.Image)
@@ -49,11 +50,13 @@ func (m *MockKindHandler) Build(arg0 context.Context, arg1 builddef.BuildOpts) (
 
 // Build indicates an expected call of Build
 func (mr *MockKindHandlerMockRecorder) Build(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Build", reflect.TypeOf((*MockKindHandler)(nil).Build), arg0, arg1)
 }
 
 // DebugConfig mocks base method
 func (m *MockKindHandler) DebugConfig(arg0 builddef.BuildOpts) (interface{}, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DebugConfig", arg0)
 	ret0, _ := ret[0].(interface{})
 	ret1, _ := ret[1].(error)
@@ -62,11 +65,13 @@ func (m *MockKindHandler) DebugConfig(arg0 builddef.BuildOpts) (interface{}, err
 
 // DebugConfig indicates an expected call of DebugConfig
 func (mr *MockKindHandlerMockRecorder) DebugConfig(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DebugConfig", reflect.TypeOf((*MockKindHandler)(nil).DebugConfig), arg0)
 }
 
 // UpdateLocks mocks base method
 func (m *MockKindHandler) UpdateLocks(arg0 context.Context, arg1 pkgsolver.PackageSolversMap, arg2 builddef.BuildOpts) (builddef.Locks, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateLocks", arg0, arg1, arg2)
 	ret0, _ := ret[0].(builddef.Locks)
 	ret1, _ := ret[1].(error)
@@ -75,15 +80,18 @@ func (m *MockKindHandler) UpdateLocks(arg0 context.Context, arg1 pkgsolver.Packa
 
 // UpdateLocks indicates an expected call of UpdateLocks
 func (mr *MockKindHandlerMockRecorder) UpdateLocks(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateLocks", reflect.TypeOf((*MockKindHandler)(nil).UpdateLocks), arg0, arg1, arg2)
 }
 
 // WithSolver mocks base method
 func (m *MockKindHandler) WithSolver(arg0 statesolver.StateSolver) {
+	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "WithSolver", arg0)
 }
 
 // WithSolver indicates an expected call of WithSolver
 func (mr *MockKindHandlerMockRecorder) WithSolver(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WithSolver", reflect.TypeOf((*MockKindHandler)(nil).WithSolver), arg0)
 }

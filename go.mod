@@ -10,7 +10,7 @@ require (
 	github.com/docker/docker v1.14.0-0.20190319215453-e7b5f7dbe98c
 	github.com/go-test/deep v1.0.5
 	github.com/gogo/protobuf v1.3.1
-	github.com/golang/mock v1.1.1
+	github.com/golang/mock v1.4.3
 	github.com/gorilla/mux v1.7.3 // indirect
 	github.com/mcuadros/go-version v0.0.0-20190830083331-035f6764e8d2
 	github.com/mitchellh/hashstructure v0.0.0-20170609045927-2bca23e0e452

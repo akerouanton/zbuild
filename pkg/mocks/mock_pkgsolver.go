@@ -35,6 +35,7 @@ func (m *MockPackageSolver) EXPECT() *MockPackageSolverMockRecorder {
 
 // ResolveVersions mocks base method
 func (m *MockPackageSolver) ResolveVersions(arg0 context.Context, arg1 string, arg2 map[string]string) (map[string]string, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ResolveVersions", arg0, arg1, arg2)
 	ret0, _ := ret[0].(map[string]string)
 	ret1, _ := ret[1].(error)
@@ -43,5 +44,6 @@ func (m *MockPackageSolver) ResolveVersions(arg0 context.Context, arg1 string, a
 
 // ResolveVersions indicates an expected call of ResolveVersions
 func (mr *MockPackageSolverMockRecorder) ResolveVersions(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResolveVersions", reflect.TypeOf((*MockPackageSolver)(nil).ResolveVersions), arg0, arg1, arg2)
 }

@@ -8,7 +8,7 @@ import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
 	client "github.com/moby/buildkit/frontend/gateway/client"
-	go_digest "github.com/opencontainers/go-digest"
+	digest "github.com/opencontainers/go-digest"
 	types "github.com/tonistiigi/fsutil/types"
 	reflect "reflect"
 )
@@ -38,6 +38,7 @@ func (m *MockClient) EXPECT() *MockClientMockRecorder {
 
 // BuildOpts mocks base method
 func (m *MockClient) BuildOpts() client.BuildOpts {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "BuildOpts")
 	ret0, _ := ret[0].(client.BuildOpts)
 	return ret0
@@ -45,13 +46,15 @@ func (m *MockClient) BuildOpts() client.BuildOpts {
 
 // BuildOpts indicates an expected call of BuildOpts
 func (mr *MockClientMockRecorder) BuildOpts() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BuildOpts", reflect.TypeOf((*MockClient)(nil).BuildOpts))
 }
 
 // ResolveImageConfig mocks base method
-func (m *MockClient) ResolveImageConfig(arg0 context.Context, arg1 string, arg2 client.ResolveImageConfigOpt) (go_digest.Digest, []byte, error) {
+func (m *MockClient) ResolveImageConfig(arg0 context.Context, arg1 string, arg2 client.ResolveImageConfigOpt) (digest.Digest, []byte, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ResolveImageConfig", arg0, arg1, arg2)
-	ret0, _ := ret[0].(go_digest.Digest)
+	ret0, _ := ret[0].(digest.Digest)
 	ret1, _ := ret[1].([]byte)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2
@@ -59,11 +62,13 @@ func (m *MockClient) ResolveImageConfig(arg0 context.Context, arg1 string, arg2 
 
 // ResolveImageConfig indicates an expected call of ResolveImageConfig
 func (mr *MockClientMockRecorder) ResolveImageConfig(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResolveImageConfig", reflect.TypeOf((*MockClient)(nil).ResolveImageConfig), arg0, arg1, arg2)
 }
 
 // Solve mocks base method
 func (m *MockClient) Solve(arg0 context.Context, arg1 client.SolveRequest) (*client.Result, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Solve", arg0, arg1)
 	ret0, _ := ret[0].(*client.Result)
 	ret1, _ := ret[1].(error)
@@ -72,6 +77,7 @@ func (m *MockClient) Solve(arg0 context.Context, arg1 client.SolveRequest) (*cli
 
 // Solve indicates an expected call of Solve
 func (mr *MockClientMockRecorder) Solve(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Solve", reflect.TypeOf((*MockClient)(nil).Solve), arg0, arg1)
 }
 
@@ -100,6 +106,7 @@ func (m *MockReference) EXPECT() *MockReferenceMockRecorder {
 
 // ReadDir mocks base method
 func (m *MockReference) ReadDir(arg0 context.Context, arg1 client.ReadDirRequest) ([]*types.Stat, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ReadDir", arg0, arg1)
 	ret0, _ := ret[0].([]*types.Stat)
 	ret1, _ := ret[1].(error)
@@ -108,11 +115,13 @@ func (m *MockReference) ReadDir(arg0 context.Context, arg1 client.ReadDirRequest
 
 // ReadDir indicates an expected call of ReadDir
 func (mr *MockReferenceMockRecorder) ReadDir(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReadDir", reflect.TypeOf((*MockReference)(nil).ReadDir), arg0, arg1)
 }
 
 // ReadFile mocks base method
 func (m *MockReference) ReadFile(arg0 context.Context, arg1 client.ReadRequest) ([]byte, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ReadFile", arg0, arg1)
 	ret0, _ := ret[0].([]byte)
 	ret1, _ := ret[1].(error)
@@ -121,11 +130,13 @@ func (m *MockReference) ReadFile(arg0 context.Context, arg1 client.ReadRequest) 
 
 // ReadFile indicates an expected call of ReadFile
 func (mr *MockReferenceMockRecorder) ReadFile(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReadFile", reflect.TypeOf((*MockReference)(nil).ReadFile), arg0, arg1)
 }
 
 // StatFile mocks base method
 func (m *MockReference) StatFile(arg0 context.Context, arg1 client.StatRequest) (*types.Stat, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "StatFile", arg0, arg1)
 	ret0, _ := ret[0].(*types.Stat)
 	ret1, _ := ret[1].(error)
@@ -134,5 +145,6 @@ func (m *MockReference) StatFile(arg0 context.Context, arg1 client.StatRequest) 
 
 // StatFile indicates an expected call of StatFile
 func (mr *MockReferenceMockRecorder) StatFile(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StatFile", reflect.TypeOf((*MockReference)(nil).StatFile), arg0, arg1)
 }
