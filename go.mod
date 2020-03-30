@@ -19,7 +19,7 @@ require (
 	github.com/opencontainers/go-digest v1.0.0-rc1
 	github.com/opencontainers/image-spec v1.0.1
 	github.com/sirupsen/logrus v1.5.0
-	github.com/spf13/cobra v0.0.6
+	github.com/spf13/cobra v0.0.7
 	github.com/tonistiigi/fsutil v0.0.0-20190819224149-3d2716dd0a4d
 	github.com/twpayne/go-vfs v1.3.6
 	golang.org/x/xerrors v0.0.0-20191011141410-1b5146add898
