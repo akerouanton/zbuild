@@ -1,0 +1,27 @@
+# syntax=akerouanton/zbuilder:200321-03
+kind: nodejs
+version: lts
+alpine: true
+frontend: true
+
+source_context:
+  type: git
+  source: github.com/gothinkster/angular-realworld-example-app
+
+build_command: ng build
+
+global_packages:
+  '@angular/cli': '^7.3'
+
+sources:
+  - src/
+  - angular.json
+  - tsconfig.json
+
+webserver:
+  type: nginx
+  alpine: true
+  config_file: nginx.conf
+  assets:
+    - from: dist/
+      to: /app/dist

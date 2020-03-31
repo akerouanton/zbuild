@@ -1,0 +1,17 @@
+# syntax=akerouanton/zbuilder:200321-03
+kind: nodejs
+version: lts
+
+source_context:
+  type: git
+  source: git://github.com/gothinkster/node-express-realworld-example-app
+
+sources:
+  - config/
+  - models/
+  - routes/
+  - app.js
+
+stages:
+  prod:
+    command: ["yarn", "run", "start"]

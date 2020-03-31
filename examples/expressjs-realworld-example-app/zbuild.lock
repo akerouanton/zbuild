@@ -1,0 +1,24 @@
+base: docker.io/library/node:lts-buster-slim@sha256:fa7e3e05b62b9cfd417e153cfc1ab917744dfc5bb97f540197af99dc660be058
+defhash: 3052806369715581406
+osrelease:
+  name: debian
+  versionname: buster
+  versionid: "10"
+source_context:
+  path: ""
+  reference: ba04b70c31af81ca7935096740a6e083563b3a4a
+  source: git://github.com/gothinkster/node-express-realworld-example-app
+  type: git
+stages:
+  dev:
+    system_packages: {}
+  prod:
+    system_packages: {}
+webserver:
+  base_image: docker.io/library/nginx:latest@sha256:2539d4344dd18e1df02be842ffc435f8e1f699cfc55516e2cf2cb16b7a9aea0b
+  osrelease:
+    name: debian
+    versionname: buster
+    versionid: "10"
+  system_packages:
+    curl: 7.64.0-4+deb10u1
