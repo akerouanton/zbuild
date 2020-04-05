@@ -81,7 +81,7 @@ func ImageSource(imageRef string, withMeta bool) llb.State {
 	return llb.Image(imageRef, opts...)
 }
 
-func Copy(src llb.State, srcPath string, dest llb.State, destPath string, chown string) llb.State {
+func Copy(src llb.State, srcPath string, dest llb.State, destPath string, chown string, ignoreCache bool) llb.State {
 	copyOpts := []llb.CopyOption{
 		&llb.CopyInfo{
 			FollowSymlinks:      true,
@@ -94,9 +94,15 @@ func Copy(src llb.State, srcPath string, dest llb.State, destPath string, chown 
 		copyOpts = append(copyOpts, llb.WithUser(chown))
 	}
 
+	fileOpts := []llb.ConstraintsOpt{
+		llb.WithCustomName(fmt.Sprintf("Copy %s", srcPath))}
+	if ignoreCache {
+		fileOpts = append(fileOpts, llb.IgnoreCache)
+	}
+
 	return dest.File(
 		llb.Copy(src, srcPath, destPath, copyOpts...),
-		llb.WithCustomName(fmt.Sprintf("Copy %s", srcPath)))
+		fileOpts...)
 }
 
 func Shell(cmds ...string) llb.RunOption {
@@ -124,6 +130,7 @@ func InstallSystemPackages(
 	state llb.State,
 	pkgMgr string,
 	locks map[string]string,
+	ignoreCache bool,
 ) (llb.State, error) {
 	if len(locks) == 0 {
 		return state, nil
@@ -158,12 +165,15 @@ func InstallSystemPackages(
 	}
 
 	stepName := fmt.Sprintf("Install system packages (%s)", strings.Join(packageSpecs, ", "))
-	state = state.Run(
+	runOpts := []llb.RunOption{
 		Shell(cmds...),
-		llb.WithCustomName(stepName),
-	).Root()
+		llb.WithCustomName(stepName)}
 
-	return state, nil
+	if ignoreCache {
+		runOpts = append(runOpts, llb.IgnoreCache)
+	}
+
+	return state.Run(runOpts...).Root(), nil
 }
 
 // ExternalFile represents a file that should be loaded through HTTP at build-time.

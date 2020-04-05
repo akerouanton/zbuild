@@ -5,6 +5,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/NiR-/zbuild/pkg/builddef"
 	"github.com/NiR-/zbuild/pkg/llbutils"
 	"github.com/mcuadros/go-version"
 	"github.com/moby/buildkit/client/llb"
@@ -372,7 +373,11 @@ func getPeclExtensionSpecs(extensions map[string]string) []string {
 // extensions. The former are installed using docker-php-ext-install whereas
 // ther latter are installed using notpecl (a replacement for pecl). It takes
 // care of deleting downloaded/unpacked files after installing extensions.
-func InstallExtensions(state llb.State, stageDef StageDefinition) llb.State {
+func InstallExtensions(
+	stageDef StageDefinition,
+	state llb.State,
+	buildOpts builddef.BuildOpts,
+) llb.State {
 	extensions := stageDef.StageLocks.Extensions
 	if len(extensions) == 0 {
 		return state
@@ -418,11 +423,15 @@ func InstallExtensions(state llb.State, stageDef StageDefinition) llb.State {
 	}
 
 	extensionNames := getExtensionNames(extensions)
-	exec := state.Run(
+	runOpts := []llb.RunOption{
 		llbutils.Shell(cmds...),
-		llb.WithCustomNamef("Install PHP extensions (%s)", strings.Join(extensionNames, ", ")))
+		llb.WithCustomNamef("Install PHP extensions (%s)", strings.Join(extensionNames, ", "))}
 
-	return exec.Root()
+	if buildOpts.IgnoreCache {
+		runOpts = append(runOpts, llb.IgnoreCache)
+	}
+
+	return state.Run(runOpts...).Root()
 }
 
 // This holds the list of flags to pass to docker-php-ext-configure. Note

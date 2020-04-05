@@ -69,7 +69,8 @@ func (h *WebserverHandler) Build(
 	}
 
 	state, err = llbutils.InstallSystemPackages(state, pkgManager,
-		def.Locks.SystemPackages)
+		def.Locks.SystemPackages,
+		buildOpts.IgnoreCache)
 	if err != nil {
 		return state, img, xerrors.Errorf("failed to add \"install system pacakges\" steps: %w", err)
 	}
@@ -79,7 +80,8 @@ func (h *WebserverHandler) Build(
 	}
 
 	for _, asset := range def.Assets {
-		state = llbutils.Copy(*buildOpts.SourceState, asset.From, state, asset.To, fileOwner)
+		state = llbutils.Copy(
+			*buildOpts.SourceState, asset.From, state, asset.To, fileOwner, buildOpts.IgnoreCache)
 	}
 
 	setImageMetadata(def, state, img)
@@ -100,12 +102,9 @@ func (h *WebserverHandler) copyConfigFile(
 		llb.WithCustomName("load config file from build context"))
 
 	return llbutils.Copy(
-		configFileSrc,
-		*def.ConfigFile,
-		state,
-		def.Type.ConfigPath(),
-		fileOwner,
-	)
+		configFileSrc, *def.ConfigFile,
+		state, def.Type.ConfigPath(), fileOwner,
+		buildOpts.IgnoreCache)
 }
 
 func setImageMetadata(

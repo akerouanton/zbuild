@@ -102,7 +102,8 @@ func (h *NodeJSHandler) buildNodeJS(
 	}
 
 	state, err = llbutils.InstallSystemPackages(state, pkgManager,
-		stageDef.StageLocks.SystemPackages)
+		stageDef.StageLocks.SystemPackages,
+		buildOpts.IgnoreCache)
 	if err != nil {
 		return state, img, xerrors.Errorf("failed to add \"install system pacakges\" steps: %w", err)
 	}
@@ -118,7 +119,7 @@ func (h *NodeJSHandler) buildNodeJS(
 		state = h.depsInstall(stageDef, state, buildOpts)
 		state = h.copySources(stageDef, state, buildOpts)
 		state = h.copyConfigFiles(stageDef, state, buildOpts)
-		state = h.build(stageDef, state)
+		state = h.build(stageDef, state, buildOpts)
 	}
 
 	setImageMetadata(stageDef, state, img)
@@ -182,12 +183,16 @@ func (h *NodeJSHandler) globalPackagesInstall(
 	}
 
 	cmd := fmt.Sprintf("yarn global add %s", strings.Join(pkgs, " "))
-	run := state.Run(
+	runOpts := []llb.RunOption{
 		llbutils.Shell(cmd),
 		llb.User("1000"),
-		llb.WithCustomNamef("Run %s", cmd))
+		llb.WithCustomNamef("Run %s", cmd)}
 
-	return run.Root()
+	if buildOpts.IgnoreCache {
+		runOpts = append(runOpts, llb.IgnoreCache)
+	}
+
+	return state.Run(runOpts...).Root()
 }
 
 func (h *NodeJSHandler) determinePackageManager(
@@ -238,16 +243,22 @@ func (h *NodeJSHandler) depsInstall(
 		llb.SharedKeyHint(SharedKeys.PackageFiles),
 		llb.WithCustomName(copyLabel))
 
-	state = llbutils.Copy(srcState, include[0], state, "/app/", "1000:1000")
-	state = llbutils.Copy(srcState, include[1], state, "/app/", "1000:1000")
+	state = llbutils.Copy(
+		srcState, include[0], state, "/app/", "1000:1000", buildOpts.IgnoreCache)
+	state = llbutils.Copy(
+		srcState, include[1], state, "/app/", "1000:1000", buildOpts.IgnoreCache)
 
-	run := state.Run(
+	runOpts := []llb.RunOption{
 		llbutils.Shell(installCmd),
 		llb.Dir(state.GetDir()),
 		llb.User("1000"),
-		llb.WithCustomName(installLabel))
+		llb.WithCustomName(installLabel)}
 
-	return run.Root()
+	if buildOpts.IgnoreCache {
+		runOpts = append(runOpts, llb.IgnoreCache)
+	}
+
+	return state.Run(runOpts...).Root()
 }
 
 func (h *NodeJSHandler) copySources(
@@ -266,7 +277,8 @@ func (h *NodeJSHandler) copySources(
 
 	if sourceContext.Type == builddef.ContextTypeLocal {
 		srcPath := prefixContextPath(sourceContext, "/")
-		return llbutils.Copy(srcState, srcPath, state, "/app", "1000:1000")
+		return llbutils.Copy(
+			srcState, srcPath, state, "/app", "1000:1000", buildOpts.IgnoreCache)
 	}
 
 	// Despite the IncludePatterns() above, the source state might also
@@ -276,7 +288,8 @@ func (h *NodeJSHandler) copySources(
 	for _, srcfile := range stageDef.Sources {
 		srcPath := prefixContextPath(sourceContext, srcfile)
 		destPath := path.Join("/app", srcfile)
-		state = llbutils.Copy(srcState, srcPath, state, destPath, "1000:1000")
+		state = llbutils.Copy(
+			srcState, srcPath, state, destPath, "1000:1000", buildOpts.IgnoreCache)
 	}
 
 	return state
@@ -312,7 +325,8 @@ func (h *NodeJSHandler) copyConfigFiles(
 	for destfile, srcfile := range stageDef.ConfigFiles {
 		srcpath := prefixContextPath(srcContext, srcfile)
 		destpath := path.Join("/app", destfile)
-		state = llbutils.Copy(srcState, srcpath, state, destpath, "1000:1000")
+		state = llbutils.Copy(
+			srcState, srcpath, state, destpath, "1000:1000", buildOpts.IgnoreCache)
 	}
 
 	return state
@@ -360,6 +374,7 @@ func prefixContextPath(srcContext *builddef.Context, p string) string {
 func (h *NodeJSHandler) build(
 	stageDef StageDefinition,
 	state llb.State,
+	buildOpts builddef.BuildOpts,
 ) llb.State {
 	if stageDef.BuildCommand == nil {
 		return state
@@ -370,12 +385,16 @@ func (h *NodeJSHandler) build(
 		"/home/node/.yarn/bin/",
 		getEnv(state, "PATH"),
 	}, ":")
-
-	run := state.Run(
+	runOpts := []llb.RunOption{
 		llbutils.Shell(*stageDef.BuildCommand),
 		llb.Dir(state.GetDir()),
 		llb.AddEnv("NODE_ENV", "production"),
 		llb.AddEnv("PATH", envPath),
-		llb.WithCustomName("Build"))
-	return run.Root()
+		llb.WithCustomName("Build")}
+
+	if buildOpts.IgnoreCache {
+		runOpts = append(runOpts, llb.IgnoreCache)
+	}
+
+	return state.Run(runOpts...).Root()
 }

@@ -214,7 +214,17 @@ func TestStateHelpers(t *testing.T) {
 			init: func(_ *testing.T) llb.State {
 				src := llbutils.ImageSource("php:7.2", false)
 				dest := llb.Scratch()
-				return llbutils.Copy(src, "/etc/passwd", dest, "/etc/passwd2", "1000:1000")
+				return llbutils.Copy(
+					src, "/etc/passwd", dest, "/etc/passwd2", "1000:1000", false)
+			},
+		},
+		"Copy without cache": {
+			testdata: "testdata/copy-without-cache.json",
+			init: func(_ *testing.T) llb.State {
+				src := llbutils.ImageSource("php:7.2", false)
+				dest := llb.Scratch()
+				return llbutils.Copy(
+					src, "/etc/passwd", dest, "/etc/passwd2", "1000:1000", true)
 			},
 		},
 		"InstallSystemPackages": {
@@ -226,7 +236,23 @@ func TestStateHelpers(t *testing.T) {
 					"ca-certficiates": "ca-certificates-version",
 					"zlib1g-dev":      "zlib1g-dev-version",
 				}
-				state, err := llbutils.InstallSystemPackages(dest, llbutils.APT, locks)
+				state, err := llbutils.InstallSystemPackages(dest, llbutils.APT, locks, false)
+				if err != nil {
+					t.Fatal(err)
+				}
+				return state
+			},
+		},
+		"InstallSystemPackages without cache": {
+			testdata: "testdata/install-system-packages-without-cache.json",
+			init: func(t *testing.T) llb.State {
+				dest := llbutils.ImageSource("php:7.2", false)
+				locks := map[string]string{
+					"curl":            "curl-version",
+					"ca-certficiates": "ca-certificates-version",
+					"zlib1g-dev":      "zlib1g-dev-version",
+				}
+				state, err := llbutils.InstallSystemPackages(dest, llbutils.APT, locks, true)
 				if err != nil {
 					t.Fatal(err)
 				}
