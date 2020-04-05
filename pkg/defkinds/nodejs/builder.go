@@ -191,8 +191,6 @@ func (h *NodeJSHandler) globalPackagesInstall(
 			llbutils.Shell("yarn global add "+strings.Join(pkgs, " ")),
 			llb.WithCustomName("Run yarn global add"))
 	} else {
-		state = state.AddEnv("NPM_CONFIG_PREFIX", "/home/node/.npm")
-
 		runOpts = append(runOpts,
 			llbutils.Shell("npm install -g "+strings.Join(pkgs, " ")),
 			llb.WithCustomName("Run npm install"))
@@ -202,7 +200,33 @@ func (h *NodeJSHandler) globalPackagesInstall(
 		runOpts = append(runOpts, llb.IgnoreCache)
 	}
 
+	runOpts, state = cacheMountOptForJSDeps(
+		runOpts, state, buildOpts, stageDef.PackageManager)
+
 	return state.Run(runOpts...).Root()
+}
+
+func cacheMountOptForJSDeps(
+	runOpts []llb.RunOption,
+	state llb.State,
+	buildOpts builddef.BuildOpts,
+	pkgMgr string,
+) ([]llb.RunOption, llb.State) {
+	if !buildOpts.WithCacheMounts {
+		return runOpts, state
+	}
+
+	if pkgMgr == pkgManagerYarn {
+		runOpts = append(runOpts, llbutils.CacheMountOpt(
+			"/home/node/.cache/yarn", buildOpts.CacheIDNamespace, "1000"))
+		return runOpts, state
+	}
+
+	state = state.AddEnv("NPM_CONFIG_PREFIX", "/home/node/.npm")
+	runOpts = append(runOpts, llbutils.CacheMountOpt(
+		"/home/node/.npm/", buildOpts.CacheIDNamespace, "1000"))
+
+	return runOpts, state
 }
 
 func (h *NodeJSHandler) determinePackageManager(
@@ -244,14 +268,14 @@ func (h *NodeJSHandler) depsInstall(
 		installLabel = "Run npm install"
 	}
 
-	copyLabel := fmt.Sprintf("load %s from build context",
+	srcLabel := fmt.Sprintf("load %s from build context",
 		strings.Join(include, " and "))
 	srcState := llbutils.FromContext(srcContext,
 		llb.IncludePatterns(include),
 		llb.LocalUniqueID(buildOpts.LocalUniqueID),
 		llb.SessionID(buildOpts.SessionID),
 		llb.SharedKeyHint(SharedKeys.PackageFiles),
-		llb.WithCustomName(copyLabel))
+		llb.WithCustomName(srcLabel))
 
 	state = llbutils.Copy(
 		srcState, include[0], state, "/app/", "1000:1000", buildOpts.IgnoreLayerCache)
@@ -267,6 +291,9 @@ func (h *NodeJSHandler) depsInstall(
 	if buildOpts.IgnoreLayerCache {
 		runOpts = append(runOpts, llb.IgnoreCache)
 	}
+
+	runOpts, state = cacheMountOptForJSDeps(
+		runOpts, state, buildOpts, stageDef.PackageManager)
 
 	return state.Run(runOpts...).Root()
 }
