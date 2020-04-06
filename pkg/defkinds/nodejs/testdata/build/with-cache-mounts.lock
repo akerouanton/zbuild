@@ -1,0 +1,22 @@
+base: docker.io/library/node:12-buster-slim@sha256:4d1016eefc4e6dc52ba9be6550dcb25a6e1826117507e65eda3650d6eb19f042
+defhash: 16909497532092672513
+osrelease:
+  name: debian
+  versionname: buster
+  versionid: "10"
+source_context: null
+stages:
+  dev:
+    system_packages: {}
+  prod:
+    system_packages: {}
+  worker:
+    system_packages: {}
+webserver:
+  base_image: docker.io/library/nginx:latest@sha256:2539d4344dd18e1df02be842ffc435f8e1f699cfc55516e2cf2cb16b7a9aea0b
+  osrelease:
+    name: debian
+    versionname: buster
+    versionid: "10"
+  system_packages:
+    curl: 7.64.0-4+deb10u1

@@ -175,7 +175,7 @@ func initBuildLLBForWorkerStageTC(t *testing.T, mockCtrl *gomock.Controller) bui
 						"NODE_ENV=production",
 					},
 					// Following entrypoint is automatically defined by the
-					// base image. Maybe it should not be kept? :thinking:
+					// base image. Maybe it should not be kept? :thinking: @TODO
 					Entrypoint: []string{"docker-entrypoint.sh"},
 					Cmd:        []string{"bin/worker.js"},
 					Volumes:    map[string]struct{}{},
@@ -478,8 +478,8 @@ func initBuildLLBForAlpineBasedBaseImageTC(t *testing.T, mockCtrl *gomock.Contro
 }
 
 func initBuildLLBForWorkerStageWithCacheMountsTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
-	genericDef := loadBuildDef(t, "testdata/build/zbuild.yml")
-	genericDef.RawLocks = loadDefLocks(t, "testdata/build/zbuild.lock")
+	genericDef := loadBuildDef(t, "testdata/build/with-cache-mounts.yml")
+	genericDef.RawLocks = loadDefLocks(t, "testdata/build/with-cache-mounts.lock")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
 	solver.EXPECT().

@@ -1,0 +1,9 @@
+kind: nodejs
+version: 12
+
+stages:
+  prod:
+    healthcheck: false
+  worker:
+    from: prod
+    command: bin/worker.js
