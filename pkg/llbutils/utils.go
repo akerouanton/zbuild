@@ -126,7 +126,7 @@ func Mkdir(state llb.State, owner string, dirs ...string) llb.State {
 // SystemPackagesCaching holds all the options relating to layer caching and
 // package caching.
 type SystemPackagesCaching struct {
-	IgnoreCache      bool
+	IgnoreLayerCache bool
 	WithCacheMounts  bool
 	CacheIDNamespace string
 }
@@ -135,7 +135,7 @@ func NewCachingStrategyFromBuildOpts(
 	buildOpts builddef.BuildOpts,
 ) SystemPackagesCaching {
 	return SystemPackagesCaching{
-		IgnoreCache:      buildOpts.IgnoreCache,
+		IgnoreLayerCache: buildOpts.IgnoreLayerCache,
 		WithCacheMounts:  buildOpts.WithCacheMounts,
 		CacheIDNamespace: buildOpts.CacheIDNamespace,
 	}
@@ -202,7 +202,7 @@ func InstallPackagesWithAPT(
 		Shell(cmds...),
 		llb.WithCustomName(stepName))
 
-	if opts.IgnoreCache {
+	if opts.IgnoreLayerCache {
 		runOpts = append(runOpts, llb.IgnoreCache)
 	}
 
@@ -233,7 +233,7 @@ func InstallPackagesWithAPK(
 		Shell(cmds...),
 		llb.WithCustomName(stepName))
 
-	if opts.IgnoreCache {
+	if opts.IgnoreLayerCache {
 		runOpts = append(runOpts, llb.IgnoreCache)
 	}
 

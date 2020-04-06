@@ -255,7 +255,7 @@ func TestStateHelpers(t *testing.T) {
 					"zlib1g-dev":      "zlib1g-dev-version",
 				}
 				caching := llbutils.SystemPackagesCaching{
-					IgnoreCache:      true,
+					IgnoreLayerCache: true,
 					WithCacheMounts:  true,
 					CacheIDNamespace: "cache-ns",
 				}
@@ -293,7 +293,7 @@ func TestStateHelpers(t *testing.T) {
 					"zlib1g-dev":      "zlib1g-dev-version",
 				}
 				caching := llbutils.SystemPackagesCaching{
-					IgnoreCache:      true,
+					IgnoreLayerCache: true,
 					WithCacheMounts:  true,
 					CacheIDNamespace: "cache-ns",
 				}

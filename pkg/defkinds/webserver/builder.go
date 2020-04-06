@@ -85,7 +85,7 @@ func (h *WebserverHandler) Build(
 
 	for _, asset := range def.Assets {
 		state = llbutils.Copy(
-			*buildOpts.SourceState, asset.From, state, asset.To, fileOwner, buildOpts.IgnoreCache)
+			*buildOpts.SourceState, asset.From, state, asset.To, fileOwner, buildOpts.IgnoreLayerCache)
 	}
 
 	setImageMetadata(def, state, img)
@@ -108,7 +108,7 @@ func (h *WebserverHandler) copyConfigFile(
 	return llbutils.Copy(
 		configFileSrc, *def.ConfigFile,
 		state, def.Type.ConfigPath(), fileOwner,
-		buildOpts.IgnoreCache)
+		buildOpts.IgnoreLayerCache)
 }
 
 func setImageMetadata(

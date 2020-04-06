@@ -90,7 +90,7 @@ func buildOptsFromBuildkitOpts(c client.Client) (builddef.BuildOpts, error) {
 
 	// @TODO: support no-cache values (see https://sourcegraph.com/github.com/moby/buildkit@e0e3ad6/-/blob/frontend/dockerfile/builder/build.go#L110)
 	if _, ok := opts[keyNoCache]; ok {
-		buildOpts.IgnoreCache = true
+		buildOpts.IgnoreLayerCache = true
 	}
 
 	return buildOpts, err

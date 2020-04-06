@@ -427,7 +427,7 @@ func InstallExtensions(
 		llbutils.Shell(cmds...),
 		llb.WithCustomNamef("Install PHP extensions (%s)", strings.Join(extensionNames, ", "))}
 
-	if buildOpts.IgnoreCache {
+	if buildOpts.IgnoreLayerCache {
 		runOpts = append(runOpts, llb.IgnoreCache)
 	}
 
