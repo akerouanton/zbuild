@@ -2,6 +2,9 @@ kind: php
 fpm: true
 version: 7.3
 
+system_packages:
+  libjpeg-dev: '*'
+
 extensions:
   intl: "*"
   pdo_mysql: "*"
@@ -16,7 +19,6 @@ config_files:
 
 integrations:
   - blackfire
-  - symfony
 
 stages:
   dev:

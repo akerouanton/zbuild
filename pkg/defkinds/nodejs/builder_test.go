@@ -477,6 +477,67 @@ func initBuildLLBForAlpineBasedBaseImageTC(t *testing.T, mockCtrl *gomock.Contro
 	}
 }
 
+func initBuildLLBForWorkerStageWithCacheMountsTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
+	genericDef := loadBuildDef(t, "testdata/build/zbuild.yml")
+	genericDef.RawLocks = loadDefLocks(t, "testdata/build/zbuild.lock")
+
+	solver := mocks.NewMockStateSolver(mockCtrl)
+	solver.EXPECT().
+		FileExists(gomock.Any(), "package-lock.json", gomock.Any()).
+		Return(false, nil)
+
+	kindHandler := nodejs.NodeJSHandler{}
+	kindHandler.WithSolver(solver)
+
+	return buildTC{
+		handler: &kindHandler,
+		client:  llbtest.NewMockClient(mockCtrl),
+		buildOpts: builddef.BuildOpts{
+			Def:              genericDef,
+			Stage:            "worker",
+			SessionID:        "<SESSION-ID>",
+			LocalUniqueID:    "x1htr02606a9rk8b0daewh9es",
+			WithCacheMounts:  true,
+			CacheIDNamespace: "cache-ns",
+			BuildContext: &builddef.Context{
+				Source: "context",
+				Type:   builddef.ContextTypeLocal,
+			},
+		},
+		expectedState: "testdata/build/state-worker-with-cache-mounts.json",
+		expectedImage: &image.Image{
+			Image: specs.Image{
+				Architecture: "amd64",
+				OS:           "linux",
+				RootFS: specs.RootFS{
+					Type: "layers",
+				},
+			},
+			Config: image.ImageConfig{
+				ImageConfig: specs.ImageConfig{
+					User: "1000",
+					Env: []string{
+						"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+						"NODE_ENV=production",
+					},
+					// Following entrypoint is automatically defined by the
+					// base image. Maybe it should not be kept? :thinking: @TODO
+					Entrypoint: []string{"docker-entrypoint.sh"},
+					Cmd:        []string{"bin/worker.js"},
+					Volumes:    map[string]struct{}{},
+					WorkingDir: "/app",
+					Labels: map[string]string{
+						"io.zbuild": "true",
+					},
+				},
+				Healthcheck: &image.HealthConfig{
+					Test: []string{"NONE"},
+				},
+			},
+		},
+	}
+}
+
 func TestBuild(t *testing.T) {
 	testcases := map[string]func(*testing.T, *gomock.Controller) buildTC{
 		"build LLB DAG for dev stage":                     initBuildLLBForDevStageTC,
@@ -487,6 +548,7 @@ func TestBuild(t *testing.T) {
 		"build LLB DAG with git build and source context": initBuildLLBWithGitBuildAndSourceContextTC,
 		"build LLB DAG for npm-based project":             initBuildLLBForNpmBasedProjectTC,
 		"build LLB DAG for alpine-based base image":       initBuildLLBForAlpineBasedBaseImageTC,
+		"build LLB DAG for prod stage with cache mounts":  initBuildLLBForWorkerStageWithCacheMountsTC,
 	}
 
 	for tcname := range testcases {

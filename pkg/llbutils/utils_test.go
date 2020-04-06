@@ -218,8 +218,8 @@ func TestStateHelpers(t *testing.T) {
 					src, "/etc/passwd", dest, "/etc/passwd2", "1000:1000", false)
 			},
 		},
-		"Copy without cache": {
-			testdata: "testdata/copy-without-cache.json",
+		"Copy with no layer caching": {
+			testdata: "testdata/copy-with-no-layer-caching.json",
 			init: func(_ *testing.T) llb.State {
 				src := llbutils.ImageSource("php:7.2", false)
 				dest := llb.Scratch()
@@ -227,8 +227,8 @@ func TestStateHelpers(t *testing.T) {
 					src, "/etc/passwd", dest, "/etc/passwd2", "1000:1000", true)
 			},
 		},
-		"InstallSystemPackages": {
-			testdata: "testdata/install-system-packages.json",
+		"InstallSystemPackages with APT and no cache mounts": {
+			testdata: "testdata/install-apt-packages-with-no-cache-mounts.json",
 			init: func(t *testing.T) llb.State {
 				dest := llbutils.ImageSource("php:7.2", false)
 				locks := map[string]string{
@@ -236,15 +236,38 @@ func TestStateHelpers(t *testing.T) {
 					"ca-certficiates": "ca-certificates-version",
 					"zlib1g-dev":      "zlib1g-dev-version",
 				}
-				state, err := llbutils.InstallSystemPackages(dest, llbutils.APT, locks, false)
+				caching := llbutils.SystemPackagesCaching{}
+				state, err := llbutils.InstallSystemPackages(dest, llbutils.APT, locks, caching)
 				if err != nil {
 					t.Fatal(err)
 				}
 				return state
 			},
 		},
-		"InstallSystemPackages without cache": {
-			testdata: "testdata/install-system-packages-without-cache.json",
+		"InstallSystemPackages with APT and cache mounts but no layer caching": {
+			testdata: "testdata/install-apt-packages-with-cache-mounts-but-no-layer-caching.json",
+			init: func(t *testing.T) llb.State {
+				dest := llbutils.SetupAPTCache(
+					llbutils.ImageSource("php:7.2", false))
+				locks := map[string]string{
+					"curl":            "curl-version",
+					"ca-certficiates": "ca-certificates-version",
+					"zlib1g-dev":      "zlib1g-dev-version",
+				}
+				caching := llbutils.SystemPackagesCaching{
+					IgnoreLayerCache: true,
+					WithCacheMounts:  true,
+					CacheIDNamespace: "cache-ns",
+				}
+				state, err := llbutils.InstallSystemPackages(dest, llbutils.APT, locks, caching)
+				if err != nil {
+					t.Fatal(err)
+				}
+				return state
+			},
+		},
+		"InstallSystemPackages with APK and no cache mounts": {
+			testdata: "testdata/install-apk-packages-with-no-cache-mounts.json",
 			init: func(t *testing.T) llb.State {
 				dest := llbutils.ImageSource("php:7.2", false)
 				locks := map[string]string{
@@ -252,7 +275,29 @@ func TestStateHelpers(t *testing.T) {
 					"ca-certficiates": "ca-certificates-version",
 					"zlib1g-dev":      "zlib1g-dev-version",
 				}
-				state, err := llbutils.InstallSystemPackages(dest, llbutils.APT, locks, true)
+				caching := llbutils.SystemPackagesCaching{}
+				state, err := llbutils.InstallSystemPackages(dest, llbutils.APK, locks, caching)
+				if err != nil {
+					t.Fatal(err)
+				}
+				return state
+			},
+		},
+		"InstallSystemPackages with APK and cache mounts but no layer caching": {
+			testdata: "testdata/install-apk-packages-with-cache-mounts-but-no-layer-caching.json",
+			init: func(t *testing.T) llb.State {
+				dest := llbutils.ImageSource("php:7.2", false)
+				locks := map[string]string{
+					"curl":            "curl-version",
+					"ca-certficiates": "ca-certificates-version",
+					"zlib1g-dev":      "zlib1g-dev-version",
+				}
+				caching := llbutils.SystemPackagesCaching{
+					IgnoreLayerCache: true,
+					WithCacheMounts:  true,
+					CacheIDNamespace: "cache-ns",
+				}
+				state, err := llbutils.InstallSystemPackages(dest, llbutils.APK, locks, caching)
 				if err != nil {
 					t.Fatal(err)
 				}

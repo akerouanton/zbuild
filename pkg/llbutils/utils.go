@@ -123,6 +123,24 @@ func Mkdir(state llb.State, owner string, dirs ...string) llb.State {
 	return state
 }
 
+// SystemPackagesCaching holds all the options relating to layer caching and
+// package caching.
+type SystemPackagesCaching struct {
+	IgnoreLayerCache bool
+	WithCacheMounts  bool
+	CacheIDNamespace string
+}
+
+func NewCachingStrategyFromBuildOpts(
+	buildOpts builddef.BuildOpts,
+) SystemPackagesCaching {
+	return SystemPackagesCaching{
+		IgnoreLayerCache: buildOpts.IgnoreLayerCache,
+		WithCacheMounts:  buildOpts.WithCacheMounts,
+		CacheIDNamespace: buildOpts.CacheIDNamespace,
+	}
+}
+
 // InstallSystemPackages installs the given packages with the given package
 // manager. Packages map have to be a set of package names associated to their
 // respective version.
@@ -130,50 +148,132 @@ func InstallSystemPackages(
 	state llb.State,
 	pkgMgr string,
 	locks map[string]string,
-	ignoreCache bool,
+	opts SystemPackagesCaching,
 ) (llb.State, error) {
 	if len(locks) == 0 {
 		return state, nil
 	}
 
-	var cmds []string
-	var pkgNames []string
-
+	// Packages are sorted by their names first to be sure to always run the
+	// same command for a given set of packages.
+	pkgNames := make([]string, 0, len(locks))
 	for pkgName := range locks {
 		pkgNames = append(pkgNames, pkgName)
 	}
 	sort.Strings(pkgNames)
 
-	packageSpecs := []string{}
+	packageSpecs := make([]string, 0, len(pkgNames))
 	for _, pkgName := range pkgNames {
 		packageSpecs = append(packageSpecs, pkgName+"="+locks[pkgName])
 	}
 
 	switch pkgMgr {
 	case APT:
-		cmds = []string{
-			"apt-get update",
-			fmt.Sprintf("apt-get install -y --no-install-recommends %s", strings.Join(packageSpecs, " ")),
-			"rm -rf /var/lib/apt/lists/*",
-		}
+		return InstallPackagesWithAPT(state, packageSpecs, opts)
 	case APK:
-		cmds = []string{
-			"apk add --no-cache " + strings.Join(packageSpecs, " "),
-		}
+		return InstallPackagesWithAPK(state, packageSpecs, opts)
 	default:
 		return llb.State{}, UnsupportedPackageManager
 	}
+}
+
+func InstallPackagesWithAPT(
+	state llb.State,
+	packageSpecs []string,
+	opts SystemPackagesCaching,
+) (llb.State, error) {
+	runOpts := []llb.RunOption{}
+	cmds := []string{
+		"apt-get update",
+		"apt-get install -y --no-install-recommends " + strings.Join(packageSpecs, " "),
+	}
+
+	if opts.WithCacheMounts {
+		cmds = append(cmds, "apt-get autoclean")
+		runOpts = append(runOpts,
+			CacheMountOpt("/var/cache/apt", opts.CacheIDNamespace, "0"),
+			CacheMountOpt("/var/lib/apt", opts.CacheIDNamespace, "0"))
+	} else {
+		cmds = append(cmds, "rm -rf /var/lib/apt/lists/*")
+	}
 
 	stepName := fmt.Sprintf("Install system packages (%s)", strings.Join(packageSpecs, ", "))
-	runOpts := []llb.RunOption{
+	runOpts = append(runOpts,
 		Shell(cmds...),
-		llb.WithCustomName(stepName)}
+		llb.WithCustomName(stepName))
 
-	if ignoreCache {
+	if opts.IgnoreLayerCache {
 		runOpts = append(runOpts, llb.IgnoreCache)
 	}
 
 	return state.Run(runOpts...).Root(), nil
+}
+
+func InstallPackagesWithAPK(
+	state llb.State,
+	packageSpecs []string,
+	opts SystemPackagesCaching,
+) (llb.State, error) {
+	runOpts := []llb.RunOption{}
+	cmds := []string{}
+
+	if opts.WithCacheMounts {
+		cmds = append(cmds,
+			"apk add "+strings.Join(packageSpecs, " "),
+			// Clean up old packages but retain installed ones
+			"apk cache -v sync")
+		runOpts = append(runOpts,
+			CacheMountOpt("/etc/apk/cache", opts.CacheIDNamespace, "0"))
+	} else {
+		cmds = append(cmds, "apk add --no-cache "+strings.Join(packageSpecs, " "))
+	}
+
+	stepName := fmt.Sprintf("Install system packages (%s)", strings.Join(packageSpecs, ", "))
+	runOpts = append(runOpts,
+		Shell(cmds...),
+		llb.WithCustomName(stepName))
+
+	if opts.IgnoreLayerCache {
+		runOpts = append(runOpts, llb.IgnoreCache)
+	}
+
+	return state.Run(runOpts...).Root(), nil
+}
+
+// CacheMountOpt is used to consistently mount cache folders used when executing
+// commands (eg. to cache downloads of apt, apk or language-specific package
+// managers).
+func CacheMountOpt(pathToCache, cacheIDNamespace string, owner string) llb.RunOption {
+	cacheState := Mkdir(llb.Scratch(), owner, "/cache")
+
+	return llb.AddMount(pathToCache, cacheState,
+		llb.AsPersistentCacheDir(cacheIDNamespace+pathToCache, llb.CacheMountShared),
+		llb.SourcePath("/cache"))
+}
+
+func SetupSystemPackagesCache(state llb.State, pkgMgr string) llb.State {
+	switch pkgMgr {
+	case APT:
+		return SetupAPTCache(state)
+	case APK:
+		return state
+	}
+
+	panic(UnsupportedPackageManager)
+}
+
+// SetupAPTCache adds a Run operation to the given llb.State and returns the
+// new state. That Run operation remove the docker-clean APT config file and
+// replace it with a new config file that explicitly tells APT to keep
+// downloaded files.
+// This function has to be called before running InstallSystemPackages with
+// cache mounts enabled.
+func SetupAPTCache(state llb.State) llb.State {
+	return state.Run(
+		Shell("[ -f /etc/apt/apt.conf.d/docker-clean ] && rm -f /etc/apt/apt.conf.d/docker-clean",
+			"echo 'Binary::apt::APT::Keep-Downloaded-Packages \"true\"' > /etc/apt/apt.conf.d/keep-cache"),
+		llb.WithCustomName("Set up APT cache"),
+	).Root()
 }
 
 // ExternalFile represents a file that should be loaded through HTTP at build-time.

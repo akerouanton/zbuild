@@ -101,9 +101,13 @@ func (h *NodeJSHandler) buildNodeJS(
 		pkgManager = llbutils.APK
 	}
 
+	if buildOpts.WithCacheMounts && len(stageDef.StageLocks.SystemPackages) > 0 {
+		state = llbutils.SetupSystemPackagesCache(state, pkgManager)
+	}
+
 	state, err = llbutils.InstallSystemPackages(state, pkgManager,
 		stageDef.StageLocks.SystemPackages,
-		buildOpts.IgnoreCache)
+		llbutils.NewCachingStrategyFromBuildOpts(buildOpts))
 	if err != nil {
 		return state, img, xerrors.Errorf("failed to add \"install system pacakges\" steps: %w", err)
 	}
@@ -188,7 +192,7 @@ func (h *NodeJSHandler) globalPackagesInstall(
 		llb.User("1000"),
 		llb.WithCustomNamef("Run %s", cmd)}
 
-	if buildOpts.IgnoreCache {
+	if buildOpts.IgnoreLayerCache {
 		runOpts = append(runOpts, llb.IgnoreCache)
 	}
 
@@ -244,9 +248,9 @@ func (h *NodeJSHandler) depsInstall(
 		llb.WithCustomName(copyLabel))
 
 	state = llbutils.Copy(
-		srcState, include[0], state, "/app/", "1000:1000", buildOpts.IgnoreCache)
+		srcState, include[0], state, "/app/", "1000:1000", buildOpts.IgnoreLayerCache)
 	state = llbutils.Copy(
-		srcState, include[1], state, "/app/", "1000:1000", buildOpts.IgnoreCache)
+		srcState, include[1], state, "/app/", "1000:1000", buildOpts.IgnoreLayerCache)
 
 	runOpts := []llb.RunOption{
 		llbutils.Shell(installCmd),
@@ -254,7 +258,7 @@ func (h *NodeJSHandler) depsInstall(
 		llb.User("1000"),
 		llb.WithCustomName(installLabel)}
 
-	if buildOpts.IgnoreCache {
+	if buildOpts.IgnoreLayerCache {
 		runOpts = append(runOpts, llb.IgnoreCache)
 	}
 
@@ -278,7 +282,7 @@ func (h *NodeJSHandler) copySources(
 	if sourceContext.Type == builddef.ContextTypeLocal {
 		srcPath := prefixContextPath(sourceContext, "/")
 		return llbutils.Copy(
-			srcState, srcPath, state, "/app", "1000:1000", buildOpts.IgnoreCache)
+			srcState, srcPath, state, "/app", "1000:1000", buildOpts.IgnoreLayerCache)
 	}
 
 	// Despite the IncludePatterns() above, the source state might also
@@ -289,7 +293,7 @@ func (h *NodeJSHandler) copySources(
 		srcPath := prefixContextPath(sourceContext, srcfile)
 		destPath := path.Join("/app", srcfile)
 		state = llbutils.Copy(
-			srcState, srcPath, state, destPath, "1000:1000", buildOpts.IgnoreCache)
+			srcState, srcPath, state, destPath, "1000:1000", buildOpts.IgnoreLayerCache)
 	}
 
 	return state
@@ -326,7 +330,7 @@ func (h *NodeJSHandler) copyConfigFiles(
 		srcpath := prefixContextPath(srcContext, srcfile)
 		destpath := path.Join("/app", destfile)
 		state = llbutils.Copy(
-			srcState, srcpath, state, destpath, "1000:1000", buildOpts.IgnoreCache)
+			srcState, srcpath, state, destpath, "1000:1000", buildOpts.IgnoreLayerCache)
 	}
 
 	return state
@@ -392,7 +396,7 @@ func (h *NodeJSHandler) build(
 		llb.AddEnv("PATH", envPath),
 		llb.WithCustomName("Build")}
 
-	if buildOpts.IgnoreCache {
+	if buildOpts.IgnoreLayerCache {
 		runOpts = append(runOpts, llb.IgnoreCache)
 	}
 

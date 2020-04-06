@@ -16,14 +16,21 @@ type BuildOpts struct {
 	// LocalUniqueID is useful mostly for test purpose, in order to use
 	// a predefine value and have stable op digests.
 	LocalUniqueID string
-	IgnoreCache   bool
-	File          string
-	LockFile      string
-	Stage         string
-	BuildContext  *Context
+	// IgnoreLayerCache determines wheter layer caching shall be disabled. It's
+	// the responsibility of specialized kind handlers to correctly apply this
+	// option.
+	IgnoreLayerCache bool
+	// WithCacheMounts determines if the specialized builders should use a
+	// custom cache to store downloaded pckages, compiled files, etc...
+	WithCacheMounts  bool
+	CacheIDNamespace string
+	File             string
+	LockFile         string
+	Stage            string
+	BuildContext     *Context
 }
 
-func NewBuildOpts(file, context, stage, sessionID string) (BuildOpts, error) {
+func NewBuildOpts(file, context, stage, sessionID, cacheIDNamespace string) (BuildOpts, error) {
 	if context == "" {
 		context = "context"
 	}
@@ -32,10 +39,12 @@ func NewBuildOpts(file, context, stage, sessionID string) (BuildOpts, error) {
 	}
 
 	opts := BuildOpts{
-		File:      file,
-		LockFile:  LockFilepath(file),
-		Stage:     stage,
-		SessionID: sessionID,
+		File:             file,
+		LockFile:         LockFilepath(file),
+		Stage:            stage,
+		SessionID:        sessionID,
+		WithCacheMounts:  true,
+		CacheIDNamespace: cacheIDNamespace,
 	}
 
 	var err error

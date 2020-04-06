@@ -68,9 +68,13 @@ func (h *WebserverHandler) Build(
 		pkgManager = llbutils.APK
 	}
 
+	if buildOpts.WithCacheMounts && len(def.Locks.SystemPackages) > 0 {
+		state = llbutils.SetupSystemPackagesCache(state, pkgManager)
+	}
+
 	state, err = llbutils.InstallSystemPackages(state, pkgManager,
 		def.Locks.SystemPackages,
-		buildOpts.IgnoreCache)
+		llbutils.NewCachingStrategyFromBuildOpts(buildOpts))
 	if err != nil {
 		return state, img, xerrors.Errorf("failed to add \"install system pacakges\" steps: %w", err)
 	}
@@ -81,7 +85,7 @@ func (h *WebserverHandler) Build(
 
 	for _, asset := range def.Assets {
 		state = llbutils.Copy(
-			*buildOpts.SourceState, asset.From, state, asset.To, fileOwner, buildOpts.IgnoreCache)
+			*buildOpts.SourceState, asset.From, state, asset.To, fileOwner, buildOpts.IgnoreLayerCache)
 	}
 
 	setImageMetadata(def, state, img)
@@ -104,7 +108,7 @@ func (h *WebserverHandler) copyConfigFile(
 	return llbutils.Copy(
 		configFileSrc, *def.ConfigFile,
 		state, def.Type.ConfigPath(), fileOwner,
-		buildOpts.IgnoreCache)
+		buildOpts.IgnoreLayerCache)
 }
 
 func setImageMetadata(

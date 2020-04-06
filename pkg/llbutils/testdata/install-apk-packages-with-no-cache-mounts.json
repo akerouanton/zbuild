@@ -1,27 +1,26 @@
 [
   {
-    "RawOp": "CkkKR3NoYTI1Njo4NTU2MjYxOTEwZDUxYWI2ZDM1OTdhNTM2NGQ1MjI3YWI1ZDBkM2E5MjYxMDNhNDc5MDYwNzA5NzYzNmZjMjBl",
+    "RawOp": "CkkKR3NoYTI1NjpiZmY1Y2VkMzllNzg0Nzg4ZmZiNzNhZWFmZmFkOTcwZjhkNTcyOTI4Y2M2OTZlMTY1ZjhmMTZjZTA0NmM3ZmYy",
     "Op": {
       "inputs": [
         {
-          "digest": "sha256:8556261910d51ab6d3597a5364d5227ab5d0d3a926103a4790607097636fc20e",
+          "digest": "sha256:bff5ced39e784788ffb73aeaffad970f8d572928cc696e165f8f16ce046c7ff2",
           "index": 0
         }
       ],
       "Op": null
     },
-    "Digest": "sha256:537d06760280de9b60e03d5546d8e0e1fad381b971c3bb718f02742ab785c7bb",
+    "Digest": "sha256:1ad663b189efaa23a4e5cb2d07bb0f4e984f7585d66f008ef326eff1fa888695",
     "OpMetadata": {
       "caps": {
         "constraints": true,
         "meta.description": true,
-        "meta.ignorecache": true,
         "platform": true
       }
     }
   },
   {
-    "RawOp": "CkkKR3NoYTI1NjpjMWFhZWU4YTM4YmE2ZGVjNjRkNWI4YzkxOWM3Y2Y2YmRkYzA0ZjBiZDE4NzYzNjc4MzQyZDMzYTI1YzA2ODQ0EtcBCs8BCgcvYmluL3NoCgItbwoHZXJyZXhpdAoCLWMKrwFhcHQtZ2V0IHVwZGF0ZTsgYXB0LWdldCBpbnN0YWxsIC15IC0tbm8taW5zdGFsbC1yZWNvbW1lbmRzIGNhLWNlcnRmaWNpYXRlcz1jYS1jZXJ0aWZpY2F0ZXMtdmVyc2lvbiBjdXJsPWN1cmwtdmVyc2lvbiB6bGliMWctZGV2PXpsaWIxZy1kZXYtdmVyc2lvbjsgcm0gLXJmIC92YXIvbGliL2FwdC9saXN0cy8qGgEvEgMaAS9SDgoFYW1kNjQSBWxpbnV4WgA=",
+    "RawOp": "CkkKR3NoYTI1NjpjMWFhZWU4YTM4YmE2ZGVjNjRkNWI4YzkxOWM3Y2Y2YmRkYzA0ZjBiZDE4NzYzNjc4MzQyZDMzYTI1YzA2ODQ0EpEBCokBCgcvYmluL3NoCgItbwoHZXJyZXhpdAoCLWMKamFwayBhZGQgLS1uby1jYWNoZSBjYS1jZXJ0ZmljaWF0ZXM9Y2EtY2VydGlmaWNhdGVzLXZlcnNpb24gY3VybD1jdXJsLXZlcnNpb24gemxpYjFnLWRldj16bGliMWctZGV2LXZlcnNpb24aAS8SAxoBL1IOCgVhbWQ2NBIFbGludXhaAA==",
     "Op": {
       "inputs": [
         {
@@ -37,7 +36,7 @@
               "-o",
               "errexit",
               "-c",
-              "apt-get update; apt-get install -y --no-install-recommends ca-certficiates=ca-certificates-version curl=curl-version zlib1g-dev=zlib1g-dev-version; rm -rf /var/lib/apt/lists/*"
+              "apk add --no-cache ca-certficiates=ca-certificates-version curl=curl-version zlib1g-dev=zlib1g-dev-version"
             ],
             "cwd": "/"
           },
@@ -56,9 +55,8 @@
       },
       "constraints": {}
     },
-    "Digest": "sha256:8556261910d51ab6d3597a5364d5227ab5d0d3a926103a4790607097636fc20e",
+    "Digest": "sha256:bff5ced39e784788ffb73aeaffad970f8d572928cc696e165f8f16ce046c7ff2",
     "OpMetadata": {
-      "ignore_cache": true,
       "description": {
         "llb.customname": "Install system packages (ca-certficiates=ca-certificates-version, curl=curl-version, zlib1g-dev=zlib1g-dev-version)"
       },

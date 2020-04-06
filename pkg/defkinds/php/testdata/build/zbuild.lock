@@ -1,33 +1,53 @@
 base_image: docker.io/library/php:7.3.13-fpm-buster
+defhash: 3338392363832298632
 extension_dir: /usr/local/lib/php/extensions/no-debug-non-zts-20180731
+osrelease:
+  name: debian
+  versionname: buster
+  versionid: "10"
+source_context: null
 stages:
   dev:
-    system_packages:
-      git: 1:2.20.1-2
-      libicu-dev: 63.1-6
-      libssl-dev: 1.1.1d-0+deb10u2
-      libxml2-dev: 2.9.4+dfsg1-7+b3
-      openssl: 1.1.1d-0+deb10u2
-      unzip: 6.0-23+deb10u1
-      zlib1g-dev: 1:1.2.11.dfsg-1
     extensions:
       intl: '*'
       pdo_mysql: '*'
       soap: '*'
       sockets: '*'
       zip: '*'
+    system_packages:
+      git: 1:2.20.1-2+deb10u1
+      libicu-dev: 63.1-6+deb10u1
+      libjpeg-dev: 1:1.5.2-2
+      libssl-dev: 1.1.1d-0+deb10u2
+      libxml2-dev: 2.9.4+dfsg1-7+b3
+      libzip-dev: 1.5.1-4
+      openssl: 1.1.1d-0+deb10u2
+      unzip: 6.0-23+deb10u1
+      zlib1g-dev: 1:1.2.11.dfsg-1
   prod:
-    system_packages:
-      git: 1:2.20.1-2
-      libicu-dev: 63.1-6
-      libssl-dev: 1.1.1d-0+deb10u2
-      libxml2-dev: 2.9.4+dfsg1-7+b3
-      openssl: 1.1.1d-0+deb10u2
-      unzip: 6.0-23+deb10u1
-      zlib1g-dev: 1:1.2.11.dfsg-1
     extensions:
+      apcu: 5.1.18
       intl: '*'
+      opcache: '*'
       pdo_mysql: '*'
       soap: '*'
       sockets: '*'
       zip: '*'
+    system_packages:
+      git: 1:2.20.1-2+deb10u1
+      libicu-dev: 63.1-6+deb10u1
+      libjpeg-dev: 1:1.5.2-2
+      libssl-dev: 1.1.1d-0+deb10u2
+      libxml2-dev: 2.9.4+dfsg1-7+b3
+      libzip-dev: 1.5.1-4
+      openssl: 1.1.1d-0+deb10u2
+      unzip: 6.0-23+deb10u1
+      zlib1g-dev: 1:1.2.11.dfsg-1
+webserver:
+  base_image: docker.io/library/nginx:latest@sha256:2539d4344dd18e1df02be842ffc435f8e1f699cfc55516e2cf2cb16b7a9aea0b
+  osrelease:
+    name: debian
+    versionname: buster
+    versionid: "10"
+  system_packages:
+    curl: 7.64.0-4+deb10u1

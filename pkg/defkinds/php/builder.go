@@ -98,13 +98,13 @@ func (h *PHPHandler) Build(
 
 func (h *PHPHandler) buildPHP(
 	ctx context.Context,
-	stage StageDefinition,
+	stageDef StageDefinition,
 	buildOpts builddef.BuildOpts,
 ) (llb.State, *image.Image, error) {
-	state := llbutils.ImageSource(stage.DefLocks.BaseImage, true)
-	baseImg, err := image.LoadMeta(ctx, stage.DefLocks.BaseImage)
+	state := llbutils.ImageSource(stageDef.DefLocks.BaseImage, true)
+	baseImg, err := image.LoadMeta(ctx, stageDef.DefLocks.BaseImage)
 	if err != nil {
-		return state, nil, xerrors.Errorf("failed to load %q metadata: %w", stage.DefLocks.BaseImage, err)
+		return state, nil, xerrors.Errorf("failed to load %q metadata: %w", stageDef.DefLocks.BaseImage, err)
 	}
 
 	img := image.CloneMeta(baseImg)
@@ -112,41 +112,45 @@ func (h *PHPHandler) buildPHP(
 
 	composer := llbutils.ImageSource(defaultComposerImageTag, false)
 	state = llbutils.Copy(
-		composer, "/usr/bin/composer", state, "/usr/bin/composer", "", buildOpts.IgnoreCache)
+		composer, "/usr/bin/composer", state, "/usr/bin/composer", "", buildOpts.IgnoreLayerCache)
 
 	pkgManager := llbutils.APT
-	if stage.DefLocks.OSRelease.Name == "alpine" {
+	if stageDef.DefLocks.OSRelease.Name == "alpine" {
 		pkgManager = llbutils.APK
 	}
 
+	if buildOpts.WithCacheMounts && len(stageDef.StageLocks.SystemPackages) > 0 {
+		state = llbutils.SetupSystemPackagesCache(state, pkgManager)
+	}
+
 	state, err = llbutils.InstallSystemPackages(state, pkgManager,
-		stage.StageLocks.SystemPackages,
-		buildOpts.IgnoreCache)
+		stageDef.StageLocks.SystemPackages,
+		llbutils.NewCachingStrategyFromBuildOpts(buildOpts))
 	if err != nil {
 		return state, img, xerrors.Errorf("failed to add \"install system pacakges\" steps: %w", err)
 	}
 
-	state = InstallExtensions(stage, state, buildOpts)
-	state = llbutils.CopyExternalFiles(state, stage.ExternalFiles)
+	state = InstallExtensions(stageDef, state, buildOpts)
+	state = llbutils.CopyExternalFiles(state, stageDef.ExternalFiles)
 
 	state = llbutils.Mkdir(state, "1000:1000", "/app", "/composer")
 	state = state.User("1000")
 	state = state.Dir("/app")
 	state = state.AddEnv("COMPOSER_HOME", "/composer")
 
-	state = copyConfigFiles(stage, state, buildOpts)
-	state = globalComposerInstall(stage, state, buildOpts)
+	state = copyConfigFiles(stageDef, state, buildOpts)
+	state = globalComposerInstall(stageDef, state, buildOpts)
 
-	if !stage.Dev {
-		state = composerInstall(stage, state, buildOpts)
-		state = copySourceFiles(stage, state, buildOpts)
-		state, err = postInstall(stage, state, buildOpts)
+	if !stageDef.Dev {
+		state = composerInstall(stageDef, state, buildOpts)
+		state = copySourceFiles(stageDef, state, buildOpts)
+		state, err = postInstall(stageDef, state, buildOpts)
 		if err != nil {
 			return state, img, err
 		}
 	}
 
-	setImageMetadata(stage, state, img)
+	setImageMetadata(stageDef, state, img)
 
 	return state, img, nil
 }
@@ -182,13 +186,13 @@ func copyConfigFiles(
 		state = llbutils.Copy(
 			sourceState, iniFile,
 			state, "/usr/local/etc/php/php.ini", "1000:1000",
-			buildOpts.IgnoreCache)
+			buildOpts.IgnoreLayerCache)
 	}
 	if fpmFile != "" {
 		state = llbutils.Copy(
 			sourceState, fpmFile,
 			state, "/usr/local/etc/php-fpm.conf", "1000:1000",
-			buildOpts.IgnoreCache)
+			buildOpts.IgnoreLayerCache)
 	}
 
 	return state
@@ -211,7 +215,7 @@ func copySourceFiles(
 	if sourceContext.Type == builddef.ContextTypeLocal {
 		srcPath := prefixContextPath(sourceContext, "/")
 		return llbutils.Copy(
-			srcState, srcPath, state, "/app/", "1000:1000", buildOpts.IgnoreCache)
+			srcState, srcPath, state, "/app/", "1000:1000", buildOpts.IgnoreLayerCache)
 	}
 
 	// Despite the IncludePatterns() above, the source state might also
@@ -222,7 +226,7 @@ func copySourceFiles(
 		srcPath := prefixContextPath(sourceContext, srcfile)
 		destPath := path.Join("/app", srcfile)
 		state = llbutils.Copy(
-			srcState, srcPath, state, destPath, "1000:1000", buildOpts.IgnoreCache)
+			srcState, srcPath, state, destPath, "1000:1000", buildOpts.IgnoreLayerCache)
 	}
 
 	return state
@@ -326,7 +330,7 @@ func globalComposerInstall(stageDef StageDefinition, state llb.State, buildOpts 
 		llb.Dir(state.GetDir()),
 		llb.User("1000"),
 		llb.WithCustomNamef("Run composer global require (%s)", strings.Join(deps, ", "))}
-	if buildOpts.IgnoreCache {
+	if buildOpts.IgnoreLayerCache {
 		runOpts = append(runOpts, llb.IgnoreCache)
 	}
 
@@ -352,7 +356,7 @@ func composerInstall(
 
 	srcPath := prefixContextPath(srcContext, "composer.*")
 	state = llbutils.Copy(
-		srcState, srcPath, state, "/app/", "1000:1000", buildOpts.IgnoreCache)
+		srcState, srcPath, state, "/app/", "1000:1000", buildOpts.IgnoreLayerCache)
 
 	cmds := []string{
 		"composer install --no-dev --prefer-dist --no-scripts --no-autoloader",
@@ -364,7 +368,7 @@ func composerInstall(
 		llb.User("1000"),
 		llb.WithCustomName("Run composer install")}
 
-	if buildOpts.IgnoreCache {
+	if buildOpts.IgnoreLayerCache {
 		runOpts = append(runOpts, llb.IgnoreCache)
 	}
 
@@ -389,7 +393,7 @@ func postInstall(
 		llb.Dir(state.GetDir()),
 		llb.WithCustomName("Dump autoloader and execute custom post-install steps")}
 
-	if buildOpts.IgnoreCache {
+	if buildOpts.IgnoreLayerCache {
 		runOpts = append(runOpts, llb.IgnoreCache)
 	}
 
