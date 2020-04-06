@@ -132,3 +132,11 @@ func (set *VersionMap) Merge(overriding *VersionMap) {
 		set.Overwrite(name, val)
 	}
 }
+
+func (set *VersionMap) Size() int {
+	if set == nil {
+		return 0
+	}
+
+	return len(*set)
+}

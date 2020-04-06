@@ -30,6 +30,7 @@ const (
 	keyContext       = "context"
 	keyDockerContext = "contextkey"
 	keyFilename      = "filename"
+	keyNoCache       = "no-cache"
 )
 
 // Builder takes a KindRegistry, which contains all the specialized handlers
@@ -83,6 +84,11 @@ func buildOptsFromBuildkitOpts(c client.Client) (builddef.BuildOpts, error) {
 		buildOpts.BuildContext, err = builddef.NewContext(v, "")
 	} else if v, ok := opts[keyContext]; ok {
 		buildOpts.BuildContext, err = builddef.NewContext(v, "")
+	}
+
+	// @TODO: support no-cache values (see https://sourcegraph.com/github.com/moby/buildkit@e0e3ad6/-/blob/frontend/dockerfile/builder/build.go#L110)
+	if _, ok := opts[keyNoCache]; ok {
+		buildOpts.IgnoreCache = true
 	}
 
 	return buildOpts, err

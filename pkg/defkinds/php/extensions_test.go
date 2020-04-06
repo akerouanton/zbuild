@@ -98,7 +98,7 @@ func TestInstallExtensions(t *testing.T) {
 			tc := tcinit(t)
 
 			state := llb.Scratch()
-			res := php.InstallExtensions(state, tc.stageDef)
+			res := php.InstallExtensions(tc.stageDef, state, builddef.BuildOpts{})
 			jsonState := llbtest.StateToJSON(t, res)
 
 			if *flagTestdata {

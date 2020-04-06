@@ -16,6 +16,7 @@ type BuildOpts struct {
 	// LocalUniqueID is useful mostly for test purpose, in order to use
 	// a predefine value and have stable op digests.
 	LocalUniqueID string
+	IgnoreCache   bool
 	File          string
 	LockFile      string
 	Stage         string
