@@ -383,55 +383,95 @@ func InstallExtensions(
 		return state
 	}
 
-	coreExtensions := filterExtensions(extensions, isCoreExtension)
-	peclExtensions := filterExtensions(extensions, isNotCoreExtension)
-
 	cmds := []string{}
-	if len(coreExtensions) > 0 {
-		coreExtensionNames := getExtensionNames(coreExtensions)
-		coreExtensionSpecs := getCoreExtensionSpecs(coreExtensions)
-
-		cmds = append(cmds, configureExtBuilds(stageDef, coreExtensionNames)...)
-		cmds = append(cmds,
-			"docker-php-ext-install -j\"$(nproc)\" "+strings.Join(coreExtensionSpecs, " "))
-
-		if version.Compare(stageDef.MajMinVersion, "7.3", ">=") {
-			cmds = append(cmds, "docker-php-source delete")
-		}
-	}
-	if len(peclExtensions) > 0 {
-		peclExtensionNames := getExtensionNames(peclExtensions)
-		peclExtensionSpecs := getPeclExtensionSpecs(peclExtensions)
-
-		cmds = append(cmds,
-			"curl -f -o /usr/local/sbin/notpecl https://storage.googleapis.com/notpecl/notpecl",
-			"chmod +x /usr/local/sbin/notpecl")
-
-		isAlpine := stageDef.DefLocks.OSRelease.Name == "alpine"
-		if isAlpine {
-			cmds = append(cmds, "apk add --no-cache --virtual=.phpize $PHPIZE_DEPS")
-		}
-
-		cmds = append(cmds,
-			"notpecl install "+strings.Join(peclExtensionSpecs, " "),
-			"docker-php-ext-enable "+strings.Join(peclExtensionNames, " "))
-
-		if isAlpine {
-			cmds = append(cmds, "apk del .phpize")
-		}
-		cmds = append(cmds, "rm -rf /usr/local/sbin/notpecl")
-	}
-
 	extensionNames := getExtensionNames(extensions)
 	runOpts := []llb.RunOption{
-		llbutils.Shell(cmds...),
 		llb.WithCustomNamef("Install PHP extensions (%s)", strings.Join(extensionNames, ", "))}
 
+	coreExtensions := filterExtensions(extensions, isCoreExtension)
+	if len(coreExtensions) > 0 {
+		cmds = append(cmds, installCoreExtensions(stageDef, coreExtensions)...)
+	}
+
+	peclExtensions := filterExtensions(extensions, isNotCoreExtension)
+	if len(peclExtensions) > 0 {
+		peclExtCmds, peclExtRunOpts := installPeclExtensions(
+			stageDef, peclExtensions, buildOpts)
+
+		cmds = append(cmds, peclExtCmds...)
+		runOpts = append(runOpts, peclExtRunOpts...)
+	}
+
+	runOpts = append(runOpts, llbutils.Shell(cmds...))
 	if buildOpts.IgnoreLayerCache {
 		runOpts = append(runOpts, llb.IgnoreCache)
 	}
 
 	return state.Run(runOpts...).Root()
+}
+
+func installCoreExtensions(
+	stageDef StageDefinition,
+	coreExtensions map[string]string,
+) []string {
+	coreExtensionNames := getExtensionNames(coreExtensions)
+	coreExtensionSpecs := getCoreExtensionSpecs(coreExtensions)
+
+	cmds := append(
+		configureExtBuilds(stageDef, coreExtensionNames),
+		"docker-php-ext-install -j\"$(nproc)\" "+strings.Join(coreExtensionSpecs, " "))
+
+	if version.Compare(stageDef.MajMinVersion, "7.3", ">=") {
+		cmds = append(cmds, "docker-php-source delete")
+	}
+
+	return cmds
+}
+
+func installPeclExtensions(
+	stageDef StageDefinition,
+	peclExtensions map[string]string,
+	buildOpts builddef.BuildOpts,
+) ([]string, []llb.RunOption) {
+	cmds := []string{
+		// @TODO: change this URL once notpecl v0.1 has been released.
+		"curl -f -o /usr/local/sbin/notpecl https://storage.googleapis.com/notpecl/notpecl",
+		"chmod +x /usr/local/sbin/notpecl"}
+	runOpts := []llb.RunOption{}
+	notpeclArgs := []string{}
+
+	if buildOpts.WithCacheMounts {
+		notpeclArgs = []string{
+			"--download-dir=/var/cache/notpecl",
+			"--cleanup=false"}
+		runOpts = append(runOpts,
+			llbutils.CacheMountOpt("/var/cache/notpecl", buildOpts.CacheIDNamespace, "0"))
+	}
+
+	peclExtensionNames := getExtensionNames(peclExtensions)
+	peclExtensionSpecs := getPeclExtensionSpecs(peclExtensions)
+	notpeclArgs = append(notpeclArgs, peclExtensionSpecs...)
+	cmds = append(cmds,
+		"notpecl install "+strings.Join(notpeclArgs, " "),
+		"docker-php-ext-enable "+strings.Join(peclExtensionNames, " "))
+
+	if stageDef.DefLocks.OSRelease.Name == "alpine" {
+		apkArgs := []string{"--virtual=.phpize", "$PHPIZE_DEPS"}
+
+		if buildOpts.WithCacheMounts {
+			runOpts = append(runOpts,
+				llbutils.CacheMountOpt("/etc/apk/cache", buildOpts.CacheIDNamespace, "0"))
+		} else {
+			apkArgs = append(apkArgs, "--no-cache")
+		}
+
+		cmds = append(
+			[]string{"apk add " + strings.Join(apkArgs, " ")},
+			append(cmds, "apk del .phpize")...)
+	}
+
+	cmds = append(cmds, "rm -rf /usr/local/sbin/notpecl")
+	return cmds, runOpts
 }
 
 // This holds the list of flags to pass to docker-php-ext-configure. Note
