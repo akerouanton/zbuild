@@ -219,9 +219,7 @@ func InstallPackagesWithAPK(
 
 	if opts.WithCacheMounts {
 		cmds = append(cmds,
-			"apk add "+strings.Join(packageSpecs, " "),
-			// Clean up old packages but retain installed ones
-			"apk cache -v sync")
+			"apk add "+strings.Join(packageSpecs, " "))
 		runOpts = append(runOpts,
 			CacheMountOpt("/etc/apk/cache", opts.CacheIDNamespace, "0"))
 	} else {
