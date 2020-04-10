@@ -5,4 +5,5 @@ healthcheck: true
 system_packages:
   curl: '*'
 
-config_file: ./docker/nginx.conf
+config_files:
+  ./docker/nginx.conf: nginx.conf
