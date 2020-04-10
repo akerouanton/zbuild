@@ -263,7 +263,7 @@ func setImageMetadata(
 	img.Config.User = "1000"
 	img.Config.WorkingDir = "/app"
 	img.Config.Env = []string{
-		"PATH=" + getEnv(state, "PATH"),
+		"PATH=/composer/vendor/bin:" + getEnv(state, "PATH"),
 		"COMPOSER_HOME=/composer",
 		"PHP_VERSION=" + getEnv(state, "PHP_VERSION"),
 		"PHP_INI_DIR=" + getEnv(state, "PHP_INI_DIR"),

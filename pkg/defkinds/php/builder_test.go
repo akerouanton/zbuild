@@ -68,7 +68,7 @@ func initBuildLLBForDevStageTC(t *testing.T, mockCtrl *gomock.Controller) buildT
 				ImageConfig: specs.ImageConfig{
 					User: "1000",
 					Env: []string{
-						"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+						"PATH=/composer/vendor/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
 						"COMPOSER_HOME=/composer",
 						"PHP_VERSION=7.3.13",
 						"PHP_INI_DIR=/usr/local/etc/php",
@@ -131,7 +131,7 @@ func initBuildLLBForProdStageTC(t *testing.T, mockCtrl *gomock.Controller) build
 				ImageConfig: specs.ImageConfig{
 					User: "1000",
 					Env: []string{
-						"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+						"PATH=/composer/vendor/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
 						"COMPOSER_HOME=/composer",
 						"PHP_VERSION=7.3.13",
 						"PHP_INI_DIR=/usr/local/etc/php",
@@ -203,7 +203,7 @@ func initBuildProdStageFromGitBasedBuildContextTC(t *testing.T, mockCtrl *gomock
 				ImageConfig: specs.ImageConfig{
 					User: "1000",
 					Env: []string{
-						"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+						"PATH=/composer/vendor/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
 						"COMPOSER_HOME=/composer",
 						"PHP_VERSION=7.3.13",
 						"PHP_INI_DIR=/usr/local/etc/php",
@@ -272,7 +272,7 @@ func initBuildProdStageFromGitBasedSourceContextTC(t *testing.T, mockCtrl *gomoc
 				ImageConfig: specs.ImageConfig{
 					User: "1000",
 					Env: []string{
-						"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+						"PATH=/composer/vendor/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
 						"COMPOSER_HOME=/composer",
 						"PHP_VERSION=7.3.13",
 						"PHP_INI_DIR=/usr/local/etc/php",
@@ -338,7 +338,7 @@ func initBuildProdStageForAlpineImageTC(t *testing.T, mockCtrl *gomock.Controlle
 				ImageConfig: specs.ImageConfig{
 					User: "1000",
 					Env: []string{
-						"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+						"PATH=/composer/vendor/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
 						"COMPOSER_HOME=/composer",
 						"PHP_VERSION=7.4.2",
 						"PHP_INI_DIR=/usr/local/etc/php",
@@ -406,7 +406,7 @@ func initBuildProdStageWithCacheMountsTC(t *testing.T, mockCtrl *gomock.Controll
 				ImageConfig: specs.ImageConfig{
 					User: "1000",
 					Env: []string{
-						"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+						"PATH=/composer/vendor/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
 						"COMPOSER_HOME=/composer",
 						"PHP_VERSION=7.3.13",
 						"PHP_INI_DIR=/usr/local/etc/php",
