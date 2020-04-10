@@ -271,7 +271,7 @@ func SetupSystemPackagesCache(state llb.State, pkgMgr string) llb.State {
 func SetupAPTCache(state llb.State) llb.State {
 	return state.Run(
 		Shell("[ -f /etc/apt/apt.conf.d/docker-clean ] && rm -f /etc/apt/apt.conf.d/docker-clean",
-			"echo 'Binary::apt::APT::Keep-Downloaded-Packages \"true\"' > /etc/apt/apt.conf.d/keep-cache"),
+			"echo 'Binary::apt::APT::Keep-Downloaded-Packages \"true\";' > /etc/apt/apt.conf.d/keep-cache"),
 		llb.WithCustomName("Set up APT cache"),
 	).Root()
 }
