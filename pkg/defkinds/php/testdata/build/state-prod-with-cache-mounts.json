@@ -49,6 +49,70 @@
     }
   },
   {
+    "RawOp": "CkkKR3NoYTI1NjpkMDI1NTg1ZWNjMTI4Zjg4ODVhYjgyYTBjMWEwYzBiYmIyYjdhZDE1YTE3YTZkMzY0Y2JiZjFmZmNlMzJhM2ZhEvoHCvIHCgcvYmluL3NoCgItbwoHZXJyZXhpdAoCLWMKQ2NvbXBvc2VyIGR1bXAtYXV0b2xvYWQgLS1uby1kZXYgLS1vcHRpbWl6ZSAtLWNsYXNzbWFwLWF1dGhvcml0YXRpdmUSQVBBVEg9L3Vzci9sb2NhbC9zYmluOi91c3IvbG9jYWwvYmluOi91c3Ivc2JpbjovdXNyL2Jpbjovc2JpbjovYmluElhQSFBJWkVfREVQUz1hdXRvY29uZiAJCWRwa2ctZGV2IAkJZmlsZSAJCWcrKyAJCWdjYyAJCWxpYmMtZGV2IAkJbWFrZSAJCXBrZy1jb25maWcgCQlyZTJjEh5QSFBfSU5JX0RJUj0vdXNyL2xvY2FsL2V0Yy9waHASZlBIUF9FWFRSQV9DT05GSUdVUkVfQVJHUz0tLWVuYWJsZS1mcG0gLS13aXRoLWZwbS11c2VyPXd3dy1kYXRhIC0td2l0aC1mcG0tZ3JvdXA9d3d3LWRhdGEgLS1kaXNhYmxlLWNnaRJeUEhQX0NGTEFHUz0tZnN0YWNrLXByb3RlY3Rvci1zdHJvbmcgLWZwaWMgLWZwaWUgLU8yIC1EX0xBUkdFRklMRV9TT1VSQ0UgLURfRklMRV9PRkZTRVRfQklUUz02NBJgUEhQX0NQUEZMQUdTPS1mc3RhY2stcHJvdGVjdG9yLXN0cm9uZyAtZnBpYyAtZnBpZSAtTzIgLURfTEFSR0VGSUxFX1NPVVJDRSAtRF9GSUxFX09GRlNFVF9CSVRTPTY0Ei5QSFBfTERGTEFHUz0tV2wsLU8xIC1XbCwtLWhhc2gtc3R5bGU9Ym90aCAtcGllElpHUEdfS0VZUz1DQkFGNjlGMTczQTBGRUE0QjUzN0Y0NzBENjZDOTU5MzExOEJDQ0I2IEYzODI1MjgyNkFDRDk1N0VGMzgwRDM5RjJGNzk1NkJDNURBMDRCNUQSElBIUF9WRVJTSU9OPTcuMy4xMxJCUEhQX1VSTD1odHRwczovL3d3dy5waHAubmV0L2dldC9waHAtNy4zLjEzLnRhci54ei9mcm9tL3RoaXMvbWlycm9yEkpQSFBfQVNDX1VSTD1odHRwczovL3d3dy5waHAubmV0L2dldC9waHAtNy4zLjEzLnRhci54ei5hc2MvZnJvbS90aGlzL21pcnJvchJLUEhQX1NIQTI1Nj01N2FjNTVmZTQ0MmQyZGE2NTBhYmViOWU2ZmExNjFiZDNhOThiYTY1MjhjMDI5ZjA3NmY4YmJhNDNkZDVjMjI4EghQSFBfTUQ1PRIXQ09NUE9TRVJfSE9NRT0vY29tcG9zZXIaBC9hcHAiBDEwMDASAxoBL1IOCgVhbWQ2NBIFbGludXhaAA==",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:d025585ecc128f8885ab82a0c1a0c0bbb2b7ad15a17a6d364cbbf1ffce32a3fa",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "exec": {
+          "meta": {
+            "args": [
+              "/bin/sh",
+              "-o",
+              "errexit",
+              "-c",
+              "composer dump-autoload --no-dev --optimize --classmap-authoritative"
+            ],
+            "env": [
+              "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+              "PHPIZE_DEPS=autoconf \t\tdpkg-dev \t\tfile \t\tg++ \t\tgcc \t\tlibc-dev \t\tmake \t\tpkg-config \t\tre2c",
+              "PHP_INI_DIR=/usr/local/etc/php",
+              "PHP_EXTRA_CONFIGURE_ARGS=--enable-fpm --with-fpm-user=www-data --with-fpm-group=www-data --disable-cgi",
+              "PHP_CFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
+              "PHP_CPPFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
+              "PHP_LDFLAGS=-Wl,-O1 -Wl,--hash-style=both -pie",
+              "GPG_KEYS=CBAF69F173A0FEA4B537F470D66C9593118BCCB6 F38252826ACD957EF380D39F2F7956BC5DA04B5D",
+              "PHP_VERSION=7.3.13",
+              "PHP_URL=https://www.php.net/get/php-7.3.13.tar.xz/from/this/mirror",
+              "PHP_ASC_URL=https://www.php.net/get/php-7.3.13.tar.xz.asc/from/this/mirror",
+              "PHP_SHA256=57ac55fe442d2da650abeb9e6fa161bd3a98ba6528c029f076f8bba43dd5c228",
+              "PHP_MD5=",
+              "COMPOSER_HOME=/composer"
+            ],
+            "cwd": "/app",
+            "user": "1000"
+          },
+          "mounts": [
+            {
+              "input": 0,
+              "dest": "/",
+              "output": 0
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:0e7b74595b6dafc73a7aaacaf8fdad35d7bbd870dde1209467100a863dfe231a",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Dump autoloader and execute custom post-install steps"
+      },
+      "caps": {
+        "exec.meta.base": true,
+        "exec.mount.bind": true
+      }
+    }
+  },
+  {
     "RawOp": "CkkKR3NoYTI1NjoxZDU1NTE0NDgwNGZiNGRhZWI4YmFiYzI5ZjBhMDQ0MzYyNjhjMmYxZWQ4ZjhiYjk5OGRkM2NmOGVhN2I1NmFmCkkKR3NoYTI1NjowZTE2YzI0YjE4ZWFlMmYyYmNjNDA4NTk0ODRkOGEwY2ZiYzZmZjRmZTg1ZDZhNDg3ZmIxYjNkYzM3YWM4OGQyImMSYRABIl0KFC9kb2NrZXIvYXBwL2ZwbS5jb25mEhsvdXNyL2xvY2FsL2V0Yy9waHAtZnBtLmNvbmYaCgoDEOgHEgMQ6Acg////////////ASgBMAFAAUgBWP///////////wFSDgoFYW1kNjQSBWxpbnV4WgA=",
     "Op": {
       "inputs": [
@@ -200,6 +264,88 @@
     }
   },
   {
+    "RawOp": "CkkKR3NoYTI1NjoxNTZmNDY4M2IzOWZjOTFjZjY4NGQ4NjlkODkwYTI1MDMyMGQwMGU1NTVhOTdhZTk4Y2Y2NjJhZDNjYThlZTRlCkkKR3NoYTI1Njo3MWFlMzI2OGVmZWQwYTFmNzdlNTI5NjdiNDNkMzBjOTRjMzRkODhjMzZhMmIwMDY4M2RiMmNhM2RhMmY2ZDJhEv0ICqcICgcvYmluL3NoCgItbwoHZXJyZXhpdAoCLWMKUGNvbXBvc2VyIGdsb2JhbCByZXF1aXJlIC0tcHJlZmVyLWRpc3QgLS1jbGFzc21hcC1hdXRob3JpdGF0aXZlIGhpcmFrL3ByZXN0aXNzaW1vEkFQQVRIPS91c3IvbG9jYWwvc2JpbjovdXNyL2xvY2FsL2JpbjovdXNyL3NiaW46L3Vzci9iaW46L3NiaW46L2JpbhJYUEhQSVpFX0RFUFM9YXV0b2NvbmYgCQlkcGtnLWRldiAJCWZpbGUgCQlnKysgCQlnY2MgCQlsaWJjLWRldiAJCW1ha2UgCQlwa2ctY29uZmlnIAkJcmUyYxIeUEhQX0lOSV9ESVI9L3Vzci9sb2NhbC9ldGMvcGhwEmZQSFBfRVhUUkFfQ09ORklHVVJFX0FSR1M9LS1lbmFibGUtZnBtIC0td2l0aC1mcG0tdXNlcj13d3ctZGF0YSAtLXdpdGgtZnBtLWdyb3VwPXd3dy1kYXRhIC0tZGlzYWJsZS1jZ2kSXlBIUF9DRkxBR1M9LWZzdGFjay1wcm90ZWN0b3Itc3Ryb25nIC1mcGljIC1mcGllIC1PMiAtRF9MQVJHRUZJTEVfU09VUkNFIC1EX0ZJTEVfT0ZGU0VUX0JJVFM9NjQSYFBIUF9DUFBGTEFHUz0tZnN0YWNrLXByb3RlY3Rvci1zdHJvbmcgLWZwaWMgLWZwaWUgLU8yIC1EX0xBUkdFRklMRV9TT1VSQ0UgLURfRklMRV9PRkZTRVRfQklUUz02NBIuUEhQX0xERkxBR1M9LVdsLC1PMSAtV2wsLS1oYXNoLXN0eWxlPWJvdGggLXBpZRJaR1BHX0tFWVM9Q0JBRjY5RjE3M0EwRkVBNEI1MzdGNDcwRDY2Qzk1OTMxMThCQ0NCNiBGMzgyNTI4MjZBQ0Q5NTdFRjM4MEQzOUYyRjc5NTZCQzVEQTA0QjVEEhJQSFBfVkVSU0lPTj03LjMuMTMSQlBIUF9VUkw9aHR0cHM6Ly93d3cucGhwLm5ldC9nZXQvcGhwLTcuMy4xMy50YXIueHovZnJvbS90aGlzL21pcnJvchJKUEhQX0FTQ19VUkw9aHR0cHM6Ly93d3cucGhwLm5ldC9nZXQvcGhwLTcuMy4xMy50YXIueHouYXNjL2Zyb20vdGhpcy9taXJyb3ISS1BIUF9TSEEyNTY9NTdhYzU1ZmU0NDJkMmRhNjUwYWJlYjllNmZhMTYxYmQzYTk4YmE2NTI4YzAyOWYwNzZmOGJiYTQzZGQ1YzIyOBIIUEhQX01ENT0SF0NPTVBPU0VSX0hPTUU9L2NvbXBvc2VyEiZDT01QT1NFUl9DQUNIRV9ESVI9L3Zhci9jYWNoZS9jb21wb3NlchoEL2FwcCIEMTAwMBIDGgEvEkwIARIGL2NhY2hlGhMvdmFyL2NhY2hlL2NvbXBvc2VyIP///////////wEwA6IBHQobY2FjaGUtbnMvdmFyL2NhY2hlL2NvbXBvc2VyUg4KBWFtZDY0EgVsaW51eFoA",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:156f4683b39fc91cf684d869d890a250320d00e555a97ae98cf662ad3ca8ee4e",
+          "index": 0
+        },
+        {
+          "digest": "sha256:71ae3268efed0a1f77e52967b43d30c94c34d88c36a2b00683db2ca3da2f6d2a",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "exec": {
+          "meta": {
+            "args": [
+              "/bin/sh",
+              "-o",
+              "errexit",
+              "-c",
+              "composer global require --prefer-dist --classmap-authoritative hirak/prestissimo"
+            ],
+            "env": [
+              "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+              "PHPIZE_DEPS=autoconf \t\tdpkg-dev \t\tfile \t\tg++ \t\tgcc \t\tlibc-dev \t\tmake \t\tpkg-config \t\tre2c",
+              "PHP_INI_DIR=/usr/local/etc/php",
+              "PHP_EXTRA_CONFIGURE_ARGS=--enable-fpm --with-fpm-user=www-data --with-fpm-group=www-data --disable-cgi",
+              "PHP_CFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
+              "PHP_CPPFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
+              "PHP_LDFLAGS=-Wl,-O1 -Wl,--hash-style=both -pie",
+              "GPG_KEYS=CBAF69F173A0FEA4B537F470D66C9593118BCCB6 F38252826ACD957EF380D39F2F7956BC5DA04B5D",
+              "PHP_VERSION=7.3.13",
+              "PHP_URL=https://www.php.net/get/php-7.3.13.tar.xz/from/this/mirror",
+              "PHP_ASC_URL=https://www.php.net/get/php-7.3.13.tar.xz.asc/from/this/mirror",
+              "PHP_SHA256=57ac55fe442d2da650abeb9e6fa161bd3a98ba6528c029f076f8bba43dd5c228",
+              "PHP_MD5=",
+              "COMPOSER_HOME=/composer",
+              "COMPOSER_CACHE_DIR=/var/cache/composer"
+            ],
+            "cwd": "/app",
+            "user": "1000"
+          },
+          "mounts": [
+            {
+              "input": 0,
+              "dest": "/",
+              "output": 0
+            },
+            {
+              "input": 1,
+              "selector": "/cache",
+              "dest": "/var/cache/composer",
+              "output": -1,
+              "mountType": 3,
+              "cacheOpt": {
+                "ID": "cache-ns/var/cache/composer"
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:1ec0dc9a8e7514b8887e3d609d1b4dd51aadd260939ed37818a8d91868455fa6",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Run composer global require (hirak/prestissimo)"
+      },
+      "caps": {
+        "exec.meta.base": true,
+        "exec.mount.bind": true,
+        "exec.mount.cache": true,
+        "exec.mount.cache.sharing": true,
+        "exec.mount.selector": true
+      }
+    }
+  },
+  {
     "RawOp": "CkkKR3NoYTI1NjowY2NmZjVlMmNjNjljYzA3M2ZhOGM1OTZhYTYxNDU0YzlkMGZiNzhhOTMyODVlYWU4ODhlZWIzM2U1OTJmNDJlCkkKR3NoYTI1Njo1NzY5ZTJmZmRlOGVjZThlMTQwZDY0MmRmYzQ1OTAxMWE5Yzg4ZmI2NmQ1ZWI5ZGY1ZDZkZmQwZWMxYTc5YWJmIkoSSBABIkQKES91c3IvYmluL2NvbXBvc2VyEhEvdXNyL2Jpbi9jb21wb3NlciD///////////8BKAEwAUABSAFY////////////AVIOCgVhbWQ2NBIFbGludXhaAA==",
     "Op": {
       "inputs": [
@@ -252,31 +398,11 @@
     }
   },
   {
-    "RawOp": "CkkKR3NoYTI1Njo3MmE2NzJmNzJhOWJlNmMxODFhMzUyMDZlYmI4MjNjNjk5Y2Y2OWU1ZDRhMzhjMzFjYjZlZjdjNjg4NzljMzM1",
+    "RawOp": "CkkKR3NoYTI1NjoxZWMwZGM5YThlNzUxNGI4ODg3ZTNkNjA5ZDFiNGRkNTFhYWRkMjYwOTM5ZWQzNzgxOGE4ZDkxODY4NDU1ZmE2CkkKR3NoYTI1Njo2YzJlYmViNWM4NDgzYzJkMGNlZjY5MjIyM2ZiMTQwY2MwNTRkZGFmNDMwNjhmM2Q5OTE1MDM5Y2UyMjFmMTgwIkQSQhABIj4KCy9jb21wb3Nlci4qEgUvYXBwLxoKCgMQ6AcSAxDoByD///////////8BKAEwAUABSAFY////////////AVIOCgVhbWQ2NBIFbGludXhaAA==",
     "Op": {
       "inputs": [
         {
-          "digest": "sha256:72a672f72a9be6c181a35206ebb823c699cf69e5d4a38c31cb6ef7c68879c335",
-          "index": 0
-        }
-      ],
-      "Op": null
-    },
-    "Digest": "sha256:2fd98139c3e13d79d586b64c5908bf8b64f3b535f9f9477e5d71018dd317c8f2",
-    "OpMetadata": {
-      "caps": {
-        "constraints": true,
-        "meta.description": true,
-        "platform": true
-      }
-    }
-  },
-  {
-    "RawOp": "CkkKR3NoYTI1Njo2MzdhMjUzZDViMzBmYzFkNGU0NmI1YjY4YTYxZGFkMTk1YzFjYzUwYWY5ZmI4ZmQ0NjgzZjE2ZmQwMTk3NWE5CkkKR3NoYTI1Njo2YzJlYmViNWM4NDgzYzJkMGNlZjY5MjIyM2ZiMTQwY2MwNTRkZGFmNDMwNjhmM2Q5OTE1MDM5Y2UyMjFmMTgwIkQSQhABIj4KCy9jb21wb3Nlci4qEgUvYXBwLxoKCgMQ6AcSAxDoByD///////////8BKAEwAUABSAFY////////////AVIOCgVhbWQ2NBIFbGludXhaAA==",
-    "Op": {
-      "inputs": [
-        {
-          "digest": "sha256:637a253d5b30fc1d4e46b5b68a61dad195c1cc50af9fb8fd4683f16fd01975a9",
+          "digest": "sha256:1ec0dc9a8e7514b8887e3d609d1b4dd51aadd260939ed37818a8d91868455fa6",
           "index": 0
         },
         {
@@ -325,74 +451,10 @@
       },
       "constraints": {}
     },
-    "Digest": "sha256:41ac46341c257d97b24bbd3b4879b571b750794eec6a40fc050f600168d7cf60",
+    "Digest": "sha256:3632a2df7a52185d2786c7baee125f013ded6d9d616ed030932c1c7ba0d08241",
     "OpMetadata": {
       "description": {
         "llb.customname": "Copy composer.*"
-      },
-      "caps": {
-        "file.base": true
-      }
-    }
-  },
-  {
-    "RawOp": "CkkKR3NoYTI1Njo4N2RiYWY0ZDZiNTcwNDc2YzA0OWU0OWZiN2EwNmM2OGZjN2UzYmM2N2Q4Y2JiMTFlZDhmYmY0YTE0MzIxYmM0CkkKR3NoYTI1NjpkN2E4OWZlZGQxNWQwNzdmOTM3YzliNjhhMzkyZDgyYzg3NmI5NmFjMmZkY2RiZDU4NTc2MWZkZDU3MmE5OTRjIjoSOBABIjQKAS8SBS9hcHAvGgoKAxDoBxIDEOgHIP///////////wEoATABQAFIAVj///////////8BUg4KBWFtZDY0EgVsaW51eFoA",
-    "Op": {
-      "inputs": [
-        {
-          "digest": "sha256:87dbaf4d6b570476c049e49fb7a06c68fc7e3bc67d8cbb11ed8fbf4a14321bc4",
-          "index": 0
-        },
-        {
-          "digest": "sha256:d7a89fedd15d077f937c9b68a392d82c876b96ac2fdcdbd585761fdd572a994c",
-          "index": 0
-        }
-      ],
-      "Op": {
-        "file": {
-          "actions": [
-            {
-              "input": 0,
-              "secondaryInput": 1,
-              "output": 0,
-              "Action": {
-                "copy": {
-                  "src": "/",
-                  "dest": "/app/",
-                  "owner": {
-                    "user": {
-                      "User": {
-                        "byID": 1000
-                      }
-                    },
-                    "group": {
-                      "User": {
-                        "byID": 1000
-                      }
-                    }
-                  },
-                  "mode": -1,
-                  "followSymlink": true,
-                  "dirCopyContents": true,
-                  "createDestPath": true,
-                  "allowWildcard": true,
-                  "timestamp": -1
-                }
-              }
-            }
-          ]
-        }
-      },
-      "platform": {
-        "Architecture": "amd64",
-        "OS": "linux"
-      },
-      "constraints": {}
-    },
-    "Digest": "sha256:54943e17d575c967759cb7bc4d67d71fc3b42b2d997e766cdb84be696a0c15bc",
-    "OpMetadata": {
-      "description": {
-        "llb.customname": "Copy /"
       },
       "caps": {
         "file.base": true
@@ -417,70 +479,6 @@
     "OpMetadata": {
       "caps": {
         "source.image": true
-      }
-    }
-  },
-  {
-    "RawOp": "CkkKR3NoYTI1NjoxNTZmNDY4M2IzOWZjOTFjZjY4NGQ4NjlkODkwYTI1MDMyMGQwMGU1NTVhOTdhZTk4Y2Y2NjJhZDNjYThlZTRlEp0ICpUICgcvYmluL3NoCgItbwoHZXJyZXhpdAoCLWMKZmNvbXBvc2VyIGdsb2JhbCByZXF1aXJlIC0tcHJlZmVyLWRpc3QgLS1jbGFzc21hcC1hdXRob3JpdGF0aXZlIGhpcmFrL3ByZXN0aXNzaW1vOyBjb21wb3NlciBjbGVhci1jYWNoZRJBUEFUSD0vdXNyL2xvY2FsL3NiaW46L3Vzci9sb2NhbC9iaW46L3Vzci9zYmluOi91c3IvYmluOi9zYmluOi9iaW4SWFBIUElaRV9ERVBTPWF1dG9jb25mIAkJZHBrZy1kZXYgCQlmaWxlIAkJZysrIAkJZ2NjIAkJbGliYy1kZXYgCQltYWtlIAkJcGtnLWNvbmZpZyAJCXJlMmMSHlBIUF9JTklfRElSPS91c3IvbG9jYWwvZXRjL3BocBJmUEhQX0VYVFJBX0NPTkZJR1VSRV9BUkdTPS0tZW5hYmxlLWZwbSAtLXdpdGgtZnBtLXVzZXI9d3d3LWRhdGEgLS13aXRoLWZwbS1ncm91cD13d3ctZGF0YSAtLWRpc2FibGUtY2dpEl5QSFBfQ0ZMQUdTPS1mc3RhY2stcHJvdGVjdG9yLXN0cm9uZyAtZnBpYyAtZnBpZSAtTzIgLURfTEFSR0VGSUxFX1NPVVJDRSAtRF9GSUxFX09GRlNFVF9CSVRTPTY0EmBQSFBfQ1BQRkxBR1M9LWZzdGFjay1wcm90ZWN0b3Itc3Ryb25nIC1mcGljIC1mcGllIC1PMiAtRF9MQVJHRUZJTEVfU09VUkNFIC1EX0ZJTEVfT0ZGU0VUX0JJVFM9NjQSLlBIUF9MREZMQUdTPS1XbCwtTzEgLVdsLC0taGFzaC1zdHlsZT1ib3RoIC1waWUSWkdQR19LRVlTPUNCQUY2OUYxNzNBMEZFQTRCNTM3RjQ3MEQ2NkM5NTkzMTE4QkNDQjYgRjM4MjUyODI2QUNEOTU3RUYzODBEMzlGMkY3OTU2QkM1REEwNEI1RBISUEhQX1ZFUlNJT049Ny4zLjEzEkJQSFBfVVJMPWh0dHBzOi8vd3d3LnBocC5uZXQvZ2V0L3BocC03LjMuMTMudGFyLnh6L2Zyb20vdGhpcy9taXJyb3ISSlBIUF9BU0NfVVJMPWh0dHBzOi8vd3d3LnBocC5uZXQvZ2V0L3BocC03LjMuMTMudGFyLnh6LmFzYy9mcm9tL3RoaXMvbWlycm9yEktQSFBfU0hBMjU2PTU3YWM1NWZlNDQyZDJkYTY1MGFiZWI5ZTZmYTE2MWJkM2E5OGJhNjUyOGMwMjlmMDc2ZjhiYmE0M2RkNWMyMjgSCFBIUF9NRDU9EhdDT01QT1NFUl9IT01FPS9jb21wb3NlchoEL2FwcCIEMTAwMBIDGgEvUg4KBWFtZDY0EgVsaW51eFoA",
-    "Op": {
-      "inputs": [
-        {
-          "digest": "sha256:156f4683b39fc91cf684d869d890a250320d00e555a97ae98cf662ad3ca8ee4e",
-          "index": 0
-        }
-      ],
-      "Op": {
-        "exec": {
-          "meta": {
-            "args": [
-              "/bin/sh",
-              "-o",
-              "errexit",
-              "-c",
-              "composer global require --prefer-dist --classmap-authoritative hirak/prestissimo; composer clear-cache"
-            ],
-            "env": [
-              "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
-              "PHPIZE_DEPS=autoconf \t\tdpkg-dev \t\tfile \t\tg++ \t\tgcc \t\tlibc-dev \t\tmake \t\tpkg-config \t\tre2c",
-              "PHP_INI_DIR=/usr/local/etc/php",
-              "PHP_EXTRA_CONFIGURE_ARGS=--enable-fpm --with-fpm-user=www-data --with-fpm-group=www-data --disable-cgi",
-              "PHP_CFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
-              "PHP_CPPFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
-              "PHP_LDFLAGS=-Wl,-O1 -Wl,--hash-style=both -pie",
-              "GPG_KEYS=CBAF69F173A0FEA4B537F470D66C9593118BCCB6 F38252826ACD957EF380D39F2F7956BC5DA04B5D",
-              "PHP_VERSION=7.3.13",
-              "PHP_URL=https://www.php.net/get/php-7.3.13.tar.xz/from/this/mirror",
-              "PHP_ASC_URL=https://www.php.net/get/php-7.3.13.tar.xz.asc/from/this/mirror",
-              "PHP_SHA256=57ac55fe442d2da650abeb9e6fa161bd3a98ba6528c029f076f8bba43dd5c228",
-              "PHP_MD5=",
-              "COMPOSER_HOME=/composer"
-            ],
-            "cwd": "/app",
-            "user": "1000"
-          },
-          "mounts": [
-            {
-              "input": 0,
-              "dest": "/",
-              "output": 0
-            }
-          ]
-        }
-      },
-      "platform": {
-        "Architecture": "amd64",
-        "OS": "linux"
-      },
-      "constraints": {}
-    },
-    "Digest": "sha256:637a253d5b30fc1d4e46b5b68a61dad195c1cc50af9fb8fd4683f16fd01975a9",
-    "OpMetadata": {
-      "description": {
-        "llb.customname": "Run composer global require (hirak/prestissimo)"
-      },
-      "caps": {
-        "exec.meta.base": true,
-        "exec.mount.bind": true
       }
     }
   },
@@ -513,48 +511,30 @@
     }
   },
   {
-    "RawOp": "CkkKR3NoYTI1Njo1NDk0M2UxN2Q1NzVjOTY3NzU5Y2I3YmM0ZDY3ZDcxZmMzYjQyYjJkOTk3ZTc2NmNkYjg0YmU2OTZhMGMxNWJjEvoHCvIHCgcvYmluL3NoCgItbwoHZXJyZXhpdAoCLWMKQ2NvbXBvc2VyIGR1bXAtYXV0b2xvYWQgLS1uby1kZXYgLS1vcHRpbWl6ZSAtLWNsYXNzbWFwLWF1dGhvcml0YXRpdmUSQVBBVEg9L3Vzci9sb2NhbC9zYmluOi91c3IvbG9jYWwvYmluOi91c3Ivc2JpbjovdXNyL2Jpbjovc2JpbjovYmluElhQSFBJWkVfREVQUz1hdXRvY29uZiAJCWRwa2ctZGV2IAkJZmlsZSAJCWcrKyAJCWdjYyAJCWxpYmMtZGV2IAkJbWFrZSAJCXBrZy1jb25maWcgCQlyZTJjEh5QSFBfSU5JX0RJUj0vdXNyL2xvY2FsL2V0Yy9waHASZlBIUF9FWFRSQV9DT05GSUdVUkVfQVJHUz0tLWVuYWJsZS1mcG0gLS13aXRoLWZwbS11c2VyPXd3dy1kYXRhIC0td2l0aC1mcG0tZ3JvdXA9d3d3LWRhdGEgLS1kaXNhYmxlLWNnaRJeUEhQX0NGTEFHUz0tZnN0YWNrLXByb3RlY3Rvci1zdHJvbmcgLWZwaWMgLWZwaWUgLU8yIC1EX0xBUkdFRklMRV9TT1VSQ0UgLURfRklMRV9PRkZTRVRfQklUUz02NBJgUEhQX0NQUEZMQUdTPS1mc3RhY2stcHJvdGVjdG9yLXN0cm9uZyAtZnBpYyAtZnBpZSAtTzIgLURfTEFSR0VGSUxFX1NPVVJDRSAtRF9GSUxFX09GRlNFVF9CSVRTPTY0Ei5QSFBfTERGTEFHUz0tV2wsLU8xIC1XbCwtLWhhc2gtc3R5bGU9Ym90aCAtcGllElpHUEdfS0VZUz1DQkFGNjlGMTczQTBGRUE0QjUzN0Y0NzBENjZDOTU5MzExOEJDQ0I2IEYzODI1MjgyNkFDRDk1N0VGMzgwRDM5RjJGNzk1NkJDNURBMDRCNUQSElBIUF9WRVJTSU9OPTcuMy4xMxJCUEhQX1VSTD1odHRwczovL3d3dy5waHAubmV0L2dldC9waHAtNy4zLjEzLnRhci54ei9mcm9tL3RoaXMvbWlycm9yEkpQSFBfQVNDX1VSTD1odHRwczovL3d3dy5waHAubmV0L2dldC9waHAtNy4zLjEzLnRhci54ei5hc2MvZnJvbS90aGlzL21pcnJvchJLUEhQX1NIQTI1Nj01N2FjNTVmZTQ0MmQyZGE2NTBhYmViOWU2ZmExNjFiZDNhOThiYTY1MjhjMDI5ZjA3NmY4YmJhNDNkZDVjMjI4EghQSFBfTUQ1PRIXQ09NUE9TRVJfSE9NRT0vY29tcG9zZXIaBC9hcHAiBDEwMDASAxoBL1IOCgVhbWQ2NBIFbGludXhaAA==",
+    "RawOp": "IjkSNwj///////////8BEP///////////wEyHwoGL2NhY2hlEOgDGAEiBQoDEOgHKP///////////wFSDgoFYW1kNjQSBWxpbnV4WgA=",
     "Op": {
-      "inputs": [
-        {
-          "digest": "sha256:54943e17d575c967759cb7bc4d67d71fc3b42b2d997e766cdb84be696a0c15bc",
-          "index": 0
-        }
-      ],
       "Op": {
-        "exec": {
-          "meta": {
-            "args": [
-              "/bin/sh",
-              "-o",
-              "errexit",
-              "-c",
-              "composer dump-autoload --no-dev --optimize --classmap-authoritative"
-            ],
-            "env": [
-              "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
-              "PHPIZE_DEPS=autoconf \t\tdpkg-dev \t\tfile \t\tg++ \t\tgcc \t\tlibc-dev \t\tmake \t\tpkg-config \t\tre2c",
-              "PHP_INI_DIR=/usr/local/etc/php",
-              "PHP_EXTRA_CONFIGURE_ARGS=--enable-fpm --with-fpm-user=www-data --with-fpm-group=www-data --disable-cgi",
-              "PHP_CFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
-              "PHP_CPPFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
-              "PHP_LDFLAGS=-Wl,-O1 -Wl,--hash-style=both -pie",
-              "GPG_KEYS=CBAF69F173A0FEA4B537F470D66C9593118BCCB6 F38252826ACD957EF380D39F2F7956BC5DA04B5D",
-              "PHP_VERSION=7.3.13",
-              "PHP_URL=https://www.php.net/get/php-7.3.13.tar.xz/from/this/mirror",
-              "PHP_ASC_URL=https://www.php.net/get/php-7.3.13.tar.xz.asc/from/this/mirror",
-              "PHP_SHA256=57ac55fe442d2da650abeb9e6fa161bd3a98ba6528c029f076f8bba43dd5c228",
-              "PHP_MD5=",
-              "COMPOSER_HOME=/composer"
-            ],
-            "cwd": "/app",
-            "user": "1000"
-          },
-          "mounts": [
+        "file": {
+          "actions": [
             {
-              "input": 0,
-              "dest": "/",
-              "output": 0
+              "input": -1,
+              "secondaryInput": -1,
+              "output": 0,
+              "Action": {
+                "mkdir": {
+                  "path": "/cache",
+                  "mode": 488,
+                  "makeParents": true,
+                  "owner": {
+                    "user": {
+                      "User": {
+                        "byID": 1000
+                      }
+                    }
+                  },
+                  "timestamp": -1
+                }
+              }
             }
           ]
         }
@@ -565,14 +545,13 @@
       },
       "constraints": {}
     },
-    "Digest": "sha256:72a672f72a9be6c181a35206ebb823c699cf69e5d4a38c31cb6ef7c68879c335",
+    "Digest": "sha256:71ae3268efed0a1f77e52967b43d30c94c34d88c36a2b00683db2ca3da2f6d2a",
     "OpMetadata": {
       "description": {
-        "llb.customname": "Dump autoloader and execute custom post-install steps"
+        "llb.customname": "Mkdir /cache"
       },
       "caps": {
-        "exec.meta.base": true,
-        "exec.mount.bind": true
+        "file.base": true
       }
     }
   },
@@ -760,70 +739,6 @@
     }
   },
   {
-    "RawOp": "CkkKR3NoYTI1Njo0MWFjNDYzNDFjMjU3ZDk3YjI0YmJkM2I0ODc5YjU3MWI3NTA3OTRlZWM2YTQwZmMwNTBmNjAwMTY4ZDdjZjYwEpEICokICgcvYmluL3NoCgItbwoHZXJyZXhpdAoCLWMKWmNvbXBvc2VyIGluc3RhbGwgLS1uby1kZXYgLS1wcmVmZXItZGlzdCAtLW5vLXNjcmlwdHMgLS1uby1hdXRvbG9hZGVyOyBjb21wb3NlciBjbGVhci1jYWNoZRJBUEFUSD0vdXNyL2xvY2FsL3NiaW46L3Vzci9sb2NhbC9iaW46L3Vzci9zYmluOi91c3IvYmluOi9zYmluOi9iaW4SWFBIUElaRV9ERVBTPWF1dG9jb25mIAkJZHBrZy1kZXYgCQlmaWxlIAkJZysrIAkJZ2NjIAkJbGliYy1kZXYgCQltYWtlIAkJcGtnLWNvbmZpZyAJCXJlMmMSHlBIUF9JTklfRElSPS91c3IvbG9jYWwvZXRjL3BocBJmUEhQX0VYVFJBX0NPTkZJR1VSRV9BUkdTPS0tZW5hYmxlLWZwbSAtLXdpdGgtZnBtLXVzZXI9d3d3LWRhdGEgLS13aXRoLWZwbS1ncm91cD13d3ctZGF0YSAtLWRpc2FibGUtY2dpEl5QSFBfQ0ZMQUdTPS1mc3RhY2stcHJvdGVjdG9yLXN0cm9uZyAtZnBpYyAtZnBpZSAtTzIgLURfTEFSR0VGSUxFX1NPVVJDRSAtRF9GSUxFX09GRlNFVF9CSVRTPTY0EmBQSFBfQ1BQRkxBR1M9LWZzdGFjay1wcm90ZWN0b3Itc3Ryb25nIC1mcGljIC1mcGllIC1PMiAtRF9MQVJHRUZJTEVfU09VUkNFIC1EX0ZJTEVfT0ZGU0VUX0JJVFM9NjQSLlBIUF9MREZMQUdTPS1XbCwtTzEgLVdsLC0taGFzaC1zdHlsZT1ib3RoIC1waWUSWkdQR19LRVlTPUNCQUY2OUYxNzNBMEZFQTRCNTM3RjQ3MEQ2NkM5NTkzMTE4QkNDQjYgRjM4MjUyODI2QUNEOTU3RUYzODBEMzlGMkY3OTU2QkM1REEwNEI1RBISUEhQX1ZFUlNJT049Ny4zLjEzEkJQSFBfVVJMPWh0dHBzOi8vd3d3LnBocC5uZXQvZ2V0L3BocC03LjMuMTMudGFyLnh6L2Zyb20vdGhpcy9taXJyb3ISSlBIUF9BU0NfVVJMPWh0dHBzOi8vd3d3LnBocC5uZXQvZ2V0L3BocC03LjMuMTMudGFyLnh6LmFzYy9mcm9tL3RoaXMvbWlycm9yEktQSFBfU0hBMjU2PTU3YWM1NWZlNDQyZDJkYTY1MGFiZWI5ZTZmYTE2MWJkM2E5OGJhNjUyOGMwMjlmMDc2ZjhiYmE0M2RkNWMyMjgSCFBIUF9NRDU9EhdDT01QT1NFUl9IT01FPS9jb21wb3NlchoEL2FwcCIEMTAwMBIDGgEvUg4KBWFtZDY0EgVsaW51eFoA",
-    "Op": {
-      "inputs": [
-        {
-          "digest": "sha256:41ac46341c257d97b24bbd3b4879b571b750794eec6a40fc050f600168d7cf60",
-          "index": 0
-        }
-      ],
-      "Op": {
-        "exec": {
-          "meta": {
-            "args": [
-              "/bin/sh",
-              "-o",
-              "errexit",
-              "-c",
-              "composer install --no-dev --prefer-dist --no-scripts --no-autoloader; composer clear-cache"
-            ],
-            "env": [
-              "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
-              "PHPIZE_DEPS=autoconf \t\tdpkg-dev \t\tfile \t\tg++ \t\tgcc \t\tlibc-dev \t\tmake \t\tpkg-config \t\tre2c",
-              "PHP_INI_DIR=/usr/local/etc/php",
-              "PHP_EXTRA_CONFIGURE_ARGS=--enable-fpm --with-fpm-user=www-data --with-fpm-group=www-data --disable-cgi",
-              "PHP_CFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
-              "PHP_CPPFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
-              "PHP_LDFLAGS=-Wl,-O1 -Wl,--hash-style=both -pie",
-              "GPG_KEYS=CBAF69F173A0FEA4B537F470D66C9593118BCCB6 F38252826ACD957EF380D39F2F7956BC5DA04B5D",
-              "PHP_VERSION=7.3.13",
-              "PHP_URL=https://www.php.net/get/php-7.3.13.tar.xz/from/this/mirror",
-              "PHP_ASC_URL=https://www.php.net/get/php-7.3.13.tar.xz.asc/from/this/mirror",
-              "PHP_SHA256=57ac55fe442d2da650abeb9e6fa161bd3a98ba6528c029f076f8bba43dd5c228",
-              "PHP_MD5=",
-              "COMPOSER_HOME=/composer"
-            ],
-            "cwd": "/app",
-            "user": "1000"
-          },
-          "mounts": [
-            {
-              "input": 0,
-              "dest": "/",
-              "output": 0
-            }
-          ]
-        }
-      },
-      "platform": {
-        "Architecture": "amd64",
-        "OS": "linux"
-      },
-      "constraints": {}
-    },
-    "Digest": "sha256:87dbaf4d6b570476c049e49fb7a06c68fc7e3bc67d8cbb11ed8fbf4a14321bc4",
-    "OpMetadata": {
-      "description": {
-        "llb.customname": "Run composer install"
-      },
-      "caps": {
-        "exec.meta.base": true,
-        "exec.mount.bind": true
-      }
-    }
-  },
-  {
     "RawOp": "CkkKR3NoYTI1NjpjNGY5YTU2YzRlNzI3OGI5MDI4MTIwNzhhZGFiMGIxNTVkMDc4ZDEzNTg4NjMzMmFkYjczZDk4MzYxYTU0ZGQwIjYSNBD///////////8BMicKCS9jb21wb3NlchDoAxgBIgoKAxDoBxIDEOgHKP///////////wFSDgoFYW1kNjQSBWxpbnV4WgA=",
     "Op": {
       "inputs": [
@@ -919,6 +834,26 @@
       },
       "caps": {
         "file.base": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1NjowZTdiNzQ1OTViNmRhZmM3M2E3YWFhY2FmOGZkYWQzNWQ3YmJkODcwZGRlMTIwOTQ2NzEwMGE4NjNkZmUyMzFh",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:0e7b74595b6dafc73a7aaacaf8fdad35d7bbd870dde1209467100a863dfe231a",
+          "index": 0
+        }
+      ],
+      "Op": null
+    },
+    "Digest": "sha256:b3936720c02648f52b151350ce6635000baed96c086447cd5ac73aa98619c930",
+    "OpMetadata": {
+      "caps": {
+        "constraints": true,
+        "meta.description": true,
+        "platform": true
       }
     }
   },
@@ -1113,6 +1048,70 @@
     }
   },
   {
+    "RawOp": "CkkKR3NoYTI1NjplNWNiMWEyZDJlYzA5ZTA4N2Y4ODk2YzFkZDkxNGRkZmQzZThlODMzMzlhZThiOGQzOTg3NTY1OWIwMDc3YmU0CkkKR3NoYTI1NjpkN2E4OWZlZGQxNWQwNzdmOTM3YzliNjhhMzkyZDgyYzg3NmI5NmFjMmZkY2RiZDU4NTc2MWZkZDU3MmE5OTRjIjoSOBABIjQKAS8SBS9hcHAvGgoKAxDoBxIDEOgHIP///////////wEoATABQAFIAVj///////////8BUg4KBWFtZDY0EgVsaW51eFoA",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:e5cb1a2d2ec09e087f8896c1dd914ddfd3e8e83339ae8b8d39875659b0077be4",
+          "index": 0
+        },
+        {
+          "digest": "sha256:d7a89fedd15d077f937c9b68a392d82c876b96ac2fdcdbd585761fdd572a994c",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "file": {
+          "actions": [
+            {
+              "input": 0,
+              "secondaryInput": 1,
+              "output": 0,
+              "Action": {
+                "copy": {
+                  "src": "/",
+                  "dest": "/app/",
+                  "owner": {
+                    "user": {
+                      "User": {
+                        "byID": 1000
+                      }
+                    },
+                    "group": {
+                      "User": {
+                        "byID": 1000
+                      }
+                    }
+                  },
+                  "mode": -1,
+                  "followSymlink": true,
+                  "dirCopyContents": true,
+                  "createDestPath": true,
+                  "allowWildcard": true,
+                  "timestamp": -1
+                }
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:d025585ecc128f8885ab82a0c1a0c0bbb2b7ad15a17a6d364cbbf1ffce32a3fa",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Copy /"
+      },
+      "caps": {
+        "file.base": true
+      }
+    }
+  },
+  {
     "RawOp": "GngKD2xvY2FsOi8vY29udGV4dBIgChRsb2NhbC5pbmNsdWRlcGF0dGVybhIIWyJzcmMvIl0SHQoNbG9jYWwuc2Vzc2lvbhIMPFNFU1NJT04tSUQ+EiQKE2xvY2FsLnNoYXJlZGtleWhpbnQSDWJ1aWxkLWNvbnRleHRaAA==",
     "Op": {
       "Op": {
@@ -1137,6 +1136,88 @@
         "source.local.includepatterns": true,
         "source.local.sessionid": true,
         "source.local.sharedkeyhint": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1NjozNjMyYTJkZjdhNTIxODVkMjc4NmM3YmFlZTEyNWYwMTNkZWQ2ZDlkNjE2ZWQwMzA5MzJjMWM3YmEwZDA4MjQxCkkKR3NoYTI1Njo3MWFlMzI2OGVmZWQwYTFmNzdlNTI5NjdiNDNkMzBjOTRjMzRkODhjMzZhMmIwMDY4M2RiMmNhM2RhMmY2ZDJhEvEICpsICgcvYmluL3NoCgItbwoHZXJyZXhpdAoCLWMKRGNvbXBvc2VyIGluc3RhbGwgLS1uby1kZXYgLS1wcmVmZXItZGlzdCAtLW5vLXNjcmlwdHMgLS1uby1hdXRvbG9hZGVyEkFQQVRIPS91c3IvbG9jYWwvc2JpbjovdXNyL2xvY2FsL2JpbjovdXNyL3NiaW46L3Vzci9iaW46L3NiaW46L2JpbhJYUEhQSVpFX0RFUFM9YXV0b2NvbmYgCQlkcGtnLWRldiAJCWZpbGUgCQlnKysgCQlnY2MgCQlsaWJjLWRldiAJCW1ha2UgCQlwa2ctY29uZmlnIAkJcmUyYxIeUEhQX0lOSV9ESVI9L3Vzci9sb2NhbC9ldGMvcGhwEmZQSFBfRVhUUkFfQ09ORklHVVJFX0FSR1M9LS1lbmFibGUtZnBtIC0td2l0aC1mcG0tdXNlcj13d3ctZGF0YSAtLXdpdGgtZnBtLWdyb3VwPXd3dy1kYXRhIC0tZGlzYWJsZS1jZ2kSXlBIUF9DRkxBR1M9LWZzdGFjay1wcm90ZWN0b3Itc3Ryb25nIC1mcGljIC1mcGllIC1PMiAtRF9MQVJHRUZJTEVfU09VUkNFIC1EX0ZJTEVfT0ZGU0VUX0JJVFM9NjQSYFBIUF9DUFBGTEFHUz0tZnN0YWNrLXByb3RlY3Rvci1zdHJvbmcgLWZwaWMgLWZwaWUgLU8yIC1EX0xBUkdFRklMRV9TT1VSQ0UgLURfRklMRV9PRkZTRVRfQklUUz02NBIuUEhQX0xERkxBR1M9LVdsLC1PMSAtV2wsLS1oYXNoLXN0eWxlPWJvdGggLXBpZRJaR1BHX0tFWVM9Q0JBRjY5RjE3M0EwRkVBNEI1MzdGNDcwRDY2Qzk1OTMxMThCQ0NCNiBGMzgyNTI4MjZBQ0Q5NTdFRjM4MEQzOUYyRjc5NTZCQzVEQTA0QjVEEhJQSFBfVkVSU0lPTj03LjMuMTMSQlBIUF9VUkw9aHR0cHM6Ly93d3cucGhwLm5ldC9nZXQvcGhwLTcuMy4xMy50YXIueHovZnJvbS90aGlzL21pcnJvchJKUEhQX0FTQ19VUkw9aHR0cHM6Ly93d3cucGhwLm5ldC9nZXQvcGhwLTcuMy4xMy50YXIueHouYXNjL2Zyb20vdGhpcy9taXJyb3ISS1BIUF9TSEEyNTY9NTdhYzU1ZmU0NDJkMmRhNjUwYWJlYjllNmZhMTYxYmQzYTk4YmE2NTI4YzAyOWYwNzZmOGJiYTQzZGQ1YzIyOBIIUEhQX01ENT0SF0NPTVBPU0VSX0hPTUU9L2NvbXBvc2VyEiZDT01QT1NFUl9DQUNIRV9ESVI9L3Zhci9jYWNoZS9jb21wb3NlchoEL2FwcCIEMTAwMBIDGgEvEkwIARIGL2NhY2hlGhMvdmFyL2NhY2hlL2NvbXBvc2VyIP///////////wEwA6IBHQobY2FjaGUtbnMvdmFyL2NhY2hlL2NvbXBvc2VyUg4KBWFtZDY0EgVsaW51eFoA",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:3632a2df7a52185d2786c7baee125f013ded6d9d616ed030932c1c7ba0d08241",
+          "index": 0
+        },
+        {
+          "digest": "sha256:71ae3268efed0a1f77e52967b43d30c94c34d88c36a2b00683db2ca3da2f6d2a",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "exec": {
+          "meta": {
+            "args": [
+              "/bin/sh",
+              "-o",
+              "errexit",
+              "-c",
+              "composer install --no-dev --prefer-dist --no-scripts --no-autoloader"
+            ],
+            "env": [
+              "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+              "PHPIZE_DEPS=autoconf \t\tdpkg-dev \t\tfile \t\tg++ \t\tgcc \t\tlibc-dev \t\tmake \t\tpkg-config \t\tre2c",
+              "PHP_INI_DIR=/usr/local/etc/php",
+              "PHP_EXTRA_CONFIGURE_ARGS=--enable-fpm --with-fpm-user=www-data --with-fpm-group=www-data --disable-cgi",
+              "PHP_CFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
+              "PHP_CPPFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
+              "PHP_LDFLAGS=-Wl,-O1 -Wl,--hash-style=both -pie",
+              "GPG_KEYS=CBAF69F173A0FEA4B537F470D66C9593118BCCB6 F38252826ACD957EF380D39F2F7956BC5DA04B5D",
+              "PHP_VERSION=7.3.13",
+              "PHP_URL=https://www.php.net/get/php-7.3.13.tar.xz/from/this/mirror",
+              "PHP_ASC_URL=https://www.php.net/get/php-7.3.13.tar.xz.asc/from/this/mirror",
+              "PHP_SHA256=57ac55fe442d2da650abeb9e6fa161bd3a98ba6528c029f076f8bba43dd5c228",
+              "PHP_MD5=",
+              "COMPOSER_HOME=/composer",
+              "COMPOSER_CACHE_DIR=/var/cache/composer"
+            ],
+            "cwd": "/app",
+            "user": "1000"
+          },
+          "mounts": [
+            {
+              "input": 0,
+              "dest": "/",
+              "output": 0
+            },
+            {
+              "input": 1,
+              "selector": "/cache",
+              "dest": "/var/cache/composer",
+              "output": -1,
+              "mountType": 3,
+              "cacheOpt": {
+                "ID": "cache-ns/var/cache/composer"
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:e5cb1a2d2ec09e087f8896c1dd914ddfd3e8e83339ae8b8d39875659b0077be4",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Run composer install"
+      },
+      "caps": {
+        "exec.meta.base": true,
+        "exec.mount.bind": true,
+        "exec.mount.cache": true,
+        "exec.mount.cache.sharing": true,
+        "exec.mount.selector": true
       }
     }
   },

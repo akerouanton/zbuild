@@ -309,6 +309,8 @@ func getEnv(src llb.State, name string) string {
 	return val
 }
 
+const composerCacheDir = "/var/cache/composer"
+
 func globalComposerInstall(stageDef StageDefinition, state llb.State, buildOpts builddef.BuildOpts) llb.State {
 	deps := make([]string, 0, stageDef.GlobalDeps.Size())
 	deps = append(deps, "hirak/prestissimo")
@@ -320,20 +322,27 @@ func globalComposerInstall(stageDef StageDefinition, state llb.State, buildOpts 
 		deps = append(deps, dep)
 	}
 
-	cmds := make([]string, 2)
-	cmds[0] = fmt.Sprintf("composer global require --prefer-dist --classmap-authoritative %s",
-		strings.Join(deps, " "))
-	cmds[1] = "composer clear-cache"
+	cmds := []string{fmt.Sprintf(
+		"composer global require --prefer-dist --classmap-authoritative %s",
+		strings.Join(deps, " "))}
 
 	runOpts := []llb.RunOption{
-		llbutils.Shell(cmds...),
 		llb.Dir(state.GetDir()),
 		llb.User("1000"),
+		llb.AddEnv("COMPOSER_CACHE_DIR", composerCacheDir),
 		llb.WithCustomNamef("Run composer global require (%s)", strings.Join(deps, ", "))}
+
 	if buildOpts.IgnoreLayerCache {
 		runOpts = append(runOpts, llb.IgnoreCache)
 	}
 
+	if buildOpts.WithCacheMounts {
+		runOpts = append(runOpts, cacheMountOptForComposer(buildOpts))
+	} else {
+		cmds = append(cmds, "composer clear-cache")
+	}
+
+	runOpts = append(runOpts, llbutils.Shell(cmds...))
 	return state.Run(runOpts...).Root()
 }
 
@@ -359,20 +368,29 @@ func composerInstall(
 		srcState, srcPath, state, "/app/", "1000:1000", buildOpts.IgnoreLayerCache)
 
 	cmds := []string{
-		"composer install --no-dev --prefer-dist --no-scripts --no-autoloader",
-		"composer clear-cache",
-	}
+		"composer install --no-dev --prefer-dist --no-scripts --no-autoloader"}
 	runOpts := []llb.RunOption{
-		llbutils.Shell(cmds...),
 		llb.Dir(state.GetDir()),
 		llb.User("1000"),
+		llb.AddEnv("COMPOSER_CACHE_DIR", composerCacheDir),
 		llb.WithCustomName("Run composer install")}
 
 	if buildOpts.IgnoreLayerCache {
 		runOpts = append(runOpts, llb.IgnoreCache)
 	}
 
+	if buildOpts.WithCacheMounts {
+		runOpts = append(runOpts, cacheMountOptForComposer(buildOpts))
+	} else {
+		cmds = append(cmds, "composer clear-cache")
+	}
+
+	runOpts = append(runOpts, llbutils.Shell(cmds...))
 	return state.Run(runOpts...).Root()
+}
+
+func cacheMountOptForComposer(buildOpts builddef.BuildOpts) llb.RunOption {
+	return llbutils.CacheMountOpt(composerCacheDir, buildOpts.CacheIDNamespace, "1000")
 }
 
 func postInstall(
