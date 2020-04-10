@@ -53,86 +53,50 @@
     }
   },
   {
-    "RawOp": "CkkKR3NoYTI1Njo5ZTJiOTk5MjcwNTMwODBmYTliN2VkYjhhNTRhOTQxNTQwMmI2ODIyY2EwMDQzZDkzYTNiYTI2OTRiNWJhMDYyCkkKR3NoYTI1NjplYTE2MmZlZGYyYTM2NGQ5MDE4OWIxYjRjMDMxM2E4MjNhOWFhOTA5ZTE3MDkwZGUxZTFkNjhmZTFkMjAyNTZlIlsSWRABIlUKEi9kb2NrZXIvbmdpbnguY29uZhIVL2V0Yy9uZ2lueC9uZ2lueC5jb25mGgoKAxDoBxIDEOgHIP///////////wEoATABQAFIAVj///////////8BUg4KBWFtZDY0EgVsaW51eFoA",
+    "RawOp": "CkkKR3NoYTI1Njo5ZWRlYzVkNzgyMmE2MjFhZDkzNjdkNjU1MTg1NjExMDVlOGFhNGQ1Nzc5ODQyZGQ0YWJkZWFjN2Q3YTk2NjAz",
     "Op": {
       "inputs": [
         {
-          "digest": "sha256:9e2b99927053080fa9b7edb8a54a9415402b6822ca0043d93a3ba2694b5ba062",
-          "index": 0
-        },
-        {
-          "digest": "sha256:ea162fedf2a364d90189b1b4c0313a823a9aa909e17090de1e1d68fe1d20256e",
-          "index": 0
-        }
-      ],
-      "Op": {
-        "File": {
-          "actions": [
-            {
-              "input": 0,
-              "secondaryInput": 1,
-              "output": 0,
-              "Action": {
-                "Copy": {
-                  "src": "/docker/nginx.conf",
-                  "dest": "/etc/nginx/nginx.conf",
-                  "owner": {
-                    "user": {
-                      "User": {
-                        "ByID": 1000
-                      }
-                    },
-                    "group": {
-                      "User": {
-                        "ByID": 1000
-                      }
-                    }
-                  },
-                  "mode": -1,
-                  "followSymlink": true,
-                  "dirCopyContents": true,
-                  "createDestPath": true,
-                  "allowWildcard": true,
-                  "timestamp": -1
-                }
-              }
-            }
-          ]
-        }
-      },
-      "platform": {
-        "Architecture": "amd64",
-        "OS": "linux"
-      },
-      "constraints": {}
-    },
-    "Digest": "sha256:45000f3962d69ef9ddf87d770265ffad83ae17bf18e1954917bf31d9b220ec9a",
-    "OpMetadata": {
-      "description": {
-        "llb.customname": "Copy ./docker/nginx.conf"
-      },
-      "caps": {
-        "file.base": true
-      }
-    }
-  },
-  {
-    "RawOp": "CkkKR3NoYTI1Njo0NTAwMGYzOTYyZDY5ZWY5ZGRmODdkNzcwMjY1ZmZhZDgzYWUxN2JmMThlMTk1NDkxN2JmMzFkOWIyMjBlYzlh",
-    "Op": {
-      "inputs": [
-        {
-          "digest": "sha256:45000f3962d69ef9ddf87d770265ffad83ae17bf18e1954917bf31d9b220ec9a",
+          "digest": "sha256:9edec5d7822a621ad9367d65518561105e8aa4d5779842dd4abdeac7d7a96603",
           "index": 0
         }
       ],
       "Op": null
     },
-    "Digest": "sha256:58d99ef74f7cec16660389e93f0764658d90465342c295100bad463edb9dfc18",
+    "Digest": "sha256:52f28c8c68f4d64a90e72a5b7ace33cbc5db15d499a5cc40710a649348ad4f49",
     "OpMetadata": {
       "caps": {
         "constraints": true,
         "meta.description": true,
         "platform": true
+      }
+    }
+  },
+  {
+    "RawOp": "GoYBCg9sb2NhbDovL2NvbnRleHQSLwoUbG9jYWwuaW5jbHVkZXBhdHRlcm4SF1siLi9kb2NrZXIvbmdpbnguY29uZiJdEh0KDWxvY2FsLnNlc3Npb24SDDxTRVNTSU9OLUlEPhIjChNsb2NhbC5zaGFyZWRrZXloaW50Egxjb25maWctZmlsZXNaAA==",
+    "Op": {
+      "Op": {
+        "Source": {
+          "identifier": "local://context",
+          "attrs": {
+            "local.includepattern": "[\"./docker/nginx.conf\"]",
+            "local.session": "\u003cSESSION-ID\u003e",
+            "local.sharedkeyhint": "config-files"
+          }
+        }
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:86f3d4ee568aeb32fe9cb6195f475f28e4da79241d3f9e95051bb10a59a89d2c",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "load config files from build context"
+      },
+      "caps": {
+        "source.local": true,
+        "source.local.includepatterns": true,
+        "source.local.sessionid": true,
+        "source.local.sharedkeyhint": true
       }
     }
   },
@@ -262,30 +226,66 @@
     }
   },
   {
-    "RawOp": "Gn0KD2xvY2FsOi8vY29udGV4dBImChRsb2NhbC5pbmNsdWRlcGF0dGVybhIOWyJuZ2lueC5jb25mIl0SHQoNbG9jYWwuc2Vzc2lvbhIMPFNFU1NJT04tSUQ+EiMKE2xvY2FsLnNoYXJlZGtleWhpbnQSDGNvbmZpZy1maWxlc1oA",
+    "RawOp": "CkkKR3NoYTI1Njo5ZTJiOTk5MjcwNTMwODBmYTliN2VkYjhhNTRhOTQxNTQwMmI2ODIyY2EwMDQzZDkzYTNiYTI2OTRiNWJhMDYyCkkKR3NoYTI1Njo4NmYzZDRlZTU2OGFlYjMyZmU5Y2I2MTk1ZjQ3NWYyOGU0ZGE3OTI0MWQzZjllOTUwNTFiYjEwYTU5YTg5ZDJjIlsSWRABIlUKEi9kb2NrZXIvbmdpbnguY29uZhIVL2V0Yy9uZ2lueC9uZ2lueC5jb25mGgoKAxDoBxIDEOgHIP///////////wEoATABQAFIAVj///////////8BUg4KBWFtZDY0EgVsaW51eFoA",
     "Op": {
-      "Op": {
-        "Source": {
-          "identifier": "local://context",
-          "attrs": {
-            "local.includepattern": "[\"nginx.conf\"]",
-            "local.session": "\u003cSESSION-ID\u003e",
-            "local.sharedkeyhint": "config-files"
-          }
+      "inputs": [
+        {
+          "digest": "sha256:9e2b99927053080fa9b7edb8a54a9415402b6822ca0043d93a3ba2694b5ba062",
+          "index": 0
+        },
+        {
+          "digest": "sha256:86f3d4ee568aeb32fe9cb6195f475f28e4da79241d3f9e95051bb10a59a89d2c",
+          "index": 0
         }
+      ],
+      "Op": {
+        "File": {
+          "actions": [
+            {
+              "input": 0,
+              "secondaryInput": 1,
+              "output": 0,
+              "Action": {
+                "Copy": {
+                  "src": "/docker/nginx.conf",
+                  "dest": "/etc/nginx/nginx.conf",
+                  "owner": {
+                    "user": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    },
+                    "group": {
+                      "User": {
+                        "ByID": 1000
+                      }
+                    }
+                  },
+                  "mode": -1,
+                  "followSymlink": true,
+                  "dirCopyContents": true,
+                  "createDestPath": true,
+                  "allowWildcard": true,
+                  "timestamp": -1
+                }
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
       },
       "constraints": {}
     },
-    "Digest": "sha256:ea162fedf2a364d90189b1b4c0313a823a9aa909e17090de1e1d68fe1d20256e",
+    "Digest": "sha256:9edec5d7822a621ad9367d65518561105e8aa4d5779842dd4abdeac7d7a96603",
     "OpMetadata": {
       "description": {
-        "llb.customname": "load config files from build context"
+        "llb.customname": "Copy ./docker/nginx.conf"
       },
       "caps": {
-        "source.local": true,
-        "source.local.includepatterns": true,
-        "source.local.sessionid": true,
-        "source.local.sharedkeyhint": true
+        "file.base": true
       }
     }
   },

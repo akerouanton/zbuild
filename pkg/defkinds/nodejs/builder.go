@@ -343,12 +343,14 @@ func (h *NodeJSHandler) copyConfigFiles(
 		return state
 	}
 
+	srcContext := buildOpts.BuildContext
 	include := []string{}
+
 	for _, srcfile := range stageDef.ConfigFiles {
-		include = append(include, srcfile)
+		srcpath := prefixContextPath(srcContext, srcfile)
+		include = append(include, srcpath)
 	}
 
-	srcContext := buildOpts.BuildContext
 	srcState := llbutils.FromContext(srcContext,
 		llb.IncludePatterns(include),
 		llb.LocalUniqueID(buildOpts.LocalUniqueID),

@@ -101,12 +101,14 @@ func (h *WebserverHandler) copyConfigFiles(
 		return state
 	}
 
+	srcContext := buildOpts.BuildContext
 	include := []string{}
-	for _, srcfile := range def.ConfigFiles {
-		include = append(include, srcfile)
+
+	for srcfile := range def.ConfigFiles {
+		srcpath := prefixContextPath(srcContext, srcfile)
+		include = append(include, srcpath)
 	}
 
-	srcContext := buildOpts.BuildContext
 	srcState := llbutils.FromContext(srcContext,
 		llb.IncludePatterns(include),
 		llb.LocalUniqueID(buildOpts.LocalUniqueID),
