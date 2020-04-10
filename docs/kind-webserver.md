@@ -17,7 +17,7 @@ kind: webserver
 
 type: <string> # (default: nginx)
 system_packages: <map[string]string>
-config_file: <string> # (required)
+config_files: <map[string]string>
 healthcheck: <bool> # (default: true)
 assets: <assets>
 ```
@@ -45,9 +45,12 @@ system_packages:
 System packages are pinned to a specific version in the lockfile with the help
 of `zbuild update`. See [here](/README.md#2-create-or-update-the-lock-file) for more details.
 
-##### `config_file` - **required**
+##### `config_files`
 
-This is the path to your local `nginx.conf` config file.
+This is a map of source to destination paths of config files you want to
+include in your image. Source path are relative to the build context root
+directory. Destination paths could be either absolute or relative to the 
+base config directory of the webserver type (nginx: `/etc/nginx`).
 
 Example:
 
@@ -65,7 +68,8 @@ $ cat zbuild.yml
 # syntax=akerouanton/zbuilder:<tag>
 kind: webserver
 
-config_file: docker/nginx.conf
+config_files:
+  docker/nginx.conf: nginx.conf
 ```
 
 ##### `healthcheck` - default: `true`

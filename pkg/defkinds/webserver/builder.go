@@ -2,6 +2,7 @@ package webserver
 
 import (
 	"context"
+	"path"
 	"time"
 
 	"github.com/NiR-/zbuild/pkg/builddef"
@@ -15,9 +16,9 @@ import (
 
 var fileOwner = "nginx"
 var SharedKeys = struct {
-	ConfigFile string
+	ConfigFiles string
 }{
-	ConfigFile: "config-file",
+	ConfigFiles: "config-files",
 }
 
 type WebserverHandler struct {
@@ -79,9 +80,7 @@ func (h *WebserverHandler) Build(
 		return state, img, xerrors.Errorf("failed to add \"install system pacakges\" steps: %w", err)
 	}
 
-	if def.ConfigFile != nil && *def.ConfigFile != "" {
-		state = h.copyConfigFile(def, state, buildOpts)
-	}
+	state = h.copyConfigFiles(def, state, buildOpts)
 
 	for _, asset := range def.Assets {
 		state = llbutils.Copy(
@@ -93,22 +92,47 @@ func (h *WebserverHandler) Build(
 	return state, img, nil
 }
 
-func (h *WebserverHandler) copyConfigFile(
+func (h *WebserverHandler) copyConfigFiles(
 	def Definition,
 	state llb.State,
 	buildOpts builddef.BuildOpts,
 ) llb.State {
-	configFileSrc := llbutils.FromContext(buildOpts.BuildContext,
-		llb.IncludePatterns([]string{*def.ConfigFile}),
+	if len(def.ConfigFiles) == 0 {
+		return state
+	}
+
+	include := []string{}
+	for _, srcfile := range def.ConfigFiles {
+		include = append(include, srcfile)
+	}
+
+	srcContext := buildOpts.BuildContext
+	srcState := llbutils.FromContext(srcContext,
+		llb.IncludePatterns(include),
 		llb.LocalUniqueID(buildOpts.LocalUniqueID),
 		llb.SessionID(buildOpts.SessionID),
-		llb.SharedKeyHint(SharedKeys.ConfigFile),
-		llb.WithCustomName("load config file from build context"))
+		llb.SharedKeyHint(SharedKeys.ConfigFiles),
+		llb.WithCustomName("load config files from build context"))
 
-	return llbutils.Copy(
-		configFileSrc, *def.ConfigFile,
-		state, def.Type.ConfigPath(), fileOwner,
-		buildOpts.IgnoreLayerCache)
+	for srcfile, destfile := range def.ConfigFiles {
+		srcpath := prefixContextPath(srcContext, srcfile)
+		destpath := destfile
+		if !path.IsAbs(destpath) {
+			destpath = path.Join(def.Type.ConfigDir(), destfile)
+		}
+
+		state = llbutils.Copy(srcState, srcpath, state, destpath, "1000:1000", buildOpts.IgnoreLayerCache)
+	}
+
+	return state
+}
+
+func prefixContextPath(srcContext *builddef.Context, p string) string {
+	if srcContext.IsGitContext() && srcContext.Path != "" {
+		return path.Join("/", srcContext.Path, p)
+	}
+
+	return p
 }
 
 func setImageMetadata(

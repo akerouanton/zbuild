@@ -53,7 +53,7 @@
     }
   },
   {
-    "RawOp": "CkkKR3NoYTI1Njo5ZTJiOTk5MjcwNTMwODBmYTliN2VkYjhhNTRhOTQxNTQwMmI2ODIyY2EwMDQzZDkzYTNiYTI2OTRiNWJhMDYyCkkKR3NoYTI1Njo5N2RiNDY5Nzc3YzViOWJjOWY3MzA4MTQ0YmQ2OGNkY2M3N2ViNWRjNDJhZGU0NGNmNzk1ZDE3ZGIwNzk5NGFkIlwSWhABIlYKEi9kb2NrZXIvbmdpbnguY29uZhIVL2V0Yy9uZ2lueC9uZ2lueC5jb25mGgsKCQoHCgVuZ2lueCD///////////8BKAEwAUABSAFY////////////AVIOCgVhbWQ2NBIFbGludXhaAA==",
+    "RawOp": "CkkKR3NoYTI1Njo5ZTJiOTk5MjcwNTMwODBmYTliN2VkYjhhNTRhOTQxNTQwMmI2ODIyY2EwMDQzZDkzYTNiYTI2OTRiNWJhMDYyCkkKR3NoYTI1NjplYTE2MmZlZGYyYTM2NGQ5MDE4OWIxYjRjMDMxM2E4MjNhOWFhOTA5ZTE3MDkwZGUxZTFkNjhmZTFkMjAyNTZlIlsSWRABIlUKEi9kb2NrZXIvbmdpbnguY29uZhIVL2V0Yy9uZ2lueC9uZ2lueC5jb25mGgoKAxDoBxIDEOgHIP///////////wEoATABQAFIAVj///////////8BUg4KBWFtZDY0EgVsaW51eFoA",
     "Op": {
       "inputs": [
         {
@@ -61,7 +61,7 @@
           "index": 0
         },
         {
-          "digest": "sha256:97db469777c5b9bc9f7308144bd68cdcc77eb5dc42ade44cf795d17db07994ad",
+          "digest": "sha256:ea162fedf2a364d90189b1b4c0313a823a9aa909e17090de1e1d68fe1d20256e",
           "index": 0
         }
       ],
@@ -79,10 +79,12 @@
                   "owner": {
                     "user": {
                       "User": {
-                        "ByName": {
-                          "name": "nginx",
-                          "input": 0
-                        }
+                        "ByID": 1000
+                      }
+                    },
+                    "group": {
+                      "User": {
+                        "ByID": 1000
                       }
                     }
                   },
@@ -104,7 +106,7 @@
       },
       "constraints": {}
     },
-    "Digest": "sha256:48c9e7ea51ba92894ce8b0a5f472b0124778624df7e18f1ffc4a17b0102b60e8",
+    "Digest": "sha256:45000f3962d69ef9ddf87d770265ffad83ae17bf18e1954917bf31d9b220ec9a",
     "OpMetadata": {
       "description": {
         "llb.customname": "Copy ./docker/nginx.conf"
@@ -115,50 +117,22 @@
     }
   },
   {
-    "RawOp": "CkkKR3NoYTI1Njo0OGM5ZTdlYTUxYmE5Mjg5NGNlOGIwYTVmNDcyYjAxMjQ3Nzg2MjRkZjdlMThmMWZmYzRhMTdiMDEwMmI2MGU4",
+    "RawOp": "CkkKR3NoYTI1Njo0NTAwMGYzOTYyZDY5ZWY5ZGRmODdkNzcwMjY1ZmZhZDgzYWUxN2JmMThlMTk1NDkxN2JmMzFkOWIyMjBlYzlh",
     "Op": {
       "inputs": [
         {
-          "digest": "sha256:48c9e7ea51ba92894ce8b0a5f472b0124778624df7e18f1ffc4a17b0102b60e8",
+          "digest": "sha256:45000f3962d69ef9ddf87d770265ffad83ae17bf18e1954917bf31d9b220ec9a",
           "index": 0
         }
       ],
       "Op": null
     },
-    "Digest": "sha256:6ab2d72295e22aeda3605ab9ff4cae7f8cf4a5c63dba4f627c8c92a067591741",
+    "Digest": "sha256:58d99ef74f7cec16660389e93f0764658d90465342c295100bad463edb9dfc18",
     "OpMetadata": {
       "caps": {
         "constraints": true,
         "meta.description": true,
         "platform": true
-      }
-    }
-  },
-  {
-    "RawOp": "GoUBCg9sb2NhbDovL2NvbnRleHQSLwoUbG9jYWwuaW5jbHVkZXBhdHRlcm4SF1siLi9kb2NrZXIvbmdpbnguY29uZiJdEh0KDWxvY2FsLnNlc3Npb24SDDxTRVNTSU9OLUlEPhIiChNsb2NhbC5zaGFyZWRrZXloaW50Egtjb25maWctZmlsZVoA",
-    "Op": {
-      "Op": {
-        "Source": {
-          "identifier": "local://context",
-          "attrs": {
-            "local.includepattern": "[\"./docker/nginx.conf\"]",
-            "local.session": "\u003cSESSION-ID\u003e",
-            "local.sharedkeyhint": "config-file"
-          }
-        }
-      },
-      "constraints": {}
-    },
-    "Digest": "sha256:97db469777c5b9bc9f7308144bd68cdcc77eb5dc42ade44cf795d17db07994ad",
-    "OpMetadata": {
-      "description": {
-        "llb.customname": "load config file from build context"
-      },
-      "caps": {
-        "source.local": true,
-        "source.local.includepatterns": true,
-        "source.local.sessionid": true,
-        "source.local.sharedkeyhint": true
       }
     }
   },
@@ -284,6 +258,34 @@
         "exec.mount.cache": true,
         "exec.mount.cache.sharing": true,
         "exec.mount.selector": true
+      }
+    }
+  },
+  {
+    "RawOp": "Gn0KD2xvY2FsOi8vY29udGV4dBImChRsb2NhbC5pbmNsdWRlcGF0dGVybhIOWyJuZ2lueC5jb25mIl0SHQoNbG9jYWwuc2Vzc2lvbhIMPFNFU1NJT04tSUQ+EiMKE2xvY2FsLnNoYXJlZGtleWhpbnQSDGNvbmZpZy1maWxlc1oA",
+    "Op": {
+      "Op": {
+        "Source": {
+          "identifier": "local://context",
+          "attrs": {
+            "local.includepattern": "[\"nginx.conf\"]",
+            "local.session": "\u003cSESSION-ID\u003e",
+            "local.sharedkeyhint": "config-files"
+          }
+        }
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:ea162fedf2a364d90189b1b4c0313a823a9aa909e17090de1e1d68fe1d20256e",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "load config files from build context"
+      },
+      "caps": {
+        "source.local": true,
+        "source.local.includepatterns": true,
+        "source.local.sessionid": true,
+        "source.local.sharedkeyhint": true
       }
     }
   },

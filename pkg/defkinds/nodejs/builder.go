@@ -26,6 +26,8 @@ var SharedKeys = struct {
 	PackageFiles: "package-files",
 }
 
+const WorkingDir = "/app"
+
 func init() {
 	RegisterKind(registry.Registry)
 }
@@ -113,9 +115,9 @@ func (h *NodeJSHandler) buildNodeJS(
 	}
 
 	state = llbutils.CopyExternalFiles(state, stageDef.ExternalFiles)
-	state = llbutils.Mkdir(state, "1000:1000", "/app")
+	state = llbutils.Mkdir(state, "1000:1000", WorkingDir)
 	state = state.User("1000")
-	state = state.Dir("/app")
+	state = state.Dir(WorkingDir)
 
 	state = h.globalPackagesInstall(state, stageDef, buildOpts)
 	if !*stageDef.Dev {
@@ -134,7 +136,7 @@ func setImageMetadata(stageDef StageDefinition, state llb.State, img *image.Imag
 	for _, dir := range stageDef.StatefulDirs {
 		fullpath := dir
 		if !path.IsAbs(fullpath) {
-			fullpath = path.Join("/app", dir)
+			fullpath = path.Join(WorkingDir, dir)
 		}
 
 		img.Config.Volumes[fullpath] = struct{}{}
@@ -150,7 +152,7 @@ func setImageMetadata(stageDef StageDefinition, state llb.State, img *image.Imag
 	}
 
 	img.Config.User = "1000"
-	img.Config.WorkingDir = "/app"
+	img.Config.WorkingDir = WorkingDir
 	img.Config.Env = []string{
 		"PATH=" + getEnv(state, "PATH"),
 		"NODE_ENV=" + nodeEnv,
@@ -315,7 +317,7 @@ func (h *NodeJSHandler) copySources(
 	if sourceContext.Type == builddef.ContextTypeLocal {
 		srcPath := prefixContextPath(sourceContext, "/")
 		return llbutils.Copy(
-			srcState, srcPath, state, "/app", "1000:1000", buildOpts.IgnoreLayerCache)
+			srcState, srcPath, state, WorkingDir, "1000:1000", buildOpts.IgnoreLayerCache)
 	}
 
 	// Despite the IncludePatterns() above, the source state might also
@@ -324,7 +326,7 @@ func (h *NodeJSHandler) copySources(
 	// in such case.
 	for _, srcfile := range stageDef.Sources {
 		srcPath := prefixContextPath(sourceContext, srcfile)
-		destPath := path.Join("/app", srcfile)
+		destPath := path.Join(WorkingDir, srcfile)
 		state = llbutils.Copy(
 			srcState, srcPath, state, destPath, "1000:1000", buildOpts.IgnoreLayerCache)
 	}
@@ -361,7 +363,7 @@ func (h *NodeJSHandler) copyConfigFiles(
 	// just copy the whole source state to the dest state.
 	for destfile, srcfile := range stageDef.ConfigFiles {
 		srcpath := prefixContextPath(srcContext, srcfile)
-		destpath := path.Join("/app", destfile)
+		destpath := path.Join(WorkingDir, destfile)
 		state = llbutils.Copy(
 			srcState, srcpath, state, destpath, "1000:1000", buildOpts.IgnoreLayerCache)
 	}

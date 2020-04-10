@@ -19,15 +19,16 @@ type newDefinitionTC struct {
 }
 
 func initSuccessfullyParseRawDefinitionTC() newDefinitionTC {
-	configFile := "./docker/nginx.conf"
 	return newDefinitionTC{
 		file:     "testdata/def/definition.yml",
 		lockFile: "testdata/def/definition.lock",
 		expected: webserver.Definition{
-			Type:       "nginx",
-			Version:    "latest",
-			Alpine:     true,
-			ConfigFile: &configFile,
+			Type:    "nginx",
+			Version: "latest",
+			Alpine:  true,
+			ConfigFiles: map[string]string{
+				"./docker/nginx.conf": "nginx.conf",
+			},
 			Healthcheck: &builddef.HealthcheckConfig{
 				HealthcheckHTTP: &builddef.HealthcheckHTTP{
 					Path:     "/_ping",
@@ -75,6 +76,7 @@ func initParseDefinitionWithCustomHealthcheckTC() newDefinitionTC {
 			SystemPackages: &builddef.VersionMap{
 				"curl": "*",
 			},
+			ConfigFiles: map[string]string{},
 		},
 	}
 }
@@ -156,6 +158,10 @@ type mergeDefinitionTC struct {
 }
 
 func TestDefinitionMerge(t *testing.T) {
+	if *flagTestdata {
+		return
+	}
+
 	testcases := map[string]mergeDefinitionTC{
 		"merge type with base": {
 			base: func() webserver.Definition {
@@ -172,6 +178,7 @@ func TestDefinitionMerge(t *testing.T) {
 				return webserver.Definition{
 					Type:           webserver.WebserverType("caddy"),
 					SystemPackages: &builddef.VersionMap{},
+					ConfigFiles:    map[string]string{},
 				}
 			},
 		},
@@ -188,6 +195,7 @@ func TestDefinitionMerge(t *testing.T) {
 				return webserver.Definition{
 					Type:           webserver.WebserverType("caddy"),
 					SystemPackages: &builddef.VersionMap{},
+					ConfigFiles:    map[string]string{},
 				}
 			},
 		},
@@ -209,6 +217,7 @@ func TestDefinitionMerge(t *testing.T) {
 			},
 			expected: func() webserver.Definition {
 				return webserver.Definition{
+					ConfigFiles: map[string]string{},
 					SystemPackages: &builddef.VersionMap{
 						"curl":            "7.64.0-4",
 						"ca-certificates": "*",
@@ -230,6 +239,7 @@ func TestDefinitionMerge(t *testing.T) {
 			},
 			expected: func() webserver.Definition {
 				return webserver.Definition{
+					ConfigFiles: map[string]string{},
 					SystemPackages: &builddef.VersionMap{
 						"curl":            "7.64.0-4",
 						"ca-certificates": "*",
@@ -237,24 +247,28 @@ func TestDefinitionMerge(t *testing.T) {
 				}
 			},
 		},
-		"merge config file with base": {
+		"merge config files with base": {
 			base: func() webserver.Definition {
-				configFile := "nginx.conf"
 				return webserver.Definition{
-					ConfigFile: &configFile,
+					ConfigFiles: map[string]string{
+						"./docker/nginx.dev.conf": "nginx.conf",
+					},
 				}
 			},
 			overriding: func() webserver.Definition {
-				configFile := "docker/nginx.conf"
 				return webserver.Definition{
-					ConfigFile: &configFile,
+					ConfigFiles: map[string]string{
+						"./docker/nginx.prod.conf": "nginx.conf",
+					},
 				}
 			},
 			expected: func() webserver.Definition {
-				configFile := "docker/nginx.conf"
 				return webserver.Definition{
-					ConfigFile:     &configFile,
 					SystemPackages: &builddef.VersionMap{},
+					ConfigFiles: map[string]string{
+						"./docker/nginx.dev.conf":  "nginx.conf",
+						"./docker/nginx.prod.conf": "nginx.conf",
+					},
 				}
 			},
 		},
@@ -263,34 +277,38 @@ func TestDefinitionMerge(t *testing.T) {
 				return webserver.Definition{}
 			},
 			overriding: func() webserver.Definition {
-				configFile := "docker/nginx.conf"
 				return webserver.Definition{
-					ConfigFile: &configFile,
+					ConfigFiles: map[string]string{
+						"./docker/nginx.prod.conf": "nginx.conf",
+					},
 				}
 			},
 			expected: func() webserver.Definition {
-				configFile := "docker/nginx.conf"
 				return webserver.Definition{
-					ConfigFile:     &configFile,
+					ConfigFiles: map[string]string{
+						"./docker/nginx.prod.conf": "nginx.conf",
+					},
 					SystemPackages: &builddef.VersionMap{},
 				}
 			},
 		},
 		"ignore nil config file": {
 			base: func() webserver.Definition {
-				configFile := "nginx.conf"
 				return webserver.Definition{
-					ConfigFile: &configFile,
+					ConfigFiles: map[string]string{
+						"./docker/nginx.dev.conf": "nginx.conf",
+					},
 				}
 			},
 			overriding: func() webserver.Definition {
 				return webserver.Definition{}
 			},
 			expected: func() webserver.Definition {
-				configFile := "nginx.conf"
 				return webserver.Definition{
-					ConfigFile:     &configFile,
 					SystemPackages: &builddef.VersionMap{},
+					ConfigFiles: map[string]string{
+						"./docker/nginx.dev.conf": "nginx.conf",
+					},
 				}
 			},
 		},
@@ -321,6 +339,7 @@ func TestDefinitionMerge(t *testing.T) {
 						Type: builddef.HealthcheckTypeDisabled,
 					},
 					SystemPackages: &builddef.VersionMap{},
+					ConfigFiles:    map[string]string{},
 				}
 			},
 		},
@@ -341,6 +360,7 @@ func TestDefinitionMerge(t *testing.T) {
 						Type: builddef.HealthcheckTypeDisabled,
 					},
 					SystemPackages: &builddef.VersionMap{},
+					ConfigFiles:    map[string]string{},
 				}
 			},
 		},
@@ -361,6 +381,7 @@ func TestDefinitionMerge(t *testing.T) {
 						Type: builddef.HealthcheckTypeDisabled,
 					},
 					SystemPackages: &builddef.VersionMap{},
+					ConfigFiles:    map[string]string{},
 				}
 			},
 		},
@@ -386,6 +407,7 @@ func TestDefinitionMerge(t *testing.T) {
 						{From: "web/", To: "web/"},
 					},
 					SystemPackages: &builddef.VersionMap{},
+					ConfigFiles:    map[string]string{},
 				}
 			},
 		},
@@ -406,6 +428,7 @@ func TestDefinitionMerge(t *testing.T) {
 						{From: "web/", To: "web/"},
 					},
 					SystemPackages: &builddef.VersionMap{},
+					ConfigFiles:    map[string]string{},
 				}
 			},
 		},
@@ -424,6 +447,7 @@ func TestDefinitionMerge(t *testing.T) {
 				return webserver.Definition{
 					Version:        "1.17.8",
 					SystemPackages: &builddef.VersionMap{},
+					ConfigFiles:    map[string]string{},
 				}
 			},
 		},
@@ -440,6 +464,7 @@ func TestDefinitionMerge(t *testing.T) {
 				return webserver.Definition{
 					Version:        "1.17.8",
 					SystemPackages: &builddef.VersionMap{},
+					ConfigFiles:    map[string]string{},
 				}
 			},
 		},

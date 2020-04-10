@@ -98,7 +98,7 @@ type Definition struct {
 	Version        string                      `mapstructure:"version"`
 	Alpine         bool                        `mapstructure:"alpine"`
 	SystemPackages *builddef.VersionMap        `mapstructure:"system_packages"`
-	ConfigFile     *string                     `mapstructure:"config_file"`
+	ConfigFiles    map[string]string           `mapstructure:"config_files"`
 	Healthcheck    *builddef.HealthcheckConfig `mapstructure:"healthcheck"`
 	Assets         []AssetToCopy               `mapstructure:"assets"`
 
@@ -125,12 +125,13 @@ func (def Definition) Copy() Definition {
 		Alpine:         def.Alpine,
 		SystemPackages: def.SystemPackages.Copy(),
 		Assets:         def.Assets,
+		ConfigFiles:    map[string]string{},
 	}
 
-	if def.ConfigFile != nil {
-		configFile := *def.ConfigFile
-		new.ConfigFile = &configFile
+	for src, dst := range def.ConfigFiles {
+		new.ConfigFiles[src] = dst
 	}
+
 	if def.Healthcheck != nil {
 		healthcheck := *def.Healthcheck
 		new.Healthcheck = &healthcheck
@@ -146,12 +147,12 @@ func (base Definition) Merge(overriding Definition) Definition {
 	new.Assets = append(new.Assets, overriding.Assets...)
 	new.SystemPackages.Merge(overriding.SystemPackages)
 
+	for from, to := range overriding.ConfigFiles {
+		new.ConfigFiles[from] = to
+	}
+
 	if !overriding.Type.IsEmpty() {
 		new.Type = overriding.Type
-	}
-	if overriding.ConfigFile != nil {
-		configFile := *overriding.ConfigFile
-		new.ConfigFile = &configFile
 	}
 	if overriding.Healthcheck != nil {
 		healthcheck := *overriding.Healthcheck
@@ -171,10 +172,10 @@ func (t WebserverType) IsEmpty() bool {
 	return string(t) == ""
 }
 
-func (t WebserverType) ConfigPath() string {
+func (t WebserverType) ConfigDir() string {
 	switch string(t) {
 	case "nginx":
-		return "/etc/nginx/nginx.conf"
+		return "/etc/nginx/"
 	}
 
 	panic(fmt.Sprintf("Webserver type %q is not supported.", string(t)))
