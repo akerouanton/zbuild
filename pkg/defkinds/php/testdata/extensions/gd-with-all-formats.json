@@ -3,7 +3,7 @@
     "RawOp": "EqkBCpYBCgcvYmluL3NoCgItbwoHZXJyZXhpdAoCLWMKd2RvY2tlci1waHAtZXh0LWNvbmZpZ3VyZSBnZCAtLXdpdGgtZnJlZXR5cGUtZGlyIC0td2l0aC1qcGVnLWRpciAtLXdpdGgtd2VicC1kaXI7IGRvY2tlci1waHAtZXh0LWluc3RhbGwgLWoiJChucHJvYykiIGdkGgEvEg4I////////////ARoBL1IOCgVhbWQ2NBIFbGludXhaAA==",
     "Op": {
       "Op": {
-        "Exec": {
+        "exec": {
           "meta": {
             "args": [
               "/bin/sh",

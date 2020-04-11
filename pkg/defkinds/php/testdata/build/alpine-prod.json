@@ -9,7 +9,7 @@
         }
       ],
       "Op": {
-        "Exec": {
+        "exec": {
           "meta": {
             "args": [
               "/bin/sh",
@@ -73,7 +73,7 @@
         }
       ],
       "Op": {
-        "Exec": {
+        "exec": {
           "meta": {
             "args": [
               "/bin/sh",
@@ -129,7 +129,7 @@
     "RawOp": "GjEKL2RvY2tlci1pbWFnZTovL2RvY2tlci5pby9saWJyYXJ5L2NvbXBvc2VyOjEuOS4wUg4KBWFtZDY0EgVsaW51eFoA",
     "Op": {
       "Op": {
-        "Source": {
+        "source": {
           "identifier": "docker-image://docker.io/library/composer:1.9.0"
         }
       },
@@ -156,26 +156,26 @@
         }
       ],
       "Op": {
-        "File": {
+        "file": {
           "actions": [
             {
               "input": 0,
               "secondaryInput": -1,
               "output": 0,
               "Action": {
-                "Mkdir": {
+                "mkdir": {
                   "path": "/app",
                   "mode": 488,
                   "makeParents": true,
                   "owner": {
                     "user": {
                       "User": {
-                        "ByID": 1000
+                        "byID": 1000
                       }
                     },
                     "group": {
                       "User": {
-                        "ByID": 1000
+                        "byID": 1000
                       }
                     }
                   },
@@ -212,7 +212,7 @@
         }
       ],
       "Op": {
-        "Exec": {
+        "exec": {
           "meta": {
             "args": [
               "/bin/sh",
@@ -270,7 +270,7 @@
     "RawOp": "GpIBCg9sb2NhbDovL2NvbnRleHQSOQoUbG9jYWwuaW5jbHVkZXBhdHRlcm4SIVsiY29tcG9zZXIuanNvbiIsImNvbXBvc2VyLmxvY2siXRIdCg1sb2NhbC5zZXNzaW9uEgw8U0VTU0lPTi1JRD4SJQoTbG9jYWwuc2hhcmVka2V5aGludBIOY29tcG9zZXItZmlsZXNaAA==",
     "Op": {
       "Op": {
-        "Source": {
+        "source": {
           "identifier": "local://context",
           "attrs": {
             "local.includepattern": "[\"composer.json\",\"composer.lock\"]",
@@ -304,7 +304,7 @@
         }
       ],
       "Op": {
-        "Exec": {
+        "exec": {
           "meta": {
             "args": [
               "/bin/sh",
@@ -372,14 +372,14 @@
         }
       ],
       "Op": {
-        "File": {
+        "file": {
           "actions": [
             {
               "input": 0,
               "secondaryInput": 1,
               "output": 0,
               "Action": {
-                "Copy": {
+                "copy": {
                   "src": "/usr/bin/composer",
                   "dest": "/usr/bin/composer",
                   "mode": -1,
@@ -414,7 +414,7 @@
     "RawOp": "GlYKD2xvY2FsOi8vY29udGV4dBIdCg1sb2NhbC5zZXNzaW9uEgw8U0VTU0lPTi1JRD4SJAoTbG9jYWwuc2hhcmVka2V5aGludBINYnVpbGQtY29udGV4dFoA",
     "Op": {
       "Op": {
-        "Source": {
+        "source": {
           "identifier": "local://context",
           "attrs": {
             "local.session": "\u003cSESSION-ID\u003e",
@@ -446,26 +446,26 @@
         }
       ],
       "Op": {
-        "File": {
+        "file": {
           "actions": [
             {
               "input": 0,
               "secondaryInput": -1,
               "output": 0,
               "Action": {
-                "Mkdir": {
+                "mkdir": {
                   "path": "/composer",
                   "mode": 488,
                   "makeParents": true,
                   "owner": {
                     "user": {
                       "User": {
-                        "ByID": 1000
+                        "byID": 1000
                       }
                     },
                     "group": {
                       "User": {
-                        "ByID": 1000
+                        "byID": 1000
                       }
                     }
                   },
@@ -516,7 +516,7 @@
     "RawOp": "Gn8KfWRvY2tlci1pbWFnZTovL2RvY2tlci5pby9saWJyYXJ5L3BocDo3LjQuMi1mcG0tYWxwaW5lQHNoYTI1NjoyZjhjZDU4NTI3MzgyMjc2YzY1NTZiZWJhNmZmNDlmMGE1NmZjNTY5MGQ2OTA3ZTRkYmE0YjMzODRhYzdmNTY0Ug4KBWFtZDY0EgVsaW51eFoA",
     "Op": {
       "Op": {
-        "Source": {
+        "source": {
           "identifier": "docker-image://docker.io/library/php:7.4.2-fpm-alpine@sha256:2f8cd58527382276c6556beba6ff49f0a56fc5690d6907e4dba4b3384ac7f564"
         }
       },
@@ -547,25 +547,25 @@
         }
       ],
       "Op": {
-        "File": {
+        "file": {
           "actions": [
             {
               "input": 0,
               "secondaryInput": 1,
               "output": 0,
               "Action": {
-                "Copy": {
+                "copy": {
                   "src": "/",
                   "dest": "/app/",
                   "owner": {
                     "user": {
                       "User": {
-                        "ByID": 1000
+                        "byID": 1000
                       }
                     },
                     "group": {
                       "User": {
-                        "ByID": 1000
+                        "byID": 1000
                       }
                     }
                   },
@@ -611,25 +611,25 @@
         }
       ],
       "Op": {
-        "File": {
+        "file": {
           "actions": [
             {
               "input": 0,
               "secondaryInput": 1,
               "output": 0,
               "Action": {
-                "Copy": {
+                "copy": {
                   "src": "/composer.*",
                   "dest": "/app/",
                   "owner": {
                     "user": {
                       "User": {
-                        "ByID": 1000
+                        "byID": 1000
                       }
                     },
                     "group": {
                       "User": {
-                        "ByID": 1000
+                        "byID": 1000
                       }
                     }
                   },
@@ -671,7 +671,7 @@
         }
       ],
       "Op": {
-        "Exec": {
+        "exec": {
           "meta": {
             "args": [
               "/bin/sh",

@@ -3,7 +3,7 @@
     "RawOp": "GlYKPWh0dHBzOi8vYmxhY2tmaXJlLmlvL2FwaS92MS9yZWxlYXNlcy9wcm9iZS9waHAvbGludXgvYW1kNjQvNzISFQoNaHR0cC5maWxlbmFtZRIEL291dFoA",
     "Op": {
       "Op": {
-        "Source": {
+        "source": {
           "identifier": "https://blackfire.io/api/v1/releases/probe/php/linux/amd64/72",
           "attrs": {
             "http.filename": "/out"
@@ -26,7 +26,7 @@
     "RawOp": "GoYBCk1odHRwczovL2dpdGh1Yi5jb20vTmlSLS9mY2dpLWNsaWVudC9yZWxlYXNlcy9kb3dubG9hZC92MC4yLjAvZmNnaS1jbGllbnQucGhhchIeCg1odHRwLmNoZWNrc3VtEg1zb21lLWNoZWNrc3VtEhUKDWh0dHAuZmlsZW5hbWUSBC9vdXRaAA==",
     "Op": {
       "Op": {
-        "Source": {
+        "source": {
           "identifier": "https://github.com/NiR-/fcgi-client/releases/download/v0.2.0/fcgi-client.phar",
           "attrs": {
             "http.checksum": "some-checksum",
@@ -57,14 +57,14 @@
         }
       ],
       "Op": {
-        "File": {
+        "file": {
           "actions": [
             {
               "input": -1,
               "secondaryInput": 0,
               "output": 0,
               "Action": {
-                "Copy": {
+                "copy": {
                   "src": "/unpacked",
                   "dest": "/some/path",
                   "mode": 488,
@@ -119,7 +119,7 @@
     "RawOp": "GmYKTWh0dHBzOi8vZ2l0aHViLmNvbS9OaVItL2ZjZ2ktY2xpZW50L3JlbGVhc2VzL2Rvd25sb2FkL3YwLjEuMC9mY2dpLWNsaWVudC5waGFyEhUKDWh0dHAuZmlsZW5hbWUSBC9vdXRaAA==",
     "Op": {
       "Op": {
-        "Source": {
+        "source": {
           "identifier": "https://github.com/NiR-/fcgi-client/releases/download/v0.1.0/fcgi-client.phar",
           "attrs": {
             "http.filename": "/out"
@@ -148,14 +148,14 @@
         }
       ],
       "Op": {
-        "File": {
+        "file": {
           "actions": [
             {
               "input": -1,
               "secondaryInput": 0,
               "output": 0,
               "Action": {
-                "Copy": {
+                "copy": {
                   "src": "/decompressed/blackfire-*.so",
                   "dest": "/unpacked",
                   "mode": -1,
@@ -198,25 +198,25 @@
         }
       ],
       "Op": {
-        "File": {
+        "file": {
           "actions": [
             {
               "input": 0,
               "secondaryInput": 1,
               "output": 0,
               "Action": {
-                "Copy": {
+                "copy": {
                   "src": "/out",
                   "dest": "/usr/local/bin/fcgi-client",
                   "owner": {
                     "user": {
                       "User": {
-                        "ByID": 1000
+                        "byID": 1000
                       }
                     },
                     "group": {
                       "User": {
-                        "ByID": 1000
+                        "byID": 1000
                       }
                     }
                   },
@@ -258,14 +258,14 @@
         }
       ],
       "Op": {
-        "File": {
+        "file": {
           "actions": [
             {
               "input": -1,
               "secondaryInput": 0,
               "output": 0,
               "Action": {
-                "Copy": {
+                "copy": {
                   "src": "/out",
                   "dest": "/decompressed",
                   "mode": -1,
@@ -307,25 +307,25 @@
         }
       ],
       "Op": {
-        "File": {
+        "file": {
           "actions": [
             {
               "input": 0,
               "secondaryInput": 1,
               "output": 0,
               "Action": {
-                "Copy": {
+                "copy": {
                   "src": "/out",
                   "dest": "/usr/local/bin/fcgi-client-0.2",
                   "owner": {
                     "user": {
                       "User": {
-                        "ByID": 1000
+                        "byID": 1000
                       }
                     },
                     "group": {
                       "User": {
-                        "ByID": 1000
+                        "byID": 1000
                       }
                     }
                   },

@@ -3,7 +3,7 @@
     "RawOp": "Gn4KfGRvY2tlci1pbWFnZTovL2RvY2tlci5pby9saWJyYXJ5L25naW54OjEuMTcuNy1hbHBpbmVAc2hhMjU2OjA4YTIzMDQyOWMyZDI3YjhhNTY2ODE2M2YzYzIwZTczZTZiYmE2YWFkNDc5NmFhZWE5MDM3MmZiYWViY2ExMjJSDgoFYW1kNjQSBWxpbnV4WgA=",
     "Op": {
       "Op": {
-        "Source": {
+        "source": {
           "identifier": "docker-image://docker.io/library/nginx:1.17.7-alpine@sha256:08a230429c2d27b8a5668163f3c20e73e6bba6aad4796aaea90372fbaebca122"
         }
       },

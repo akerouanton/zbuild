@@ -3,7 +3,7 @@
     "RawOp": "GjgKNmRvY2tlci1pbWFnZTovL2RvY2tlci5pby9saWJyYXJ5L3BocDo3LjMuMTMtZnBtLWJ1c3RlclIOCgVhbWQ2NBIFbGludXhaAA==",
     "Op": {
       "Op": {
-        "Source": {
+        "source": {
           "identifier": "docker-image://docker.io/library/php:7.3.13-fpm-buster"
         }
       },
@@ -24,7 +24,7 @@
     "RawOp": "GpsBCg9sb2NhbDovL2NvbnRleHQSRAoUbG9jYWwuaW5jbHVkZXBhdHRlcm4SLFsiZG9ja2VyL2FwcC9waHAuaW5pIiwiZG9ja2VyL2FwcC9mcG0uY29uZiJdEh0KDWxvY2FsLnNlc3Npb24SDDxTRVNTSU9OLUlEPhIjChNsb2NhbC5zaGFyZWRrZXloaW50Egxjb25maWctZmlsZXNaAA==",
     "Op": {
       "Op": {
-        "Source": {
+        "source": {
           "identifier": "local://context",
           "attrs": {
             "local.includepattern": "[\"docker/app/php.ini\",\"docker/app/fpm.conf\"]",
@@ -52,7 +52,7 @@
     "RawOp": "GlYKPWh0dHBzOi8vYmxhY2tmaXJlLmlvL2FwaS92MS9yZWxlYXNlcy9wcm9iZS9waHAvbGludXgvYW1kNjQvNzISFQoNaHR0cC5maWxlbmFtZRIEL291dFoA",
     "Op": {
       "Op": {
-        "Source": {
+        "source": {
           "identifier": "https://blackfire.io/api/v1/releases/probe/php/linux/amd64/72",
           "attrs": {
             "http.filename": "/out"
@@ -85,14 +85,14 @@
         }
       ],
       "Op": {
-        "File": {
+        "file": {
           "actions": [
             {
               "input": 0,
               "secondaryInput": 1,
               "output": 0,
               "Action": {
-                "Copy": {
+                "copy": {
                   "src": "/usr/bin/composer",
                   "dest": "/usr/bin/composer",
                   "mode": -1,
@@ -137,14 +137,14 @@
         }
       ],
       "Op": {
-        "File": {
+        "file": {
           "actions": [
             {
               "input": 0,
               "secondaryInput": 1,
               "output": 0,
               "Action": {
-                "Copy": {
+                "copy": {
                   "src": "/unpacked",
                   "dest": "/usr/local/lib/php/extensions/no-debug-non-zts-20180731/blackfire.so",
                   "mode": 420,
@@ -179,7 +179,7 @@
     "RawOp": "GjEKL2RvY2tlci1pbWFnZTovL2RvY2tlci5pby9saWJyYXJ5L2NvbXBvc2VyOjEuOS4wUg4KBWFtZDY0EgVsaW51eFoA",
     "Op": {
       "Op": {
-        "Source": {
+        "source": {
           "identifier": "docker-image://docker.io/library/composer:1.9.0"
         }
       },
@@ -210,25 +210,25 @@
         }
       ],
       "Op": {
-        "File": {
+        "file": {
           "actions": [
             {
               "input": 0,
               "secondaryInput": 1,
               "output": 0,
               "Action": {
-                "Copy": {
+                "copy": {
                   "src": "/docker/app/php.ini",
                   "dest": "/usr/local/etc/php/php.ini",
                   "owner": {
                     "user": {
                       "User": {
-                        "ByID": 1000
+                        "byID": 1000
                       }
                     },
                     "group": {
                       "User": {
-                        "ByID": 1000
+                        "byID": 1000
                       }
                     }
                   },
@@ -270,14 +270,14 @@
         }
       ],
       "Op": {
-        "File": {
+        "file": {
           "actions": [
             {
               "input": -1,
               "secondaryInput": 0,
               "output": 0,
               "Action": {
-                "Copy": {
+                "copy": {
                   "src": "/decompressed/blackfire-*.so",
                   "dest": "/unpacked",
                   "mode": -1,
@@ -316,7 +316,7 @@
         }
       ],
       "Op": {
-        "Exec": {
+        "exec": {
           "meta": {
             "args": [
               "/bin/sh",
@@ -378,26 +378,26 @@
         }
       ],
       "Op": {
-        "File": {
+        "file": {
           "actions": [
             {
               "input": 0,
               "secondaryInput": -1,
               "output": 0,
               "Action": {
-                "Mkdir": {
+                "mkdir": {
                   "path": "/composer",
                   "mode": 488,
                   "makeParents": true,
                   "owner": {
                     "user": {
                       "User": {
-                        "ByID": 1000
+                        "byID": 1000
                       }
                     },
                     "group": {
                       "User": {
-                        "ByID": 1000
+                        "byID": 1000
                       }
                     }
                   },
@@ -434,7 +434,7 @@
         }
       ],
       "Op": {
-        "Exec": {
+        "exec": {
           "meta": {
             "args": [
               "/bin/sh",
@@ -496,7 +496,7 @@
         }
       ],
       "Op": {
-        "Exec": {
+        "exec": {
           "meta": {
             "args": [
               "/bin/sh",
@@ -580,14 +580,14 @@
         }
       ],
       "Op": {
-        "File": {
+        "file": {
           "actions": [
             {
               "input": -1,
               "secondaryInput": 0,
               "output": 0,
               "Action": {
-                "Copy": {
+                "copy": {
                   "src": "/out",
                   "dest": "/decompressed",
                   "mode": -1,
@@ -625,26 +625,26 @@
         }
       ],
       "Op": {
-        "File": {
+        "file": {
           "actions": [
             {
               "input": 0,
               "secondaryInput": -1,
               "output": 0,
               "Action": {
-                "Mkdir": {
+                "mkdir": {
                   "path": "/app",
                   "mode": 488,
                   "makeParents": true,
                   "owner": {
                     "user": {
                       "User": {
-                        "ByID": 1000
+                        "byID": 1000
                       }
                     },
                     "group": {
                       "User": {
-                        "ByID": 1000
+                        "byID": 1000
                       }
                     }
                   },
@@ -685,25 +685,25 @@
         }
       ],
       "Op": {
-        "File": {
+        "file": {
           "actions": [
             {
               "input": 0,
               "secondaryInput": 1,
               "output": 0,
               "Action": {
-                "Copy": {
+                "copy": {
                   "src": "/docker/app/fpm.conf",
                   "dest": "/usr/local/etc/php-fpm.conf",
                   "owner": {
                     "user": {
                       "User": {
-                        "ByID": 1000
+                        "byID": 1000
                       }
                     },
                     "group": {
                       "User": {
-                        "ByID": 1000
+                        "byID": 1000
                       }
                     }
                   },

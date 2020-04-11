@@ -7,6 +7,7 @@ package llbtest
 import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
+	llb "github.com/moby/buildkit/client/llb"
 	client "github.com/moby/buildkit/frontend/gateway/client"
 	digest "github.com/opencontainers/go-digest"
 	types "github.com/tonistiigi/fsutil/types"
@@ -50,8 +51,23 @@ func (mr *MockClientMockRecorder) BuildOpts() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BuildOpts", reflect.TypeOf((*MockClient)(nil).BuildOpts))
 }
 
+// Inputs mocks base method
+func (m *MockClient) Inputs(arg0 context.Context) (map[string]llb.State, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Inputs", arg0)
+	ret0, _ := ret[0].(map[string]llb.State)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Inputs indicates an expected call of Inputs
+func (mr *MockClientMockRecorder) Inputs(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Inputs", reflect.TypeOf((*MockClient)(nil).Inputs), arg0)
+}
+
 // ResolveImageConfig mocks base method
-func (m *MockClient) ResolveImageConfig(arg0 context.Context, arg1 string, arg2 client.ResolveImageConfigOpt) (digest.Digest, []byte, error) {
+func (m *MockClient) ResolveImageConfig(arg0 context.Context, arg1 string, arg2 llb.ResolveImageConfigOpt) (digest.Digest, []byte, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ResolveImageConfig", arg0, arg1, arg2)
 	ret0, _ := ret[0].(digest.Digest)
@@ -147,4 +163,19 @@ func (m *MockReference) StatFile(arg0 context.Context, arg1 client.StatRequest) 
 func (mr *MockReferenceMockRecorder) StatFile(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StatFile", reflect.TypeOf((*MockReference)(nil).StatFile), arg0, arg1)
+}
+
+// ToState mocks base method
+func (m *MockReference) ToState() (llb.State, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ToState")
+	ret0, _ := ret[0].(llb.State)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ToState indicates an expected call of ToState
+func (mr *MockReferenceMockRecorder) ToState() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ToState", reflect.TypeOf((*MockReference)(nil).ToState))
 }

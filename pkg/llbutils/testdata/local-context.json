@@ -23,7 +23,7 @@
     "RawOp": "GoYBCg9sb2NhbDovL2NvbnRleHQSJwoUbG9jYWwuaW5jbHVkZXBhdHRlcm4SD1sic29tZSIsImZpbGUiXRIdCg1sb2NhbC5zZXNzaW9uEgw8U0VTU0lPTi1JRD4SKwoTbG9jYWwuc2hhcmVka2V5aGludBIUc29tZS1zaGFyZWQta2V5LWhpbnRaAA==",
     "Op": {
       "Op": {
-        "Source": {
+        "source": {
           "identifier": "local://context",
           "attrs": {
             "local.includepattern": "[\"some\",\"file\"]",

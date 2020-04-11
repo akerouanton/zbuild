@@ -23,7 +23,7 @@
     "RawOp": "EsYCCrMCCgcvYmluL3NoCgItbwoHZXJyZXhpdAoCLWMKkwJjdXJsIC1mIC1vIC91c3IvbG9jYWwvc2Jpbi9ub3RwZWNsIGh0dHBzOi8vc3RvcmFnZS5nb29nbGVhcGlzLmNvbS9ub3RwZWNsL25vdHBlY2w7IGNobW9kICt4IC91c3IvbG9jYWwvc2Jpbi9ub3RwZWNsOyBhcGsgYWRkIC0tbm8tY2FjaGUgLS12aXJ0dWFsPS5waHBpemUgJFBIUElaRV9ERVBTOyBub3RwZWNsIGluc3RhbGwgbWVtY2FjaGVkOyBkb2NrZXItcGhwLWV4dC1lbmFibGUgbWVtY2FjaGVkOyBhcGsgZGVsIC5waHBpemU7IHJtIC1yZiAvdXNyL2xvY2FsL3NiaW4vbm90cGVjbBoBLxIOCP///////////wEaAS9SDgoFYW1kNjQSBWxpbnV4WgA=",
     "Op": {
       "Op": {
-        "Exec": {
+        "exec": {
           "meta": {
             "args": [
               "/bin/sh",

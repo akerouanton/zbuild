@@ -9,25 +9,25 @@
         }
       ],
       "Op": {
-        "File": {
+        "file": {
           "actions": [
             {
               "input": -1,
               "secondaryInput": 0,
               "output": 0,
               "Action": {
-                "Copy": {
+                "copy": {
                   "src": "/etc/passwd",
                   "dest": "/etc/passwd2",
                   "owner": {
                     "user": {
                       "User": {
-                        "ByID": 1000
+                        "byID": 1000
                       }
                     },
                     "group": {
                       "User": {
-                        "ByID": 1000
+                        "byID": 1000
                       }
                     }
                   },
@@ -83,7 +83,7 @@
     "RawOp": "GioKKGRvY2tlci1pbWFnZTovL2RvY2tlci5pby9saWJyYXJ5L3BocDo3LjJSDgoFYW1kNjQSBWxpbnV4WgA=",
     "Op": {
       "Op": {
-        "Source": {
+        "source": {
           "identifier": "docker-image://docker.io/library/php:7.2"
         }
       },

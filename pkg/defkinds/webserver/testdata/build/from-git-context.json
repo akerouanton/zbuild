@@ -3,7 +3,7 @@
     "RawOp": "GkcKGmdpdDovL2dpdGh1Yi5jb20vc29tZS9yZXBvEikKC2dpdC5mdWxsdXJsEhpnaXQ6Ly9naXRodWIuY29tL3NvbWUvcmVwb1oA",
     "Op": {
       "Op": {
-        "Source": {
+        "source": {
           "identifier": "git://github.com/some/repo",
           "attrs": {
             "git.fullurl": "git://github.com/some/repo"
@@ -50,7 +50,7 @@
         }
       ],
       "Op": {
-        "Exec": {
+        "exec": {
           "meta": {
             "args": [
               "/bin/sh",
@@ -97,7 +97,7 @@
     "RawOp": "GncKdWRvY2tlci1pbWFnZTovL2RvY2tlci5pby9saWJyYXJ5L25naW54OmxhdGVzdEBzaGEyNTY6OGFhN2Y2YTk1ODVkOTA4YTYzZTVlNDE4ZGM1ZDE0YWU3NDY3ZDJlMzZlMWFiNGYwZDhmOWQwNTlhM2QwNzFjZVIOCgVhbWQ2NBIFbGludXhaAA==",
     "Op": {
       "Op": {
-        "Source": {
+        "source": {
           "identifier": "docker-image://docker.io/library/nginx:latest@sha256:8aa7f6a9585d908a63e5e418dc5d14ae7467d2e36e1ab4f0d8f9d059a3d071ce"
         }
       },
@@ -128,25 +128,25 @@
         }
       ],
       "Op": {
-        "File": {
+        "file": {
           "actions": [
             {
               "input": 0,
               "secondaryInput": 1,
               "output": 0,
               "Action": {
-                "Copy": {
+                "copy": {
                   "src": "/docker/nginx.conf",
                   "dest": "/etc/nginx/nginx.conf",
                   "owner": {
                     "user": {
                       "User": {
-                        "ByID": 1000
+                        "byID": 1000
                       }
                     },
                     "group": {
                       "User": {
-                        "ByID": 1000
+                        "byID": 1000
                       }
                     }
                   },
