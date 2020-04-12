@@ -18,7 +18,7 @@ sources:
     - src/
 
 config_files:
-    php.ini: docker/php/php.ini
+    docker/php/php.ini: "${php_ini}"
 
 stateful_dirs:
     - var/

@@ -14,8 +14,8 @@ stateful_dirs:
   - './public/uploads'
 
 config_files:
-  fpm.conf: 'docker/app/fpm.conf'
-  php.ini: 'docker/app/php.ini'
+  docker/app/fpm.conf: ${fpm_conf}
+  docker/app/php.ini: ${php_ini}
 
 integrations:
   - blackfire

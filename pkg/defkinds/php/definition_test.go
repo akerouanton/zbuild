@@ -25,8 +25,6 @@ func initParseRawDefinitionWithoutStagesTC() newDefinitionTC {
 	lockFile := "testdata/def/without-stages.lock"
 
 	isFPM := true
-	iniFile := "docker/app/php.ini"
-	fpmConfigFile := "docker/app/fpm.conf"
 	isDev := true
 	isNotDev := false
 	inferMode := false
@@ -48,9 +46,9 @@ func initParseRawDefinitionWithoutStagesTC() newDefinitionTC {
 					"soap":      "*",
 				},
 				GlobalDeps: &builddef.VersionMap{},
-				ConfigFiles: php.PHPConfigFiles{
-					IniFile:       &iniFile,
-					FPMConfigFile: &fpmConfigFile,
+				ConfigFiles: builddef.PathsMap{
+					"docker/app/php.ini":  "${php_ini}",
+					"docker/app/fpm.conf": "${fpm_conf}",
 				},
 				ComposerDumpFlags: &php.ComposerDumpFlags{
 					APCU:                  false,
@@ -111,9 +109,6 @@ func initParseRawDefinitionWithoutStagesTC() newDefinitionTC {
 }
 
 func initParseRawDefinitionWithStagesTC() newDefinitionTC {
-	iniDevFile := "docker/app/php.dev.ini"
-	iniProdFile := "docker/app/php.prod.ini"
-	fpmConfigFile := "docker/app/fpm.conf"
 	devStageDevMode := true
 	prodStageDevMode := false
 	isFPM := true
@@ -122,13 +117,13 @@ func initParseRawDefinitionWithStagesTC() newDefinitionTC {
 	inferMode := true
 
 	devStage := emptyStage()
-	devStage.ConfigFiles = php.PHPConfigFiles{
-		IniFile: &iniDevFile,
+	devStage.ConfigFiles = builddef.PathsMap{
+		"docker/app/php.dev.ini": "${php_ini}",
 	}
 
 	prodStage := emptyStage()
-	prodStage.ConfigFiles = php.PHPConfigFiles{
-		IniFile: &iniProdFile,
+	prodStage.ConfigFiles = builddef.PathsMap{
+		"docker/app/php.prod.ini": "${php_ini}",
 	}
 	prodStage.Healthcheck = &builddef.HealthcheckConfig{
 		HealthcheckFCGI: &builddef.HealthcheckFCGI{
@@ -156,8 +151,8 @@ func initParseRawDefinitionWithStagesTC() newDefinitionTC {
 					"soap":      "*",
 				},
 				GlobalDeps: &builddef.VersionMap{},
-				ConfigFiles: php.PHPConfigFiles{
-					FPMConfigFile: &fpmConfigFile,
+				ConfigFiles: builddef.PathsMap{
+					"docker/app/fpm.conf": "${fpm_conf}",
 				},
 				ComposerDumpFlags: &php.ComposerDumpFlags{
 					APCU:                  false,
@@ -189,7 +184,6 @@ func initParseRawDefinitionWithStagesTC() newDefinitionTC {
 				"worker": {
 					DeriveFrom: "prod",
 					Stage: php.Stage{
-						ConfigFiles: php.PHPConfigFiles{},
 						ComposerDumpFlags: &php.ComposerDumpFlags{
 							APCU:                  true,
 							ClassmapAuthoritative: false,
@@ -273,7 +267,7 @@ func initParseRawDefinitionWithCustomFCGIHealthcheckTC() newDefinitionTC {
 				SystemPackages: &builddef.VersionMap{},
 				Extensions:     &builddef.VersionMap{},
 				GlobalDeps:     &builddef.VersionMap{},
-				ConfigFiles:    php.PHPConfigFiles{},
+				ConfigFiles:    builddef.PathsMap{},
 				Sources:        []string{},
 				Integrations:   []string{},
 				StatefulDirs:   []string{},
@@ -330,7 +324,7 @@ func initParseRawDefinitionWithCustomSourceContextTC() newDefinitionTC {
 				SystemPackages: &builddef.VersionMap{},
 				Extensions:     &builddef.VersionMap{},
 				GlobalDeps:     &builddef.VersionMap{},
-				ConfigFiles:    php.PHPConfigFiles{},
+				ConfigFiles:    builddef.PathsMap{},
 				Sources: []string{
 					"src/",
 				},
@@ -404,7 +398,7 @@ func initAlpineWithoutBaseImageTC() newDefinitionTC {
 				FPM:            &isFPM,
 				Extensions:     &builddef.VersionMap{},
 				GlobalDeps:     &builddef.VersionMap{},
-				ConfigFiles:    php.PHPConfigFiles{},
+				ConfigFiles:    builddef.PathsMap{},
 				ComposerDumpFlags: &php.ComposerDumpFlags{
 					APCU:                  false,
 					ClassmapAuthoritative: true,
@@ -497,10 +491,7 @@ type resolveStageTC struct {
 func initSuccessfullyResolveDefaultDevStageTC(t *testing.T, mockCtrl *gomock.Controller) resolveStageTC {
 	file := "testdata/def/without-stages.yml"
 	lockFile := "testdata/def/without-stages.lock"
-
 	isFPM := true
-	phpIni := "docker/app/php.ini"
-	fpmConfigFile := "docker/app/fpm.conf"
 
 	return resolveStageTC{
 		file:     file,
@@ -540,9 +531,9 @@ func initSuccessfullyResolveDefaultDevStageTC(t *testing.T, mockCtrl *gomock.Con
 				GlobalDeps:   &builddef.VersionMap{},
 				Sources:      []string{"./src"},
 				StatefulDirs: []string{"./public/uploads"},
-				ConfigFiles: php.PHPConfigFiles{
-					IniFile:       &phpIni,
-					FPMConfigFile: &fpmConfigFile,
+				ConfigFiles: builddef.PathsMap{
+					"docker/app/php.ini":  "${php_ini}",
+					"docker/app/fpm.conf": "${fpm_conf}",
 				},
 				ComposerDumpFlags: &php.ComposerDumpFlags{
 					APCU:                  false,
@@ -624,6 +615,7 @@ func initSuccessfullyResolveWorkerStageTC(t *testing.T, mockCtrl *gomock.Control
 					APCU:                  false,
 					ClassmapAuthoritative: true,
 				},
+				ConfigFiles:  builddef.PathsMap{},
 				Sources:      []string{"bin/", "src/"},
 				Integrations: []string{},
 				StatefulDirs: []string{},
@@ -714,7 +706,7 @@ func initRemoveDefaultExtensionsTC(t *testing.T, mockCtrl *gomock.Controller) re
 					"session":    "*",
 				},
 				GlobalDeps:  &builddef.VersionMap{},
-				ConfigFiles: php.PHPConfigFiles{},
+				ConfigFiles: builddef.PathsMap{},
 				ComposerDumpFlags: &php.ComposerDumpFlags{
 					ClassmapAuthoritative: true,
 				},
@@ -774,7 +766,7 @@ func initPreservePredefinedExtensionConstraintsTC(t *testing.T, mockCtrl *gomock
 					"redis": "^5.1",
 				},
 				GlobalDeps:  &builddef.VersionMap{},
-				ConfigFiles: php.PHPConfigFiles{},
+				ConfigFiles: builddef.PathsMap{},
 				ComposerDumpFlags: &php.ComposerDumpFlags{
 					ClassmapAuthoritative: true,
 				},
@@ -852,6 +844,7 @@ func initInferAlpinePackagesRequiredByExtsTC(t *testing.T, mockCtrl *gomock.Cont
 					ClassmapAuthoritative: true,
 				},
 				Sources:      []string{},
+				ConfigFiles:  builddef.PathsMap{},
 				Integrations: []string{},
 				StatefulDirs: []string{},
 				PostInstall:  []string{},
@@ -1308,7 +1301,7 @@ func emptyStage() php.Stage {
 		SystemPackages: &builddef.VersionMap{},
 		Extensions:     &builddef.VersionMap{},
 		GlobalDeps:     &builddef.VersionMap{},
-		ConfigFiles:    php.PHPConfigFiles{},
+		ConfigFiles:    builddef.PathsMap{},
 		Sources:        []string{},
 		Integrations:   []string{},
 		StatefulDirs:   []string{},
@@ -1558,33 +1551,26 @@ func initMergeExtensionsWithoutBaseTC() mergeStageTC {
 }
 
 func initMergeConfigFilesWithBaseTC() mergeStageTC {
-	baseIniFile := "php.dev.ini"
-	baseFpmConf := "fpm.dev.conf"
-	overridingIniFile := "php.prod.ini"
-	overridingFpmConf := "fpm.prod.conf"
-	expectedIniFile := "php.prod.ini"
-	expectedFpmConf := "fpm.prod.conf"
-
 	return mergeStageTC{
 		base: func() php.Stage {
 			return php.Stage{
-				ConfigFiles: php.PHPConfigFiles{
-					IniFile:       &baseIniFile,
-					FPMConfigFile: &baseFpmConf,
+				ConfigFiles: builddef.PathsMap{
+					"docker/app/php.dev.ini":  "${php_ini}",
+					"docker/app/fpm.dev.conf": "${fpm_conf}",
 				},
 			}
 		},
 		overriding: php.Stage{
-			ConfigFiles: php.PHPConfigFiles{
-				IniFile:       &overridingIniFile,
-				FPMConfigFile: &overridingFpmConf,
+			ConfigFiles: builddef.PathsMap{
+				"docker/app/php.prod.ini":  "${php_ini}",
+				"docker/app/fpm.prod.conf": "${fpm_conf}",
 			},
 		},
 		expected: func() php.Stage {
 			s := emptyStage()
-			s.ConfigFiles = php.PHPConfigFiles{
-				IniFile:       &expectedIniFile,
-				FPMConfigFile: &expectedFpmConf,
+			s.ConfigFiles = builddef.PathsMap{
+				"docker/app/php.prod.ini":  "${php_ini}",
+				"docker/app/fpm.prod.conf": "${fpm_conf}",
 			}
 			return s
 		},
@@ -1592,26 +1578,21 @@ func initMergeConfigFilesWithBaseTC() mergeStageTC {
 }
 
 func initMergeConfigFilesWithoutBaseTC() mergeStageTC {
-	overridingIniFile := "php.prod.ini"
-	overridingFpmConf := "fpm.prod.conf"
-	expectedIniFile := "php.prod.ini"
-	expectedFpmConf := "fpm.prod.conf"
-
 	return mergeStageTC{
 		base: func() php.Stage {
 			return php.Stage{}
 		},
 		overriding: php.Stage{
-			ConfigFiles: php.PHPConfigFiles{
-				IniFile:       &overridingIniFile,
-				FPMConfigFile: &overridingFpmConf,
+			ConfigFiles: builddef.PathsMap{
+				"docker/app/php.prod.ini":  "${php_ini}",
+				"docker/app/fpm.prod.conf": "${fpm_conf}",
 			},
 		},
 		expected: func() php.Stage {
 			s := emptyStage()
-			s.ConfigFiles = php.PHPConfigFiles{
-				IniFile:       &expectedIniFile,
-				FPMConfigFile: &expectedFpmConf,
+			s.ConfigFiles = builddef.PathsMap{
+				"docker/app/php.prod.ini":  "${php_ini}",
+				"docker/app/fpm.prod.conf": "${fpm_conf}",
 			}
 			return s
 		},

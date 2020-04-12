@@ -15,6 +15,6 @@ sources:
   - src/
 
 config_files:
-  php.ini: php.ini
+  php.ini: ${php_ini}
 
 healthcheck: false

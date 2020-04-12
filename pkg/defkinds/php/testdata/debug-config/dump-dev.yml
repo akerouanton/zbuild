@@ -34,8 +34,7 @@ stage:
   globaldeps:
     symfony/flex: '*'
   configfiles:
-    inifile: docker/php/php.ini
-    fpmconfigfile: null
+    docker/php/php.ini: ${php_ini}
   composerdumpflags:
     apcu: false
     classmapauthoritative: true
