@@ -26,7 +26,7 @@ func initSuccessfullyParseRawDefinitionTC() newDefinitionTC {
 			Type:    "nginx",
 			Version: "latest",
 			Alpine:  true,
-			ConfigFiles: map[string]string{
+			ConfigFiles: builddef.PathsMap{
 				"./docker/nginx.conf": "nginx.conf",
 			},
 			Healthcheck: &builddef.HealthcheckConfig{
@@ -76,7 +76,7 @@ func initParseDefinitionWithCustomHealthcheckTC() newDefinitionTC {
 			SystemPackages: &builddef.VersionMap{
 				"curl": "*",
 			},
-			ConfigFiles: map[string]string{},
+			ConfigFiles: builddef.PathsMap{},
 		},
 	}
 }
@@ -178,7 +178,7 @@ func TestDefinitionMerge(t *testing.T) {
 				return webserver.Definition{
 					Type:           webserver.WebserverType("caddy"),
 					SystemPackages: &builddef.VersionMap{},
-					ConfigFiles:    map[string]string{},
+					ConfigFiles:    builddef.PathsMap{},
 				}
 			},
 		},
@@ -195,7 +195,7 @@ func TestDefinitionMerge(t *testing.T) {
 				return webserver.Definition{
 					Type:           webserver.WebserverType("caddy"),
 					SystemPackages: &builddef.VersionMap{},
-					ConfigFiles:    map[string]string{},
+					ConfigFiles:    builddef.PathsMap{},
 				}
 			},
 		},
@@ -217,7 +217,7 @@ func TestDefinitionMerge(t *testing.T) {
 			},
 			expected: func() webserver.Definition {
 				return webserver.Definition{
-					ConfigFiles: map[string]string{},
+					ConfigFiles: builddef.PathsMap{},
 					SystemPackages: &builddef.VersionMap{
 						"curl":            "7.64.0-4",
 						"ca-certificates": "*",
@@ -239,7 +239,7 @@ func TestDefinitionMerge(t *testing.T) {
 			},
 			expected: func() webserver.Definition {
 				return webserver.Definition{
-					ConfigFiles: map[string]string{},
+					ConfigFiles: builddef.PathsMap{},
 					SystemPackages: &builddef.VersionMap{
 						"curl":            "7.64.0-4",
 						"ca-certificates": "*",
@@ -250,14 +250,14 @@ func TestDefinitionMerge(t *testing.T) {
 		"merge config files with base": {
 			base: func() webserver.Definition {
 				return webserver.Definition{
-					ConfigFiles: map[string]string{
+					ConfigFiles: builddef.PathsMap{
 						"./docker/nginx.dev.conf": "nginx.conf",
 					},
 				}
 			},
 			overriding: func() webserver.Definition {
 				return webserver.Definition{
-					ConfigFiles: map[string]string{
+					ConfigFiles: builddef.PathsMap{
 						"./docker/nginx.prod.conf": "nginx.conf",
 					},
 				}
@@ -265,8 +265,7 @@ func TestDefinitionMerge(t *testing.T) {
 			expected: func() webserver.Definition {
 				return webserver.Definition{
 					SystemPackages: &builddef.VersionMap{},
-					ConfigFiles: map[string]string{
-						"./docker/nginx.dev.conf":  "nginx.conf",
+					ConfigFiles: builddef.PathsMap{
 						"./docker/nginx.prod.conf": "nginx.conf",
 					},
 				}
@@ -278,14 +277,14 @@ func TestDefinitionMerge(t *testing.T) {
 			},
 			overriding: func() webserver.Definition {
 				return webserver.Definition{
-					ConfigFiles: map[string]string{
+					ConfigFiles: builddef.PathsMap{
 						"./docker/nginx.prod.conf": "nginx.conf",
 					},
 				}
 			},
 			expected: func() webserver.Definition {
 				return webserver.Definition{
-					ConfigFiles: map[string]string{
+					ConfigFiles: builddef.PathsMap{
 						"./docker/nginx.prod.conf": "nginx.conf",
 					},
 					SystemPackages: &builddef.VersionMap{},
@@ -295,7 +294,7 @@ func TestDefinitionMerge(t *testing.T) {
 		"ignore nil config file": {
 			base: func() webserver.Definition {
 				return webserver.Definition{
-					ConfigFiles: map[string]string{
+					ConfigFiles: builddef.PathsMap{
 						"./docker/nginx.dev.conf": "nginx.conf",
 					},
 				}
@@ -306,7 +305,7 @@ func TestDefinitionMerge(t *testing.T) {
 			expected: func() webserver.Definition {
 				return webserver.Definition{
 					SystemPackages: &builddef.VersionMap{},
-					ConfigFiles: map[string]string{
+					ConfigFiles: builddef.PathsMap{
 						"./docker/nginx.dev.conf": "nginx.conf",
 					},
 				}
@@ -339,7 +338,7 @@ func TestDefinitionMerge(t *testing.T) {
 						Type: builddef.HealthcheckTypeDisabled,
 					},
 					SystemPackages: &builddef.VersionMap{},
-					ConfigFiles:    map[string]string{},
+					ConfigFiles:    builddef.PathsMap{},
 				}
 			},
 		},
@@ -360,7 +359,7 @@ func TestDefinitionMerge(t *testing.T) {
 						Type: builddef.HealthcheckTypeDisabled,
 					},
 					SystemPackages: &builddef.VersionMap{},
-					ConfigFiles:    map[string]string{},
+					ConfigFiles:    builddef.PathsMap{},
 				}
 			},
 		},
@@ -381,7 +380,7 @@ func TestDefinitionMerge(t *testing.T) {
 						Type: builddef.HealthcheckTypeDisabled,
 					},
 					SystemPackages: &builddef.VersionMap{},
-					ConfigFiles:    map[string]string{},
+					ConfigFiles:    builddef.PathsMap{},
 				}
 			},
 		},
@@ -407,7 +406,7 @@ func TestDefinitionMerge(t *testing.T) {
 						{From: "web/", To: "web/"},
 					},
 					SystemPackages: &builddef.VersionMap{},
-					ConfigFiles:    map[string]string{},
+					ConfigFiles:    builddef.PathsMap{},
 				}
 			},
 		},
@@ -428,7 +427,7 @@ func TestDefinitionMerge(t *testing.T) {
 						{From: "web/", To: "web/"},
 					},
 					SystemPackages: &builddef.VersionMap{},
-					ConfigFiles:    map[string]string{},
+					ConfigFiles:    builddef.PathsMap{},
 				}
 			},
 		},
@@ -447,7 +446,7 @@ func TestDefinitionMerge(t *testing.T) {
 				return webserver.Definition{
 					Version:        "1.17.8",
 					SystemPackages: &builddef.VersionMap{},
-					ConfigFiles:    map[string]string{},
+					ConfigFiles:    builddef.PathsMap{},
 				}
 			},
 		},
@@ -464,7 +463,7 @@ func TestDefinitionMerge(t *testing.T) {
 				return webserver.Definition{
 					Version:        "1.17.8",
 					SystemPackages: &builddef.VersionMap{},
-					ConfigFiles:    map[string]string{},
+					ConfigFiles:    builddef.PathsMap{},
 				}
 			},
 		},

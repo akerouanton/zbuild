@@ -53,7 +53,7 @@
     }
   },
   {
-    "RawOp": "CkkKR3NoYTI1NjplMjIwMWM5M2RhOWRlZTU2ZDE0OWQ3NGYwODRmMmE5MTNiNGJkMDQ4M2M5MGFjYzhmMTYyMjEyZTU2MTA2YWE5CkkKR3NoYTI1Njo4NmYzZDRlZTU2OGFlYjMyZmU5Y2I2MTk1ZjQ3NWYyOGU0ZGE3OTI0MWQzZjllOTUwNTFiYjEwYTU5YTg5ZDJjIlsSWRABIlUKEi9kb2NrZXIvbmdpbnguY29uZhIVL2V0Yy9uZ2lueC9uZ2lueC5jb25mGgoKAxDoBxIDEOgHIP///////////wEoATABQAFIAVj///////////8BUg4KBWFtZDY0EgVsaW51eFoA",
+    "RawOp": "CkkKR3NoYTI1NjplMjIwMWM5M2RhOWRlZTU2ZDE0OWQ3NGYwODRmMmE5MTNiNGJkMDQ4M2M5MGFjYzhmMTYyMjEyZTU2MTA2YWE5CkkKR3NoYTI1Njo1ZDYwNDc1ZTk1YWU5NTEzNWQzYTQ4YjkyYjdjZWJkMmQ4MTk4MjY2OGE5OTJmN2UxMDUxMzQwYTAzMGM3ZjYzIlsSWRABIlUKEi9kb2NrZXIvbmdpbnguY29uZhIVL2V0Yy9uZ2lueC9uZ2lueC5jb25mGgoKAxDoBxIDEOgHIP///////////wEoATABQAFIAVj///////////8BUg4KBWFtZDY0EgVsaW51eFoA",
     "Op": {
       "inputs": [
         {
@@ -61,7 +61,7 @@
           "index": 0
         },
         {
-          "digest": "sha256:86f3d4ee568aeb32fe9cb6195f475f28e4da79241d3f9e95051bb10a59a89d2c",
+          "digest": "sha256:5d60475e95ae95135d3a48b92b7cebd2d81982668a992f7e1051340a030c7f63",
           "index": 0
         }
       ],
@@ -106,10 +106,10 @@
       },
       "constraints": {}
     },
-    "Digest": "sha256:36d2a7518ef36b8f3bd7b5112c6bccbbd0f00fbc696cb0554873333d0bbf6446",
+    "Digest": "sha256:2fdcf4170721a630ad4b5386b47df63def34349bbc77c79f9bede6b9c5cb8894",
     "OpMetadata": {
       "description": {
-        "llb.customname": "Copy ./docker/nginx.conf"
+        "llb.customname": "Copy /docker/nginx.conf"
       },
       "caps": {
         "file.base": true
@@ -117,13 +117,13 @@
     }
   },
   {
-    "RawOp": "GoYBCg9sb2NhbDovL2NvbnRleHQSLwoUbG9jYWwuaW5jbHVkZXBhdHRlcm4SF1siLi9kb2NrZXIvbmdpbnguY29uZiJdEh0KDWxvY2FsLnNlc3Npb24SDDxTRVNTSU9OLUlEPhIjChNsb2NhbC5zaGFyZWRrZXloaW50Egxjb25maWctZmlsZXNaAA==",
+    "RawOp": "GoUBCg9sb2NhbDovL2NvbnRleHQSLgoUbG9jYWwuaW5jbHVkZXBhdHRlcm4SFlsiL2RvY2tlci9uZ2lueC5jb25mIl0SHQoNbG9jYWwuc2Vzc2lvbhIMPFNFU1NJT04tSUQ+EiMKE2xvY2FsLnNoYXJlZGtleWhpbnQSDGNvbmZpZy1maWxlc1oA",
     "Op": {
       "Op": {
         "source": {
           "identifier": "local://context",
           "attrs": {
-            "local.includepattern": "[\"./docker/nginx.conf\"]",
+            "local.includepattern": "[\"/docker/nginx.conf\"]",
             "local.session": "\u003cSESSION-ID\u003e",
             "local.sharedkeyhint": "config-files"
           }
@@ -131,7 +131,7 @@
       },
       "constraints": {}
     },
-    "Digest": "sha256:86f3d4ee568aeb32fe9cb6195f475f28e4da79241d3f9e95051bb10a59a89d2c",
+    "Digest": "sha256:5d60475e95ae95135d3a48b92b7cebd2d81982668a992f7e1051340a030c7f63",
     "OpMetadata": {
       "description": {
         "llb.customname": "load config files from build context"
@@ -145,17 +145,17 @@
     }
   },
   {
-    "RawOp": "CkkKR3NoYTI1NjozNmQyYTc1MThlZjM2YjhmM2JkN2I1MTEyYzZiY2NiYmQwZjAwZmJjNjk2Y2IwNTU0ODczMzMzZDBiYmY2NDQ2",
+    "RawOp": "CkkKR3NoYTI1NjoyZmRjZjQxNzA3MjFhNjMwYWQ0YjUzODZiNDdkZjYzZGVmMzQzNDliYmM3N2M3OWY5YmVkZTZiOWM1Y2I4ODk0",
     "Op": {
       "inputs": [
         {
-          "digest": "sha256:36d2a7518ef36b8f3bd7b5112c6bccbbd0f00fbc696cb0554873333d0bbf6446",
+          "digest": "sha256:2fdcf4170721a630ad4b5386b47df63def34349bbc77c79f9bede6b9c5cb8894",
           "index": 0
         }
       ],
       "Op": null
     },
-    "Digest": "sha256:946b6e2d0f1edddc996b4a4fd648a208f6ae721c6477048fbca3d06c4dde7e59",
+    "Digest": "sha256:8a58c5c0bcc5ad30866a7ef71783221c8201da1d6b60abe9c2d8fb083f5111ad",
     "OpMetadata": {
       "caps": {
         "constraints": true,

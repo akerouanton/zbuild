@@ -98,7 +98,7 @@ type Definition struct {
 	Version        string                      `mapstructure:"version"`
 	Alpine         bool                        `mapstructure:"alpine"`
 	SystemPackages *builddef.VersionMap        `mapstructure:"system_packages"`
-	ConfigFiles    map[string]string           `mapstructure:"config_files"`
+	ConfigFiles    builddef.PathsMap           `mapstructure:"config_files"`
 	Healthcheck    *builddef.HealthcheckConfig `mapstructure:"healthcheck"`
 	Assets         []AssetToCopy               `mapstructure:"assets"`
 
@@ -125,11 +125,7 @@ func (def Definition) Copy() Definition {
 		Alpine:         def.Alpine,
 		SystemPackages: def.SystemPackages.Copy(),
 		Assets:         def.Assets,
-		ConfigFiles:    map[string]string{},
-	}
-
-	for src, dst := range def.ConfigFiles {
-		new.ConfigFiles[src] = dst
+		ConfigFiles:    def.ConfigFiles.Copy(),
 	}
 
 	if def.Healthcheck != nil {
@@ -145,11 +141,8 @@ func (base Definition) Merge(overriding Definition) Definition {
 	new.Version = overriding.Version
 	new.Alpine = overriding.Alpine
 	new.Assets = append(new.Assets, overriding.Assets...)
+	new.ConfigFiles = new.ConfigFiles.Merge(overriding.ConfigFiles)
 	new.SystemPackages.Merge(overriding.SystemPackages)
-
-	for from, to := range overriding.ConfigFiles {
-		new.ConfigFiles[from] = to
-	}
 
 	if !overriding.Type.IsEmpty() {
 		new.Type = overriding.Type

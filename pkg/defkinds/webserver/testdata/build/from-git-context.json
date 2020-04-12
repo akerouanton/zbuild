@@ -171,7 +171,7 @@
     "Digest": "sha256:f9106b1038404d659e5fef8139e124a4a4e17ce160f2d5e7aa02d050be9040dd",
     "OpMetadata": {
       "description": {
-        "llb.customname": "Copy ./docker/nginx.conf"
+        "llb.customname": "Copy /docker/nginx.conf"
       },
       "caps": {
         "file.base": true
