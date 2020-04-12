@@ -7,6 +7,10 @@ make gen-testdata
 make gen-diagrams
 make gen-mocks
 
+# Go might sometimes update the go.sum file on CI whereras it won't on local
+# dev machines... However, this change is unneeded and unwanted.
+git checkout -- go.sum
+
 if [ "$(git diff | wc -l)" -ne 0 ]; then
     echo "Looks like some generated files aren't up-to-date. Please run following commands to update them:"
     echo '* `make gen-testdata`'
