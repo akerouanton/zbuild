@@ -1,74 +1,10 @@
 [
   {
-    "RawOp": "CkkKR3NoYTI1Njo1ZmFiZGQzZDMzNDA3NGVlOGVmNWMwNTU4NTRmMzcyMDExZmJjNWI2NDYwOTM4NGU0MjQwM2VkN2Q5M2JlYTU1CkkKR3NoYTI1Njo3MTUxNzNjYTE5MmM2ZTViYTI1ZjVjMDNiNTgyNTA2ZDA1NGVmZWMyNzI3N2JjOTk1NjBhODgyODdiYzc0YTZiIkcSRRABIkEKBS8uZW52Eg4vYXBwLy5lbnYucHJvZBoKCgMQ6AcSAxDoByD///////////8BKAEwAUABSAFY////////////AVIOCgVhbWQ2NBIFbGludXhaAA==",
+    "RawOp": "CkkKR3NoYTI1Njo4MDc0MmQ0N2Y1Y2YwNTMyZDJkM2M0NWMzYTM2NzNiMjUzMzZlZjRlMjdhMThkYzI4Y2NiNWZlNjk1YmNmY2RmCkkKR3NoYTI1NjpkN2E4OWZlZGQxNWQwNzdmOTM3YzliNjhhMzkyZDgyYzg3NmI5NmFjMmZkY2RiZDU4NTc2MWZkZDU3MmE5OTRjIjkSNxABIjMKAS8SBC9hcHAaCgoDEOgHEgMQ6Acg////////////ASgBMAFAAUgBWP///////////wFSDgoFYW1kNjQSBWxpbnV4WgA=",
     "Op": {
       "inputs": [
         {
-          "digest": "sha256:5fabdd3d334074ee8ef5c055854f372011fbc5b64609384e42403ed7d93bea55",
-          "index": 0
-        },
-        {
-          "digest": "sha256:715173ca192c6e5ba25f5c03b582506d054efec27277bc99560a88287bc74a6b",
-          "index": 0
-        }
-      ],
-      "Op": {
-        "file": {
-          "actions": [
-            {
-              "input": 0,
-              "secondaryInput": 1,
-              "output": 0,
-              "Action": {
-                "copy": {
-                  "src": "/.env",
-                  "dest": "/app/.env.prod",
-                  "owner": {
-                    "user": {
-                      "User": {
-                        "byID": 1000
-                      }
-                    },
-                    "group": {
-                      "User": {
-                        "byID": 1000
-                      }
-                    }
-                  },
-                  "mode": -1,
-                  "followSymlink": true,
-                  "dirCopyContents": true,
-                  "createDestPath": true,
-                  "allowWildcard": true,
-                  "timestamp": -1
-                }
-              }
-            }
-          ]
-        }
-      },
-      "platform": {
-        "Architecture": "amd64",
-        "OS": "linux"
-      },
-      "constraints": {}
-    },
-    "Digest": "sha256:420852c7d21ef2d186ccede3419fc6a988e1483d998f3f9b4bac83e6aac1641e",
-    "OpMetadata": {
-      "description": {
-        "llb.customname": "Copy .env"
-      },
-      "caps": {
-        "file.base": true
-      }
-    }
-  },
-  {
-    "RawOp": "CkkKR3NoYTI1Njo3ODgyNThhM2E4MzdmYjk4YmQ3NTZhZDQ3YTFjYzU0ZTIyZTcwOTc3ZjY2MDI0NjRhOTRkYWVkNzU3NTg2NzM2CkkKR3NoYTI1NjpkN2E4OWZlZGQxNWQwNzdmOTM3YzliNjhhMzkyZDgyYzg3NmI5NmFjMmZkY2RiZDU4NTc2MWZkZDU3MmE5OTRjIjkSNxABIjMKAS8SBC9hcHAaCgoDEOgHEgMQ6Acg////////////ASgBMAFAAUgBWP///////////wFSDgoFYW1kNjQSBWxpbnV4WgA=",
-    "Op": {
-      "inputs": [
-        {
-          "digest": "sha256:788258a3a837fb98bd756ad47a1cc54e22e70977f6602464a94daed757586736",
+          "digest": "sha256:80742d47f5cf0532d2d3c45c3a3673b25336ef4e27a18dc28ccb5fe695bcfcdf",
           "index": 0
         },
         {
@@ -117,13 +53,95 @@
       },
       "constraints": {}
     },
-    "Digest": "sha256:5fabdd3d334074ee8ef5c055854f372011fbc5b64609384e42403ed7d93bea55",
+    "Digest": "sha256:24b3570674a2a863f2212ed1afcff093596b138323b25863f68cb7bd6924a927",
     "OpMetadata": {
       "description": {
         "llb.customname": "Copy /"
       },
       "caps": {
         "file.base": true
+      }
+    }
+  },
+  {
+    "RawOp": "Gn4KD2xvY2FsOi8vY29udGV4dBImChRsb2NhbC5pbmNsdWRlcGF0dGVybhIOWyIvLmVudi5wcm9kIl0SHQoNbG9jYWwuc2Vzc2lvbhIMPFNFU1NJT04tSUQ+EiQKE2xvY2FsLnNoYXJlZGtleWhpbnQSDWJ1aWxkLWNvbnRleHRaAA==",
+    "Op": {
+      "Op": {
+        "source": {
+          "identifier": "local://context",
+          "attrs": {
+            "local.includepattern": "[\"/.env.prod\"]",
+            "local.session": "\u003cSESSION-ID\u003e",
+            "local.sharedkeyhint": "build-context"
+          }
+        }
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:344d81563aa465a5866b07b46503ff680fb2027b61c2942107a1ad0697325810",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "load config files"
+      },
+      "caps": {
+        "source.local": true,
+        "source.local.includepatterns": true,
+        "source.local.sessionid": true,
+        "source.local.sharedkeyhint": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1NjoyNGIzNTcwNjc0YTJhODYzZjIyMTJlZDFhZmNmZjA5MzU5NmIxMzgzMjNiMjU4NjNmNjhjYjdiZDY5MjRhOTI3EuwBCuQBCgcvYmluL3NoCgItbwoHZXJyZXhpdAoCLWMKDnlhcm4gcnVuIGJ1aWxkEhROT0RFX1ZFUlNJT049MTIuMTQuMRITWUFSTl9WRVJTSU9OPTEuMjEuMRITTk9ERV9FTlY9cHJvZHVjdGlvbhJsUEFUSD0vaG9tZS9ub2RlLy5ucG0vYmluLzovaG9tZS9ub2RlLy55YXJuL2Jpbi86L3Vzci9sb2NhbC9zYmluOi91c3IvbG9jYWwvYmluOi91c3Ivc2JpbjovdXNyL2Jpbjovc2JpbjovYmluGgQvYXBwIgQxMDAwEgMaAS9SDgoFYW1kNjQSBWxpbnV4WgA=",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:24b3570674a2a863f2212ed1afcff093596b138323b25863f68cb7bd6924a927",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "exec": {
+          "meta": {
+            "args": [
+              "/bin/sh",
+              "-o",
+              "errexit",
+              "-c",
+              "yarn run build"
+            ],
+            "env": [
+              "NODE_VERSION=12.14.1",
+              "YARN_VERSION=1.21.1",
+              "NODE_ENV=production",
+              "PATH=/home/node/.npm/bin/:/home/node/.yarn/bin/:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+            ],
+            "cwd": "/app",
+            "user": "1000"
+          },
+          "mounts": [
+            {
+              "input": 0,
+              "dest": "/",
+              "output": 0
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:65024714ab3f65fce489706955d5884f48173c821775b79cb1c955b1978b0f31",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Build"
+      },
+      "caps": {
+        "exec.meta.base": true,
+        "exec.mount.bind": true
       }
     }
   },
@@ -145,34 +163,6 @@
     "OpMetadata": {
       "caps": {
         "source.image": true
-      }
-    }
-  },
-  {
-    "RawOp": "GngKD2xvY2FsOi8vY29udGV4dBIgChRsb2NhbC5pbmNsdWRlcGF0dGVybhIIWyIuZW52Il0SHQoNbG9jYWwuc2Vzc2lvbhIMPFNFU1NJT04tSUQ+EiQKE2xvY2FsLnNoYXJlZGtleWhpbnQSDWJ1aWxkLWNvbnRleHRaAA==",
-    "Op": {
-      "Op": {
-        "source": {
-          "identifier": "local://context",
-          "attrs": {
-            "local.includepattern": "[\".env\"]",
-            "local.session": "\u003cSESSION-ID\u003e",
-            "local.sharedkeyhint": "build-context"
-          }
-        }
-      },
-      "constraints": {}
-    },
-    "Digest": "sha256:715173ca192c6e5ba25f5c03b582506d054efec27277bc99560a88287bc74a6b",
-    "OpMetadata": {
-      "description": {
-        "llb.customname": "load config files"
-      },
-      "caps": {
-        "source.local": true,
-        "source.local.includepatterns": true,
-        "source.local.sessionid": true,
-        "source.local.sharedkeyhint": true
       }
     }
   },
@@ -226,6 +216,70 @@
       "caps": {
         "exec.meta.base": true,
         "exec.mount.bind": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1Njo3ODgyNThhM2E4MzdmYjk4YmQ3NTZhZDQ3YTFjYzU0ZTIyZTcwOTc3ZjY2MDI0NjRhOTRkYWVkNzU3NTg2NzM2CkkKR3NoYTI1NjozNDRkODE1NjNhYTQ2NWE1ODY2YjA3YjQ2NTAzZmY2ODBmYjIwMjdiNjFjMjk0MjEwN2ExYWQwNjk3MzI1ODEwIkcSRRABIkEKCi8uZW52LnByb2QSCS9hcHAvLmVudhoKCgMQ6AcSAxDoByD///////////8BKAEwAUABSAFY////////////AVIOCgVhbWQ2NBIFbGludXhaAA==",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:788258a3a837fb98bd756ad47a1cc54e22e70977f6602464a94daed757586736",
+          "index": 0
+        },
+        {
+          "digest": "sha256:344d81563aa465a5866b07b46503ff680fb2027b61c2942107a1ad0697325810",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "file": {
+          "actions": [
+            {
+              "input": 0,
+              "secondaryInput": 1,
+              "output": 0,
+              "Action": {
+                "copy": {
+                  "src": "/.env.prod",
+                  "dest": "/app/.env",
+                  "owner": {
+                    "user": {
+                      "User": {
+                        "byID": 1000
+                      }
+                    },
+                    "group": {
+                      "User": {
+                        "byID": 1000
+                      }
+                    }
+                  },
+                  "mode": -1,
+                  "followSymlink": true,
+                  "dirCopyContents": true,
+                  "createDestPath": true,
+                  "allowWildcard": true,
+                  "timestamp": -1
+                }
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:80742d47f5cf0532d2d3c45c3a3673b25336ef4e27a18dc28ccb5fe695bcfcdf",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Copy /.env.prod"
+      },
+      "caps": {
+        "file.base": true
       }
     }
   },
@@ -350,26 +404,6 @@
     }
   },
   {
-    "RawOp": "CkkKR3NoYTI1NjplMzY4YTU4YzY2NDFjNTQ2ZWZmNGI4NmEzNzdiYjMwMjdjNmE4ZjE1NDU1YjA5ZTA0YTJjODljMDE2NGZiODg1",
-    "Op": {
-      "inputs": [
-        {
-          "digest": "sha256:e368a58c6641c546eff4b86a377bb3027c6a8f15455b09e04a2c89c0164fb885",
-          "index": 0
-        }
-      ],
-      "Op": null
-    },
-    "Digest": "sha256:8c4d080a5e8b83ee26f2dd576557d311cb19176267468ae3feed288d2d7cabdf",
-    "OpMetadata": {
-      "caps": {
-        "constraints": true,
-        "meta.description": true,
-        "platform": true
-      }
-    }
-  },
-  {
     "RawOp": "GowBCg9sb2NhbDovL2NvbnRleHQSNAoUbG9jYWwuaW5jbHVkZXBhdHRlcm4SHFsicGFja2FnZS5qc29uIiwieWFybi5sb2NrIl0SHQoNbG9jYWwuc2Vzc2lvbhIMPFNFU1NJT04tSUQ+EiQKE2xvY2FsLnNoYXJlZGtleWhpbnQSDXBhY2thZ2UtZmlsZXNaAA==",
     "Op": {
       "Op": {
@@ -490,56 +524,22 @@
     }
   },
   {
-    "RawOp": "CkkKR3NoYTI1Njo0MjA4NTJjN2QyMWVmMmQxODZjY2VkZTM0MTlmYzZhOTg4ZTE0ODNkOTk4ZjNmOWI0YmFjODNlNmFhYzE2NDFlEuwBCuQBCgcvYmluL3NoCgItbwoHZXJyZXhpdAoCLWMKDnlhcm4gcnVuIGJ1aWxkEhROT0RFX1ZFUlNJT049MTIuMTQuMRITWUFSTl9WRVJTSU9OPTEuMjEuMRITTk9ERV9FTlY9cHJvZHVjdGlvbhJsUEFUSD0vaG9tZS9ub2RlLy5ucG0vYmluLzovaG9tZS9ub2RlLy55YXJuL2Jpbi86L3Vzci9sb2NhbC9zYmluOi91c3IvbG9jYWwvYmluOi91c3Ivc2JpbjovdXNyL2Jpbjovc2JpbjovYmluGgQvYXBwIgQxMDAwEgMaAS9SDgoFYW1kNjQSBWxpbnV4WgA=",
+    "RawOp": "CkkKR3NoYTI1Njo2NTAyNDcxNGFiM2Y2NWZjZTQ4OTcwNjk1NWQ1ODg0ZjQ4MTczYzgyMTc3NWI3OWNiMWM5NTViMTk3OGIwZjMx",
     "Op": {
       "inputs": [
         {
-          "digest": "sha256:420852c7d21ef2d186ccede3419fc6a988e1483d998f3f9b4bac83e6aac1641e",
+          "digest": "sha256:65024714ab3f65fce489706955d5884f48173c821775b79cb1c955b1978b0f31",
           "index": 0
         }
       ],
-      "Op": {
-        "exec": {
-          "meta": {
-            "args": [
-              "/bin/sh",
-              "-o",
-              "errexit",
-              "-c",
-              "yarn run build"
-            ],
-            "env": [
-              "NODE_VERSION=12.14.1",
-              "YARN_VERSION=1.21.1",
-              "NODE_ENV=production",
-              "PATH=/home/node/.npm/bin/:/home/node/.yarn/bin/:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-            ],
-            "cwd": "/app",
-            "user": "1000"
-          },
-          "mounts": [
-            {
-              "input": 0,
-              "dest": "/",
-              "output": 0
-            }
-          ]
-        }
-      },
-      "platform": {
-        "Architecture": "amd64",
-        "OS": "linux"
-      },
-      "constraints": {}
+      "Op": null
     },
-    "Digest": "sha256:e368a58c6641c546eff4b86a377bb3027c6a8f15455b09e04a2c89c0164fb885",
+    "Digest": "sha256:e8c2d01ec2087fd3af71b8bf47cfb5bbedc901942bbcc238353768eb3b6a87e8",
     "OpMetadata": {
-      "description": {
-        "llb.customname": "Build"
-      },
       "caps": {
-        "exec.meta.base": true,
-        "exec.mount.bind": true
+        "constraints": true,
+        "meta.description": true,
+        "platform": true
       }
     }
   }

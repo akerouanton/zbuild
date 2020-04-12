@@ -1,6 +1,12 @@
 package builddef
 
-import "github.com/mitchellh/hashstructure"
+import (
+	"path"
+	"sort"
+
+	"github.com/buildkite/interpolate"
+	"github.com/mitchellh/hashstructure"
+)
 
 var (
 	ZbuildLabel = "io.zbuild"
@@ -148,4 +154,82 @@ func (set *VersionMap) Size() int {
 	}
 
 	return len(*set)
+}
+
+// PathsMap represents a set of paths with the source paths as keys and dest
+// paths as values. It provides POSIX-like parameter expansion through its
+// Interpolate() methods.
+type PathsMap map[string]string
+
+// SourcePaths() returns the sorted list of sources paths from the map
+// prepended with the given prefix.
+func (paths PathsMap) SourcePaths(srcPrefix string) []string {
+	sources := make([]string, 0, len(paths))
+
+	for src := range paths {
+		sources = append(sources, path.Join(srcPrefix, src))
+	}
+
+	sort.Strings(sources)
+	return sources
+}
+
+// Interpolate expands POSIX-like parameters from the dest paths of the map
+// using the given map of parameters and prepends all the source paths with
+// the given prefix. Interpolated dest paths that aren't absolute are prefixed
+// with the given basedir.
+func (paths PathsMap) Interpolate(
+	srcPrefix string,
+	basedir string,
+	params map[string]string,
+) (map[string]string, error) {
+	interpolated := make(PathsMap)
+	paramsEnv := interpolate.NewMapEnv(params)
+
+	for src, dest := range paths {
+		var err error
+		dest, err = interpolate.Interpolate(paramsEnv, dest)
+		if err != nil {
+			return interpolated, err
+		}
+
+		if !path.IsAbs(dest) {
+			dest = path.Join(basedir, dest)
+		}
+
+		src = path.Join(srcPrefix, src)
+		interpolated[src] = dest
+	}
+
+	return interpolated, nil
+}
+
+func (paths PathsMap) Copy() PathsMap {
+	new := PathsMap{}
+	for src, dest := range paths {
+		new[src] = dest
+	}
+	return new
+}
+
+func (paths PathsMap) Merge(overriding PathsMap) PathsMap {
+	if overriding == nil {
+		overriding = PathsMap{}
+	}
+
+	knownDest := map[string]struct{}{}
+	for _, dest := range overriding {
+		knownDest[dest] = struct{}{}
+	}
+
+	for src, dest := range paths {
+		if _, ok := knownDest[dest]; ok {
+			continue
+		}
+
+		overriding[src] = dest
+		knownDest[dest] = struct{}{}
+	}
+
+	return overriding
 }

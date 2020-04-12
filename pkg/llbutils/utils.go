@@ -81,7 +81,7 @@ func ImageSource(imageRef string, withMeta bool) llb.State {
 	return llb.Image(imageRef, opts...)
 }
 
-func Copy(src llb.State, srcPath string, dest llb.State, destPath string, chown string, ignoreCache bool) llb.State {
+func Copy(src llb.State, srcPath string, dest llb.State, destPath string, owner string, ignoreCache bool) llb.State {
 	copyOpts := []llb.CopyOption{
 		&llb.CopyInfo{
 			FollowSymlinks:      true,
@@ -90,8 +90,8 @@ func Copy(src llb.State, srcPath string, dest llb.State, destPath string, chown 
 			AllowWildcard:       true,
 		},
 	}
-	if chown != "" {
-		copyOpts = append(copyOpts, llb.WithUser(chown))
+	if owner != "" {
+		copyOpts = append(copyOpts, llb.WithUser(owner))
 	}
 
 	fileOpts := []llb.ConstraintsOpt{
@@ -103,6 +103,23 @@ func Copy(src llb.State, srcPath string, dest llb.State, destPath string, chown 
 	return dest.File(
 		llb.Copy(src, srcPath, destPath, copyOpts...),
 		fileOpts...)
+}
+
+func CopyAll(src, dest llb.State, paths map[string]string, owner string, ignoreCache bool) llb.State {
+	// Source paths are sorted first to make sure for a given map the Copy
+	// steps are always added in the same order to the llb.State DAG.
+	sorted := make([]string, 0, len(paths))
+	for src := range paths {
+		sorted = append(sorted, src)
+	}
+	sort.Strings(sorted)
+
+	for _, srcpath := range sorted {
+		destpath := paths[srcpath]
+		dest = Copy(src, srcpath, dest, destpath, owner, ignoreCache)
+	}
+
+	return dest
 }
 
 func Shell(cmds ...string) llb.RunOption {
