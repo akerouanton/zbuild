@@ -22,7 +22,7 @@
     "RawOp": "GnQKRWdpdDovL2dpdGh1Yi5jb20vTmlSLS96YnVpbGQjODljMGM5NTA3ZDcyNWIzNTUyMjQyNmMyOTQyNDllZTNiNDU2NmRjZBIrCgtnaXQuZnVsbHVybBIcZ2l0Oi8vZ2l0aHViLmNvbS9OaVItL3pidWlsZFoA",
     "Op": {
       "Op": {
-        "Source": {
+        "source": {
           "identifier": "git://github.com/NiR-/zbuild#89c0c9507d725b35522426c294249ee3b4566dcd",
           "attrs": {
             "git.fullurl": "git://github.com/NiR-/zbuild"

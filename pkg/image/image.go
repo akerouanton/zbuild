@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"time"
 
+	"github.com/moby/buildkit/client/llb"
 	"github.com/moby/buildkit/client/llb/imagemetaresolver"
-	"github.com/moby/buildkit/frontend/gateway/client"
 	specs "github.com/opencontainers/image-spec/specs-go/v1"
 )
 
@@ -51,7 +51,7 @@ type HealthConfig struct {
 // LoadMeta looks for image metadata for the given imageRef. It returns an Image
 // when metadata could be found and an error otherwise.
 func LoadMeta(ctx context.Context, imageRef string) (*Image, error) {
-	_, meta, err := imagemetaresolver.Default().ResolveImageConfig(ctx, imageRef, client.ResolveImageConfigOpt{})
+	_, meta, err := imagemetaresolver.Default().ResolveImageConfig(ctx, imageRef, llb.ResolveImageConfigOpt{})
 	if err != nil {
 		return nil, err
 	}

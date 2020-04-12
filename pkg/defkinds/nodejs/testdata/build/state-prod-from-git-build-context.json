@@ -3,7 +3,7 @@
     "RawOp": "GkcKGmdpdDovL2dpdGh1Yi5jb20vc29tZS9yZXBvEikKC2dpdC5mdWxsdXJsEhpnaXQ6Ly9naXRodWIuY29tL3NvbWUvcmVwb1oA",
     "Op": {
       "Op": {
-        "Source": {
+        "source": {
           "identifier": "git://github.com/some/repo",
           "attrs": {
             "git.fullurl": "git://github.com/some/repo"
@@ -30,26 +30,26 @@
         }
       ],
       "Op": {
-        "File": {
+        "file": {
           "actions": [
             {
               "input": 0,
               "secondaryInput": -1,
               "output": 0,
               "Action": {
-                "Mkdir": {
+                "mkdir": {
                   "path": "/app",
                   "mode": 488,
                   "makeParents": true,
                   "owner": {
                     "user": {
                       "User": {
-                        "ByID": 1000
+                        "byID": 1000
                       }
                     },
                     "group": {
                       "User": {
-                        "ByID": 1000
+                        "byID": 1000
                       }
                     }
                   },
@@ -90,25 +90,25 @@
         }
       ],
       "Op": {
-        "File": {
+        "file": {
           "actions": [
             {
               "input": 0,
               "secondaryInput": 1,
               "output": 0,
               "Action": {
-                "Copy": {
+                "copy": {
                   "src": "/sub/dir/package.json",
                   "dest": "/app/",
                   "owner": {
                     "user": {
                       "User": {
-                        "ByID": 1000
+                        "byID": 1000
                       }
                     },
                     "group": {
                       "User": {
-                        "ByID": 1000
+                        "byID": 1000
                       }
                     }
                   },
@@ -154,25 +154,25 @@
         }
       ],
       "Op": {
-        "File": {
+        "file": {
           "actions": [
             {
               "input": 0,
               "secondaryInput": 1,
               "output": 0,
               "Action": {
-                "Copy": {
+                "copy": {
                   "src": "/sub/dir/yarn.lock",
                   "dest": "/app/",
                   "owner": {
                     "user": {
                       "User": {
-                        "ByID": 1000
+                        "byID": 1000
                       }
                     },
                     "group": {
                       "User": {
-                        "ByID": 1000
+                        "byID": 1000
                       }
                     }
                   },
@@ -208,7 +208,7 @@
     "RawOp": "Gn4KfGRvY2tlci1pbWFnZTovL2RvY2tlci5pby9saWJyYXJ5L25vZGU6MTItYnVzdGVyLXNsaW1Ac2hhMjU2OjRkMTAxNmVlZmM0ZTZkYzUyYmE5YmU2NTUwZGNiMjVhNmUxODI2MTE3NTA3ZTY1ZWRhMzY1MGQ2ZWIxOWYwNDJSDgoFYW1kNjQSBWxpbnV4WgA=",
     "Op": {
       "Op": {
-        "Source": {
+        "source": {
           "identifier": "docker-image://docker.io/library/node:12-buster-slim@sha256:4d1016eefc4e6dc52ba9be6550dcb25a6e1826117507e65eda3650d6eb19f042"
         }
       },
@@ -255,7 +255,7 @@
         }
       ],
       "Op": {
-        "Exec": {
+        "exec": {
           "meta": {
             "args": [
               "/bin/sh",

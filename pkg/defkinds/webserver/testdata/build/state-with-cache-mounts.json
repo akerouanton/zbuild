@@ -9,7 +9,7 @@
         }
       ],
       "Op": {
-        "Exec": {
+        "exec": {
           "meta": {
             "args": [
               "/bin/sh",
@@ -76,7 +76,7 @@
     "RawOp": "GoYBCg9sb2NhbDovL2NvbnRleHQSLwoUbG9jYWwuaW5jbHVkZXBhdHRlcm4SF1siLi9kb2NrZXIvbmdpbnguY29uZiJdEh0KDWxvY2FsLnNlc3Npb24SDDxTRVNTSU9OLUlEPhIjChNsb2NhbC5zaGFyZWRrZXloaW50Egxjb25maWctZmlsZXNaAA==",
     "Op": {
       "Op": {
-        "Source": {
+        "source": {
           "identifier": "local://context",
           "attrs": {
             "local.includepattern": "[\"./docker/nginx.conf\"]",
@@ -104,22 +104,20 @@
     "RawOp": "IjgSNgj///////////8BEP///////////wEyHgoGL2NhY2hlEOgDGAEiBAoCEAAo////////////AVIOCgVhbWQ2NBIFbGludXhaAA==",
     "Op": {
       "Op": {
-        "File": {
+        "file": {
           "actions": [
             {
               "input": -1,
               "secondaryInput": -1,
               "output": 0,
               "Action": {
-                "Mkdir": {
+                "mkdir": {
                   "path": "/cache",
                   "mode": 488,
                   "makeParents": true,
                   "owner": {
                     "user": {
-                      "User": {
-                        "ByID": 0
-                      }
+                      "User": {}
                     }
                   },
                   "timestamp": -1
@@ -159,7 +157,7 @@
         }
       ],
       "Op": {
-        "Exec": {
+        "exec": {
           "meta": {
             "args": [
               "/bin/sh",
@@ -239,25 +237,25 @@
         }
       ],
       "Op": {
-        "File": {
+        "file": {
           "actions": [
             {
               "input": 0,
               "secondaryInput": 1,
               "output": 0,
               "Action": {
-                "Copy": {
+                "copy": {
                   "src": "/docker/nginx.conf",
                   "dest": "/etc/nginx/nginx.conf",
                   "owner": {
                     "user": {
                       "User": {
-                        "ByID": 1000
+                        "byID": 1000
                       }
                     },
                     "group": {
                       "User": {
-                        "ByID": 1000
+                        "byID": 1000
                       }
                     }
                   },
@@ -293,7 +291,7 @@
     "RawOp": "GncKdWRvY2tlci1pbWFnZTovL2RvY2tlci5pby9saWJyYXJ5L25naW54OmxhdGVzdEBzaGEyNTY6OGFhN2Y2YTk1ODVkOTA4YTYzZTVlNDE4ZGM1ZDE0YWU3NDY3ZDJlMzZlMWFiNGYwZDhmOWQwNTlhM2QwNzFjZVIOCgVhbWQ2NBIFbGludXhaAA==",
     "Op": {
       "Op": {
-        "Source": {
+        "source": {
           "identifier": "docker-image://docker.io/library/nginx:latest@sha256:8aa7f6a9585d908a63e5e418dc5d14ae7467d2e36e1ab4f0d8f9d059a3d071ce"
         }
       },

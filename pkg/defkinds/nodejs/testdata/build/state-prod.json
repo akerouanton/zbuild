@@ -13,25 +13,25 @@
         }
       ],
       "Op": {
-        "File": {
+        "file": {
           "actions": [
             {
               "input": 0,
               "secondaryInput": 1,
               "output": 0,
               "Action": {
-                "Copy": {
+                "copy": {
                   "src": "/.env",
                   "dest": "/app/.env.prod",
                   "owner": {
                     "user": {
                       "User": {
-                        "ByID": 1000
+                        "byID": 1000
                       }
                     },
                     "group": {
                       "User": {
-                        "ByID": 1000
+                        "byID": 1000
                       }
                     }
                   },
@@ -77,25 +77,25 @@
         }
       ],
       "Op": {
-        "File": {
+        "file": {
           "actions": [
             {
               "input": 0,
               "secondaryInput": 1,
               "output": 0,
               "Action": {
-                "Copy": {
+                "copy": {
                   "src": "/",
                   "dest": "/app",
                   "owner": {
                     "user": {
                       "User": {
-                        "ByID": 1000
+                        "byID": 1000
                       }
                     },
                     "group": {
                       "User": {
-                        "ByID": 1000
+                        "byID": 1000
                       }
                     }
                   },
@@ -131,7 +131,7 @@
     "RawOp": "GjsKOWRvY2tlci1pbWFnZTovL2RvY2tlci5pby9saWJyYXJ5L25vZGU6MTIuMTQuMS1idXN0ZXItc2xpbVIOCgVhbWQ2NBIFbGludXhaAA==",
     "Op": {
       "Op": {
-        "Source": {
+        "source": {
           "identifier": "docker-image://docker.io/library/node:12.14.1-buster-slim"
         }
       },
@@ -152,7 +152,7 @@
     "RawOp": "GngKD2xvY2FsOi8vY29udGV4dBIgChRsb2NhbC5pbmNsdWRlcGF0dGVybhIIWyIuZW52Il0SHQoNbG9jYWwuc2Vzc2lvbhIMPFNFU1NJT04tSUQ+EiQKE2xvY2FsLnNoYXJlZGtleWhpbnQSDWJ1aWxkLWNvbnRleHRaAA==",
     "Op": {
       "Op": {
-        "Source": {
+        "source": {
           "identifier": "local://context",
           "attrs": {
             "local.includepattern": "[\".env\"]",
@@ -186,7 +186,7 @@
         }
       ],
       "Op": {
-        "Exec": {
+        "exec": {
           "meta": {
             "args": [
               "/bin/sh",
@@ -243,25 +243,25 @@
         }
       ],
       "Op": {
-        "File": {
+        "file": {
           "actions": [
             {
               "input": 0,
               "secondaryInput": 1,
               "output": 0,
               "Action": {
-                "Copy": {
+                "copy": {
                   "src": "/yarn.lock",
                   "dest": "/app/",
                   "owner": {
                     "user": {
                       "User": {
-                        "ByID": 1000
+                        "byID": 1000
                       }
                     },
                     "group": {
                       "User": {
-                        "ByID": 1000
+                        "byID": 1000
                       }
                     }
                   },
@@ -303,26 +303,26 @@
         }
       ],
       "Op": {
-        "File": {
+        "file": {
           "actions": [
             {
               "input": 0,
               "secondaryInput": -1,
               "output": 0,
               "Action": {
-                "Mkdir": {
+                "mkdir": {
                   "path": "/app",
                   "mode": 488,
                   "makeParents": true,
                   "owner": {
                     "user": {
                       "User": {
-                        "ByID": 1000
+                        "byID": 1000
                       }
                     },
                     "group": {
                       "User": {
-                        "ByID": 1000
+                        "byID": 1000
                       }
                     }
                   },
@@ -373,7 +373,7 @@
     "RawOp": "GowBCg9sb2NhbDovL2NvbnRleHQSNAoUbG9jYWwuaW5jbHVkZXBhdHRlcm4SHFsicGFja2FnZS5qc29uIiwieWFybi5sb2NrIl0SHQoNbG9jYWwuc2Vzc2lvbhIMPFNFU1NJT04tSUQ+EiQKE2xvY2FsLnNoYXJlZGtleWhpbnQSDXBhY2thZ2UtZmlsZXNaAA==",
     "Op": {
       "Op": {
-        "Source": {
+        "source": {
           "identifier": "local://context",
           "attrs": {
             "local.includepattern": "[\"package.json\",\"yarn.lock\"]",
@@ -411,25 +411,25 @@
         }
       ],
       "Op": {
-        "File": {
+        "file": {
           "actions": [
             {
               "input": 0,
               "secondaryInput": 1,
               "output": 0,
               "Action": {
-                "Copy": {
+                "copy": {
                   "src": "/package.json",
                   "dest": "/app/",
                   "owner": {
                     "user": {
                       "User": {
-                        "ByID": 1000
+                        "byID": 1000
                       }
                     },
                     "group": {
                       "User": {
-                        "ByID": 1000
+                        "byID": 1000
                       }
                     }
                   },
@@ -465,7 +465,7 @@
     "RawOp": "GngKD2xvY2FsOi8vY29udGV4dBIgChRsb2NhbC5pbmNsdWRlcGF0dGVybhIIWyJzcmMvIl0SHQoNbG9jYWwuc2Vzc2lvbhIMPFNFU1NJT04tSUQ+EiQKE2xvY2FsLnNoYXJlZGtleWhpbnQSDWJ1aWxkLWNvbnRleHRaAA==",
     "Op": {
       "Op": {
-        "Source": {
+        "source": {
           "identifier": "local://context",
           "attrs": {
             "local.includepattern": "[\"src/\"]",
@@ -499,7 +499,7 @@
         }
       ],
       "Op": {
-        "Exec": {
+        "exec": {
           "meta": {
             "args": [
               "/bin/sh",
