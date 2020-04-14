@@ -1,6 +1,6 @@
 [
   {
-    "RawOp": "CkkKR3NoYTI1NjpmMWQxM2JmYmYzYjgwYjM2YTI4ZmFkNTEyODVhMjZhYjg4ZTY4OWU1MmI0NWRmMGE0ZThjZGIyOTRkYjIxOTRhEtYCCs4CCgcvYmluL3NoCgItbwoHZXJyZXhpdAoCLWMKrAFbIC1mIC9ldGMvYXB0L2FwdC5jb25mLmQvZG9ja2VyLWNsZWFuIF0gJiYgcm0gLWYgL2V0Yy9hcHQvYXB0LmNvbmYuZC9kb2NrZXItY2xlYW47IGVjaG8gJ0JpbmFyeTo6YXB0OjpBUFQ6OktlZXAtRG93bmxvYWRlZC1QYWNrYWdlcyAidHJ1ZSInID4gL2V0Yy9hcHQvYXB0LmNvbmYuZC9rZWVwLWNhY2hlEkFQQVRIPS91c3IvbG9jYWwvc2JpbjovdXNyL2xvY2FsL2JpbjovdXNyL3NiaW46L3Vzci9iaW46L3NiaW46L2JpbhIUTkdJTlhfVkVSU0lPTj0xLjE3LjcSEU5KU19WRVJTSU9OPTAuMy43EhRQS0dfUkVMRUFTRT0xfmJ1c3RlchoBLxIDGgEvUg4KBWFtZDY0EgVsaW51eFoA",
+    "RawOp": "CkkKR3NoYTI1NjpmMWQxM2JmYmYzYjgwYjM2YTI4ZmFkNTEyODVhMjZhYjg4ZTY4OWU1MmI0NWRmMGE0ZThjZGIyOTRkYjIxOTRhEtcCCs8CCgcvYmluL3NoCgItbwoHZXJyZXhpdAoCLWMKrQFbIC1mIC9ldGMvYXB0L2FwdC5jb25mLmQvZG9ja2VyLWNsZWFuIF0gJiYgcm0gLWYgL2V0Yy9hcHQvYXB0LmNvbmYuZC9kb2NrZXItY2xlYW47IGVjaG8gJ0JpbmFyeTo6YXB0OjpBUFQ6OktlZXAtRG93bmxvYWRlZC1QYWNrYWdlcyAidHJ1ZSI7JyA+IC9ldGMvYXB0L2FwdC5jb25mLmQva2VlcC1jYWNoZRJBUEFUSD0vdXNyL2xvY2FsL3NiaW46L3Vzci9sb2NhbC9iaW46L3Vzci9zYmluOi91c3IvYmluOi9zYmluOi9iaW4SFE5HSU5YX1ZFUlNJT049MS4xNy43EhFOSlNfVkVSU0lPTj0wLjMuNxIUUEtHX1JFTEVBU0U9MX5idXN0ZXIaAS8SAxoBL1IOCgVhbWQ2NBIFbGludXhaAA==",
     "Op": {
       "inputs": [
         {
@@ -16,7 +16,7 @@
               "-o",
               "errexit",
               "-c",
-              "[ -f /etc/apt/apt.conf.d/docker-clean ] \u0026\u0026 rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages \"true\"' \u003e /etc/apt/apt.conf.d/keep-cache"
+              "[ -f /etc/apt/apt.conf.d/docker-clean ] \u0026\u0026 rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages \"true\";' \u003e /etc/apt/apt.conf.d/keep-cache"
             ],
             "env": [
               "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
@@ -41,7 +41,7 @@
       },
       "constraints": {}
     },
-    "Digest": "sha256:25c550579f9c0d1be96f4bae06d2095b5a3417c2507c51aa4d8d16fda077a9bb",
+    "Digest": "sha256:08985dd43c99f024c8e3f4d4031e9b1a96a40eb5308f94d9cdbf7bb2584e8ad9",
     "OpMetadata": {
       "description": {
         "llb.customname": "Set up APT cache"
@@ -53,22 +53,66 @@
     }
   },
   {
-    "RawOp": "CkkKR3NoYTI1Njo5ZWRlYzVkNzgyMmE2MjFhZDkzNjdkNjU1MTg1NjExMDVlOGFhNGQ1Nzc5ODQyZGQ0YWJkZWFjN2Q3YTk2NjAz",
+    "RawOp": "CkkKR3NoYTI1NjplMjIwMWM5M2RhOWRlZTU2ZDE0OWQ3NGYwODRmMmE5MTNiNGJkMDQ4M2M5MGFjYzhmMTYyMjEyZTU2MTA2YWE5CkkKR3NoYTI1Njo4NmYzZDRlZTU2OGFlYjMyZmU5Y2I2MTk1ZjQ3NWYyOGU0ZGE3OTI0MWQzZjllOTUwNTFiYjEwYTU5YTg5ZDJjIlsSWRABIlUKEi9kb2NrZXIvbmdpbnguY29uZhIVL2V0Yy9uZ2lueC9uZ2lueC5jb25mGgoKAxDoBxIDEOgHIP///////////wEoATABQAFIAVj///////////8BUg4KBWFtZDY0EgVsaW51eFoA",
     "Op": {
       "inputs": [
         {
-          "digest": "sha256:9edec5d7822a621ad9367d65518561105e8aa4d5779842dd4abdeac7d7a96603",
+          "digest": "sha256:e2201c93da9dee56d149d74f084f2a913b4bd0483c90acc8f162212e56106aa9",
+          "index": 0
+        },
+        {
+          "digest": "sha256:86f3d4ee568aeb32fe9cb6195f475f28e4da79241d3f9e95051bb10a59a89d2c",
           "index": 0
         }
       ],
-      "Op": null
+      "Op": {
+        "file": {
+          "actions": [
+            {
+              "input": 0,
+              "secondaryInput": 1,
+              "output": 0,
+              "Action": {
+                "copy": {
+                  "src": "/docker/nginx.conf",
+                  "dest": "/etc/nginx/nginx.conf",
+                  "owner": {
+                    "user": {
+                      "User": {
+                        "byID": 1000
+                      }
+                    },
+                    "group": {
+                      "User": {
+                        "byID": 1000
+                      }
+                    }
+                  },
+                  "mode": -1,
+                  "followSymlink": true,
+                  "dirCopyContents": true,
+                  "createDestPath": true,
+                  "allowWildcard": true,
+                  "timestamp": -1
+                }
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
     },
-    "Digest": "sha256:52f28c8c68f4d64a90e72a5b7ace33cbc5db15d499a5cc40710a649348ad4f49",
+    "Digest": "sha256:36d2a7518ef36b8f3bd7b5112c6bccbbd0f00fbc696cb0554873333d0bbf6446",
     "OpMetadata": {
+      "description": {
+        "llb.customname": "Copy ./docker/nginx.conf"
+      },
       "caps": {
-        "constraints": true,
-        "meta.description": true,
-        "platform": true
+        "file.base": true
       }
     }
   },
@@ -97,6 +141,26 @@
         "source.local.includepatterns": true,
         "source.local.sessionid": true,
         "source.local.sharedkeyhint": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1NjozNmQyYTc1MThlZjM2YjhmM2JkN2I1MTEyYzZiY2NiYmQwZjAwZmJjNjk2Y2IwNTU0ODczMzMzZDBiYmY2NDQ2",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:36d2a7518ef36b8f3bd7b5112c6bccbbd0f00fbc696cb0554873333d0bbf6446",
+          "index": 0
+        }
+      ],
+      "Op": null
+    },
+    "Digest": "sha256:946b6e2d0f1edddc996b4a4fd648a208f6ae721c6477048fbca3d06c4dde7e59",
+    "OpMetadata": {
+      "caps": {
+        "constraints": true,
+        "meta.description": true,
+        "platform": true
       }
     }
   },
@@ -144,11 +208,11 @@
     }
   },
   {
-    "RawOp": "CkkKR3NoYTI1NjoyNWM1NTA1NzlmOWMwZDFiZTk2ZjRiYWUwNmQyMDk1YjVhMzQxN2MyNTA3YzUxYWE0ZDhkMTZmZGEwNzdhOWJiCkkKR3NoYTI1Njo5OWY0YTNiODExNTljYTdmNWJhMDc3Njg5YmYzOTFhYmQ4OTViMDBmNWIxYzI1ZTI5ODE1YTIzYjBhY2NiYWY2EogDCvwBCgcvYmluL3NoCgItbwoHZXJyZXhpdAoCLWMKW2FwdC1nZXQgdXBkYXRlOyBhcHQtZ2V0IGluc3RhbGwgLXkgLS1uby1pbnN0YWxsLXJlY29tbWVuZHMgY3VybD03LjY0LjAtNDsgYXB0LWdldCBhdXRvY2xlYW4SQVBBVEg9L3Vzci9sb2NhbC9zYmluOi91c3IvbG9jYWwvYmluOi91c3Ivc2JpbjovdXNyL2Jpbjovc2JpbjovYmluEhROR0lOWF9WRVJTSU9OPTEuMTcuNxIRTkpTX1ZFUlNJT049MC4zLjcSFFBLR19SRUxFQVNFPTF+YnVzdGVyGgEvEgMaAS8SQggBEgYvY2FjaGUaDi92YXIvY2FjaGUvYXB0IP///////////wEwA6IBGAoWY2FjaGUtbnMvdmFyL2NhY2hlL2FwdBI+CAESBi9jYWNoZRoML3Zhci9saWIvYXB0IP///////////wEwA6IBFgoUY2FjaGUtbnMvdmFyL2xpYi9hcHRSDgoFYW1kNjQSBWxpbnV4WgA=",
+    "RawOp": "CkkKR3NoYTI1NjowODk4NWRkNDNjOTlmMDI0YzhlM2Y0ZDQwMzFlOWIxYTk2YTQwZWI1MzA4Zjk0ZDljZGJmN2JiMjU4NGU4YWQ5CkkKR3NoYTI1Njo5OWY0YTNiODExNTljYTdmNWJhMDc3Njg5YmYzOTFhYmQ4OTViMDBmNWIxYzI1ZTI5ODE1YTIzYjBhY2NiYWY2EogDCvwBCgcvYmluL3NoCgItbwoHZXJyZXhpdAoCLWMKW2FwdC1nZXQgdXBkYXRlOyBhcHQtZ2V0IGluc3RhbGwgLXkgLS1uby1pbnN0YWxsLXJlY29tbWVuZHMgY3VybD03LjY0LjAtNDsgYXB0LWdldCBhdXRvY2xlYW4SQVBBVEg9L3Vzci9sb2NhbC9zYmluOi91c3IvbG9jYWwvYmluOi91c3Ivc2JpbjovdXNyL2Jpbjovc2JpbjovYmluEhROR0lOWF9WRVJTSU9OPTEuMTcuNxIRTkpTX1ZFUlNJT049MC4zLjcSFFBLR19SRUxFQVNFPTF+YnVzdGVyGgEvEgMaAS8SQggBEgYvY2FjaGUaDi92YXIvY2FjaGUvYXB0IP///////////wEwA6IBGAoWY2FjaGUtbnMvdmFyL2NhY2hlL2FwdBI+CAESBi9jYWNoZRoML3Zhci9saWIvYXB0IP///////////wEwA6IBFgoUY2FjaGUtbnMvdmFyL2xpYi9hcHRSDgoFYW1kNjQSBWxpbnV4WgA=",
     "Op": {
       "inputs": [
         {
-          "digest": "sha256:25c550579f9c0d1be96f4bae06d2095b5a3417c2507c51aa4d8d16fda077a9bb",
+          "digest": "sha256:08985dd43c99f024c8e3f4d4031e9b1a96a40eb5308f94d9cdbf7bb2584e8ad9",
           "index": 0
         },
         {
@@ -209,7 +273,7 @@
       },
       "constraints": {}
     },
-    "Digest": "sha256:9e2b99927053080fa9b7edb8a54a9415402b6822ca0043d93a3ba2694b5ba062",
+    "Digest": "sha256:e2201c93da9dee56d149d74f084f2a913b4bd0483c90acc8f162212e56106aa9",
     "OpMetadata": {
       "description": {
         "llb.customname": "Install system packages (curl=7.64.0-4)"
@@ -220,70 +284,6 @@
         "exec.mount.cache": true,
         "exec.mount.cache.sharing": true,
         "exec.mount.selector": true
-      }
-    }
-  },
-  {
-    "RawOp": "CkkKR3NoYTI1Njo5ZTJiOTk5MjcwNTMwODBmYTliN2VkYjhhNTRhOTQxNTQwMmI2ODIyY2EwMDQzZDkzYTNiYTI2OTRiNWJhMDYyCkkKR3NoYTI1Njo4NmYzZDRlZTU2OGFlYjMyZmU5Y2I2MTk1ZjQ3NWYyOGU0ZGE3OTI0MWQzZjllOTUwNTFiYjEwYTU5YTg5ZDJjIlsSWRABIlUKEi9kb2NrZXIvbmdpbnguY29uZhIVL2V0Yy9uZ2lueC9uZ2lueC5jb25mGgoKAxDoBxIDEOgHIP///////////wEoATABQAFIAVj///////////8BUg4KBWFtZDY0EgVsaW51eFoA",
-    "Op": {
-      "inputs": [
-        {
-          "digest": "sha256:9e2b99927053080fa9b7edb8a54a9415402b6822ca0043d93a3ba2694b5ba062",
-          "index": 0
-        },
-        {
-          "digest": "sha256:86f3d4ee568aeb32fe9cb6195f475f28e4da79241d3f9e95051bb10a59a89d2c",
-          "index": 0
-        }
-      ],
-      "Op": {
-        "file": {
-          "actions": [
-            {
-              "input": 0,
-              "secondaryInput": 1,
-              "output": 0,
-              "Action": {
-                "copy": {
-                  "src": "/docker/nginx.conf",
-                  "dest": "/etc/nginx/nginx.conf",
-                  "owner": {
-                    "user": {
-                      "User": {
-                        "byID": 1000
-                      }
-                    },
-                    "group": {
-                      "User": {
-                        "byID": 1000
-                      }
-                    }
-                  },
-                  "mode": -1,
-                  "followSymlink": true,
-                  "dirCopyContents": true,
-                  "createDestPath": true,
-                  "allowWildcard": true,
-                  "timestamp": -1
-                }
-              }
-            }
-          ]
-        }
-      },
-      "platform": {
-        "Architecture": "amd64",
-        "OS": "linux"
-      },
-      "constraints": {}
-    },
-    "Digest": "sha256:9edec5d7822a621ad9367d65518561105e8aa4d5779842dd4abdeac7d7a96603",
-    "OpMetadata": {
-      "description": {
-        "llb.customname": "Copy ./docker/nginx.conf"
-      },
-      "caps": {
-        "file.base": true
       }
     }
   },

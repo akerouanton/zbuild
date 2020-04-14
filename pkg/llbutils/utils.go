@@ -219,9 +219,7 @@ func InstallPackagesWithAPK(
 
 	if opts.WithCacheMounts {
 		cmds = append(cmds,
-			"apk add "+strings.Join(packageSpecs, " "),
-			// Clean up old packages but retain installed ones
-			"apk cache -v sync")
+			"apk add "+strings.Join(packageSpecs, " "))
 		runOpts = append(runOpts,
 			CacheMountOpt("/etc/apk/cache", opts.CacheIDNamespace, "0"))
 	} else {
@@ -271,7 +269,7 @@ func SetupSystemPackagesCache(state llb.State, pkgMgr string) llb.State {
 func SetupAPTCache(state llb.State) llb.State {
 	return state.Run(
 		Shell("[ -f /etc/apt/apt.conf.d/docker-clean ] && rm -f /etc/apt/apt.conf.d/docker-clean",
-			"echo 'Binary::apt::APT::Keep-Downloaded-Packages \"true\"' > /etc/apt/apt.conf.d/keep-cache"),
+			"echo 'Binary::apt::APT::Keep-Downloaded-Packages \"true\";' > /etc/apt/apt.conf.d/keep-cache"),
 		llb.WithCustomName("Set up APT cache"),
 	).Root()
 }

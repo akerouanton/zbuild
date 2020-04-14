@@ -1,16 +1,16 @@
 [
   {
-    "RawOp": "CkkKR3NoYTI1NjpiN2RmYjAzZDBlMjI2YTJkZGY4MzFlMDI5ODZjMGQxMjVlN2RlODhiMzVhMGNkYWM2MGIzNDIzODMxNDcyYjc0",
+    "RawOp": "CkkKR3NoYTI1NjpiMGZiZDc3MThlOTg4NTg4NzNjMDMyODQyMjQyNDlhZDM0OTczMTFlMjdhYzM2ODNlZmU5OTJjNzdjNDg5Nzkw",
     "Op": {
       "inputs": [
         {
-          "digest": "sha256:b7dfb03d0e226a2ddf831e02986c0d125e7de88b35a0cdac60b3423831472b74",
+          "digest": "sha256:b0fbd7718e98858873c03284224249ad3497311e27ac3683efe992c77c489790",
           "index": 0
         }
       ],
       "Op": null
     },
-    "Digest": "sha256:2e4f44137f959ea8f431ba67bd1e1f4baab5463052367b8e081839d56594da94",
+    "Digest": "sha256:66ea927b951d1acc6f9c58265b9cd42e0cab880bfd42c113e17db58d8f41a84f",
     "OpMetadata": {
       "caps": {
         "constraints": true,
@@ -20,7 +20,7 @@
     }
   },
   {
-    "RawOp": "EsYCCrMCCgcvYmluL3NoCgItbwoHZXJyZXhpdAoCLWMKkwJjdXJsIC1mIC1vIC91c3IvbG9jYWwvc2Jpbi9ub3RwZWNsIGh0dHBzOi8vc3RvcmFnZS5nb29nbGVhcGlzLmNvbS9ub3RwZWNsL25vdHBlY2w7IGNobW9kICt4IC91c3IvbG9jYWwvc2Jpbi9ub3RwZWNsOyBhcGsgYWRkIC0tbm8tY2FjaGUgLS12aXJ0dWFsPS5waHBpemUgJFBIUElaRV9ERVBTOyBub3RwZWNsIGluc3RhbGwgbWVtY2FjaGVkOyBkb2NrZXItcGhwLWV4dC1lbmFibGUgbWVtY2FjaGVkOyBhcGsgZGVsIC5waHBpemU7IHJtIC1yZiAvdXNyL2xvY2FsL3NiaW4vbm90cGVjbBoBLxIOCP///////////wEaAS9SDgoFYW1kNjQSBWxpbnV4WgA=",
+    "RawOp": "EsYCCrMCCgcvYmluL3NoCgItbwoHZXJyZXhpdAoCLWMKkwJhcGsgYWRkIC0tdmlydHVhbD0ucGhwaXplICRQSFBJWkVfREVQUyAtLW5vLWNhY2hlOyBjdXJsIC1mIC1vIC91c3IvbG9jYWwvc2Jpbi9ub3RwZWNsIGh0dHBzOi8vc3RvcmFnZS5nb29nbGVhcGlzLmNvbS9ub3RwZWNsL25vdHBlY2w7IGNobW9kICt4IC91c3IvbG9jYWwvc2Jpbi9ub3RwZWNsOyBub3RwZWNsIGluc3RhbGwgbWVtY2FjaGVkOyBkb2NrZXItcGhwLWV4dC1lbmFibGUgbWVtY2FjaGVkOyBhcGsgZGVsIC5waHBpemU7IHJtIC1yZiAvdXNyL2xvY2FsL3NiaW4vbm90cGVjbBoBLxIOCP///////////wEaAS9SDgoFYW1kNjQSBWxpbnV4WgA=",
     "Op": {
       "Op": {
         "exec": {
@@ -30,7 +30,7 @@
               "-o",
               "errexit",
               "-c",
-              "curl -f -o /usr/local/sbin/notpecl https://storage.googleapis.com/notpecl/notpecl; chmod +x /usr/local/sbin/notpecl; apk add --no-cache --virtual=.phpize $PHPIZE_DEPS; notpecl install memcached; docker-php-ext-enable memcached; apk del .phpize; rm -rf /usr/local/sbin/notpecl"
+              "apk add --virtual=.phpize $PHPIZE_DEPS --no-cache; curl -f -o /usr/local/sbin/notpecl https://storage.googleapis.com/notpecl/notpecl; chmod +x /usr/local/sbin/notpecl; notpecl install memcached; docker-php-ext-enable memcached; apk del .phpize; rm -rf /usr/local/sbin/notpecl"
             ],
             "cwd": "/"
           },
@@ -49,7 +49,7 @@
       },
       "constraints": {}
     },
-    "Digest": "sha256:b7dfb03d0e226a2ddf831e02986c0d125e7de88b35a0cdac60b3423831472b74",
+    "Digest": "sha256:b0fbd7718e98858873c03284224249ad3497311e27ac3683efe992c77c489790",
     "OpMetadata": {
       "description": {
         "llb.customname": "Install PHP extensions (memcached)"
