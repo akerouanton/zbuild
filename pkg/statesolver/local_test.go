@@ -35,7 +35,7 @@ func newDockerClient(t *testing.T) *client.Client {
 	return c
 }
 
-func initFetchOSReleaseFromImageTC(t *testing.T, solver statesolver.DockerSolver) dockerReadFileTC {
+func initFetchOSReleaseFromImageTC(t *testing.T, solver statesolver.LocalSolver) dockerReadFileTC {
 	return dockerReadFileTC{
 		opt:  solver.FromImage(debianBusterSlimRef),
 		path: "/etc/os-release",
@@ -52,7 +52,7 @@ BUG_REPORT_URL="https://bugs.debian.org/"
 	}
 }
 
-func initFailToFetchNonexistantPathFromImageTC(t *testing.T, solver statesolver.DockerSolver) dockerReadFileTC {
+func initFailToFetchNonexistantPathFromImageTC(t *testing.T, solver statesolver.LocalSolver) dockerReadFileTC {
 	return dockerReadFileTC{
 		opt:  solver.FromImage(debianBusterSlimRef),
 		path: "/etc/nonexistant",
@@ -63,7 +63,7 @@ func initFailToFetchNonexistantPathFromImageTC(t *testing.T, solver statesolver.
 	}
 }
 
-func initPullImageAndReadFileFromImageTC(t *testing.T, solver statesolver.DockerSolver) dockerReadFileTC {
+func initPullImageAndReadFileFromImageTC(t *testing.T, solver statesolver.LocalSolver) dockerReadFileTC {
 	return dockerReadFileTC{
 		opt:  solver.FromImage("debian:bullseye-slim"),
 		path: "/etc/os-release",
@@ -77,7 +77,7 @@ BUG_REPORT_URL="https://bugs.debian.org/"
 	}
 }
 
-func initFailToFetchFromNonexistantImageTC(t *testing.T, solver statesolver.DockerSolver) dockerReadFileTC {
+func initFailToFetchFromNonexistantImageTC(t *testing.T, solver statesolver.LocalSolver) dockerReadFileTC {
 	return dockerReadFileTC{
 		opt:         solver.FromImage("akerouanton/nopenopenope"),
 		path:        "/etc/os-release",
@@ -85,7 +85,7 @@ func initFailToFetchFromNonexistantImageTC(t *testing.T, solver statesolver.Dock
 	}
 }
 
-func initDockerReadFileFromBuildContextTC(t *testing.T, solver statesolver.DockerSolver) dockerReadFileTC {
+func initDockerReadFileFromBuildContextTC(t *testing.T, solver statesolver.LocalSolver) dockerReadFileTC {
 	return dockerReadFileTC{
 		opt: solver.FromContext(&builddef.Context{
 			Type: builddef.ContextTypeLocal,
@@ -95,7 +95,7 @@ func initDockerReadFileFromBuildContextTC(t *testing.T, solver statesolver.Docke
 	}
 }
 
-func initFailToReadNonexistantFileFromBuildContextTC(t *testing.T, solver statesolver.DockerSolver) dockerReadFileTC {
+func initFailToReadNonexistantFileFromBuildContextTC(t *testing.T, solver statesolver.LocalSolver) dockerReadFileTC {
 	return dockerReadFileTC{
 		opt: solver.FromContext(&builddef.Context{
 			Type: builddef.ContextTypeLocal,
@@ -106,7 +106,7 @@ func initFailToReadNonexistantFileFromBuildContextTC(t *testing.T, solver states
 }
 
 func TestDockerReadFile(t *testing.T) {
-	testcases := map[string]func(*testing.T, statesolver.DockerSolver) dockerReadFileTC{
+	testcases := map[string]func(*testing.T, statesolver.LocalSolver) dockerReadFileTC{
 		"fetch /etc/os-release from image":                 initFetchOSReleaseFromImageTC,
 		"fail to fetch nonexistant path":                   initFailToFetchNonexistantPathFromImageTC,
 		"pull image and fetch /etc/os-release":             initPullImageAndReadFileFromImageTC,
@@ -125,7 +125,7 @@ func TestDockerReadFile(t *testing.T) {
 		t.Run(tcname, func(t *testing.T) {
 			t.Parallel()
 
-			solver := statesolver.DockerSolver{
+			solver := statesolver.LocalSolver{
 				Client:  c,
 				Labels:  map[string]string{},
 				RootDir: "testdata",
@@ -210,7 +210,7 @@ func TestDockerExecImage(t *testing.T) {
 		t.Run(tcname, func(t *testing.T) {
 			t.Parallel()
 
-			solver := statesolver.DockerSolver{
+			solver := statesolver.LocalSolver{
 				Client:  c,
 				Labels:  map[string]string{},
 				RootDir: "testdata",
@@ -256,7 +256,7 @@ func TestDockerResolveImageRef(t *testing.T) {
 		},
 	}
 
-	solver := statesolver.DockerSolver{
+	solver := statesolver.LocalSolver{
 		ImageResolver: docker.NewResolver(docker.ResolverOptions{}),
 	}
 
@@ -292,7 +292,7 @@ type dockerFileExistsTC struct {
 	expectedErr error
 }
 
-func TestDockerSolverFileExists(t *testing.T) {
+func TestLocalSolverFileExists(t *testing.T) {
 	testcases := map[string]dockerFileExistsTC{
 		"successfully check file exists": {
 			filepath: "testfile",
@@ -316,7 +316,7 @@ func TestDockerSolverFileExists(t *testing.T) {
 		t.Run(tcname, func(t *testing.T) {
 			t.Parallel()
 
-			solver := statesolver.DockerSolver{
+			solver := statesolver.LocalSolver{
 				Labels:  map[string]string{},
 				RootDir: "testdata",
 			}

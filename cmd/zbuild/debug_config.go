@@ -40,7 +40,7 @@ func HandleDebugConfigCmd(cmd *cobra.Command, args []string) {
 	b := builder.Builder{
 		Registry: registry.Registry,
 	}
-	solver := newDockerSolver(debugConfigFlags.context)
+	solver := newLocalSolver(debugConfigFlags.context)
 
 	dump, err := b.DumpConfig(solver,
 		debugConfigFlags.file,

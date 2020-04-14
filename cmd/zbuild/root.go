@@ -36,7 +36,7 @@ func main() {
 	}
 }
 
-func newDockerSolver(rootDir string) statesolver.DockerSolver {
+func newLocalSolver(rootDir string) statesolver.LocalSolver {
 	c, err := client.NewClientWithOpts(client.FromEnv)
 	if err != nil {
 		logrus.Fatalf("%+v", err)
@@ -52,7 +52,7 @@ func newDockerSolver(rootDir string) statesolver.DockerSolver {
 		}
 	}
 
-	return statesolver.DockerSolver{
+	return statesolver.LocalSolver{
 		Client:        c,
 		Labels:        map[string]string{},
 		RootDir:       rootDir,

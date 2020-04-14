@@ -50,7 +50,7 @@ func HandleUpdateCmd(cmd *cobra.Command, args []string) {
 		BuildContext: buildctx,
 	}
 
-	solver := newDockerSolver(buildOpts.BuildContext.Source)
+	solver := newLocalSolver(buildOpts.BuildContext.Source)
 	b := builder.Builder{
 		Registry:   registry.Registry,
 		PkgSolvers: pkgsolver.DefaultPackageSolversMap,
