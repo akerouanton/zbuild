@@ -141,7 +141,8 @@ Moreover, when the target stage is non-dev, following steps also happen:
 * Copy sources files ;
 * Execute post install steps ;
 
-Also note that uid 1000 is automatically set as the default user.
+Also note that uid 1000 is automatically set as the default user of the built
+images.
 
 ## Locking
 

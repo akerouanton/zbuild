@@ -8,44 +8,37 @@ no assets) ;
 2. integrated within another builder (e.g. to add assets built by another
 zbuildfile) ;
 
+* [Syntax](#syntax)
+  * [Webserver type - `<webserver_type>`](#webserver-type---webserver_type)
+  * [System packages - `<system_packages>`](#system-packages---system_packages)
+  * [Config files - `<config_files>`](#config-files---config_files)
+  * [Healthcheck - `<healthcheck>`](#healthcheck---healthcheck)
+  * [Assets - `<assets>`](#assets---assets)
+
 ## Syntax
 
-zbuildfiles with webserver definitions have following structure:
+Webserver definitions have following structure:
 
 ```yaml
 kind: webserver
 
-type: <string> # (default: nginx)
-system_packages: <map[string]string>
-config_files: <map[string]string>
-healthcheck: <bool> # (default: true)
+type: <webserver_type> # (default: nginx)
+system_packages: <system_packages>
+config_files: <config_files>
+healthcheck: <bool>
 assets: <assets>
 ```
 
-##### `type` - default: `nginx`
+##### Webserver type - `<webserver_type>` (default: `nginx`)
 
 This parameter defines which webserver you want to use for this image. Only
 `nginx` is supported for now.
 
-##### `system_packages` - not required
+##### System packages - `<system_packages>`
 
-This parameter can be used to install custom system packages in the image. It's
-a map of package names as keys and version constraints as values.
+See [here](generic-parameters.md#system-packages---system_packages).
 
-Example:
-
-```yaml
-# syntax=akerouanton/zbuilder:<tag>
-kind: webserver
-
-system_packages:
-  curl: *
-```
-
-System packages are pinned to a specific version in the lockfile with the help
-of `zbuild update`. See [here](/README.md#2-create-or-update-the-lock-file) for more details.
-
-##### Config files - `config_files`
+##### Config files - `<config_files>`
 
 See [here](generic-parameters.md#config-files)
 
@@ -56,11 +49,12 @@ Following parameters are available for expansion:
 
 * `${config_dir}`: points to `/etc/nginx` ;
 
-##### `healthcheck` - default: `true`
+#### Healthcheck - `<healthcheck>`
 
 The `healthcheck` parameter can be used to preconfigure Docker healthcheck for
-this image. For nginx definitions, it's either of type `http` or `cmd`. See [here](generic-parameters.md#healthcheck)
-for more details about healthcheck parameter.
+this image. For webserver definitions, the healthcheck can either be of type
+`http` or `cmd`. See [here](generic-parameters.md#healthcheck) for more details
+about healthcheck parameter.
 
 `http` healthchecks are using `curl` and corresponding package is automatically
 added to your `system_packages`.
@@ -78,28 +72,27 @@ healthcheck:
     expected: pong
 ```
 
-You have to set following parameters in your `fpm.conf` file to use the default
-healthcheck:
-
-You still have to properly configure your webserver to expose a ping/pong healthcheck on
-`/_ping`.
+You still have to properly configure your webserver to expose a ping/pong
+healthcheck on `/_ping`.
 
 Example `nginx.conf`:
 
 ```
-server {
-    # ...
+http {
+    server {
+        # ...
 
-    location = /_ping {
-        access_log off;
-        allow 127.0.0.1;
-        deny all;
-        return 200 "pong";
+        location = /_ping {
+            access_log off;
+            allow 127.0.0.1;
+            deny all;
+            return 200 "pong";
+        }
     }
 }
 ```
 
-##### `assets`
+##### Assets - `<assets>`
 
 This parameter can only be used when the webserver builder is called by another
 builder (e.g. within a zbuildfile with php or nodejs kind). It's a list of 
