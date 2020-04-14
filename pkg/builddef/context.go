@@ -123,6 +123,19 @@ func (c *Context) IsLocalContext() bool {
 	return c != nil && c.Type == ContextTypeLocal
 }
 
+// Subdir returns the context Path if the context is Git-based. This method
+// should be prefered over accessing Path directly since the Path can be
+// set by users.
+// It doesn't support local context because Buildkit clients' scope the build
+// contexts to the build dir they're instructed to use. Thus, context dir for
+// local contexts as no meaning.
+func (c *Context) Subdir() string {
+	if c.IsGitContext() {
+		return c.Path
+	}
+	return ""
+}
+
 type GitContext struct {
 	Reference string
 	// Path contains the base root dir of the context in the git repo.

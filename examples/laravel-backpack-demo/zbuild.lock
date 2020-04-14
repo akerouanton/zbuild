@@ -1,8 +1,13 @@
-base_image: docker.io/library/php:7.4-fpm-buster@sha256:d7b10a1c883c7ddbc59a8b8886bc5900e4c83a15891ec8a8e86cb2b60d070839
+base_image: docker.io/library/php:7.4-fpm-buster@sha256:24c6c895d0e22fcbfd67fed04eba192d983e6bf01d9714c6e7e371255a682e17
+defhash: 4719473280499134212
 extension_dir: /usr/local/lib/php/extensions/no-debug-non-zts-20190902
+osrelease:
+  name: debian
+  versionname: buster
+  versionid: "10"
 source_context:
   path: ""
-  reference: e700b2a98a129299de830a4ffb9ccb2b07ae48e2
+  reference: 76915aeb35e60b0efc0df3eab0585a815f8d5fe3
   source: git://github.com/Laravel-Backpack/Demo
   type: git
 stages:
@@ -30,6 +35,10 @@ stages:
       unzip: 6.0-23+deb10u1
       zlib1g-dev: 1:1.2.11.dfsg-1
 webserver:
-  base_image: docker.io/library/nginx:latest@sha256:70821e443be75ea38bdf52a974fd2271babd5875b2b1964f05025981c75a6717
+  base_image: docker.io/library/nginx:latest@sha256:282530fcb7cd19f3848c7b611043f82ae4be3781cb00105a1d593d7e6286b596
+  osrelease:
+    name: debian
+    versionname: buster
+    versionid: "10"
   system_packages:
-    curl: 7.64.0-4
+    curl: 7.64.0-4+deb10u1

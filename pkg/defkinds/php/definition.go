@@ -283,7 +283,7 @@ type Stage struct {
 	Command           *[]string                   `mapstructure:"command"`
 	Extensions        *builddef.VersionMap        `mapstructure:"extensions"`
 	GlobalDeps        *builddef.VersionMap        `mapstructure:"global_deps"`
-	ConfigFiles       PHPConfigFiles              `mapstructure:"config_files"`
+	ConfigFiles       builddef.PathsMap           `mapstructure:"config_files"`
 	ComposerDumpFlags *ComposerDumpFlags          `mapstructure:"composer_dump"`
 	Sources           []string                    `mapstructure:"sources"`
 	Integrations      []string                    `mapstructure:"integrations"`
@@ -422,41 +422,6 @@ func (base DerivedStageSet) Merge(overriding DerivedStageSet) DerivedStageSet {
 		} else {
 			new[name] = new[name].Merge(stage)
 		}
-	}
-
-	return new
-}
-
-type PHPConfigFiles struct {
-	IniFile       *string `mapstructure:"php.ini"`
-	FPMConfigFile *string `mapstructure:"fpm.conf"`
-}
-
-func (base PHPConfigFiles) Copy() PHPConfigFiles {
-	new := PHPConfigFiles{}
-
-	if base.IniFile != nil {
-		iniFile := *base.IniFile
-		new.IniFile = &iniFile
-	}
-	if base.FPMConfigFile != nil {
-		fpmConfigFile := *base.FPMConfigFile
-		new.FPMConfigFile = &fpmConfigFile
-	}
-
-	return new
-}
-
-func (base PHPConfigFiles) Merge(overriding PHPConfigFiles) PHPConfigFiles {
-	new := base.Copy()
-
-	if overriding.IniFile != nil {
-		iniFile := *overriding.IniFile
-		new.IniFile = &iniFile
-	}
-	if overriding.FPMConfigFile != nil {
-		fpmConfigFile := *overriding.FPMConfigFile
-		new.FPMConfigFile = &fpmConfigFile
 	}
 
 	return new
@@ -622,9 +587,6 @@ func mergeStages(base *Definition, stages ...DerivedStage) StageDefinition {
 		}
 	}
 
-	if !*stageDef.FPM {
-		stageDef.ConfigFiles.FPMConfigFile = nil
-	}
 	if stageDef.Dev || stageDef.FPM == nil || !*stageDef.FPM {
 		stageDef.Healthcheck = nil
 	}

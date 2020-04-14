@@ -1,4 +1,9 @@
-base: docker.io/library/node:lts-buster-slim@sha256:4d1016eefc4e6dc52ba9be6550dcb25a6e1826117507e65eda3650d6eb19f042
+base: docker.io/library/node:lts-buster-slim@sha256:08fbaedaa09f60f6f22bcb09849ed4000d02630dc18821b080fb8c847e6723e7
+defhash: 8348209520401830947
+osrelease:
+  name: debian
+  versionname: buster
+  versionid: "10"
 source_context:
   path: ""
   reference: c4f895c02f2ac583dc0cc4874f4def4414f71679
@@ -10,6 +15,10 @@ stages:
   prod:
     system_packages: {}
 webserver:
-  base_image: docker.io/library/nginx:latest@sha256:70821e443be75ea38bdf52a974fd2271babd5875b2b1964f05025981c75a6717
+  base_image: docker.io/library/nginx:latest@sha256:282530fcb7cd19f3848c7b611043f82ae4be3781cb00105a1d593d7e6286b596
+  osrelease:
+    name: debian
+    versionname: buster
+    versionid: "10"
   system_packages:
-    curl: 7.64.0-4
+    curl: 7.64.0-4+deb10u1

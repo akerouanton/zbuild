@@ -45,32 +45,16 @@ system_packages:
 System packages are pinned to a specific version in the lockfile with the help
 of `zbuild update`. See [here](/README.md#2-create-or-update-the-lock-file) for more details.
 
-##### `config_files`
+##### Config files - `config_files`
 
-This is a map of source to destination paths of config files you want to
-include in your image. Source path are relative to the build context root
-directory. Destination paths could be either absolute or relative to the 
-base config directory of the webserver type (nginx: `/etc/nginx`).
+See [here](generic-parameters.md#config-files)
 
-Example:
+This builder defines no working directory but instead reuses the working
+directory of the base image.
 
-```
-$ tree .
-.
-├── docker
-│   ├── nginx.conf
-│   └── ...
-├── docker-compose.yml
-├── zbuild.lock
-└── zbuild.yml
+Following parameters are available for expansion:
 
-$ cat zbuild.yml
-# syntax=akerouanton/zbuilder:<tag>
-kind: webserver
-
-config_files:
-  docker/nginx.conf: nginx.conf
-```
+* `${config_dir}`: points to `/etc/nginx` ;
 
 ##### `healthcheck` - default: `true`
 

@@ -6,4 +6,4 @@ system_packages:
   curl: '*'
 
 config_files:
-  ./docker/nginx.conf: nginx.conf
+  ./docker/nginx.conf: "${config_dir}/nginx.conf"

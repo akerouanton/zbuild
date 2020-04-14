@@ -27,8 +27,8 @@ sources:
   - src/
 
 config_files:
-  fpm.conf: fpm.conf
-  php.ini: php.ini
+  fpm.conf: "${fpm_conf}"
+  php.ini: "${php_ini}"
 
 stateful_dirs:
   - var/
@@ -55,7 +55,8 @@ stages:
 webserver:
   type: nginx
   alpine: true
-  config_file: nginx.conf
+  config_files:
+    nginx.conf: "${nginx_conf}"
   assets:
     - from: public/
       to: /app/public/

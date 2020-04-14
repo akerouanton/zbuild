@@ -15,7 +15,7 @@ stateful_dirs:
   - 'public/uploads'
 
 config_files:
-  fpm.conf: 'docker/app/fpm.conf'
+  docker/app/fpm.conf: ${fpm_conf}
 
 post_install:
   - echo some command
@@ -24,11 +24,11 @@ stages:
   dev:
     dev: true
     config_files:
-      php.ini: 'docker/app/php.dev.ini'
+      docker/app/php.dev.ini: ${php_ini}
 
   prod:
     config_files:
-      php.ini: 'docker/app/php.prod.ini'
+      docker/app/php.prod.ini: ${php_ini}
     healthcheck: true
     integrations:
       - blackfire

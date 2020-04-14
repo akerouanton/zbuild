@@ -43,7 +43,7 @@ func initParseRawDefinitionWithoutStagesTC() newDefinitionTC {
 				SystemPackages: &builddef.VersionMap{
 					"ca-certificates": "*",
 				},
-				ConfigFiles: map[string]string{
+				ConfigFiles: builddef.PathsMap{
 					".babelrc": ".babelrc",
 				},
 				GlobalPackages: &builddef.VersionMap{},
@@ -780,21 +780,20 @@ func initMergeConfigFilesWithBaseTC() mergeStageTC {
 	return mergeStageTC{
 		base: func() nodejs.Stage {
 			return nodejs.Stage{
-				ConfigFiles: map[string]string{
+				ConfigFiles: builddef.PathsMap{
 					".env": ".env",
 				},
 			}
 		},
 		overriding: nodejs.Stage{
-			ConfigFiles: map[string]string{
-				".env.production": ".env.production",
+			ConfigFiles: builddef.PathsMap{
+				".env.prod.dist": ".env",
 			},
 		},
 		expected: func() nodejs.Stage {
 			s := emptyStage()
 			s.ConfigFiles = map[string]string{
-				".env":            ".env",
-				".env.production": ".env.production",
+				".env.prod.dist": ".env",
 			}
 			return s
 		},
@@ -807,14 +806,14 @@ func initMergeConfigFilesWithoutBaseTC() mergeStageTC {
 			return nodejs.Stage{}
 		},
 		overriding: nodejs.Stage{
-			ConfigFiles: map[string]string{
-				".env.production": ".env.production",
+			ConfigFiles: builddef.PathsMap{
+				".env.prod.dist": ".env",
 			},
 		},
 		expected: func() nodejs.Stage {
 			s := emptyStage()
 			s.ConfigFiles = map[string]string{
-				".env.production": ".env.production",
+				".env.prod.dist": ".env",
 			}
 			return s
 		},

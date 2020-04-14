@@ -56,130 +56,30 @@
     }
   },
   {
-    "RawOp": "CkkKR3NoYTI1NjpkODJhNzM3YzU2Y2Q1ZDM5MDQ4NzVlNmI2ZTJhMzczZWM5Y2JiNWNjZDg2ODU0ZmEyZTc4ZTliNjUxYTQyYTRlCkkKR3NoYTI1Njo3MTUxNzNjYTE5MmM2ZTViYTI1ZjVjMDNiNTgyNTA2ZDA1NGVmZWMyNzI3N2JjOTk1NjBhODgyODdiYzc0YTZiIk0SSxABIkcKBS8uZW52EhQvYXBwLy5lbnYucHJvZHVjdGlvbhoKCgMQ6AcSAxDoByD///////////8BKAEwAUABSAFY////////////AVIOCgVhbWQ2NBIFbGludXhaAA==",
+    "RawOp": "GoQBCg9sb2NhbDovL2NvbnRleHQSLAoUbG9jYWwuaW5jbHVkZXBhdHRlcm4SFFsiLy5lbnYucHJvZHVjdGlvbiJdEh0KDWxvY2FsLnNlc3Npb24SDDxTRVNTSU9OLUlEPhIkChNsb2NhbC5zaGFyZWRrZXloaW50Eg1idWlsZC1jb250ZXh0WgA=",
     "Op": {
-      "inputs": [
-        {
-          "digest": "sha256:d82a737c56cd5d3904875e6b6e2a373ec9cbb5ccd86854fa2e78e9b651a42a4e",
-          "index": 0
-        },
-        {
-          "digest": "sha256:715173ca192c6e5ba25f5c03b582506d054efec27277bc99560a88287bc74a6b",
-          "index": 0
-        }
-      ],
       "Op": {
-        "file": {
-          "actions": [
-            {
-              "input": 0,
-              "secondaryInput": 1,
-              "output": 0,
-              "Action": {
-                "copy": {
-                  "src": "/.env",
-                  "dest": "/app/.env.production",
-                  "owner": {
-                    "user": {
-                      "User": {
-                        "byID": 1000
-                      }
-                    },
-                    "group": {
-                      "User": {
-                        "byID": 1000
-                      }
-                    }
-                  },
-                  "mode": -1,
-                  "followSymlink": true,
-                  "dirCopyContents": true,
-                  "createDestPath": true,
-                  "allowWildcard": true,
-                  "timestamp": -1
-                }
-              }
-            }
-          ]
+        "source": {
+          "identifier": "local://context",
+          "attrs": {
+            "local.includepattern": "[\"/.env.production\"]",
+            "local.session": "\u003cSESSION-ID\u003e",
+            "local.sharedkeyhint": "build-context"
+          }
         }
-      },
-      "platform": {
-        "Architecture": "amd64",
-        "OS": "linux"
       },
       "constraints": {}
     },
-    "Digest": "sha256:0e774731a37f8f8696f9af34ae8e161d11fb970ca56a20a3be6957355785b8a7",
+    "Digest": "sha256:1a4b754904c064a7285c35a93d9083028d5e01e069a1a00d40e25ff08cf64acd",
     "OpMetadata": {
       "description": {
-        "llb.customname": "Copy .env"
+        "llb.customname": "load config files"
       },
       "caps": {
-        "file.base": true
-      }
-    }
-  },
-  {
-    "RawOp": "CkkKR3NoYTI1NjpkM2JmYWVjZjFkNWMzNjAzZjRiZjA4MzhlNjJkMTE4MzJhYzYyYjNhZTAzMzNmNzczOTA2ODE4ZmMzMDk3N2RjCkkKR3NoYTI1NjplNjI1YjNlMGRmNmE4ZGVlZWNjMzg0MmJjMDFjZjI0N2NmODgyMmE3Y2E2MmMyMjc4NzljYTU3NGUxZThiNDMzIkcSRRABIkEKCy9jbGllbnQvc3JjEggvYXBwL3NyYxoKCgMQ6AcSAxDoByD///////////8BKAEwAUABSAFY////////////AVIOCgVhbWQ2NBIFbGludXhaAA==",
-    "Op": {
-      "inputs": [
-        {
-          "digest": "sha256:d3bfaecf1d5c3603f4bf0838e62d11832ac62b3ae0333f773906818fc30977dc",
-          "index": 0
-        },
-        {
-          "digest": "sha256:e625b3e0df6a8deeecc3842bc01cf247cf8822a7ca62c227879ca574e1e8b433",
-          "index": 0
-        }
-      ],
-      "Op": {
-        "file": {
-          "actions": [
-            {
-              "input": 0,
-              "secondaryInput": 1,
-              "output": 0,
-              "Action": {
-                "copy": {
-                  "src": "/client/src",
-                  "dest": "/app/src",
-                  "owner": {
-                    "user": {
-                      "User": {
-                        "byID": 1000
-                      }
-                    },
-                    "group": {
-                      "User": {
-                        "byID": 1000
-                      }
-                    }
-                  },
-                  "mode": -1,
-                  "followSymlink": true,
-                  "dirCopyContents": true,
-                  "createDestPath": true,
-                  "allowWildcard": true,
-                  "timestamp": -1
-                }
-              }
-            }
-          ]
-        }
-      },
-      "platform": {
-        "Architecture": "amd64",
-        "OS": "linux"
-      },
-      "constraints": {}
-    },
-    "Digest": "sha256:355f226403130756205086990167bd6a34957c8e7683fab7390129b111f1eff3",
-    "OpMetadata": {
-      "description": {
-        "llb.customname": "Copy /client/src"
-      },
-      "caps": {
-        "file.base": true
+        "source.local": true,
+        "source.local.includepatterns": true,
+        "source.local.sessionid": true,
+        "source.local.sharedkeyhint": true
       }
     }
   },
@@ -205,45 +105,17 @@
     }
   },
   {
-    "RawOp": "GngKD2xvY2FsOi8vY29udGV4dBIgChRsb2NhbC5pbmNsdWRlcGF0dGVybhIIWyIuZW52Il0SHQoNbG9jYWwuc2Vzc2lvbhIMPFNFU1NJT04tSUQ+EiQKE2xvY2FsLnNoYXJlZGtleWhpbnQSDWJ1aWxkLWNvbnRleHRaAA==",
-    "Op": {
-      "Op": {
-        "source": {
-          "identifier": "local://context",
-          "attrs": {
-            "local.includepattern": "[\".env\"]",
-            "local.session": "\u003cSESSION-ID\u003e",
-            "local.sharedkeyhint": "build-context"
-          }
-        }
-      },
-      "constraints": {}
-    },
-    "Digest": "sha256:715173ca192c6e5ba25f5c03b582506d054efec27277bc99560a88287bc74a6b",
-    "OpMetadata": {
-      "description": {
-        "llb.customname": "load config files"
-      },
-      "caps": {
-        "source.local": true,
-        "source.local.includepatterns": true,
-        "source.local.sessionid": true,
-        "source.local.sharedkeyhint": true
-      }
-    }
-  },
-  {
-    "RawOp": "CkkKR3NoYTI1NjowZTc3NDczMWEzN2Y4Zjg2OTZmOWFmMzRhZThlMTYxZDExZmI5NzBjYTU2YTIwYTNiZTY5NTczNTU3ODViOGE3",
+    "RawOp": "CkkKR3NoYTI1Njo4NzM3MjFmYmNhM2YwZTFlYzkzMGZhZDkzZTEyYWE4MDFmM2IwYTc3NjY4OWYxNmFjMjE1OTQwMTNhNTVjMDk1",
     "Op": {
       "inputs": [
         {
-          "digest": "sha256:0e774731a37f8f8696f9af34ae8e161d11fb970ca56a20a3be6957355785b8a7",
+          "digest": "sha256:873721fbca3f0e1ec930fad93e12aa801f3b0a776689f16ac21594013a55c095",
           "index": 0
         }
       ],
       "Op": null
     },
-    "Digest": "sha256:7499ce7c7f5c77e5538c6d6144a8552214789ef46155499220edeedb30b0913e",
+    "Digest": "sha256:64dc905bb154e942b31d426051d0ffd2e02870efee0d6a832a2684842957a507",
     "OpMetadata": {
       "caps": {
         "constraints": true,
@@ -310,6 +182,70 @@
     "OpMetadata": {
       "description": {
         "llb.customname": "Copy /client/package.json"
+      },
+      "caps": {
+        "file.base": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1NjpmMDg5YTRjN2E5ZWEzMDZhOWIxMzU3OGU3YTE4MzM0YmM4NjRkMDhmODUyNmRlZmJkODU3MDdjZjI1NjIyYmM2CkkKR3NoYTI1NjplNjI1YjNlMGRmNmE4ZGVlZWNjMzg0MmJjMDFjZjI0N2NmODgyMmE3Y2E2MmMyMjc4NzljYTU3NGUxZThiNDMzIk0SSxABIkcKDi9jbGllbnQvcHVibGljEgsvYXBwL3B1YmxpYxoKCgMQ6AcSAxDoByD///////////8BKAEwAUABSAFY////////////AVIOCgVhbWQ2NBIFbGludXhaAA==",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:f089a4c7a9ea306a9b13578e7a18334bc864d08f8526defbd85707cf25622bc6",
+          "index": 0
+        },
+        {
+          "digest": "sha256:e625b3e0df6a8deeecc3842bc01cf247cf8822a7ca62c227879ca574e1e8b433",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "file": {
+          "actions": [
+            {
+              "input": 0,
+              "secondaryInput": 1,
+              "output": 0,
+              "Action": {
+                "copy": {
+                  "src": "/client/public",
+                  "dest": "/app/public",
+                  "owner": {
+                    "user": {
+                      "User": {
+                        "byID": 1000
+                      }
+                    },
+                    "group": {
+                      "User": {
+                        "byID": 1000
+                      }
+                    }
+                  },
+                  "mode": -1,
+                  "followSymlink": true,
+                  "dirCopyContents": true,
+                  "createDestPath": true,
+                  "allowWildcard": true,
+                  "timestamp": -1
+                }
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:873721fbca3f0e1ec930fad93e12aa801f3b0a776689f16ac21594013a55c095",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Copy /client/public"
       },
       "caps": {
         "file.base": true
@@ -434,15 +370,15 @@
     }
   },
   {
-    "RawOp": "CkkKR3NoYTI1NjozNTVmMjI2NDAzMTMwNzU2MjA1MDg2OTkwMTY3YmQ2YTM0OTU3YzhlNzY4M2ZhYjczOTAxMjliMTExZjFlZmYzCkkKR3NoYTI1NjplNjI1YjNlMGRmNmE4ZGVlZWNjMzg0MmJjMDFjZjI0N2NmODgyMmE3Y2E2MmMyMjc4NzljYTU3NGUxZThiNDMzIk0SSxABIkcKDi9jbGllbnQvcHVibGljEgsvYXBwL3B1YmxpYxoKCgMQ6AcSAxDoByD///////////8BKAEwAUABSAFY////////////AVIOCgVhbWQ2NBIFbGludXhaAA==",
+    "RawOp": "CkkKR3NoYTI1NjpkM2JmYWVjZjFkNWMzNjAzZjRiZjA4MzhlNjJkMTE4MzJhYzYyYjNhZTAzMzNmNzczOTA2ODE4ZmMzMDk3N2RjCkkKR3NoYTI1NjoxYTRiNzU0OTA0YzA2NGE3Mjg1YzM1YTkzZDkwODMwMjhkNWUwMWUwNjlhMWEwMGQ0MGUyNWZmMDhjZjY0YWNkIk0SSxABIkcKEC8uZW52LnByb2R1Y3Rpb24SCS9hcHAvLmVudhoKCgMQ6AcSAxDoByD///////////8BKAEwAUABSAFY////////////AVIOCgVhbWQ2NBIFbGludXhaAA==",
     "Op": {
       "inputs": [
         {
-          "digest": "sha256:355f226403130756205086990167bd6a34957c8e7683fab7390129b111f1eff3",
+          "digest": "sha256:d3bfaecf1d5c3603f4bf0838e62d11832ac62b3ae0333f773906818fc30977dc",
           "index": 0
         },
         {
-          "digest": "sha256:e625b3e0df6a8deeecc3842bc01cf247cf8822a7ca62c227879ca574e1e8b433",
+          "digest": "sha256:1a4b754904c064a7285c35a93d9083028d5e01e069a1a00d40e25ff08cf64acd",
           "index": 0
         }
       ],
@@ -455,8 +391,8 @@
               "output": 0,
               "Action": {
                 "copy": {
-                  "src": "/client/public",
-                  "dest": "/app/public",
+                  "src": "/.env.production",
+                  "dest": "/app/.env",
                   "owner": {
                     "user": {
                       "User": {
@@ -487,10 +423,10 @@
       },
       "constraints": {}
     },
-    "Digest": "sha256:d82a737c56cd5d3904875e6b6e2a373ec9cbb5ccd86854fa2e78e9b651a42a4e",
+    "Digest": "sha256:db3d6ef15ea38471e54a56a8ddb798f002e1814cfeb1ce9665cb7dfeaea3e429",
     "OpMetadata": {
       "description": {
-        "llb.customname": "Copy /client/public"
+        "llb.customname": "Copy /.env.production"
       },
       "caps": {
         "file.base": true
@@ -511,6 +447,70 @@
     "OpMetadata": {
       "caps": {
         "source.git": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1NjpkYjNkNmVmMTVlYTM4NDcxZTU0YTU2YThkZGI3OThmMDAyZTE4MTRjZmViMWNlOTY2NWNiN2RmZWFlYTNlNDI5CkkKR3NoYTI1NjplNjI1YjNlMGRmNmE4ZGVlZWNjMzg0MmJjMDFjZjI0N2NmODgyMmE3Y2E2MmMyMjc4NzljYTU3NGUxZThiNDMzIkcSRRABIkEKCy9jbGllbnQvc3JjEggvYXBwL3NyYxoKCgMQ6AcSAxDoByD///////////8BKAEwAUABSAFY////////////AVIOCgVhbWQ2NBIFbGludXhaAA==",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:db3d6ef15ea38471e54a56a8ddb798f002e1814cfeb1ce9665cb7dfeaea3e429",
+          "index": 0
+        },
+        {
+          "digest": "sha256:e625b3e0df6a8deeecc3842bc01cf247cf8822a7ca62c227879ca574e1e8b433",
+          "index": 0
+        }
+      ],
+      "Op": {
+        "file": {
+          "actions": [
+            {
+              "input": 0,
+              "secondaryInput": 1,
+              "output": 0,
+              "Action": {
+                "copy": {
+                  "src": "/client/src",
+                  "dest": "/app/src",
+                  "owner": {
+                    "user": {
+                      "User": {
+                        "byID": 1000
+                      }
+                    },
+                    "group": {
+                      "User": {
+                        "byID": 1000
+                      }
+                    }
+                  },
+                  "mode": -1,
+                  "followSymlink": true,
+                  "dirCopyContents": true,
+                  "createDestPath": true,
+                  "allowWildcard": true,
+                  "timestamp": -1
+                }
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:f089a4c7a9ea306a9b13578e7a18334bc864d08f8526defbd85707cf25622bc6",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Copy /client/src"
+      },
+      "caps": {
+        "file.base": true
       }
     }
   }

@@ -1,9 +1,9 @@
-base: docker.io/library/node:lts-alpine@sha256:bba77d0ca8820b43af898b3c50d4e8b68dc703ebbd958319af2f21f2d3c309f5
-defhash: 18264024912167914044
+base: docker.io/library/node:lts-alpine@sha256:0354aa58867fb873ef47d8345d21dddef1309a36226a425217910bc19fde5fb5
+defhash: 15053991651419712630
 osrelease:
   name: alpine
   versionname: ""
-  versionid: 3.11.3
+  versionid: 3.11.5
 source_context:
   path: ""
   reference: 0b3435f2435eebc0742c3e680b7b28ef5c7382c9

@@ -2,13 +2,44 @@
 
 Following parameters are common to many or all kinds of definition:
 
+* [Config files - `<config_files>`](#config-files---config_files)
 * [External files - `<external_files>`](#external-files---external_files)
-* [Source context - `<source_context>`](#source-context--source-context)
+* [Source context - `<source_context>`](#source-context---source_context)
 * [System packages - `<system_packages>`](#system-packages---system_packages)
 * [Healthcheck - `<healthcheck>`](#healthcheck---healthcheck)
   * [`cmd` healthcheck](#cmd-healthcheck)
   * [`fcgi` healthcheck](#fcgi-healthcheck)
   * [`http` healthcheck](#http-healthcheck)
+
+#### Config files - `<config_files>`
+
+This is a map of source to destination paths of config files you want to
+include in your image. Source path are relative to the build context root
+directory. Destination paths could be either absolute or relative to the 
+working directory used by each specialized builders. Moreover, you can use
+POSIX-like parameter expansion in the destination paths. Each specialized
+builder defines its own set of parameters, check their docs for more details.
+
+Example:
+
+```
+$ tree .
+.
+├── docker
+│   ├── nginx.conf
+│   └── ...
+├── docker-compose.yml
+├── zbuild.lock
+└── zbuild.yml
+```
+
+```yaml
+# syntax=akerouanton/zbuilder:<tag>
+kind: webserver
+
+config_files:
+  docker/nginx.conf: "${config_dir}/nginx.conf"
+```
 
 #### External files - `<external_files>`
 

@@ -552,6 +552,10 @@ func initDebugProdStageTC(t *testing.T, mockCtrl *gomock.Controller) debugConfig
 }
 
 func TestDebugConfig(t *testing.T) {
+	if *flagTestdata {
+		return
+	}
+
 	testcases := map[string]func(*testing.T, *gomock.Controller) debugConfigTC{
 		"debug dev stage config":  initDebugDevStageTC,
 		"debug prod stage config": initDebugProdStageTC,

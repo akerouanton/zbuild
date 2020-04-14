@@ -19,6 +19,10 @@ import (
 
 const (
 	defaultComposerImageTag = "docker.io/library/composer:1.9.0"
+
+	ConfigDir   = "/usr/local/etc"
+	WorkingDir  = "/app"
+	ComposerDir = "/composer"
 )
 
 var SharedKeys = struct {
@@ -133,14 +137,17 @@ func (h *PHPHandler) buildPHP(
 	state = InstallExtensions(stageDef, state, buildOpts)
 	state = llbutils.CopyExternalFiles(state, stageDef.ExternalFiles)
 
-	state = llbutils.Mkdir(state, "1000:1000", "/app", "/composer")
+	state = llbutils.Mkdir(state, "1000:1000", WorkingDir, ComposerDir)
 	state = state.User("1000")
-	state = state.Dir("/app")
-	state = state.AddEnv("COMPOSER_HOME", "/composer")
+	state = state.Dir(WorkingDir)
+	state = state.AddEnv("COMPOSER_HOME", ComposerDir)
 
-	state = copyConfigFiles(stageDef, state, buildOpts)
+	state, err = copyConfigFiles(stageDef, state, buildOpts)
+	if err != nil {
+		return state, img, err
+	}
+
 	state = globalComposerInstall(stageDef, state, buildOpts)
-
 	if !stageDef.Dev {
 		state = composerInstall(stageDef, state, buildOpts)
 		state = copySourceFiles(stageDef, state, buildOpts)
@@ -156,46 +163,44 @@ func (h *PHPHandler) buildPHP(
 }
 
 func copyConfigFiles(
-	stage StageDefinition,
+	stageDef StageDefinition,
 	state llb.State,
 	buildOpts builddef.BuildOpts,
-) llb.State {
-	buildctx := buildOpts.BuildContext
-	configFiles := make([]string, 0, 2)
-
-	iniFile := ""
-	if stage.ConfigFiles.IniFile != nil {
-		iniFile = prefixContextPath(buildctx, *stage.ConfigFiles.IniFile)
-		configFiles = append(configFiles, iniFile)
+) (llb.State, error) {
+	if len(stageDef.ConfigFiles) == 0 {
+		return state, nil
 	}
 
-	fpmFile := ""
-	if stage.ConfigFiles.FPMConfigFile != nil {
-		fpmFile = prefixContextPath(buildctx, *stage.ConfigFiles.FPMConfigFile)
-		configFiles = append(configFiles, fpmFile)
-	}
-
-	sourceState := llbutils.FromContext(buildctx,
-		llb.IncludePatterns(configFiles),
+	srcContext := buildOpts.BuildContext
+	srcPrefix := "/" + srcContext.Subdir()
+	include := stageDef.ConfigFiles.SourcePaths(srcPrefix)
+	srcState := llbutils.FromContext(srcContext,
+		llb.IncludePatterns(include),
 		llb.LocalUniqueID(buildOpts.LocalUniqueID),
 		llb.SessionID(buildOpts.SessionID),
 		llb.SharedKeyHint(SharedKeys.ConfigFiles),
 		llb.WithCustomName("load config files from build context"))
 
-	if iniFile != "" {
-		state = llbutils.Copy(
-			sourceState, iniFile,
-			state, "/usr/local/etc/php/php.ini", "1000:1000",
-			buildOpts.IgnoreLayerCache)
+	pathParams := map[string]string{
+		"config_dir": ConfigDir,
+		"fpm_conf":   path.Join(ConfigDir, "php-fpm.conf"),
+		"php_ini":    path.Join(ConfigDir, "php/php.ini"),
 	}
-	if fpmFile != "" {
-		state = llbutils.Copy(
-			sourceState, fpmFile,
-			state, "/usr/local/etc/php-fpm.conf", "1000:1000",
-			buildOpts.IgnoreLayerCache)
+	interpolated, err := stageDef.ConfigFiles.Interpolate(
+		srcPrefix, WorkingDir, pathParams)
+	if err != nil {
+		return state, err
 	}
 
-	return state
+	// Despite the IncludePatterns() above, the source state might also
+	// contain files that were not including, for instance if the conext is
+	// non-local. However, including precise patterns help buildkit determine
+	// if the cache is fresh (when using a local context). As such, we can't
+	// just copy the whole source state to the dest state.
+	state = llbutils.CopyAll(
+		srcState, state, interpolated, "1000:1000", buildOpts.IgnoreLayerCache)
+
+	return state, nil
 }
 
 func copySourceFiles(
@@ -215,7 +220,7 @@ func copySourceFiles(
 	if sourceContext.Type == builddef.ContextTypeLocal {
 		srcPath := prefixContextPath(sourceContext, "/")
 		return llbutils.Copy(
-			srcState, srcPath, state, "/app/", "1000:1000", buildOpts.IgnoreLayerCache)
+			srcState, srcPath, state, WorkingDir+"/", "1000:1000", buildOpts.IgnoreLayerCache)
 	}
 
 	// Despite the IncludePatterns() above, the source state might also
@@ -224,7 +229,7 @@ func copySourceFiles(
 	// in such case.
 	for _, srcfile := range stageDef.Sources {
 		srcPath := prefixContextPath(sourceContext, srcfile)
-		destPath := path.Join("/app", srcfile)
+		destPath := path.Join(WorkingDir, srcfile)
 		state = llbutils.Copy(
 			srcState, srcPath, state, destPath, "1000:1000", buildOpts.IgnoreLayerCache)
 	}
@@ -250,7 +255,7 @@ func setImageMetadata(
 	for _, dir := range stage.StatefulDirs {
 		fullpath := dir
 		if !path.IsAbs(fullpath) {
-			fullpath = path.Join("/app", dir)
+			fullpath = path.Join(WorkingDir, dir)
 		}
 
 		img.Config.Volumes[fullpath] = struct{}{}
@@ -261,10 +266,10 @@ func setImageMetadata(
 	}
 
 	img.Config.User = "1000"
-	img.Config.WorkingDir = "/app"
+	img.Config.WorkingDir = WorkingDir
 	img.Config.Env = []string{
 		"PATH=/composer/vendor/bin:" + getEnv(state, "PATH"),
-		"COMPOSER_HOME=/composer",
+		"COMPOSER_HOME=" + ComposerDir,
 		"PHP_VERSION=" + getEnv(state, "PHP_VERSION"),
 		"PHP_INI_DIR=" + getEnv(state, "PHP_INI_DIR"),
 	}
@@ -365,7 +370,7 @@ func composerInstall(
 
 	srcPath := prefixContextPath(srcContext, "composer.*")
 	state = llbutils.Copy(
-		srcState, srcPath, state, "/app/", "1000:1000", buildOpts.IgnoreLayerCache)
+		srcState, srcPath, state, WorkingDir+"/", "1000:1000", buildOpts.IgnoreLayerCache)
 
 	cmds := []string{
 		"composer install --no-dev --prefer-dist --no-scripts --no-autoloader"}

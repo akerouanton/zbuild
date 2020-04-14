@@ -122,8 +122,12 @@ func (h *NodeJSHandler) buildNodeJS(
 	state = h.globalPackagesInstall(state, stageDef, buildOpts)
 	if !*stageDef.Dev {
 		state = h.depsInstall(stageDef, state, buildOpts)
+		state, err = h.copyConfigFiles(stageDef, state, buildOpts)
+		if err != nil {
+			return state, img, err
+		}
+
 		state = h.copySources(stageDef, state, buildOpts)
-		state = h.copyConfigFiles(stageDef, state, buildOpts)
 		state = h.build(stageDef, state, buildOpts)
 	}
 
@@ -338,19 +342,14 @@ func (h *NodeJSHandler) copyConfigFiles(
 	stageDef StageDefinition,
 	state llb.State,
 	buildOpts builddef.BuildOpts,
-) llb.State {
+) (llb.State, error) {
 	if len(stageDef.ConfigFiles) == 0 {
-		return state
+		return state, nil
 	}
 
 	srcContext := buildOpts.BuildContext
-	include := []string{}
-
-	for _, srcfile := range stageDef.ConfigFiles {
-		srcpath := prefixContextPath(srcContext, srcfile)
-		include = append(include, srcpath)
-	}
-
+	srcPrefix := "/" + srcContext.Subdir()
+	include := stageDef.ConfigFiles.SourcePaths(srcPrefix)
 	srcState := llbutils.FromContext(srcContext,
 		llb.IncludePatterns(include),
 		llb.LocalUniqueID(buildOpts.LocalUniqueID),
@@ -358,19 +357,21 @@ func (h *NodeJSHandler) copyConfigFiles(
 		llb.SharedKeyHint(SharedKeys.BuildContext),
 		llb.WithCustomName("load config files"))
 
+	interpolated, err := stageDef.ConfigFiles.Interpolate(
+		srcPrefix, WorkingDir, map[string]string{})
+	if err != nil {
+		return state, err
+	}
+
 	// Despite the IncludePatterns() above, the source state might also
 	// contain files that were not including, for instance if the conext is
 	// non-local. However, including precise patterns help buildkit determine
 	// if the cache is fresh (when using a local context). As such, we can't
 	// just copy the whole source state to the dest state.
-	for destfile, srcfile := range stageDef.ConfigFiles {
-		srcpath := prefixContextPath(srcContext, srcfile)
-		destpath := path.Join(WorkingDir, destfile)
-		state = llbutils.Copy(
-			srcState, srcpath, state, destpath, "1000:1000", buildOpts.IgnoreLayerCache)
-	}
+	state = llbutils.CopyAll(
+		srcState, state, interpolated, "1000:1000", buildOpts.IgnoreLayerCache)
 
-	return state
+	return state, nil
 }
 
 func resolveSourceContext(

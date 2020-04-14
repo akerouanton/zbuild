@@ -43,9 +43,9 @@ def diff_path(first: str, last: str, path: str):
     
     cmd = """{tool} "$(git show {first}:{path} | zbuild llbgraph)" """.format(**args)
     if last != "unstaged":
-        cmd += "\"$(git show {last}:{path} | zbuild llbgraph)\""
+        cmd += "\"$(git show {last}:{path} | zbuild llbgraph --raw)\""
     else:
-        cmd += "\"$(cat {path} | zbuild llbgraph)\" "
+        cmd += "\"$(cat {path} | zbuild llbgraph --raw)\" "
     
     cmd += "| dot /dev/stdin -o /dev/stdout -T png | feh -"
     cmd = cmd.format(**args)
@@ -67,6 +67,7 @@ def diff_commit_range(commit_range: str, paths: List[str]):
         paths = find_updated_dumps(commits[0], commits[1])
 
     for path in paths:
+        print("Generting diff for {0}...".format(path))
         diff_path(commits[0], commits[1], path)
 
 

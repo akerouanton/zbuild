@@ -1,11 +1,12 @@
-base: docker.io/library/node:12-alpine@sha256:bba77d0ca8820b43af898b3c50d4e8b68dc703ebbd958319af2f21f2d3c309f5
+base: docker.io/library/node:12-alpine@sha256:0354aa58867fb873ef47d8345d21dddef1309a36226a425217910bc19fde5fb5
+defhash: 1957271039925347422
 osrelease:
   name: alpine
   versionname: ""
-  versionid: 3.11.3
+  versionid: 3.11.5
 source_context:
   path: client
-  reference: 5ecd2177087afbcce8f88ddfedbc7b95e738d961
+  reference: 534ccab2fe371939e8d37d781f70255d57151cc1
   source: github.com/api-platform/demo
   type: git
 stages:
@@ -14,7 +15,7 @@ stages:
   prod:
     system_packages: {}
 webserver:
-  base_image: docker.io/library/nginx:alpine@sha256:9e81b8f9cef5a095f892183688798a5b2c368663276aa0f2be4b1cd283ace53d
+  base_image: docker.io/library/nginx:alpine@sha256:abe5ce652eb78d9c793df34453fddde12bb4d93d9fbf2c363d0992726e4d2cad
   osrelease:
     name: alpine
     versionname: ""

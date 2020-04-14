@@ -169,12 +169,11 @@ func defaultBaseImage(def Definition) string {
 type Definition struct {
 	BaseStage Stage `mapstructure:",squash"`
 
-	BaseImage string          `mapstructure:"base"`
-	Version   string          `mapstructure:"version"`
-	Alpine    bool            `mapstructure:"alpine"`
-	Stages    DerivedStageSet `mapstructure:"stages"`
-	// @TODO: move to Stage?
-	IsFrontend bool `mapstructure:"frontend"`
+	BaseImage  string          `mapstructure:"base"`
+	Version    string          `mapstructure:"version"`
+	Alpine     bool            `mapstructure:"alpine"`
+	Stages     DerivedStageSet `mapstructure:"stages"`
+	IsFrontend bool            `mapstructure:"frontend"`
 
 	SourceContext *builddef.Context `mapstructure:"source_context"`
 
@@ -235,7 +234,7 @@ type Stage struct {
 	GlobalPackages *builddef.VersionMap        `mapstructure:"global_packages"`
 	BuildCommand   *string                     `mapstructure:"build_command"`
 	Command        *[]string                   `mapstructure:"command"`
-	ConfigFiles    map[string]string           `mapstructure:"config_files"`
+	ConfigFiles    builddef.PathsMap           `mapstructure:"config_files"`
 	Sources        []string                    `mapstructure:"sources"`
 	StatefulDirs   []string                    `mapstructure:"stateful_dirs"`
 	Healthcheck    *builddef.HealthcheckConfig `mapstructure:"healthcheck"`
@@ -248,7 +247,7 @@ func (s Stage) Copy() Stage {
 		GlobalPackages: s.GlobalPackages.Copy(),
 		BuildCommand:   s.BuildCommand,
 		Command:        s.Command,
-		ConfigFiles:    map[string]string{},
+		ConfigFiles:    s.ConfigFiles.Copy(),
 		Sources:        make([]string, len(s.Sources)),
 		StatefulDirs:   make([]string, len(s.StatefulDirs)),
 		Healthcheck:    s.Healthcheck,
@@ -258,10 +257,6 @@ func (s Stage) Copy() Stage {
 	copy(new.Sources, s.Sources)
 	copy(new.StatefulDirs, s.StatefulDirs)
 
-	for src, dst := range s.ConfigFiles {
-		new.ConfigFiles[src] = dst
-	}
-
 	return new
 }
 
@@ -269,13 +264,10 @@ func (s Stage) Merge(overriding Stage) Stage {
 	new := s.Copy()
 	new.ExternalFiles = append(new.ExternalFiles, overriding.ExternalFiles...)
 	new.Sources = append(new.Sources, overriding.Sources...)
+	new.ConfigFiles = new.ConfigFiles.Merge(overriding.ConfigFiles)
 	new.StatefulDirs = append(new.StatefulDirs, overriding.StatefulDirs...)
 	new.SystemPackages.Merge(overriding.SystemPackages)
 	new.GlobalPackages.Merge(overriding.GlobalPackages)
-
-	for from, to := range overriding.ConfigFiles {
-		new.ConfigFiles[from] = to
-	}
 
 	if overriding.BuildCommand != nil {
 		buildCmd := *overriding.BuildCommand

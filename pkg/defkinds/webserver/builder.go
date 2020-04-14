@@ -80,7 +80,11 @@ func (h *WebserverHandler) Build(
 		return state, img, xerrors.Errorf("failed to add \"install system pacakges\" steps: %w", err)
 	}
 
-	state = h.copyConfigFiles(def, state, buildOpts)
+	workingDir := img.Config.WorkingDir
+	state, err = h.copyConfigFiles(def, state, workingDir, buildOpts)
+	if err != nil {
+		return state, img, err
+	}
 
 	for _, asset := range def.Assets {
 		state = llbutils.Copy(
@@ -95,20 +99,16 @@ func (h *WebserverHandler) Build(
 func (h *WebserverHandler) copyConfigFiles(
 	def Definition,
 	state llb.State,
+	workingDir string,
 	buildOpts builddef.BuildOpts,
-) llb.State {
+) (llb.State, error) {
 	if len(def.ConfigFiles) == 0 {
-		return state
+		return state, nil
 	}
 
 	srcContext := buildOpts.BuildContext
-	include := []string{}
-
-	for srcfile := range def.ConfigFiles {
-		srcpath := prefixContextPath(srcContext, srcfile)
-		include = append(include, srcpath)
-	}
-
+	srcPrefix := "/" + srcContext.Subdir()
+	include := def.ConfigFiles.SourcePaths(srcPrefix)
 	srcState := llbutils.FromContext(srcContext,
 		llb.IncludePatterns(include),
 		llb.LocalUniqueID(buildOpts.LocalUniqueID),
@@ -116,17 +116,24 @@ func (h *WebserverHandler) copyConfigFiles(
 		llb.SharedKeyHint(SharedKeys.ConfigFiles),
 		llb.WithCustomName("load config files from build context"))
 
-	for srcfile, destfile := range def.ConfigFiles {
-		srcpath := prefixContextPath(srcContext, srcfile)
-		destpath := destfile
-		if !path.IsAbs(destpath) {
-			destpath = path.Join(def.Type.ConfigDir(), destfile)
-		}
-
-		state = llbutils.Copy(srcState, srcpath, state, destpath, "1000:1000", buildOpts.IgnoreLayerCache)
+	pathParams := map[string]string{
+		"config_dir": def.Type.ConfigDir(),
+	}
+	interpolated, err := def.ConfigFiles.Interpolate(
+		srcPrefix, workingDir, pathParams)
+	if err != nil {
+		return state, err
 	}
 
-	return state
+	// Despite the IncludePatterns() above, the source state might also
+	// contain files that were not including, for instance if the conext is
+	// non-local. However, including precise patterns help buildkit determine
+	// if the cache is fresh (when using a local context). As such, we can't
+	// just copy the whole source state to the dest state.
+	state = llbutils.CopyAll(
+		srcState, state, interpolated, "1000:1000", buildOpts.IgnoreLayerCache)
+
+	return state, nil
 }
 
 func prefixContextPath(srcContext *builddef.Context, p string) string {

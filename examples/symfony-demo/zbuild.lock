@@ -1,19 +1,22 @@
-base_image: docker.io/library/php:7.4-fpm-buster@sha256:d7b10a1c883c7ddbc59a8b8886bc5900e4c83a15891ec8a8e86cb2b60d070839
+base_image: docker.io/library/php:7.4-fpm-buster@sha256:24c6c895d0e22fcbfd67fed04eba192d983e6bf01d9714c6e7e371255a682e17
+defhash: 607881986423000386
 extension_dir: /usr/local/lib/php/extensions/no-debug-non-zts-20190902
+osrelease:
+  name: debian
+  versionname: buster
+  versionid: "10"
 source_context:
   path: ""
-  reference: d94fcc81f81a72760a4ed759579afaf727d538f2
+  reference: 156b2bf9786b4583b9036587b0787688f67ff2ac
   source: git://github.com/symfony/demo
   type: git
 stages:
   dev:
     extensions:
-      intl: '*'
       pdo_mysql: '*'
       zip: '*'
     system_packages:
       git: 1:2.20.1-2+deb10u1
-      libicu-dev: 63.1-6
       libsqlite3-dev: 3.27.2-3
       libxml2-dev: 2.9.4+dfsg1-7+b3
       libzip-dev: 1.5.1-4
@@ -22,19 +25,21 @@ stages:
   prod:
     extensions:
       apcu: 5.1.18
-      intl: '*'
       opcache: '*'
       pdo_mysql: '*'
       zip: '*'
     system_packages:
       git: 1:2.20.1-2+deb10u1
-      libicu-dev: 63.1-6
       libsqlite3-dev: 3.27.2-3
       libxml2-dev: 2.9.4+dfsg1-7+b3
       libzip-dev: 1.5.1-4
       unzip: 6.0-23+deb10u1
       zlib1g-dev: 1:1.2.11.dfsg-1
 webserver:
-  base_image: docker.io/library/nginx:latest@sha256:70821e443be75ea38bdf52a974fd2271babd5875b2b1964f05025981c75a6717
+  base_image: docker.io/library/nginx:latest@sha256:282530fcb7cd19f3848c7b611043f82ae4be3781cb00105a1d593d7e6286b596
+  osrelease:
+    name: debian
+    versionname: buster
+    versionid: "10"
   system_packages:
-    curl: 7.64.0-4
+    curl: 7.64.0-4+deb10u1
