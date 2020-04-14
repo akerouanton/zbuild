@@ -21,7 +21,8 @@ sources:
 webserver:
   type: nginx
   alpine: true
-  config_file: nginx.conf
+  config_files:
+    nginx.conf: "${config_dir}/nginx.conf"
   assets:
     - from: dist/
       to: /app/dist

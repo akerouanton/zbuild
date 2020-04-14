@@ -28,7 +28,8 @@ integrations:
 webserver:
   type: nginx
   healthcheck: true
-  config_file: nginx.conf
+  config_files:
+    nginx.conf: "${config_dir}/nginx.conf"
   assets:
     - from: /app/public
       to: /app/public
