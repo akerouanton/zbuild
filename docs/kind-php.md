@@ -27,7 +27,7 @@ A [full example](#full-example) is available at the end of this page, but you
 can also take a look at following examples:
 
 * [`symfony/demo`](/examples/symfony-demo/zbuild.yml)
-* [`api-platform/demo` - API](/examples/api-platform-demo/api/zbuild.yml)
+* [`api-platform/demo`](/examples/api-platform-demo/api/zbuild.yml)
 * [`laravel-backpack/demo`](/examples/laravel-backpack-demo/zbuild.yml)
 
 ## Multi-stages and dev builds
@@ -348,19 +348,14 @@ global_deps:
 
 #### Config files - `<config_files>`
 
-The `config_files` map takes two parameters pointing to config files in the
-build context. Both paths should be relative to the context root dir (the
-directory at the end of `docker build ...`).
+See [here](generic-parameters.md#config-files).
 
-```yaml
-# This is empty by default
-config_files:
-  php.ini: <local_path>
-  fpm.conf: <local_path>
-```
+This builder defines `/app` as the working directory and following parameters
+are available for expansion:
 
-Both can be set independently. When merging parent stages, each property is
-overriden independently too.
+* `${config_dir}` points to `/usr/local/etc` ;
+* `${php_ini}` points to `/usr/local/etc/php/php.ini` ;
+* `${fpm_conf}` points to `/usr/local/etc/fpm.conf` ;
 
 #### `composer dump` flags - `<composer_dump>`
 
@@ -497,7 +492,7 @@ stateful_dirs:
   - web/uploads/
 
 config_files:
-  fpm.conf: docker/php/fpm.conf
+  docker/php/fpm.conf: "${fpm_conf}"
 
 integrations:
   - blackfire
@@ -505,11 +500,11 @@ integrations:
 stages:
   dev:
     config_files:
-      php.ini: docker/app/php.dev.ini
+      docker/app/php.dev.ini: "${php_ini}"
 
   prod:
     config_files:
-      php.ini: docker/app/php.prod.ini
+      docker/app/php.prod.ini: "${php_ini}"
 
   worker:
     derive_from: prod
