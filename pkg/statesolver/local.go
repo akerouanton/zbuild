@@ -24,10 +24,9 @@ import (
 	"golang.org/x/xerrors"
 )
 
-// DockerSolver is the solver used by zbuild CLI tool. As such, it uses Docker
+// LocalSolver is the solver used by zbuild CLI tool. As such, it uses Docker
 // to read files from images and resolve image references.
-// @TODO: rename into LocalSolver?
-type DockerSolver struct {
+type LocalSolver struct {
 	Client *client.Client
 	Labels map[string]string
 	// RootDir is the path to the root of the build context.
@@ -35,7 +34,7 @@ type DockerSolver struct {
 	ImageResolver remotes.Resolver
 }
 
-func (s DockerSolver) ExecImage(
+func (s LocalSolver) ExecImage(
 	ctx context.Context,
 	imageRef string,
 	cmd []string,
@@ -67,7 +66,7 @@ func (s DockerSolver) ExecImage(
 	return outbuf, readErr
 }
 
-func (s DockerSolver) startContainerAndWait(ctx context.Context, containerID string) error {
+func (s LocalSolver) startContainerAndWait(ctx context.Context, containerID string) error {
 	waitch, errch := s.Client.ContainerWait(ctx, containerID,
 		container.WaitConditionNextExit)
 
@@ -92,7 +91,7 @@ func (s DockerSolver) startContainerAndWait(ctx context.Context, containerID str
 	return nil
 }
 
-func (s DockerSolver) fetchContainerLogs(
+func (s LocalSolver) fetchContainerLogs(
 	ctx context.Context,
 	containerID string,
 	stdout,
@@ -124,7 +123,7 @@ func (s DockerSolver) fetchContainerLogs(
 	return outbuf, errbuf, nil
 }
 
-func (s DockerSolver) FileExists(
+func (s LocalSolver) FileExists(
 	ctx context.Context,
 	filepath string,
 	source *builddef.Context,
@@ -153,7 +152,7 @@ func (s DockerSolver) FileExists(
 	return found, err
 }
 
-func (s DockerSolver) ReadFile(
+func (s LocalSolver) ReadFile(
 	ctx context.Context,
 	filepath string,
 	opt ReadFileOpt,
@@ -161,7 +160,7 @@ func (s DockerSolver) ReadFile(
 	return opt(ctx, filepath)
 }
 
-func (s DockerSolver) FromContext(
+func (s LocalSolver) FromContext(
 	source *builddef.Context,
 	_ ...llb.LocalOption,
 ) ReadFileOpt {
@@ -184,7 +183,7 @@ func (s DockerSolver) FromContext(
 	}
 }
 
-func (s DockerSolver) readFromLocalContext(filepath string) ([]byte, error) {
+func (s LocalSolver) readFromLocalContext(filepath string) ([]byte, error) {
 	fullpath := path.Join(s.RootDir, filepath)
 	raw, err := ioutil.ReadFile(fullpath)
 	if os.IsNotExist(err) {
@@ -196,7 +195,7 @@ func (s DockerSolver) readFromLocalContext(filepath string) ([]byte, error) {
 	return raw, nil
 }
 
-func (s DockerSolver) readFromGitContext(
+func (s LocalSolver) readFromGitContext(
 	ctx context.Context,
 	c *builddef.Context,
 	filepath string,
@@ -221,7 +220,7 @@ func (s DockerSolver) readFromGitContext(
 	return out, nil
 }
 
-func (s DockerSolver) FromImage(image string) ReadFileOpt {
+func (s LocalSolver) FromImage(image string) ReadFileOpt {
 	return func(ctx context.Context, filepath string) ([]byte, error) {
 		var res []byte
 
@@ -245,7 +244,7 @@ func (s DockerSolver) FromImage(image string) ReadFileOpt {
 	}
 }
 
-func (s DockerSolver) readFromContainer(
+func (s LocalSolver) readFromContainer(
 	ctx context.Context,
 	cid string,
 	filepath string,
@@ -291,7 +290,7 @@ func (s DockerSolver) readFromContainer(
 	return ioutil.ReadAll(tarR)
 }
 
-func (s DockerSolver) pullImage(ctx context.Context, image string) error {
+func (s LocalSolver) pullImage(ctx context.Context, image string) error {
 	_, _, err := s.Client.ImageInspectWithRaw(ctx, image)
 	// Don't pull agin if the image already exists
 	if err == nil {
@@ -317,7 +316,7 @@ func (s DockerSolver) pullImage(ctx context.Context, image string) error {
 	return err
 }
 
-func (s DockerSolver) createContainer(
+func (s LocalSolver) createContainer(
 	ctx context.Context,
 	image string,
 	cmd []string,
@@ -340,14 +339,14 @@ func (s DockerSolver) createContainer(
 	return resp.ID, nil
 }
 
-func (s DockerSolver) removeContainer(ctx context.Context, ID string) {
+func (s LocalSolver) removeContainer(ctx context.Context, ID string) {
 	err := s.Client.ContainerRemove(ctx, ID, types.ContainerRemoveOptions{})
 	if err != nil {
 		logrus.Error(err)
 	}
 }
 
-func (s DockerSolver) ResolveImageRef(ctx context.Context, imageRef string) (string, error) {
+func (s LocalSolver) ResolveImageRef(ctx context.Context, imageRef string) (string, error) {
 	normalized, err := reference.ParseNormalizedNamed(imageRef)
 	if err != nil {
 		return "", err

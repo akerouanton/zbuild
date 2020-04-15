@@ -57,7 +57,7 @@ func HandleDebugLLBCmd(cmd *cobra.Command, args []string) {
 	b := builder.Builder{
 		Registry: registry.Registry,
 	}
-	solver := newDockerSolver(debugFlags.context)
+	solver := newLocalSolver(debugFlags.context)
 
 	state, err := b.Debug(solver, debugFlags.file, debugFlags.stage)
 	if err != nil {

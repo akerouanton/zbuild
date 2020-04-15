@@ -122,7 +122,25 @@ func (s BuildkitSolver) FileExists(
 	filepath string,
 	source *builddef.Context,
 ) (bool, error) {
-	_, err := s.ReadFile(ctx, filepath, s.FromContext(source))
+	// @TODO: switch to StatFile once it got fixed upstream (it currently fails the hard way if the given filepath does not exist).
+	/* src := llbutils.FromContext(source,
+		llb.IncludePatterns([]string{filepath}),
+		llb.SessionID(s.sessionID))
+	_, srcRef, err := llbutils.SolveState(ctx, s.client, src)
+	if err != nil {
+		return false, err
+	}
+
+	_, err = srcRef.StatFile(ctx, client.StatRequest{
+		Path: filepath,
+	})
+	if xerrors.Is(err, FileNotFound) {
+		return false, nil
+	}
+	return true, err */
+
+	_, err := s.ReadFile(ctx, filepath, s.FromContext(source,
+		llb.IncludePatterns([]string{filepath})))
 	if xerrors.Is(err, FileNotFound) {
 		return false, nil
 	}

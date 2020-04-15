@@ -36,7 +36,7 @@ func TestAPTResolveVersions(t *testing.T) {
 			t.Parallel()
 
 			ctx := context.Background()
-			solver := statesolver.DockerSolver{
+			solver := statesolver.LocalSolver{
 				Client:  c,
 				Labels:  map[string]string{},
 				RootDir: "testdata",
