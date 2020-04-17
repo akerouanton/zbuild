@@ -107,7 +107,7 @@ func (h *WebserverHandler) copyConfigFiles(
 	}
 
 	srcContext := buildOpts.BuildContext
-	srcPrefix := "/" + srcContext.Subdir()
+	srcPrefix := srcContext.Subdir()
 	include := def.ConfigFiles.SourcePaths(srcPrefix)
 	srcState := llbutils.FromContext(srcContext,
 		llb.IncludePatterns(include),
