@@ -416,7 +416,7 @@
     "Digest": "sha256:4a0760ebbb74e0deaa0bc4abdfda31a7595427a0bae2cca7f8f0b0d211ffa187",
     "OpMetadata": {
       "description": {
-        "llb.customname": "Copy /sub/dir/docker/app/fpm.conf"
+        "llb.customname": "Copy sub/dir/docker/app/fpm.conf"
       },
       "caps": {
         "file.base": true
@@ -774,7 +774,7 @@
     "Digest": "sha256:9e3aa22fb1dc01c86fcc265ea98febabea05ba2f412348fb10a0f1fcdb9c3308",
     "OpMetadata": {
       "description": {
-        "llb.customname": "Copy /sub/dir/docker/app/php.ini"
+        "llb.customname": "Copy sub/dir/docker/app/php.ini"
       },
       "caps": {
         "file.base": true

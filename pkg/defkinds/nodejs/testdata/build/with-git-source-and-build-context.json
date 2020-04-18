@@ -133,7 +133,7 @@
     "Digest": "sha256:2a6d0bb45290570b32589919842860e1f57ccb3af13495787300e8b4421b8dea",
     "OpMetadata": {
       "description": {
-        "llb.customname": "Copy /sub/dir/.env.production"
+        "llb.customname": "Copy sub/dir/.env.production"
       },
       "caps": {
         "file.base": true
