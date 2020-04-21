@@ -357,7 +357,6 @@ func composerInstall(
 	buildOpts builddef.BuildOpts,
 ) llb.State {
 	srcContext := resolveSourceContext(stageDef, buildOpts)
-	// @TODO: test if composer.* can be used as an include pattern
 	include := []string{
 		prefixContextPath(srcContext, "composer.json"),
 		prefixContextPath(srcContext, "composer.lock")}

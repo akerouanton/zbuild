@@ -7,7 +7,6 @@ healthcheck:
   fcgi:
     path: /some-custom-path
     expected: some-output
-  # @TODO: define these params by default
   interval: 20s
   timeout: 5s
   retries: 3

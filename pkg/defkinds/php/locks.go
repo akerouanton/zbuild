@@ -117,7 +117,6 @@ func (h *PHPHandler) resolveExtensionDir(ctx context.Context, image string) (str
 	return buf.String(), nil
 }
 
-// @TODO: remove pkgSolver?
 func (h *PHPHandler) updateStagesLocks(
 	ctx context.Context,
 	pkgSolver pkgsolver.PackageSolver,
