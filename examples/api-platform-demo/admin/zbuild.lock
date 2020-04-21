@@ -1,5 +1,5 @@
 base: docker.io/library/node:12-alpine@sha256:0354aa58867fb873ef47d8345d21dddef1309a36226a425217910bc19fde5fb5
-defhash: 17828652684623093576
+defhash: 14168660784483237327
 osrelease:
   name: alpine
   versionname: ""
@@ -15,10 +15,10 @@ stages:
   prod:
     system_packages: {}
 webserver:
-  base_image: docker.io/library/nginx:alpine@sha256:abe5ce652eb78d9c793df34453fddde12bb4d93d9fbf2c363d0992726e4d2cad
+  base_image: docker.io/library/nginx:alpine@sha256:b942ebabfeff14ec6a7cb7a4826fe1d2e8dd8b7db5e651b81e4bc9cd6c6e91dc
   osrelease:
     name: alpine
     versionname: ""
-    versionid: 3.10.4
+    versionid: 3.11.5
   system_packages:
-    curl: 7.66.0-r0
+    curl: 7.67.0-r0

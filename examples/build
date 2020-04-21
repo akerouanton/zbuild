@@ -10,6 +10,7 @@ unset COMPOSE_PROJECT_NAME
 
 config=$(docker-compose config | yq .)
 services=$(echo "${config}" | jq -r '.services | keys[]')
+basedir=$(pwd)
 
 for service_name in ${services}; do
 	service=$(echo "${config}" | jq ".services[\"${service_name}\"]")
@@ -33,6 +34,23 @@ for service_name in ${services}; do
 		build_args="${build_args} --target ${target}"
 	fi
 
+	if [[ "${CI:-}" != "" ]]; then
+		build_args="${build_args} --progress plain"
+	fi
+
+	if [[ "${NO_CACHE:-}" != "" ]]; then
+		build_args="${build_args} --no-cache"
+	fi
+
+	if [[ "${WITH_CACHE_MOUNTS:-}" != "" ]]; then
+		cache_dir="${basedir}/.cache/${service_name}"
+		if [ -d "${cache_dir}" ]; then
+			build_args="${build_args} --cache-from type=local,src=${cache_dir} --cache-to type=inline"
+		else
+			build_args="${build_args} --cache-to type=local,dest=${cache_dir}"
+		fi
+	fi
+
 	cd ${context}
-	docker build ${build_args} .
+	docker buildx build ${build_args} .
 done

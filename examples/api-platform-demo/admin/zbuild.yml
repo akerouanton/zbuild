@@ -1,4 +1,4 @@
-# syntax=akerouanton/zbuilder:200321-03
+# syntax=akerouanton/zbuilder:200419-03
 kind: nodejs
 version: 12
 alpine: true
@@ -16,7 +16,7 @@ sources:
   - public/
 
 config_files:
-  .env.production: .env
+  .env: .env
 
 webserver:
   type: nginx

@@ -67,6 +67,11 @@ push: .validate-image-tag
 install:
 	cp bin/zbuild ~/go/bin
 
+.PHONY: update-examples-syntax
+update-examples-syntax: .validate-image-tag
+	find examples/ -type f -name 'zbuild.yml' -exec \
+		sed -i '1 s/^.*$$/# syntax=akerouanton\/zbuilder:$(IMAGE_TAG)/' {} \;
+
 
 ####################
 ## Preconditions

@@ -1,4 +1,4 @@
-# syntax=akerouanton/zbuilder:200321-03
+# syntax=akerouanton/zbuilder:200419-03
 kind: nodejs
 version: lts
 alpine: true

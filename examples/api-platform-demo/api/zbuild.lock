@@ -1,4 +1,4 @@
-base_image: docker.io/library/php:7.3-fpm-alpine@sha256:bb781419ef15e6f5d0769aea943b749b7abf4c4882841d8eac90e4751ba494ab
+base_image: docker.io/library/php:7.3-fpm-alpine@sha256:b6d98b53443a7e6ae91cd0f5f2916d4ff8a398473b5df0ec5c6bc3c816bda8e2
 defhash: 14857721941681470598
 extension_dir: /usr/local/lib/php/extensions/no-debug-non-zts-20180731
 osrelease:
@@ -19,7 +19,7 @@ stages:
       pdo_pgsql: '*'
       zip: '*'
     system_packages:
-      git: 2.24.1-r0
+      git: 2.24.2-r0
       icu-dev: 64.2-r1
       libxml2-dev: 2.9.10-r2
       libzip-dev: 1.5.2-r0
@@ -31,7 +31,7 @@ stages:
       pdo_pgsql: '*'
       zip: '*'
     system_packages:
-      git: 2.24.1-r0
+      git: 2.24.2-r0
       icu-dev: 64.2-r1
       libxml2-dev: 2.9.10-r2
       libzip-dev: 1.5.2-r0
@@ -45,17 +45,17 @@ stages:
       pdo_pgsql: '*'
       zip: '*'
     system_packages:
-      git: 2.24.1-r0
+      git: 2.24.2-r0
       icu-dev: 64.2-r1
       libxml2-dev: 2.9.10-r2
       libzip-dev: 1.5.2-r0
       postgresql-dev: 12.2-r0
       unzip: 6.0-r6
 webserver:
-  base_image: docker.io/library/nginx:alpine@sha256:abe5ce652eb78d9c793df34453fddde12bb4d93d9fbf2c363d0992726e4d2cad
+  base_image: docker.io/library/nginx:alpine@sha256:b942ebabfeff14ec6a7cb7a4826fe1d2e8dd8b7db5e651b81e4bc9cd6c6e91dc
   osrelease:
     name: alpine
     versionname: ""
-    versionid: 3.10.4
+    versionid: 3.11.5
   system_packages:
-    curl: 7.66.0-r0
+    curl: 7.67.0-r0
