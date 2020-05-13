@@ -24,7 +24,7 @@ require (
 	github.com/tonistiigi/fsutil v0.0.0-20200326231323-c2c7d7b0e144
 	github.com/twpayne/go-vfs v1.4.0
 	golang.org/x/xerrors v0.0.0-20191011141410-1b5146add898
-	gopkg.in/yaml.v2 v2.2.8
+	gopkg.in/yaml.v2 v2.3.0
 )
 
 replace github.com/hashicorp/go-immutable-radix => github.com/tonistiigi/go-immutable-radix v0.0.0-20170803185627-826af9ccf0fe
