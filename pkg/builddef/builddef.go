@@ -148,14 +148,6 @@ func (set *VersionMap) Merge(overriding *VersionMap) {
 	}
 }
 
-func (set *VersionMap) Size() int {
-	if set == nil {
-		return 0
-	}
-
-	return len(*set)
-}
-
 // PathsMap represents a set of paths with the source paths as keys and dest
 // paths as values. It provides POSIX-like parameter expansion through its
 // Interpolate() methods.

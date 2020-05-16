@@ -317,7 +317,7 @@ func getEnv(src llb.State, name string) string {
 const composerCacheDir = "/var/cache/composer"
 
 func globalComposerInstall(stageDef StageDefinition, state llb.State, buildOpts builddef.BuildOpts) llb.State {
-	deps := make([]string, 0, stageDef.GlobalDeps.Size())
+	deps := make([]string, 0, stageDef.GlobalDeps.Len())
 	deps = append(deps, "hirak/prestissimo")
 
 	for dep, constraint := range stageDef.GlobalDeps.Map() {
