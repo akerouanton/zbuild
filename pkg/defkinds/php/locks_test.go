@@ -54,7 +54,7 @@ func initUpdateLocksWithDebianBaseImageTC(t *testing.T, mockCtrl *gomock.Control
 		gomock.Any(),
 	).Return(rawDebianOSRelease, nil)
 
-	solver.EXPECT().FromContext(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(2)
+	solver.EXPECT().FromContext(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(1)
 	solver.EXPECT().ReadFile(
 		gomock.Any(), "composer.lock", gomock.Any(),
 	).AnyTimes().Return([]byte{}, statesolver.FileNotFound)
@@ -139,7 +139,7 @@ func initUpdateLocksWithAlpineBaseImageTC(t *testing.T, mockCtrl *gomock.Control
 		gomock.Any(),
 	).Return(rawAlpineOSRelease, nil)
 
-	solver.EXPECT().FromContext(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(2)
+	solver.EXPECT().FromContext(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(1)
 	solver.EXPECT().ReadFile(
 		gomock.Any(), "composer.lock", gomock.Any(),
 	).AnyTimes().Return([]byte{}, statesolver.FileNotFound)

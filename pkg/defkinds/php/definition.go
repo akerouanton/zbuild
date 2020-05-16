@@ -25,10 +25,7 @@ func (h *PHPHandler) loadDefs(
 		return stageDef, err
 	}
 
-	composerLockLoader := func(stageDef *StageDefinition) error {
-		return LoadComposerLock(ctx, h.solver, stageDef, buildOpts.BuildContext)
-	}
-
+	composerLockLoader := h.composerLockCacheLoader(ctx, buildOpts.BuildContext)
 	stageDef, err = def.ResolveStageDefinition(buildOpts.Stage,
 		composerLockLoader, true)
 	if err != nil {
@@ -466,11 +463,9 @@ type StageDefinition struct {
 	MajMinVersion string
 	Infer         bool
 	Dev           bool
-	// LockedPackages is the set of packages found in composer.lock
-	LockedPackages map[string]string
 	// PlatformReqs is the list of extension requirements extracted from
 	// composer.lock. See LoadComposerLock.
-	PlatformReqs map[string]string
+	PlatformReqs *builddef.VersionMap
 	DefLocks     DefinitionLocks
 	StageLocks   StageLocks
 }
@@ -502,8 +497,6 @@ func (def *Definition) ResolveStageDefinition(
 	stageDef.Name = stageName
 	stageDef.DefLocks = def.Locks
 
-	// @TODO: this should not be called here as composer.lock content
-	// won't change between stage resolution
 	if err := composerLockLoader(&stageDef); err != nil {
 		return stageDef, err
 	}
@@ -568,11 +561,10 @@ func extractMajMinVersion(versionString string) string {
 
 func mergeStages(base *Definition, stages ...DerivedStage) StageDefinition {
 	stageDef := StageDefinition{
-		Version:        base.Version,
-		MajMinVersion:  base.MajMinVersion,
-		Stage:          base.BaseStage.Copy(),
-		PlatformReqs:   map[string]string{},
-		LockedPackages: map[string]string{},
+		Version:       base.Version,
+		MajMinVersion: base.MajMinVersion,
+		Stage:         base.BaseStage.Copy(),
+		PlatformReqs:  &builddef.VersionMap{},
 	}
 	if base.Infer != nil {
 		stageDef.Infer = *base.Infer
@@ -682,7 +674,7 @@ func inferConfig(stageDef *StageDefinition) {
 		stageDef.Extensions.Add("apcu", "*")
 		stageDef.Extensions.Add("opcache", "*")
 	}
-	for name, constraint := range stageDef.PlatformReqs {
+	for name, constraint := range stageDef.PlatformReqs.Map() {
 		stageDef.Extensions.Add(name, constraint)
 	}
 

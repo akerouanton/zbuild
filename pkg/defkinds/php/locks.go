@@ -125,9 +125,7 @@ func (h *PHPHandler) updateStagesLocks(
 	buildOpts builddef.BuildOpts,
 ) (map[string]StageLocks, error) {
 	locks := map[string]StageLocks{}
-	composerLockLoader := func(stageDef *StageDefinition) error {
-		return LoadComposerLock(ctx, h.solver, stageDef, buildOpts.BuildContext)
-	}
+	composerLockLoader := h.composerLockCacheLoader(ctx, buildOpts.BuildContext)
 
 	for name := range def.Stages {
 		stage, err := def.ResolveStageDefinition(name, composerLockLoader, false)
