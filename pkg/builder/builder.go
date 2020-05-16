@@ -338,6 +338,9 @@ func (b Builder) updateLocks(
 	if !b.Registry.EmbedWebserverDef(buildOpts.Def.Kind) {
 		return rawLocks, nil
 	}
+	if _, ok := buildOpts.Def.RawConfig["webserver"]; !ok {
+		return rawLocks, nil
+	}
 
 	buildOpts.Def = newBuildDefForWebserver(buildOpts.Def)
 	rawLocks["webserver"], err = b.updateLocks(ctx, solver, buildOpts)
