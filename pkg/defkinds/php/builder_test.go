@@ -33,7 +33,7 @@ func initBuildLLBForDevStageTC(t *testing.T, mockCtrl *gomock.Controller) buildT
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
 
-	raw := loadRawTestdata(t, "testdata/composer/composer-symfony4.4.lock")
+	raw := loadRawTestdata(t, "testdata/composer/valid/composer-symfony4.4.lock")
 	solver.EXPECT().FromContext(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(1)
 	solver.EXPECT().ReadFile(
 		gomock.Any(), "composer.lock", gomock.Any(),
@@ -96,7 +96,7 @@ func initBuildLLBForProdStageTC(t *testing.T, mockCtrl *gomock.Controller) build
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
 
-	raw := loadRawTestdata(t, "testdata/composer/composer-symfony4.4.lock")
+	raw := loadRawTestdata(t, "testdata/composer/valid/composer-symfony4.4.lock")
 	solver.EXPECT().FromContext(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(1)
 	solver.EXPECT().ReadFile(
 		gomock.Any(), "composer.lock", gomock.Any(),
@@ -165,7 +165,7 @@ func initBuildProdStageFromGitBasedBuildContextTC(t *testing.T, mockCtrl *gomock
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
 
-	raw := loadRawTestdata(t, "testdata/composer/composer-symfony4.4.lock")
+	raw := loadRawTestdata(t, "testdata/composer/valid/composer-symfony4.4.lock")
 	solver.EXPECT().FromContext(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(1)
 	solver.EXPECT().ReadFile(
 		gomock.Any(), "/sub/dir/composer.lock", gomock.Any(),
@@ -303,7 +303,7 @@ func initBuildProdStageForAlpineImageTC(t *testing.T, mockCtrl *gomock.Controlle
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
 
-	raw := loadRawTestdata(t, "testdata/composer/composer-symfony4.4.lock")
+	raw := loadRawTestdata(t, "testdata/composer/valid/composer-symfony4.4.lock")
 	solver.EXPECT().FromContext(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(1)
 	solver.EXPECT().ReadFile(
 		gomock.Any(), "composer.lock", gomock.Any(),
@@ -369,7 +369,7 @@ func initBuildProdStageWithCacheMountsTC(t *testing.T, mockCtrl *gomock.Controll
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
 
-	raw := loadRawTestdata(t, "testdata/composer/composer-symfony4.4.lock")
+	raw := loadRawTestdata(t, "testdata/composer/valid/composer-symfony4.4.lock")
 	solver.EXPECT().FromContext(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(1)
 	solver.EXPECT().ReadFile(
 		gomock.Any(), "composer.lock", gomock.Any(),

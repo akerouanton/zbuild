@@ -54,7 +54,7 @@ func initLoadComposerLockFromGitSubdirTC(t *testing.T, mockCtrl *gomock.Controll
 	solver := mocks.NewMockStateSolver(mockCtrl)
 	solver.EXPECT().FromContext(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(1)
 
-	raw := loadRawTestdata(t, "testdata/composer/composer-symfony4.4.lock")
+	raw := loadRawTestdata(t, "testdata/composer/valid/composer-symfony4.4.lock")
 	solver.EXPECT().ReadFile(
 		gomock.Any(), "/sub/dir/composer.lock", gomock.Any(),
 	).Return(raw, nil)
