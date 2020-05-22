@@ -18,8 +18,10 @@ $ cd examples/php/symfony-demo
 # file and build images.
 $ ../build
 
-# Finally, you can start the demo
+# Finally, you can start the demo...
 $ docker-compose -d
+# And load the fixtures.
+$ make load-fixtures
 ```
 
 [`jq`]: https://stedolan.github.io/jq/download/
