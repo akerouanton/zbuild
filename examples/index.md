@@ -4,6 +4,7 @@
 
 |            |                                                |
 |------------|------------------------------------------------|
+| PHP 8 demo | [`php8-demo/zbuild.yml`](php8-demo/zbuild.yml) |
 | Symfony demo      | [`symfony-demo/zbuild.yml`](symfony-demo/zbuild.yml) |
 | API Platform demo | [`api-platform-demo/api/zbuild.yml`](api-platform-demo/api/zbuild.yml) |
 | Laravel backpack demo | [`laravel-backpack-demo/zbuild.yml`](laravel-backpack-demo/zbuild.yml) |

@@ -1,0 +1,27 @@
+# syntax=akerouanton/zbuilder:200518-04
+kind: php
+base: devilbox/php-fpm-8.0:latest
+fpm: true
+healthcheck: false
+
+extensions:
+  pdo_sqlite: '*'
+
+sources:
+  - src/
+
+stateful_dirs:
+  - data/
+
+integrations:
+  - blackfire
+
+post_install:
+  # @TODO: let zbuild create this directory with the right owner/group
+  - mkdir data/
+
+webserver:
+  type: nginx
+  healthcheck: true
+  config_files:
+    nginx.conf: "${config_dir}/nginx.conf"

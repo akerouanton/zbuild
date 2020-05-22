@@ -1,0 +1,20 @@
+version: '3.4'
+
+services:
+  php:
+    image: php8-demo/php:latest
+    build:
+      dockerfile: zbuild.yml
+      context: .
+      target: prod
+    restart: on-failure
+
+  nginx:
+    image: php8-demo/nginx:latest
+    build:
+      dockerfile: zbuild.yml
+      context: .
+      target: webserver-prod
+    restart: on-failure
+    ports:
+      - "80:80"
