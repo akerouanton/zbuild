@@ -13,7 +13,7 @@ To build and run this example you need:
 ##### Run this example
 
 ```bash
-$ cd examples/php/expressjs-realworld-example-app
+$ cd examples/expressjs-realworld-example-app
 
 # Unfortunately, docker-compose isn't able to build images using Buildkit yet.
 # As such, we have to rely on following script to parse docker-compose.yml

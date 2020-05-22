@@ -11,7 +11,7 @@ To build and run this example you need:
 ##### Run this example
 
 ```bash
-$ cd examples/php/api-platform-demo
+$ cd examples/api-platform-demo
 
 # Unfortunately, docker-compose isn't able to build images using Buildkit yet.
 # As such, we have to rely on following script to parse docker-compose.yml

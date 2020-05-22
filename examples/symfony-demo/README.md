@@ -11,7 +11,7 @@ To build this example you need:
 ##### Run this example
 
 ```bash
-$ cd examples/php/symfony-demo
+$ cd examples/symfony-demo
 
 # Unfortunately, docker-compose isn't able to build images using Buildkit yet.
 # As such, we have to rely on following script to parse docker-compose.yml
