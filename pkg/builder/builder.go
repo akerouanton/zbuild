@@ -284,17 +284,17 @@ func (b Builder) DumpConfig(
 
 func (b Builder) UpdateLockFile(
 	solver statesolver.StateSolver,
-	buildOpts builddef.BuildOpts,
+	opts builddef.UpdateLocksOpts,
 ) error {
 	var err error
 	ctx := context.Background()
 
-	buildOpts.Def, err = defloader.Load(ctx, solver, buildOpts)
+	opts.BuildOpts.Def, err = defloader.Load(ctx, solver, *opts.BuildOpts)
 	if err != nil {
 		return err
 	}
 
-	rawLocks, err := b.updateLocks(ctx, solver, buildOpts)
+	rawLocks, err := b.updateLocks(ctx, solver, opts)
 	if err != nil {
 		return err
 	}
@@ -304,16 +304,16 @@ func (b Builder) UpdateLockFile(
 	// to the locked one later on, when loading both files. This is used to
 	// detect any changes on the BuildDef made without re-running
 	// `zbuild update`.
-	rawLocks["defhash"] = buildOpts.Def.Hash()
+	rawLocks["defhash"] = opts.BuildOpts.Def.Hash()
 
 	buf, err := yaml.Marshal(rawLocks)
 	if err != nil {
 		return err
 	}
 
-	err = b.Filesystem.WriteFile(buildOpts.LockFile, buf, 0640)
+	err = b.Filesystem.WriteFile(opts.BuildOpts.LockFile, buf, 0640)
 	if err != nil {
-		return xerrors.Errorf("could not write %s: %w", buildOpts.LockFile, err)
+		return xerrors.Errorf("could not write %s: %w", opts.BuildOpts.LockFile, err)
 	}
 
 	return nil
@@ -322,28 +322,28 @@ func (b Builder) UpdateLockFile(
 func (b Builder) updateLocks(
 	ctx context.Context,
 	solver statesolver.StateSolver,
-	buildOpts builddef.BuildOpts,
+	opts builddef.UpdateLocksOpts,
 ) (map[string]interface{}, error) {
-	handler, err := b.findHandler(buildOpts.Def.Kind, solver, false)
+	handler, err := b.findHandler(opts.BuildOpts.Def.Kind, solver, false)
 	if err != nil {
 		return nil, err
 	}
 
-	locks, err := handler.UpdateLocks(ctx, b.PkgSolvers, buildOpts)
+	locks, err := handler.UpdateLocks(ctx, b.PkgSolvers, opts)
 	if err != nil {
 		return nil, err
 	}
 
 	rawLocks := locks.RawLocks()
-	if !b.Registry.EmbedWebserverDef(buildOpts.Def.Kind) {
+	if !b.Registry.EmbedWebserverDef(opts.BuildOpts.Def.Kind) {
 		return rawLocks, nil
 	}
-	if _, ok := buildOpts.Def.RawConfig["webserver"]; !ok {
+	if _, ok := opts.Def.RawConfig["webserver"]; !ok {
 		return rawLocks, nil
 	}
 
-	buildOpts.Def = newBuildDefForWebserver(buildOpts.Def)
-	rawLocks["webserver"], err = b.updateLocks(ctx, solver, buildOpts)
+	opts.BuildOpts.Def = newBuildDefForWebserver(opts.BuildOpts.Def)
+	rawLocks["webserver"], err = b.updateLocks(ctx, solver, opts)
 	if err != nil {
 		return nil, err
 	}

@@ -1,0 +1,42 @@
+base_image: docker.io/library/php:7.3-fpm-alpine@sha256
+extension_dir: /some/path
+osrelease:
+  name: alpine
+  versionname: ""
+  versionid: 3.10.3
+source_context: null
+stages:
+  dev:
+    extensions:
+      intl: '*'
+      pdo_mysql: '*'
+      redis: 5.1.0
+      soap: '*'
+      sockets: '*'
+      yaml: 1.1.0
+      zip: '*'
+    system_packages:
+      git: 3.2.1
+      icu-dev: 3.2.1
+      libxml2-dev: 3.2.1
+      libzip-dev: 3.2.1
+      openssl-dev: 3.2.1
+      unzip: 3.2.1
+  prod:
+    extensions:
+      apcu: 5.1.18
+      intl: '*'
+      opcache: '*'
+      pdo_mysql: '*'
+      redis: 5.1.0
+      soap: '*'
+      sockets: '*'
+      yaml: 1.1.0
+      zip: '*'
+    system_packages:
+      git: 3.2.1
+      icu-dev: 3.2.1
+      libxml2-dev: 3.2.1
+      libzip-dev: 3.2.1
+      openssl-dev: 3.2.1
+      unzip: 3.2.1

@@ -59,37 +59,30 @@ func (l StageLocks) RawLocks() map[string]interface{} {
 func (h *PHPHandler) UpdateLocks(
 	ctx context.Context,
 	pkgSolvers pkgsolver.PackageSolversMap,
-	buildOpts builddef.BuildOpts,
+	opts builddef.UpdateLocksOpts,
 ) (builddef.Locks, error) {
-	def, err := NewKind(buildOpts.Def)
+	def, err := NewKind(opts.BuildOpts.Def)
 	if err != nil {
 		return nil, err
 	}
 
-	def.Locks.BaseImage, err = h.solver.ResolveImageRef(ctx, def.BaseImage)
-	if err != nil {
-		return nil, xerrors.Errorf("could not resolve image %q: %w",
-			def.BaseImage, err)
-	}
+	if opts.UpdateImageRef {
+		def.Locks.BaseImage, err = h.solver.ResolveImageRef(ctx, def.BaseImage)
+		if err != nil {
+			return nil, xerrors.Errorf("could not resolve image %q: %w",
+				def.BaseImage, err)
+		}
 
-	osrelease, err := statesolver.ResolveImageOS(ctx, h.solver, def.Locks.BaseImage)
-	if err != nil {
-		return nil, xerrors.Errorf("could not resolve OS details from base image: %w", err)
-	}
-	def.Locks.OSRelease = osrelease
+		osrelease, err := statesolver.ResolveImageOS(ctx, h.solver, def.Locks.BaseImage)
+		if err != nil {
+			return nil, xerrors.Errorf("could not resolve OS details from base image: %w", err)
+		}
+		def.Locks.OSRelease = osrelease
 
-	var pkgSolverType pkgsolver.SolverType
-	if osrelease.Name == "debian" {
-		pkgSolverType = pkgsolver.APT
-	} else if osrelease.Name == "alpine" {
-		pkgSolverType = pkgsolver.APK
-	} else {
-		return nil, xerrors.Errorf("unsupported OS %q: only debian-based and alpine-based base images are supported", osrelease.Name)
-	}
-
-	def.Locks.ExtensionDir, err = h.resolveExtensionDir(ctx, def.Locks.BaseImage)
-	if err != nil {
-		return nil, err
+		def.Locks.ExtensionDir, err = h.resolveExtensionDir(ctx, def.Locks.BaseImage)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	def.Locks.SourceContext, err = h.lockSourceContext(ctx, def.SourceContext)
@@ -97,8 +90,17 @@ func (h *PHPHandler) UpdateLocks(
 		return nil, xerrors.Errorf("failed to lock source context: %w", err)
 	}
 
+	var pkgSolverType pkgsolver.SolverType
+	if def.Locks.OSRelease.Name == "debian" {
+		pkgSolverType = pkgsolver.APT
+	} else if def.Locks.OSRelease.Name == "alpine" {
+		pkgSolverType = pkgsolver.APK
+	} else {
+		return nil, xerrors.Errorf("unsupported OS %q: only debian-based and alpine-based base images are supported", def.Locks.OSRelease.Name)
+	}
+
 	pkgSolver := pkgSolvers.New(pkgSolverType, h.solver)
-	def.Locks.Stages, err = h.updateStagesLocks(ctx, pkgSolver, def, buildOpts)
+	def.Locks.Stages, err = h.updateStagesLocks(ctx, pkgSolver, def, opts)
 	if err != nil {
 		return nil, xerrors.Errorf("failed to update stages locks: %w", err)
 	}
@@ -121,10 +123,10 @@ func (h *PHPHandler) updateStagesLocks(
 	ctx context.Context,
 	pkgSolver pkgsolver.PackageSolver,
 	def Definition,
-	buildOpts builddef.BuildOpts,
+	opts builddef.UpdateLocksOpts,
 ) (map[string]StageLocks, error) {
 	locks := map[string]StageLocks{}
-	composerLockLoader := h.composerLockCacheLoader(ctx, buildOpts.BuildContext)
+	composerLockLoader := h.composerLockCacheLoader(ctx, opts.BuildContext)
 
 	for name := range def.Stages {
 		stage, err := def.ResolveStageDefinition(name, composerLockLoader, false)
@@ -132,16 +134,24 @@ func (h *PHPHandler) updateStagesLocks(
 			return nil, xerrors.Errorf("could not resolve stage %q: %w", name, err)
 		}
 
-		stageLocks := StageLocks{}
-		stageLocks.SystemPackages, err = pkgSolver.ResolveVersions(ctx,
-			def.Locks.BaseImage, stage.SystemPackages.Map())
-		if err != nil {
-			return nil, xerrors.Errorf("could not resolve systems package versions: %w", err)
+		stageLocks, ok := def.Locks.Stages[name]
+		if !ok {
+			stageLocks = StageLocks{}
 		}
 
-		stageLocks.Extensions, err = h.lockExtensions(stage.Extensions)
-		if err != nil {
-			return nil, xerrors.Errorf("could not resolve php extension versions: %w", err)
+		if opts.UpdateSystemPackages {
+			stageLocks.SystemPackages, err = pkgSolver.ResolveVersions(ctx,
+				def.Locks.BaseImage, stage.SystemPackages.Map())
+			if err != nil {
+				return nil, xerrors.Errorf("could not resolve systems package versions: %w", err)
+			}
+		}
+
+		if opts.UpdatePHPExtensions {
+			stageLocks.Extensions, err = h.lockExtensions(stage.Extensions)
+			if err != nil {
+				return nil, xerrors.Errorf("could not resolve php extension versions: %w", err)
+			}
 		}
 
 		// @TODO: lock global extensions?

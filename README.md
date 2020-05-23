@@ -28,6 +28,7 @@ As zbuild implements builder backends for multiple kinds of images, you have to
 refer to their specific parameters.
 
 * [php](docs/kind-php.md)
+* [nodejs](docs/kind-nodejs.md)
 * [webserver](docs/kind-webserver.md)
 * More to come soon...
 

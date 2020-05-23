@@ -11,9 +11,12 @@ import (
 )
 
 var updateFlags = struct {
-	file     string
-	context  string
-	logLevel string
+	file                  string
+	context               string
+	logLevel              string
+	noImageUpdate         bool
+	noPackagesUpdate      bool
+	noPHPExtensionsUpdate bool
 }{
 	logLevel: "warn",
 }
@@ -30,6 +33,10 @@ func newUpdateCmd() *cobra.Command {
 	AddContextFlag(cmd, &updateFlags.context)
 	AddLogLevelFlag(cmd, &updateFlags.logLevel)
 
+	cmd.Flags().BoolVar(&updateFlags.noImageUpdate, "no-image-update", false, "Do not update the base image reference")
+	cmd.Flags().BoolVar(&updateFlags.noPackagesUpdate, "no-pacakges-update", false, "Do not update system packages")
+	cmd.Flags().BoolVar(&updateFlags.noPHPExtensionsUpdate, "no-php-extensions-update", false, "Do not update PHP extensions")
+
 	return cmd
 }
 
@@ -44,20 +51,25 @@ func HandleUpdateCmd(cmd *cobra.Command, args []string) {
 		logrus.Fatalf("Only local contexts are supported by zbuild update.")
 	}
 
-	buildOpts := builddef.BuildOpts{
-		File:         updateFlags.file,
-		LockFile:     builddef.LockFilepath(updateFlags.file),
-		BuildContext: buildctx,
+	updateOpts := builddef.UpdateLocksOpts{
+		BuildOpts: &builddef.BuildOpts{
+			File:         updateFlags.file,
+			LockFile:     builddef.LockFilepath(updateFlags.file),
+			BuildContext: buildctx,
+		},
+		UpdateImageRef:       !updateFlags.noImageUpdate,
+		UpdateSystemPackages: !updateFlags.noPackagesUpdate,
+		UpdatePHPExtensions:  !updateFlags.noPHPExtensionsUpdate,
 	}
 
-	solver := newLocalSolver(buildOpts.BuildContext.Source)
+	solver := newLocalSolver(buildctx.Source)
 	b := builder.Builder{
 		Registry:   registry.Registry,
 		PkgSolvers: pkgsolver.DefaultPackageSolversMap,
 		Filesystem: vfs.HostOSFS,
 	}
 
-	if err := b.UpdateLockFile(solver, buildOpts); err != nil {
+	if err := b.UpdateLockFile(solver, updateOpts); err != nil {
 		logrus.Fatalf("%+v", err)
 	}
 }
