@@ -504,13 +504,12 @@ func initSuccessfullyResolveDefaultDevStageTC(t *testing.T, mockCtrl *gomock.Con
 			return nil
 		},
 		expected: php.StageDefinition{
-			Name:           "dev",
-			Version:        "7.4.0",
-			MajMinVersion:  "7.4",
-			Infer:          false,
-			Dev:            true,
-			LockedPackages: map[string]string{},
-			PlatformReqs:   map[string]string{},
+			Name:          "dev",
+			Version:       "7.4.0",
+			MajMinVersion: "7.4",
+			Infer:         false,
+			Dev:           true,
+			PlatformReqs:  &builddef.VersionMap{},
 			Stage: php.Stage{
 				ExternalFiles: []llbutils.ExternalFile{
 					{
@@ -578,9 +577,6 @@ func initSuccessfullyResolveWorkerStageTC(t *testing.T, mockCtrl *gomock.Control
 		},
 		composerLockLoader: mockComposerLockLoader(
 			map[string]string{
-				"clue/stream-filter": "v1.4.0",
-			},
-			map[string]string{
 				"mbstring": "*",
 			},
 		),
@@ -590,10 +586,7 @@ func initSuccessfullyResolveWorkerStageTC(t *testing.T, mockCtrl *gomock.Control
 			MajMinVersion: "7.4",
 			Infer:         true,
 			Dev:           false,
-			LockedPackages: map[string]string{
-				"clue/stream-filter": "v1.4.0",
-			},
-			PlatformReqs: map[string]string{
+			PlatformReqs: &builddef.VersionMap{
 				"mbstring": "*",
 			},
 			Stage: php.Stage{
@@ -634,7 +627,7 @@ func initFailToResolveUnknownStageTC(t *testing.T, mockCtrl *gomock.Controller) 
 	file := "testdata/def/without-stages.yml"
 	lockFile := "testdata/def/without-stages.lock"
 
-	composerLockLoader := mockComposerLockLoader(map[string]string{}, map[string]string{})
+	composerLockLoader := mockComposerLockLoader(map[string]string{})
 
 	return resolveStageTC{
 		file:     file,
@@ -649,7 +642,7 @@ func initFailToResolveUnknownStageTC(t *testing.T, mockCtrl *gomock.Controller) 
 }
 
 func initFailToResolveStageWithCyclicDepsTC(t *testing.T, mockCtrl *gomock.Controller) resolveStageTC {
-	composerLockLoader := mockComposerLockLoader(map[string]string{}, map[string]string{})
+	composerLockLoader := mockComposerLockLoader(map[string]string{})
 
 	return resolveStageTC{
 		file:     "testdata/def/cyclic-stage-deps.yml",
@@ -666,7 +659,7 @@ func initFailToResolveStageWithCyclicDepsTC(t *testing.T, mockCtrl *gomock.Contr
 func initRemoveDefaultExtensionsTC(t *testing.T, mockCtrl *gomock.Controller) resolveStageTC {
 	fpm := true
 
-	composerLockLoader := mockComposerLockLoader(map[string]string{}, map[string]string{})
+	composerLockLoader := mockComposerLockLoader(map[string]string{})
 
 	return resolveStageTC{
 		file:     "testdata/def/remove-default-exts.yml",
@@ -677,13 +670,12 @@ func initRemoveDefaultExtensionsTC(t *testing.T, mockCtrl *gomock.Controller) re
 		},
 		composerLockLoader: composerLockLoader,
 		expected: php.StageDefinition{
-			Name:           "dev",
-			Version:        "7.4",
-			MajMinVersion:  "7.4",
-			Infer:          true,
-			Dev:            true,
-			LockedPackages: map[string]string{},
-			PlatformReqs:   map[string]string{},
+			Name:          "dev",
+			Version:       "7.4",
+			MajMinVersion: "7.4",
+			Infer:         true,
+			Dev:           true,
+			PlatformReqs:  &builddef.VersionMap{},
 			Stage: php.Stage{
 				ExternalFiles: []llbutils.ExternalFile{},
 				SystemPackages: &builddef.VersionMap{
@@ -737,19 +729,17 @@ func initPreservePredefinedExtensionConstraintsTC(t *testing.T, mockCtrl *gomock
 			Name: "debian",
 		},
 		composerLockLoader: mockComposerLockLoader(
-			map[string]string{},
 			map[string]string{
 				"redis": "*",
 			},
 		),
 		expected: php.StageDefinition{
-			Name:           "dev",
-			Version:        "7.4",
-			MajMinVersion:  "7.4",
-			Infer:          true,
-			Dev:            true,
-			LockedPackages: map[string]string{},
-			PlatformReqs: map[string]string{
+			Name:          "dev",
+			Version:       "7.4",
+			MajMinVersion: "7.4",
+			Infer:         true,
+			Dev:           true,
+			PlatformReqs: &builddef.VersionMap{
 				"redis": "*",
 			},
 			Stage: php.Stage{
@@ -785,7 +775,7 @@ func initPreservePredefinedExtensionConstraintsTC(t *testing.T, mockCtrl *gomock
 }
 
 func initFailWhenComposerFlagsAreInvalidTC(t *testing.T, _ *gomock.Controller) resolveStageTC {
-	composerLockLoader := mockComposerLockLoader(map[string]string{}, map[string]string{})
+	composerLockLoader := mockComposerLockLoader(map[string]string{})
 
 	return resolveStageTC{
 		file:     "testdata/def/invalid-composer-flags.yml",
@@ -811,16 +801,14 @@ func initInferAlpinePackagesRequiredByExtsTC(t *testing.T, mockCtrl *gomock.Cont
 		},
 		composerLockLoader: mockComposerLockLoader(
 			map[string]string{},
-			map[string]string{},
 		),
 		expected: php.StageDefinition{
-			Name:           "prod",
-			Version:        "7.4",
-			MajMinVersion:  "7.4",
-			Infer:          true,
-			Dev:            false,
-			LockedPackages: map[string]string{},
-			PlatformReqs:   map[string]string{},
+			Name:          "prod",
+			Version:       "7.4",
+			MajMinVersion: "7.4",
+			Infer:         true,
+			Dev:           false,
+			PlatformReqs:  &builddef.VersionMap{},
 			Stage: php.Stage{
 				FPM:           &fpmMode,
 				ExternalFiles: []llbutils.ExternalFile{},
@@ -978,12 +966,10 @@ func loadBuildDef(t *testing.T, filepath string) *builddef.BuildDef {
 
 // @TODO: use a proper ComposerLock struct
 func mockComposerLockLoader(
-	lockedPackages map[string]string,
-	platformReqs map[string]string,
+	PlatformReqs map[string]string,
 ) func(*php.StageDefinition) error {
 	return func(stageDef *php.StageDefinition) error {
-		stageDef.LockedPackages = lockedPackages
-		stageDef.PlatformReqs = platformReqs
+		*stageDef.PlatformReqs = builddef.VersionMap(PlatformReqs)
 		return nil
 	}
 }

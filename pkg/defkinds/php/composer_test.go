@@ -15,10 +15,9 @@ import (
 )
 
 type loadComposerLockTC struct {
-	initial     php.StageDefinition
 	context     *builddef.Context
 	solver      statesolver.StateSolver
-	expected    php.StageDefinition
+	expected    php.ComposerLock
 	expectedErr error
 }
 
@@ -35,24 +34,17 @@ func initSuccessfullyLoadAndParseComposerLockTC(
 	).Return(raw, nil)
 
 	return loadComposerLockTC{
-		initial: php.StageDefinition{
-			Dev: true,
-		},
 		context: &builddef.Context{
 			Type:   builddef.ContextTypeLocal,
 			Source: "context",
 		},
 		solver: solver,
-		expected: php.StageDefinition{
-			Dev: true,
-			LockedPackages: map[string]string{
-				"clue/stream-filter":    "v1.4.0",
-				"webmozart/assert":      "1.4.0",
-				"sebastian/environment": "4.2.2",
-				"sebastian/exporter":    "3.1.0",
-			},
-			PlatformReqs: map[string]string{
+		expected: php.ComposerLock{
+			PlatformReqs: &builddef.VersionMap{
 				"mbstring": "*",
+			},
+			PlatformReqsDev: &builddef.VersionMap{
+				"ctype": "*",
 			},
 		},
 	}
@@ -62,15 +54,12 @@ func initLoadComposerLockFromGitSubdirTC(t *testing.T, mockCtrl *gomock.Controll
 	solver := mocks.NewMockStateSolver(mockCtrl)
 	solver.EXPECT().FromContext(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(1)
 
-	raw := loadRawTestdata(t, "testdata/composer/valid/composer.lock")
+	raw := loadRawTestdata(t, "testdata/composer/valid/composer-symfony4.4.lock")
 	solver.EXPECT().ReadFile(
 		gomock.Any(), "/sub/dir/composer.lock", gomock.Any(),
 	).Return(raw, nil)
 
 	return loadComposerLockTC{
-		initial: php.StageDefinition{
-			Dev: true,
-		},
 		context: &builddef.Context{
 			Type:   builddef.ContextTypeGit,
 			Source: "git://github.com/some/repo",
@@ -79,17 +68,13 @@ func initLoadComposerLockFromGitSubdirTC(t *testing.T, mockCtrl *gomock.Controll
 			},
 		},
 		solver: solver,
-		expected: php.StageDefinition{
-			Dev: true,
-			LockedPackages: map[string]string{
-				"clue/stream-filter":    "v1.4.0",
-				"webmozart/assert":      "1.4.0",
-				"sebastian/environment": "4.2.2",
-				"sebastian/exporter":    "3.1.0",
+		expected: php.ComposerLock{
+			PlatformReqs: &builddef.VersionMap{
+				"xml":   "*",
+				"ctype": "*",
+				"iconv": "*",
 			},
-			PlatformReqs: map[string]string{
-				"mbstring": "*",
-			},
+			PlatformReqsDev: &builddef.VersionMap{},
 		},
 	}
 }
@@ -106,19 +91,12 @@ func initSilentlyFailWhenComposerLockFileDoesNotExistTC(
 	).Return([]byte{}, statesolver.FileNotFound)
 
 	return loadComposerLockTC{
-		initial: php.StageDefinition{
-			LockedPackages: map[string]string{},
-			PlatformReqs:   map[string]string{},
-		},
 		context: &builddef.Context{
 			Type:   builddef.ContextTypeLocal,
 			Source: "context",
 		},
-		solver: solver,
-		expected: php.StageDefinition{
-			LockedPackages: map[string]string{},
-			PlatformReqs:   map[string]string{},
-		},
+		solver:   solver,
+		expected: php.ComposerLock{},
 	}
 }
 
@@ -135,7 +113,6 @@ func initFailToLoadBrokenComposerLockFileTC(
 	).Return(raw, nil)
 
 	return loadComposerLockTC{
-		initial: php.StageDefinition{},
 		context: &builddef.Context{
 			Type:   builddef.ContextTypeLocal,
 			Source: "context",
@@ -167,11 +144,9 @@ func TestLoadComposerLock(t *testing.T) {
 			defer mockCtrl.Finish()
 
 			tc := tcinit(t, mockCtrl)
-			stage := tc.initial
 
 			ctx := context.Background()
-
-			err := php.LoadComposerLock(ctx, tc.solver, &stage, tc.context)
+			lock, err := php.LoadComposerLock(ctx, tc.solver, tc.context)
 			if tc.expectedErr != nil {
 				if err == nil || tc.expectedErr.Error() != err.Error() {
 					t.Fatalf("Expected error: %v\nGot: %v", tc.expectedErr, err)
@@ -182,7 +157,7 @@ func TestLoadComposerLock(t *testing.T) {
 				t.Fatalf("Unexpected error: %v", err)
 			}
 
-			if diff := deep.Equal(stage, tc.expected); diff != nil {
+			if diff := deep.Equal(lock, tc.expected); diff != nil {
 				t.Fatal(diff)
 			}
 		})
