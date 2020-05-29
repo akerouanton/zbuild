@@ -68,7 +68,9 @@ func initBuildLLBForDevStageTC(t *testing.T, mockCtrl *gomock.Controller) buildT
 					},
 					Entrypoint: []string{"docker-entrypoint.sh"},
 					Cmd:        []string{"node"},
-					Volumes:    map[string]struct{}{},
+					Volumes: map[string]struct{}{
+						"/app/data": {},
+					},
 					WorkingDir: "/app",
 					Labels: map[string]string{
 						"io.zbuild": "true",
@@ -178,7 +180,9 @@ func initBuildLLBForWorkerStageTC(t *testing.T, mockCtrl *gomock.Controller) bui
 					// base image. Maybe it should not be kept? :thinking: @TODO
 					Entrypoint: []string{"docker-entrypoint.sh"},
 					Cmd:        []string{"bin/worker.js"},
-					Volumes:    map[string]struct{}{},
+					Volumes: map[string]struct{}{
+						"/app/data": {},
+					},
 					WorkingDir: "/app",
 					Labels: map[string]string{
 						"io.zbuild": "true",
@@ -238,7 +242,9 @@ func initBuildLLBWithGitBuildContextTC(t *testing.T, mockCtrl *gomock.Controller
 					},
 					Entrypoint: []string{"docker-entrypoint.sh"},
 					Cmd:        []string{"node"},
-					Volumes:    map[string]struct{}{},
+					Volumes: map[string]struct{}{
+						"/app/data": {},
+					},
 					WorkingDir: "/app",
 					Labels: map[string]string{
 						"io.zbuild": "true",

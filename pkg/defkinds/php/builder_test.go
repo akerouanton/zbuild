@@ -77,7 +77,9 @@ func initBuildLLBForDevStageTC(t *testing.T, mockCtrl *gomock.Controller) buildT
 					Cmd:        []string{"php-fpm"},
 					WorkingDir: "/app",
 					StopSignal: "SIGQUIT",
-					Volumes:    map[string]struct{}{},
+					Volumes: map[string]struct{}{
+						"/app/data": {},
+					},
 					ExposedPorts: map[string]struct{}{
 						"9000/tcp": {},
 					},
@@ -140,7 +142,9 @@ func initBuildLLBForProdStageTC(t *testing.T, mockCtrl *gomock.Controller) build
 					Cmd:        []string{"php-fpm"},
 					WorkingDir: "/app",
 					StopSignal: "SIGQUIT",
-					Volumes:    map[string]struct{}{},
+					Volumes: map[string]struct{}{
+						"/app/data": {},
+					},
 					ExposedPorts: map[string]struct{}{
 						"9000/tcp": {},
 					},
@@ -212,7 +216,9 @@ func initBuildProdStageFromGitBasedBuildContextTC(t *testing.T, mockCtrl *gomock
 					Cmd:        []string{"php-fpm"},
 					WorkingDir: "/app",
 					StopSignal: "SIGQUIT",
-					Volumes:    map[string]struct{}{},
+					Volumes: map[string]struct{}{
+						"/app/data": {},
+					},
 					ExposedPorts: map[string]struct{}{
 						"9000/tcp": {},
 					},
@@ -415,7 +421,9 @@ func initBuildProdStageWithCacheMountsTC(t *testing.T, mockCtrl *gomock.Controll
 					Cmd:        []string{"php-fpm"},
 					WorkingDir: "/app",
 					StopSignal: "SIGQUIT",
-					Volumes:    map[string]struct{}{},
+					Volumes: map[string]struct{}{
+						"/app/data": {},
+					},
 					ExposedPorts: map[string]struct{}{
 						"9000/tcp": {},
 					},

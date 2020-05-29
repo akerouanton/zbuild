@@ -77,7 +77,7 @@
     }
   },
   {
-    "RawOp": "CkkKR3NoYTI1NjowZDM2N2YxMGNlYzQ2MTBlMzA4MjFmMmMzYTg0Y2U2MTkzMWIyYjhhOWYzMzY2ZGQwMDY5MDM5YjViMjVkNDY3",
+    "RawOp": "CkkKR3NoYTI1NjowZDM2N2YxMGNlYzQ2MTBlMzA4MjFmMmMzYTg0Y2U2MTkzMWIyYjhhOWYzMzY2ZGQwMDY5MDM5YjViMjVkNDY3IjISMBD///////////8BMiMKBS9kYXRhEOgDGAEiCgoDEOgHEgMQ6Aco////////////AVIOCgVhbWQ2NBIFbGludXhaAA==",
     "Op": {
       "inputs": [
         {
@@ -85,9 +85,65 @@
           "index": 0
         }
       ],
+      "Op": {
+        "file": {
+          "actions": [
+            {
+              "input": 0,
+              "secondaryInput": -1,
+              "output": 0,
+              "Action": {
+                "mkdir": {
+                  "path": "/data",
+                  "mode": 488,
+                  "makeParents": true,
+                  "owner": {
+                    "user": {
+                      "User": {
+                        "byID": 1000
+                      }
+                    },
+                    "group": {
+                      "User": {
+                        "byID": 1000
+                      }
+                    }
+                  },
+                  "timestamp": -1
+                }
+              }
+            }
+          ]
+        }
+      },
+      "platform": {
+        "Architecture": "amd64",
+        "OS": "linux"
+      },
+      "constraints": {}
+    },
+    "Digest": "sha256:6cb50bc3812a3771c695f813b6bde33706ea8c402298ca1a2425d84bab17c0ea",
+    "OpMetadata": {
+      "description": {
+        "llb.customname": "Mkdir data/"
+      },
+      "caps": {
+        "file.base": true
+      }
+    }
+  },
+  {
+    "RawOp": "CkkKR3NoYTI1Njo2Y2I1MGJjMzgxMmEzNzcxYzY5NWY4MTNiNmJkZTMzNzA2ZWE4YzQwMjI5OGNhMWEyNDI1ZDg0YmFiMTdjMGVh",
+    "Op": {
+      "inputs": [
+        {
+          "digest": "sha256:6cb50bc3812a3771c695f813b6bde33706ea8c402298ca1a2425d84bab17c0ea",
+          "index": 0
+        }
+      ],
       "Op": null
     },
-    "Digest": "sha256:e35710d54d67bbb7eb85b491f5df298804fba9cb650fb6c03c5ba31e039eef9b",
+    "Digest": "sha256:e2229eebb69a2bf2c0381e737f1cb447b8c66109106d12dcbdfe08ba193b2979",
     "OpMetadata": {
       "caps": {
         "constraints": true,
