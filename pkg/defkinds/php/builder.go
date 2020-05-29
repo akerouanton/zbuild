@@ -137,7 +137,8 @@ func (h *PHPHandler) buildPHP(
 	state = InstallExtensions(stageDef, state, buildOpts)
 	state = llbutils.CopyExternalFiles(state, stageDef.ExternalFiles)
 
-	state = llbutils.Mkdir(state, "1000:1000", WorkingDir, ComposerDir)
+	state = llbutils.Mkdir(state, "1000:1000",
+		append([]string{WorkingDir, ComposerDir}, stageDef.StatefulDirs...)...)
 	state = state.User("1000")
 	state = state.Dir(WorkingDir)
 	state = state.AddEnv("COMPOSER_HOME", ComposerDir)

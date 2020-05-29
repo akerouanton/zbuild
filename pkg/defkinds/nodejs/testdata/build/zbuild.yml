@@ -1,6 +1,9 @@
 kind: nodejs
 version: 12
 
+stateful_dirs:
+  - data/
+
 stages:
   prod:
     healthcheck: false

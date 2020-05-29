@@ -115,7 +115,8 @@ func (h *NodeJSHandler) buildNodeJS(
 	}
 
 	state = llbutils.CopyExternalFiles(state, stageDef.ExternalFiles)
-	state = llbutils.Mkdir(state, "1000:1000", WorkingDir)
+	state = llbutils.Mkdir(state, "1000:1000",
+		append([]string{WorkingDir}, stageDef.StatefulDirs...)...)
 	state = state.User("1000")
 	state = state.Dir(WorkingDir)
 
