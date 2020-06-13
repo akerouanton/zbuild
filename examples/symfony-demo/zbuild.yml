@@ -1,11 +1,11 @@
-# syntax=akerouanton/zbuilder:200419-03
+# syntax=akerouanton/zbuilder:200518-04
 kind: php
 version: 7.4
 fpm: true
 healthcheck: false
 
 extensions:
-  pdo_mysql: '*'
+  pdo_sqlite: '*'
 
 source_context:
   type: git
@@ -21,9 +21,17 @@ sources:
 
 stateful_dirs:
   - var/session/
+  - data/
 
 integrations:
   - blackfire
+
+post_install:
+  - echo '' > .env
+  # @TODO: let zbuild create data/ folder with the right owner/group
+  - mkdir -p var/cache/ data/
+  # @TODO: find a proper way to warmup symfony cache
+  # - APP_ENV=prod bin/console cache:warmup --env=prod
 
 webserver:
   type: nginx

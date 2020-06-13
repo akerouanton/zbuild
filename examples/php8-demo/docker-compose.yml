@@ -2,20 +2,15 @@ version: '3.4'
 
 services:
   php:
-    image: symfony-demo/php:latest
+    image: php8-demo/php:latest
     build:
       dockerfile: zbuild.yml
       context: .
       target: prod
     restart: on-failure
-    environment:
-      - APP_ENV=prod
-      - APP_SECRET=67d829bf61dc5f87a73fd814e2c9f629
-      - DATABASE_URL=sqlite:///%kernel.project_dir%/data/database.sqlite
-      - MAILER_DSN=smtp://localhost
 
   nginx:
-    image: symfony-demo/nginx:latest
+    image: php8-demo/nginx:latest
     build:
       dockerfile: zbuild.yml
       context: .

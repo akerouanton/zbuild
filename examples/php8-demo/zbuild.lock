@@ -1,15 +1,11 @@
-base_image: docker.io/library/php:7.4-fpm-buster@sha256:f1991803d4aeeb93a389120e3339993a6e8a2330947046e69942059663826a32
-defhash: 9676059295788910267
-extension_dir: /usr/local/lib/php/extensions/no-debug-non-zts-20190902
+base_image: docker.io/devilbox/php-fpm-8.0:latest@sha256:6fb72a4a5d91a076019afec13c1914cecfcf1459b6624996edd6bb8e7d87b7a7
+defhash: 5868208241010966384
+extension_dir: /usr/local/lib/php/extensions/no-debug-non-zts-20190128
 osrelease:
   name: debian
   versionname: buster
   versionid: "10"
-source_context:
-  path: ""
-  reference: 7e49b6414ab7d143b9aba9354f2c1c3760b38cd4
-  source: git://github.com/symfony/demo
-  type: git
+source_context: null
 stages:
   dev:
     extensions:
@@ -17,7 +13,6 @@ stages:
     system_packages:
       git: 1:2.20.1-2+deb10u3
       libsqlite3-dev: 3.27.2-3
-      libxml2-dev: 2.9.4+dfsg1-7+b3
       libzip-dev: 1.5.1-4
       unzip: 6.0-23+deb10u1
       zlib1g-dev: 1:1.2.11.dfsg-1
@@ -29,7 +24,6 @@ stages:
     system_packages:
       git: 1:2.20.1-2+deb10u3
       libsqlite3-dev: 3.27.2-3
-      libxml2-dev: 2.9.4+dfsg1-7+b3
       libzip-dev: 1.5.1-4
       unzip: 6.0-23+deb10u1
       zlib1g-dev: 1:1.2.11.dfsg-1
