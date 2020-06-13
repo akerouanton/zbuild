@@ -1,9 +1,9 @@
-base_image: docker.io/library/php:7.3-fpm-buster@sha256
+base_image: docker.io/library/php:7.3-fpm-alpine@sha256
 extension_dir: /some/path
 osrelease:
-  name: debian
-  versionname: buster
-  versionid: "10"
+  name: alpine
+  versionname: ""
+  versionid: 3.10.3
 source_context: null
 stages:
   dev:
@@ -17,13 +17,11 @@ stages:
       zip: '*'
     system_packages:
       git: git-version
-      libicu-dev: libicu-dev-version
-      libssl-dev: libssl-dev-version
+      icu-dev: icu-dev-version
       libxml2-dev: libxml2-dev-version
       libzip-dev: libzip-dev-version
-      openssl: openssl-version
+      openssl-dev: libssl-dev-version
       unzip: unzip-version
-      zlib1g-dev: zlib1g-dev-version
   prod:
     extensions:
       apcu: 5.1.18
@@ -37,10 +35,8 @@ stages:
       zip: '*'
     system_packages:
       git: git-version
-      libicu-dev: libicu-dev-version
-      libssl-dev: libssl-dev-version
+      icu-dev: icu-dev-version
       libxml2-dev: libxml2-dev-version
       libzip-dev: libzip-dev-version
-      openssl: openssl-version
+      openssl-dev: libssl-dev-version
       unzip: unzip-version
-      zlib1g-dev: zlib1g-dev-version

@@ -638,11 +638,13 @@ func TestBuilderUpdateLocks(t *testing.T) {
 			tc.builder.Filesystem = fs
 			defer cleanup()
 
-			buildOpts := builddef.BuildOpts{
-				File:     tc.zbuildfile,
-				LockFile: tc.lockfileVfst,
+			opts := builddef.UpdateLocksOpts{
+				BuildOpts: &builddef.BuildOpts{
+					File:     tc.zbuildfile,
+					LockFile: tc.lockfileVfst,
+				},
 			}
-			err := tc.builder.UpdateLockFile(tc.solver, buildOpts)
+			err := tc.builder.UpdateLockFile(tc.solver, opts)
 			if tc.expectedErr != nil {
 				if err.Error() != tc.expectedErr.Error() {
 					t.Fatalf("Expected err: %v\nGot: %v", tc.expectedErr, err)

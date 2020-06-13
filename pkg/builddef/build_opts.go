@@ -57,3 +57,19 @@ func LockFilepath(ymlFile string) string {
 	ext := filepath.Ext(ymlFile)
 	return strings.TrimSuffix(ymlFile, ext) + ".lock"
 }
+
+// UpdateLocksOpts represents the parameters passed to specialized builders to
+// update a lockfile.
+type UpdateLocksOpts struct {
+	*BuildOpts
+
+	// UpdateImageRef indicates whether the locked image reference shall be
+	// updated.
+	UpdateImageRef bool
+	// UpdateSystemPackages indicates whether locked system packages shall be
+	// updated.
+	UpdateSystemPackages bool
+	// UpdatePHPExtensions indicates whether PHP community extensions shall be
+	// updated.
+	UpdatePHPExtensions bool
+}

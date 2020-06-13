@@ -1,0 +1,7 @@
+base_image: docker.io/library/nginx:latest@some-updated-sha256
+osrelease:
+  name: debian
+  versionname: bullseye
+  versionid: "11"
+system_packages:
+  curl: 7.64.0-4

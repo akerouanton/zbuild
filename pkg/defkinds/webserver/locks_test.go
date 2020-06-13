@@ -14,14 +14,14 @@ import (
 )
 
 type updateLocksTC struct {
-	deffile     string
+	opts        builddef.UpdateLocksOpts
 	handler     *webserver.WebserverHandler
 	pkgSolvers  pkgsolver.PackageSolversMap
 	expected    string
 	expectedErr error
 }
 
-var rawDebianOSRelease = []byte(`PRETTY_NAME="Debian GNU/Linux 10 (buster)"
+var rawDebianBusterOSRelease = []byte(`PRETTY_NAME="Debian GNU/Linux 10 (buster)"
 NAME="Debian GNU/Linux"
 VERSION_ID="10"
 VERSION="10 (buster)"
@@ -42,7 +42,7 @@ func initSuccessfullyUpdateLocksTC(t *testing.T, mockCtrl *gomock.Controller) up
 		gomock.Any(),
 		"/etc/os-release",
 		gomock.Any(),
-	).AnyTimes().Return(rawDebianOSRelease, nil)
+	).AnyTimes().Return(rawDebianBusterOSRelease, nil)
 
 	pkgSolver := mocks.NewMockPackageSolver(mockCtrl)
 	pkgSolver.EXPECT().ResolveVersions(
@@ -57,7 +57,13 @@ func initSuccessfullyUpdateLocksTC(t *testing.T, mockCtrl *gomock.Controller) up
 	h.WithSolver(solver)
 
 	return updateLocksTC{
-		deffile: "testdata/locks/definition.yml",
+		opts: builddef.UpdateLocksOpts{
+			BuildOpts: &builddef.BuildOpts{
+				Def: loadBuildDef(t, "testdata/locks/definition.yml"),
+			},
+			UpdateImageRef:       true,
+			UpdateSystemPackages: true,
+		},
 		handler: h,
 		pkgSolvers: pkgsolver.PackageSolversMap{
 			pkgsolver.APT: func(statesolver.StateSolver) pkgsolver.PackageSolver {
@@ -68,9 +74,101 @@ func initSuccessfullyUpdateLocksTC(t *testing.T, mockCtrl *gomock.Controller) up
 	}
 }
 
+var rawDebianBullseyeOSRelease = []byte(`PRETTY_NAME="Debian GNU/Linux 11 (bullseye)"
+NAME="Debian GNU/Linux"
+VERSION_ID="11"
+VERSION="11 (bullseye)"
+VERSION_CODENAME=bullseye
+ID=debian
+HOME_URL="https://www.debian.org/"
+SUPPORT_URL="https://www.debian.org/support"
+BUG_REPORT_URL="https://bugs.debian.org/"`)
+
+func initUpdateImageRefOnlyTC(t *testing.T, mockCtrl *gomock.Controller) updateLocksTC {
+	solver := mocks.NewMockStateSolver(mockCtrl)
+	solver.EXPECT().ResolveImageRef(
+		gomock.Any(), "docker.io/library/nginx:latest",
+	).Return("docker.io/library/nginx:latest@some-updated-sha256", nil)
+
+	solver.EXPECT().FromImage("docker.io/library/nginx:latest@some-updated-sha256").Times(1)
+	solver.EXPECT().ReadFile(
+		gomock.Any(),
+		"/etc/os-release",
+		gomock.Any(),
+	).AnyTimes().Return(rawDebianBullseyeOSRelease, nil)
+
+	h := &webserver.WebserverHandler{}
+	h.WithSolver(solver)
+
+	return updateLocksTC{
+		opts: builddef.UpdateLocksOpts{
+			BuildOpts: &builddef.BuildOpts{
+				Def: loadBuildDefWithLocks(t, "testdata/locks/definition.yml"),
+			},
+			UpdateImageRef:       true,
+			UpdateSystemPackages: false,
+		},
+		handler:    h,
+		pkgSolvers: pkgsolver.PackageSolversMap{},
+		expected:   "testdata/locks/update-image-ref-only.lock",
+	}
+}
+
+func initUpdateSystemPackagesOnlyTC(t *testing.T, mockCtrl *gomock.Controller) updateLocksTC {
+	solver := mocks.NewMockStateSolver(mockCtrl)
+
+	pkgSolver := mocks.NewMockPackageSolver(mockCtrl)
+	pkgSolver.EXPECT().ResolveVersions(
+		gomock.Any(),
+		"docker.io/library/nginx:latest@sha256",
+		map[string]string{"curl": "*"},
+	).Times(1).Return(map[string]string{
+		"curl": "7.64.0-4",
+	}, nil)
+
+	h := &webserver.WebserverHandler{}
+	h.WithSolver(solver)
+
+	return updateLocksTC{
+		opts: builddef.UpdateLocksOpts{
+			BuildOpts: &builddef.BuildOpts{
+				Def: loadBuildDefWithLocks(t, "testdata/locks/definition.yml"),
+			},
+			UpdateImageRef:       false,
+			UpdateSystemPackages: true,
+		},
+		handler: h,
+		pkgSolvers: pkgsolver.PackageSolversMap{
+			pkgsolver.APT: func(statesolver.StateSolver) pkgsolver.PackageSolver {
+				return pkgSolver
+			},
+		},
+		expected: "testdata/locks/definition.lock",
+	}
+}
+
+func loadBuildDefWithLocks(t *testing.T, filepath string) *builddef.BuildDef {
+	def := loadBuildDef(t, filepath)
+	def.RawLocks = loadRawLocks(t, builddef.LockFilepath(filepath))
+	return def
+}
+
+func loadRawLocks(t *testing.T, filepath string) builddef.RawLocks {
+	raw := loadRawTestdata(t, filepath)
+
+	var locks builddef.RawLocks
+	if err := yaml.Unmarshal(raw, &locks); err != nil {
+		t.Fatal(err)
+	}
+
+	return locks
+}
+
 func TestUpdateLocks(t *testing.T) {
 	testcases := map[string]func(*testing.T, *gomock.Controller) updateLocksTC{
 		"successfully update locks": initSuccessfullyUpdateLocksTC,
+		"only image ref":            initUpdateImageRefOnlyTC,
+		"only system packages":      initUpdateSystemPackagesOnlyTC,
 	}
 
 	for tcname := range testcases {
@@ -83,18 +181,12 @@ func TestUpdateLocks(t *testing.T) {
 			defer mockCtrl.Finish()
 
 			tc := tcinit(t, mockCtrl)
-			genericDef := loadGenericDef(t, tc.deffile)
 
 			var locks builddef.Locks
-			var rawLocks []byte
 			var err error
 
 			ctx := context.Background()
-			buildOpts := builddef.BuildOpts{
-				Def: &genericDef,
-			}
-
-			locks, err = tc.handler.UpdateLocks(ctx, tc.pkgSolvers, buildOpts)
+			locks, err = tc.handler.UpdateLocks(ctx, tc.pkgSolvers, tc.opts)
 			if tc.expectedErr != nil {
 				if err == nil || err.Error() != tc.expectedErr.Error() {
 					t.Fatalf("Expected error: %v\nGot: %v", tc.expectedErr, err)
@@ -105,6 +197,7 @@ func TestUpdateLocks(t *testing.T) {
 				t.Fatalf("Unexpected error: %v", err)
 			}
 
+			var rawLocks []byte
 			rawLocks, err = yaml.Marshal(locks.RawLocks())
 			if err != nil {
 				t.Fatal(err)

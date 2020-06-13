@@ -28,8 +28,7 @@ type buildTC struct {
 }
 
 func initBuildLLBForDevStageTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
-	genericDef := loadGenericDef(t, "testdata/build/zbuild.yml")
-	genericDef.RawLocks = loadDefLocks(t, "testdata/build/zbuild.lock")
+	genericDef := loadBuildDefWithLocks(t, "testdata/build/zbuild.yml")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
 
@@ -46,7 +45,7 @@ func initBuildLLBForDevStageTC(t *testing.T, mockCtrl *gomock.Controller) buildT
 		handler: kindHandler,
 		client:  llbtest.NewMockClient(mockCtrl),
 		buildOpts: builddef.BuildOpts{
-			Def:           &genericDef,
+			Def:           genericDef,
 			Stage:         "dev",
 			SessionID:     "<SESSION-ID>",
 			LocalUniqueID: "x1htr02606a9rk8b0daewh9es",
@@ -93,8 +92,7 @@ func initBuildLLBForDevStageTC(t *testing.T, mockCtrl *gomock.Controller) buildT
 }
 
 func initBuildLLBForProdStageTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
-	genericDef := loadGenericDef(t, "testdata/build/zbuild.yml")
-	genericDef.RawLocks = loadDefLocks(t, "testdata/build/zbuild.lock")
+	genericDef := loadBuildDefWithLocks(t, "testdata/build/zbuild.yml")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
 
@@ -111,7 +109,7 @@ func initBuildLLBForProdStageTC(t *testing.T, mockCtrl *gomock.Controller) build
 		handler: kindHandler,
 		client:  llbtest.NewMockClient(mockCtrl),
 		buildOpts: builddef.BuildOpts{
-			Def:           &genericDef,
+			Def:           genericDef,
 			Stage:         "prod",
 			SessionID:     "<SESSION-ID>",
 			LocalUniqueID: "x1htr02606a9rk8b0daewh9es",
@@ -164,8 +162,7 @@ func initBuildLLBForProdStageTC(t *testing.T, mockCtrl *gomock.Controller) build
 }
 
 func initBuildProdStageFromGitBasedBuildContextTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
-	genericDef := loadGenericDef(t, "testdata/build/zbuild.yml")
-	genericDef.RawLocks = loadDefLocks(t, "testdata/build/zbuild.lock")
+	genericDef := loadBuildDefWithLocks(t, "testdata/build/zbuild.yml")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
 
@@ -182,7 +179,7 @@ func initBuildProdStageFromGitBasedBuildContextTC(t *testing.T, mockCtrl *gomock
 		handler: kindHandler,
 		client:  llbtest.NewMockClient(mockCtrl),
 		buildOpts: builddef.BuildOpts{
-			Def:           &genericDef,
+			Def:           genericDef,
 			Stage:         "prod",
 			SessionID:     "<SESSION-ID>",
 			LocalUniqueID: "x1htr02606a9rk8b0daewh9es",
@@ -238,8 +235,7 @@ func initBuildProdStageFromGitBasedBuildContextTC(t *testing.T, mockCtrl *gomock
 }
 
 func initBuildProdStageFromGitBasedSourceContextTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
-	genericDef := loadGenericDef(t, "testdata/build/with-git-based-source-context.yml")
-	genericDef.RawLocks = loadDefLocks(t, "testdata/build/with-git-based-source-context.lock")
+	genericDef := loadBuildDefWithLocks(t, "testdata/build/with-git-based-source-context.yml")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
 
@@ -256,7 +252,7 @@ func initBuildProdStageFromGitBasedSourceContextTC(t *testing.T, mockCtrl *gomoc
 		handler: kindHandler,
 		client:  llbtest.NewMockClient(mockCtrl),
 		buildOpts: builddef.BuildOpts{
-			Def:           &genericDef,
+			Def:           genericDef,
 			Stage:         "prod",
 			SessionID:     "<SESSION-ID>",
 			LocalUniqueID: "x1htr02606a9rk8b0daewh9es",
@@ -304,8 +300,7 @@ func initBuildProdStageFromGitBasedSourceContextTC(t *testing.T, mockCtrl *gomoc
 }
 
 func initBuildProdStageForAlpineImageTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
-	genericDef := loadGenericDef(t, "testdata/build/alpine.yml")
-	genericDef.RawLocks = loadDefLocks(t, "testdata/build/alpine.lock")
+	genericDef := loadBuildDefWithLocks(t, "testdata/build/alpine.yml")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
 
@@ -322,7 +317,7 @@ func initBuildProdStageForAlpineImageTC(t *testing.T, mockCtrl *gomock.Controlle
 		handler: kindHandler,
 		client:  llbtest.NewMockClient(mockCtrl),
 		buildOpts: builddef.BuildOpts{
-			Def:           &genericDef,
+			Def:           genericDef,
 			Stage:         "prod",
 			SessionID:     "<SESSION-ID>",
 			LocalUniqueID: "x1htr02606a9rk8b0daewh9es",
@@ -370,8 +365,7 @@ func initBuildProdStageForAlpineImageTC(t *testing.T, mockCtrl *gomock.Controlle
 }
 
 func initBuildProdStageWithCacheMountsTC(t *testing.T, mockCtrl *gomock.Controller) buildTC {
-	genericDef := loadGenericDef(t, "testdata/build/zbuild.yml")
-	genericDef.RawLocks = loadDefLocks(t, "testdata/build/zbuild.lock")
+	genericDef := loadBuildDefWithLocks(t, "testdata/build/zbuild.yml")
 
 	solver := mocks.NewMockStateSolver(mockCtrl)
 
@@ -388,7 +382,7 @@ func initBuildProdStageWithCacheMountsTC(t *testing.T, mockCtrl *gomock.Controll
 		handler: kindHandler,
 		client:  llbtest.NewMockClient(mockCtrl),
 		buildOpts: builddef.BuildOpts{
-			Def:              &genericDef,
+			Def:              genericDef,
 			Stage:            "prod",
 			SessionID:        "<SESSION-ID>",
 			LocalUniqueID:    "x1htr02606a9rk8b0daewh9es",
@@ -521,13 +515,12 @@ func initDebugDevStageTC(t *testing.T, mockCtrl *gomock.Controller) debugConfigT
 	h := php.NewPHPHandler()
 	h.WithSolver(solver)
 
-	genericDef := loadGenericDef(t, "testdata/debug-config/zbuild.yml")
-	genericDef.RawLocks = loadDefLocks(t, "testdata/debug-config/zbuild.lock")
+	genericDef := loadBuildDefWithLocks(t, "testdata/debug-config/zbuild.yml")
 
 	return debugConfigTC{
 		handler: h,
 		buildOpts: builddef.BuildOpts{
-			Def:   &genericDef,
+			Def:   genericDef,
 			Stage: "dev",
 		},
 		expected: "testdata/debug-config/dump-dev.yml",
@@ -546,13 +539,12 @@ func initDebugProdStageTC(t *testing.T, mockCtrl *gomock.Controller) debugConfig
 	h := php.NewPHPHandler()
 	h.WithSolver(solver)
 
-	genericDef := loadGenericDef(t, "testdata/debug-config/zbuild.yml")
-	genericDef.RawLocks = loadDefLocks(t, "testdata/debug-config/zbuild.lock")
+	genericDef := loadBuildDefWithLocks(t, "testdata/debug-config/zbuild.yml")
 
 	return debugConfigTC{
 		handler: h,
 		buildOpts: builddef.BuildOpts{
-			Def:   &genericDef,
+			Def:   genericDef,
 			Stage: "prod",
 		},
 		expected: "testdata/debug-config/dump-prod.yml",

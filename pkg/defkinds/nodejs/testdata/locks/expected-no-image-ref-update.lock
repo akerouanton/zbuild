@@ -7,7 +7,7 @@ source_context: null
 stages:
   dev:
     system_packages:
-      libsass-dev: 1.2.3
+      libsass-dev: 3.2.1
   prod:
     system_packages:
-      libsass-dev: 1.2.3
+      libsass-dev: 3.2.1

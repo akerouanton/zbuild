@@ -70,7 +70,7 @@ func (mr *MockKindHandlerMockRecorder) DebugConfig(arg0 interface{}) *gomock.Cal
 }
 
 // UpdateLocks mocks base method
-func (m *MockKindHandler) UpdateLocks(arg0 context.Context, arg1 pkgsolver.PackageSolversMap, arg2 builddef.BuildOpts) (builddef.Locks, error) {
+func (m *MockKindHandler) UpdateLocks(arg0 context.Context, arg1 pkgsolver.PackageSolversMap, arg2 builddef.UpdateLocksOpts) (builddef.Locks, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateLocks", arg0, arg1, arg2)
 	ret0, _ := ret[0].(builddef.Locks)

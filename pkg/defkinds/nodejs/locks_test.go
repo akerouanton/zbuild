@@ -18,7 +18,7 @@ import (
 var flagTestdata = flag.Bool("testdata", false, "Use this flag to (re)generate testdata (dumps of LLB states and lockfiles)")
 
 type updateLocksTC struct {
-	file       string
+	opts       builddef.UpdateLocksOpts
 	handler    *nodejs.NodeJSHandler
 	pkgSolvers pkgsolver.PackageSolversMap
 	// expected is the path to a lock file in testdata/ folder
@@ -62,18 +62,24 @@ func initUpdateLocksForDebianTC(t *testing.T, mockCtrl *gomock.Controller) updat
 	h.WithSolver(solver)
 
 	return updateLocksTC{
-		file:    "testdata/locks/without-stages.yml",
+		opts: builddef.UpdateLocksOpts{
+			BuildOpts: &builddef.BuildOpts{
+				Def: loadBuildDef(t, "testdata/locks/debian.yml"),
+			},
+			UpdateImageRef:       true,
+			UpdateSystemPackages: true,
+		},
 		handler: &h,
 		pkgSolvers: pkgsolver.PackageSolversMap{
 			pkgsolver.APT: func(statesolver.StateSolver) pkgsolver.PackageSolver {
 				return pkgSolver
 			},
 		},
-		expected: "testdata/locks/without-stages.lock",
+		expected: "testdata/locks/debian.lock",
 	}
 }
 
-var rawAlpineOSRelease = []byte(`NAME="Alpine Linux"
+var rawAlpine3103OSRelease = []byte(`NAME="Alpine Linux"
 ID=alpine
 VERSION_ID=3.10.3
 PRETTY_NAME="Alpine Linux v3.10"
@@ -92,7 +98,7 @@ func initUpdateLocksForAlpineTC(t *testing.T, mockCtrl *gomock.Controller) updat
 		gomock.Any(),
 		"/etc/os-release",
 		gomock.Any(),
-	).Return(rawAlpineOSRelease, nil)
+	).Return(rawAlpine3103OSRelease, nil)
 
 	pkgSolver := mocks.NewMockPackageSolver(mockCtrl)
 	pkgSolver.EXPECT().ResolveVersions(
@@ -100,14 +106,20 @@ func initUpdateLocksForAlpineTC(t *testing.T, mockCtrl *gomock.Controller) updat
 		"docker.io/library/node:12-alpine@sha256",
 		map[string]string{"libsass-dev": "*"},
 	).AnyTimes().Return(map[string]string{
-		"libsass-dev": "libsass-dev-version",
+		"libsass-dev": "1.2.3",
 	}, nil)
 
 	h := nodejs.NodeJSHandler{}
 	h.WithSolver(solver)
 
 	return updateLocksTC{
-		file:    "testdata/locks/alpine.yml",
+		opts: builddef.UpdateLocksOpts{
+			BuildOpts: &builddef.BuildOpts{
+				Def: loadBuildDef(t, "testdata/locks/alpine.yml"),
+			},
+			UpdateImageRef:       true,
+			UpdateSystemPackages: true,
+		},
 		handler: &h,
 		pkgSolvers: pkgsolver.PackageSolversMap{
 			pkgsolver.APK: func(statesolver.StateSolver) pkgsolver.PackageSolver {
@@ -118,10 +130,107 @@ func initUpdateLocksForAlpineTC(t *testing.T, mockCtrl *gomock.Controller) updat
 	}
 }
 
+func initUpdateLocksButNotTheImageRefTC(t *testing.T, mockCtrl *gomock.Controller) updateLocksTC {
+	solver := mocks.NewMockStateSolver(mockCtrl)
+
+	pkgSolver := mocks.NewMockPackageSolver(mockCtrl)
+	pkgSolver.EXPECT().ResolveVersions(
+		gomock.Any(),
+		"docker.io/library/node:12-alpine@sha256",
+		map[string]string{"libsass-dev": "*"},
+	).AnyTimes().Return(map[string]string{
+		"libsass-dev": "3.2.1",
+	}, nil)
+
+	h := nodejs.NodeJSHandler{}
+	h.WithSolver(solver)
+
+	return updateLocksTC{
+		opts: builddef.UpdateLocksOpts{
+			BuildOpts: &builddef.BuildOpts{
+				Def: loadBuildDefWithLocks(t, "testdata/locks/alpine.yml"),
+			},
+			UpdateImageRef:       false,
+			UpdateSystemPackages: true,
+		},
+		handler: &h,
+		pkgSolvers: pkgsolver.PackageSolversMap{
+			pkgsolver.APK: func(statesolver.StateSolver) pkgsolver.PackageSolver {
+				return pkgSolver
+			},
+		},
+		expected: "testdata/locks/expected-no-image-ref-update.lock",
+	}
+}
+
+var rawAlpine3112OSRelease = []byte(`NAME="Alpine Linux"
+ID=alpine
+VERSION_ID=3.11.2
+PRETTY_NAME="Alpine Linux v3.11"
+HOME_URL="https://alpinelinux.org/"
+BUG_REPORT_URL="https://bugs.alpinelinux.org/"
+`)
+
+func initUpdateLocksButNotSystemPackagesTC(t *testing.T, mockCtrl *gomock.Controller) updateLocksTC {
+	solver := mocks.NewMockStateSolver(mockCtrl)
+	solver.EXPECT().ResolveImageRef(
+		gomock.Any(), "docker.io/library/node:12-alpine",
+	).Return("docker.io/library/node:12-alpine@some-other-sha256", nil)
+
+	solver.EXPECT().FromImage("docker.io/library/node:12-alpine@some-other-sha256").Times(1)
+	solver.EXPECT().ReadFile(
+		gomock.Any(),
+		"/etc/os-release",
+		gomock.Any(),
+	).Return(rawAlpine3112OSRelease, nil)
+
+	pkgSolver := mocks.NewMockPackageSolver(mockCtrl)
+
+	h := nodejs.NodeJSHandler{}
+	h.WithSolver(solver)
+
+	return updateLocksTC{
+		opts: builddef.UpdateLocksOpts{
+			BuildOpts: &builddef.BuildOpts{
+				Def: loadBuildDefWithLocks(t, "testdata/locks/alpine.yml"),
+			},
+			UpdateImageRef:       true,
+			UpdateSystemPackages: false,
+		},
+		handler: &h,
+		pkgSolvers: pkgsolver.PackageSolversMap{
+			pkgsolver.APK: func(statesolver.StateSolver) pkgsolver.PackageSolver {
+				return pkgSolver
+			},
+		},
+		expected: "testdata/locks/expected-no-system-packages-update.lock",
+	}
+}
+
+func loadBuildDefWithLocks(t *testing.T, filepath string) *builddef.BuildDef {
+	def := loadBuildDef(t, filepath)
+	def.RawLocks = loadRawLocks(t, builddef.LockFilepath(filepath))
+
+	return def
+}
+
+func loadRawLocks(t *testing.T, filepath string) builddef.RawLocks {
+	raw := loadRawTestdata(t, filepath)
+
+	var locks builddef.RawLocks
+	if err := yaml.Unmarshal(raw, &locks); err != nil {
+		t.Fatal(err)
+	}
+
+	return locks
+}
+
 func TestUpdateLocks(t *testing.T) {
 	testcases := map[string]func(*testing.T, *gomock.Controller) updateLocksTC{
-		"update locks for debian base iamge": initUpdateLocksForDebianTC,
-		"update locks for alpine base iamge": initUpdateLocksForAlpineTC,
+		"update locks for debian base iamge":   initUpdateLocksForDebianTC,
+		"update locks for alpine base iamge":   initUpdateLocksForAlpineTC,
+		"update locks but not the image ref":   initUpdateLocksButNotTheImageRefTC,
+		"update locks but not system packages": initUpdateLocksButNotSystemPackagesTC,
 	}
 
 	for tcname := range testcases {
@@ -134,18 +243,11 @@ func TestUpdateLocks(t *testing.T) {
 			defer mockCtrl.Finish()
 
 			tc := tcinit(t, mockCtrl)
-			genericDef := loadBuildDef(t, tc.file)
-
 			var locks builddef.Locks
-			var rawLocks []byte
 			var err error
 
 			ctx := context.Background()
-			buildOpts := builddef.BuildOpts{
-				Def: genericDef,
-			}
-
-			locks, err = tc.handler.UpdateLocks(ctx, tc.pkgSolvers, buildOpts)
+			locks, err = tc.handler.UpdateLocks(ctx, tc.pkgSolvers, tc.opts)
 			if tc.expectedErr != nil {
 				if err == nil || err.Error() != tc.expectedErr.Error() {
 					t.Fatalf("Expected error: %v\nGot: %v", tc.expectedErr, err)
@@ -156,6 +258,7 @@ func TestUpdateLocks(t *testing.T) {
 				t.Fatalf("Unexpected error: %v", err)
 			}
 
+			var rawLocks []byte
 			rawLocks, err = yaml.Marshal(locks.RawLocks())
 			if err != nil {
 				t.Fatal(err)
