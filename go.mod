@@ -22,7 +22,7 @@ require (
 	github.com/sirupsen/logrus v1.6.0
 	github.com/spf13/cobra v0.0.7
 	github.com/tonistiigi/fsutil v0.0.0-20200326231323-c2c7d7b0e144
-	github.com/twpayne/go-vfs v1.4.2
+	github.com/twpayne/go-vfs v1.6.0
 	golang.org/x/xerrors v0.0.0-20191011141410-1b5146add898
 	gopkg.in/yaml.v2 v2.3.0
 )
