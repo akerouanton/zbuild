@@ -336,6 +336,7 @@ github.com/twpayne/go-vfs v1.4.0 h1:oiiMliJyKXj4qujubNoc9Owh07yfP6WESxOMIfq7KmQ=
 github.com/twpayne/go-vfs v1.4.0/go.mod h1:EDwCEqgWLi6nehByJQGUBtoDTBWVX/Bn6blPQ1Yo9qw=
 github.com/twpayne/go-vfs v1.4.2 h1:sheXsgu25owG7JP+jRl7wfumyqaJjWfKG/dX34RIfgo=
 github.com/twpayne/go-vfs v1.4.2/go.mod h1:kG5wCT9b5BWdFBHTKOoC4Mxba5NuiTyErJH1wuTIXIE=
+github.com/twpayne/go-vfs v1.7.2/go.mod h1:1eni2ntkiiAHZG27xfLOO4CYvMR4Kw8V7rYiLeeolsQ=
 github.com/uber/jaeger-client-go v0.0.0-20180103221425-e02c85f9069e/go.mod h1:WVhlPFC8FDjOFMMWRy2pZqQJSXxYSwNYOkTr/Z6d3Kk=
 github.com/uber/jaeger-lib v1.2.1/go.mod h1:ComeNDZlWwrWnDv8aPp0Ba6+uUTzImX/AauajbLI56U=
 github.com/ugorji/go v1.1.4/go.mod h1:uQMGLiO92mf5W77hV/PUCpI3pbzQx3CRekS0kk+RGrc=
@@ -414,6 +415,7 @@ golang.org/x/sys v0.0.0-20200116001909-b77594299b42/go.mod h1:h1NjWce9XRLGQEsW7w
 golang.org/x/sys v0.0.0-20200120151820-655fe14d7479/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20200223170610-d5e6a3e2c0ae h1:/WDfKMnPU+m5M4xB+6x4kaepxRw6jWvR5iDRdvjHgy8=
 golang.org/x/sys v0.0.0-20200223170610-d5e6a3e2c0ae/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
+golang.org/x/sys v0.0.0-20201223074533-0d417f636930/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/text v0.0.0-20170915032832-14c0d48ead0c/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golang.org/x/text v0.3.2 h1:tW2bmiBqwgJj/UpqtC8EpXEZVYOwU0yG4iWbprSVAcs=
