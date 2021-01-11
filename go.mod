@@ -10,7 +10,7 @@ require (
 	github.com/docker/distribution v2.7.1-0.20190205005809-0d3efadf0154+incompatible
 	github.com/docker/docker v1.14.0-0.20190319215453-e7b5f7dbe98c
 	github.com/go-test/deep v1.0.6
-	github.com/gogo/protobuf v1.3.1
+	github.com/gogo/protobuf v1.3.2
 	github.com/golang/mock v1.4.3
 	github.com/gorilla/mux v1.7.3 // indirect
 	github.com/mcuadros/go-version v0.0.0-20190830083331-035f6764e8d2
@@ -23,7 +23,7 @@ require (
 	github.com/spf13/cobra v0.0.7
 	github.com/tonistiigi/fsutil v0.0.0-20200326231323-c2c7d7b0e144
 	github.com/twpayne/go-vfs v1.4.2
-	golang.org/x/xerrors v0.0.0-20191011141410-1b5146add898
+	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1
 	gopkg.in/yaml.v2 v2.3.0
 )
 
