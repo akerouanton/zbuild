@@ -6,24 +6,23 @@ require (
 	github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78 // indirect
 	github.com/NiR-/notpecl v0.0.0-20200330122501-5974f6f2e95b
 	github.com/buildkite/interpolate v0.0.0-20181028012610-973457fa2b4c
-	github.com/containerd/containerd v1.4.0-0
-	github.com/docker/distribution v2.7.1-0.20190205005809-0d3efadf0154+incompatible
-	github.com/docker/docker v1.14.0-0.20190319215453-e7b5f7dbe98c
+	github.com/containerd/containerd v1.4.1-0.20201117152358-0edc412565dc
+	github.com/docker/distribution v2.7.1+incompatible
+	github.com/docker/docker v20.10.0-beta1.0.20201110211921-af34b94a78a1+incompatible
 	github.com/go-test/deep v1.0.6
 	github.com/gogo/protobuf v1.3.1
 	github.com/golang/mock v1.4.3
-	github.com/gorilla/mux v1.7.3 // indirect
 	github.com/mcuadros/go-version v0.0.0-20190830083331-035f6764e8d2
-	github.com/mitchellh/hashstructure v0.0.0-20170609045927-2bca23e0e452
+	github.com/mitchellh/hashstructure v1.0.0
 	github.com/mitchellh/mapstructure v1.3.3
-	github.com/moby/buildkit v0.7.2
+	github.com/moby/buildkit v0.8.2
 	github.com/opencontainers/go-digest v1.0.0
 	github.com/opencontainers/image-spec v1.0.1
-	github.com/sirupsen/logrus v1.6.0
-	github.com/spf13/cobra v0.0.7
-	github.com/tonistiigi/fsutil v0.0.0-20200326231323-c2c7d7b0e144
+	github.com/sirupsen/logrus v1.7.0
+	github.com/spf13/cobra v1.0.0
+	github.com/tonistiigi/fsutil v0.0.0-20201103201449-0834f99b7b85
 	github.com/twpayne/go-vfs v1.4.2
-	golang.org/x/xerrors v0.0.0-20191011141410-1b5146add898
+	golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543
 	gopkg.in/yaml.v2 v2.3.0
 )
 
