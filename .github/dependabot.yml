@@ -1,0 +1,30 @@
+version: 2
+updates:
+- package-ecosystem: gomod
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "04:00"
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: github.com/containerd/containerd
+    versions:
+    - 1.5.0-beta.0
+    - 1.5.0-beta.1
+    - 1.5.0-beta.2
+    - 1.5.0-beta.3
+    - 1.5.0-beta.4
+    - 1.5.0-rc.0
+    - 1.5.0-rc.1
+    - 1.5.0-rc.2
+  - dependency-name: github.com/sirupsen/logrus
+    versions:
+    - 1.7.0
+    - 1.7.1
+    - 1.8.0
+  - dependency-name: github.com/moby/buildkit
+    versions:
+    - 0.8.1
+  - dependency-name: github.com/golang/mock
+    versions:
+    - 1.4.4
