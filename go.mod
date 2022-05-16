@@ -18,7 +18,7 @@ require (
 	github.com/mitchellh/mapstructure v1.3.3
 	github.com/moby/buildkit v0.7.2
 	github.com/opencontainers/go-digest v1.0.0
-	github.com/opencontainers/image-spec v1.0.1
+	github.com/opencontainers/image-spec v1.0.2
 	github.com/sirupsen/logrus v1.6.0
 	github.com/spf13/cobra v0.0.7
 	github.com/tonistiigi/fsutil v0.0.0-20200326231323-c2c7d7b0e144
