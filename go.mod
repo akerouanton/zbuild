@@ -7,7 +7,7 @@ require (
 	github.com/NiR-/notpecl v0.0.0-20200330122501-5974f6f2e95b
 	github.com/buildkite/interpolate v0.0.0-20181028012610-973457fa2b4c
 	github.com/containerd/containerd v1.4.0-0
-	github.com/docker/distribution v2.7.1-0.20190205005809-0d3efadf0154+incompatible
+	github.com/docker/distribution v2.8.2-beta.1+incompatible
 	github.com/docker/docker v1.14.0-0.20190319215453-e7b5f7dbe98c
 	github.com/go-test/deep v1.0.6
 	github.com/gogo/protobuf v1.3.1
